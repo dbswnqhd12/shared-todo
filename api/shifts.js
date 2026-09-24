@@ -41,7 +41,7 @@ function cleanText(v) {
 }
 
 export default async function handler(req, res) {
-  if (!guard(req, res)) return;
+  if (!(await guard(req, res))) return;
   try {
     if (!(await editGuard(req, res))) return;
     const id = req.query?.id ? String(req.query.id) : null;
