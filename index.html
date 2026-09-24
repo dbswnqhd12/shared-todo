@@ -155,12 +155,6 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .shift .shift-bar{margin:0 14px 12px}
 .shift-body{display:flex;flex-direction:column;gap:8px;padding:0 14px 14px}
 .shift-body .checks li + li{border-top:1px solid var(--bg)}
-@media (min-width:700px){
-  .shift-body .checks{display:block;columns:2;column-gap:20px}
-  .shift-body .checks li{break-inside:avoid}
-  .shift-body .checks li + li{border-top:0}
-  .shift-body .checks li{border-bottom:1px solid var(--bg)}
-}
 .edit-lock{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:-8px}
 .edit-lock label{font-size:13.5px;font-weight:600}
 .edit-lock input{width:140px;max-width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 10px;letter-spacing:.1em}
