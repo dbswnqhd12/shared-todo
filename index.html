@@ -146,6 +146,11 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .shift-add input{flex:1;min-width:0;font-size:13.5px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 8px}
 .shift-add button{border:0;background:var(--cs);color:var(--c);border-radius:6px;padding:6px 10px;font-size:13px;font-weight:600}
 .edit-note{font-size:12.5px;color:var(--muted);margin:-10px 0 0}
+.edit-lock{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:-8px}
+.edit-lock label{font-size:13.5px;font-weight:600}
+.edit-lock input{width:140px;max-width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 10px;letter-spacing:.1em}
+.edit-lock .err{flex-basis:100%;color:var(--high);font-size:13px;min-height:0}
+.edit-lock .err:empty{display:none}
 
 /* 할 일 목록 */
 ul.todos{list-style:none;margin:0;padding:0;background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:hidden}
@@ -236,6 +241,13 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     </div>
     <button type="button" class="ghost" id="editToggle" aria-pressed="false">체크리스트 편집</button>
   </div>
+  <form class="edit-lock" id="editLock" hidden autocomplete="off">
+    <label for="editPw">편집 비밀번호</label>
+    <input type="password" id="editPw" inputmode="numeric" autocomplete="off">
+    <button class="btn" type="submit">확인</button>
+    <button class="ghost" type="button" id="editCancel">취소</button>
+    <div class="err" id="editErr" role="alert"></div>
+  </form>
   <p class="edit-note" id="editNote" hidden>항목을 추가하거나 빼면 오늘부터 매일 적용돼요. 지난 날짜의 체크 기록은 그대로 남아요.</p>
 
   <div class="shifts" id="shifts"></div>
@@ -299,6 +311,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   let filter = store.get('todo-filter', 'all');
   let view = store.get('todo-view2', 'cal');
   let teamKey = store.get('team-key', '');
+  let editKey = '', askEdit = false;
+  try { editKey = sessionStorage.getItem('edit-key') || ''; } catch(e) {}
+  const setEditKey = k => { editKey = k; try { k ? sessionStorage.setItem('edit-key', k) : sessionStorage.removeItem('edit-key'); } catch(e) {} };
   let selDate = todayIso;
   let calMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -309,6 +324,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 4000); }
 
   class Locked extends Error {}
+  class EditLocked extends Error {}
   function showLock(msg){
     $('#app').hidden = true; $('#lock').hidden = false;
     $('#lockErr').textContent = msg || '';
@@ -319,9 +335,11 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const headers = {};
     if (body) headers['Content-Type'] = 'application/json';
     if (teamKey) headers['x-team-key'] = encodeURIComponent(teamKey);
+    if (editKey && url.startsWith('/api/shifts')) headers['x-edit-key'] = encodeURIComponent(editKey);
     const r = await fetch(url, {method, headers, body: body ? JSON.stringify(body) : undefined, cache:'no-store'});
     const data = await r.json().catch(() => ({}));
     if (r.status === 401) throw new Locked(data.error || '팀 비밀번호를 입력하세요.');
+    if (data.editLocked) throw new EditLocked(data.error || '편집 비밀번호를 입력하세요.');
     if (!r.ok) throw new Error(data.error || '서버에 연결하지 못했어요.');
     return data;
   }
@@ -375,6 +393,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     } catch(e) {
       ({items, templates, checks} = JSON.parse(before)); render();
       if (e instanceof Locked) return showLock(e.message);
+      if (e instanceof EditLocked){ setEditKey(''); editMode = false; askEdit = true; render(); $('#editErr').textContent = e.message; $('#editPw').focus(); setSync('', '저장 안 됨'); loadFull(); return; }
       toast(e.message); setSync('err', e.message);
     }
     loadFull();
@@ -598,6 +617,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const cal = view === 'cal';
     for (const id of ['#cal', '#dayHead', '#shifts', '#todoLabel']) $(id).hidden = !cal;
     $('#editNote').hidden = !(cal && editMode);
+    $('#editLock').hidden = !(cal && askEdit && !editMode);
     $('#editToggle').setAttribute('aria-pressed', editMode);
     $('#editToggle').textContent = editMode ? '편집 끝내기' : '체크리스트 편집';
     if (cal){
@@ -654,7 +674,29 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     $('#newDue').value = view === 'cal' ? selDate : '';
     render();
   });
-  $('#editToggle').onclick = () => { editMode = !editMode; render(); if (editMode) { const el = $('#add-day'); if (el) el.focus(); } };
+  function enterEdit(){ askEdit = false; editMode = true; render(); const el = $('#add-day'); if (el) el.focus(); }
+  $('#editToggle').onclick = () => {
+    if (editMode) { editMode = false; render(); return; }
+    if (editKey) return enterEdit();
+    askEdit = !askEdit; $('#editErr').textContent = ''; render();
+    if (askEdit) $('#editPw').focus();
+  };
+  $('#editCancel').onclick = () => { askEdit = false; $('#editPw').value = ''; render(); };
+  $('#editLock').addEventListener('submit', async e => {
+    e.preventDefault();
+    const pw = $('#editPw').value.trim();
+    if (!pw) return $('#editPw').focus();
+    setEditKey(pw);
+    try {
+      await request('GET', '/api/shifts?verify=1');
+      $('#editPw').value = ''; $('#editErr').textContent = '';
+      enterEdit();
+    } catch(err) {
+      setEditKey('');
+      if (err instanceof Locked) return showLock(err.message);
+      $('#editErr').textContent = err.message; $('#editPw').select();
+    }
+  });
   function goMonth(delta){ calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()+delta, 1); render(); loadFull(); }
   $('#calPrev').onclick = () => goMonth(-1);
   $('#calNext').onclick = () => goMonth(1);
