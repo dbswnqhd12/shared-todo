@@ -23,7 +23,7 @@ function clean(input, base = {}) {
 }
 
 export default async function handler(req, res) {
-  if (!guard(req, res)) return;
+  if (!(await guard(req, res))) return;
   try {
     const id = req.query?.id ? String(req.query.id) : null;
 
