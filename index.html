@@ -490,12 +490,6 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
               };
               label.append(cb, span);
               li.appendChild(label);
-              if (on && done[t.id].at){
-                const at = document.createElement('span'); at.className = 'at';
-                at.textContent = new Date(done[t.id].at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false});
-                at.title = '체크한 시각';
-                li.appendChild(at);
-              }
             }
             ul.appendChild(li);
           }
