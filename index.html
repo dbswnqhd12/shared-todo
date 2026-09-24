@@ -119,8 +119,8 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .dayhead h2{font-size:18px}
 .dayhead .sub{font-size:13px;color:var(--muted)}
 .section-label{font-size:14px;font-weight:600;color:var(--ink);margin:6px 0 -8px}
-.shifts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.shift{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.shifts{display:grid;grid-template-columns:1fr;gap:8px}
+.shift{background:var(--paper);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-width:0;overflow:hidden}
 .shift-head{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
 .shift-name{font-weight:600;font-size:15px;display:inline-flex;align-items:center;gap:6px}
 .shift-name::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c)}
@@ -146,6 +146,21 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .shift-add input{flex:1;min-width:0;font-size:13.5px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 8px}
 .shift-add button{border:0;background:var(--cs);color:var(--c);border-radius:6px;padding:6px 10px;font-size:13px;font-weight:600}
 .edit-note{font-size:12.5px;color:var(--muted);margin:-10px 0 0}
+.shift-toggle{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:var(--ink);padding:13px 14px;text-align:left}
+@media (hover:hover){.shift-toggle:hover{background:var(--bg)}}
+.shift-toggle .shift-name{flex:1}
+.shift-toggle .shift-count{font-size:13px}
+.chev{flex:none;color:var(--muted);font-size:13px;transition:transform .2s}
+.shift.open .chev{transform:rotate(180deg)}
+.shift .shift-bar{margin:0 14px 12px}
+.shift-body{display:flex;flex-direction:column;gap:8px;padding:0 14px 14px}
+.shift-body .checks li + li{border-top:1px solid var(--bg)}
+@media (min-width:700px){
+  .shift-body .checks{display:block;columns:2;column-gap:20px}
+  .shift-body .checks li{break-inside:avoid}
+  .shift-body .checks li + li{border-top:0}
+  .shift-body .checks li{border-bottom:1px solid var(--bg)}
+}
 .edit-lock{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:-8px}
 .edit-lock label{font-size:13.5px;font-weight:600}
 .edit-lock input{width:140px;max-width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 10px;letter-spacing:.1em}
@@ -312,6 +327,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   let view = store.get('todo-view2', 'cal');
   let teamKey = store.get('team-key', '');
   let editKey = '', askEdit = false;
+  let openShifts = new Set();
+  try { openShifts = new Set(JSON.parse(store.get('open-shifts', '[]'))); } catch(e) {}
   try { editKey = sessionStorage.getItem('edit-key') || ''; } catch(e) {}
   const setEditKey = k => { editKey = k; try { k ? sessionStorage.setItem('edit-key', k) : sessionStorage.removeItem('edit-key'); } catch(e) {} };
   let selDate = todayIso;
@@ -419,78 +436,96 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const anyEver = templates.length > 0;
     for (const s of SHIFTS){
       const list_ = editMode ? templates.filter(t => t.shift === s.key && activeOn(t, todayIso)).sort(orderT) : byShift[s.key];
-      const card = document.createElement('section');
-      card.className = 'shift s-' + s.key;
-      card.setAttribute('aria-label', s.name);
+      const isOpen = editMode || openShifts.has(s.key);
       const n = list_.length, d = list_.filter(t => done[t.id]).length;
-      const head = document.createElement('div'); head.className = 'shift-head';
-      const name = document.createElement('h3'); name.className = 'shift-name'; name.textContent = s.name;
+      const card = document.createElement('section');
+      card.className = 'shift s-' + s.key + (isOpen ? ' open' : '');
+
+      // 접고 펴는 제목 줄
+      const tg = document.createElement('button');
+      tg.type = 'button'; tg.className = 'shift-toggle';
+      tg.setAttribute('aria-expanded', isOpen);
+      tg.setAttribute('aria-controls', 'body-' + s.key);
+      const name = document.createElement('span'); name.className = 'shift-name'; name.textContent = s.name;
       const cnt = document.createElement('span'); cnt.className = 'shift-count' + (n && d === n && !editMode ? ' full' : '');
-      cnt.textContent = editMode ? `${n}개 항목` : (n ? `${d} / ${n}` : '');
-      head.append(name, cnt); card.appendChild(head);
+      cnt.textContent = editMode ? `${n}개 항목` : (n ? (d === n ? `완료 ${d} / ${n}` : `${d} / ${n}`) : '항목 없음');
+      const chev = document.createElement('span'); chev.className = 'chev'; chev.setAttribute('aria-hidden', 'true'); chev.textContent = '▾';
+      tg.append(name, cnt, chev);
+      tg.onclick = () => {
+        if (editMode) return;
+        if (openShifts.has(s.key)) openShifts.delete(s.key); else openShifts.add(s.key);
+        store.set('open-shifts', JSON.stringify([...openShifts]));
+        render();
+      };
+      card.appendChild(tg);
       if (!editMode && n){
         const bar = document.createElement('div'); bar.className = 'shift-bar';
         const fill = document.createElement('i'); fill.style.width = (d/n*100) + '%'; bar.appendChild(fill); card.appendChild(bar);
       }
-      if (!n){
-        const p = document.createElement('p'); p.className = 'shift-empty';
-        p.textContent = editMode ? '아래에 매일 할 항목을 추가하세요.'
-          : !anyEver ? '아직 항목이 없어요. 위의 [체크리스트 편집]에서 추가하세요.'
-          : '이날은 체크리스트 항목이 없어요.';
-        card.appendChild(p);
-      } else {
-        const ul = document.createElement('ul'); ul.className = 'checks';
-        for (const t of list_){
-          const li = document.createElement('li');
-          const on = !editMode && Boolean(done[t.id]);
-          if (on) li.classList.add('on');
-          if (editMode){
-            const span = document.createElement('span'); span.className = 't'; span.textContent = t.text; span.style.flex = '1';
-            const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = '×';
-            rm.setAttribute('aria-label', `${s.name} 항목 삭제: ${t.text}`);
-            rm.onclick = () => mutate(
-              () => { const x = templates.find(y => y.id === t.id); if (x.start >= todayIso) templates = templates.filter(y => y.id !== t.id); else x.end = todayIso; },
-              () => api('DELETE', '/api/shifts?id=' + encodeURIComponent(t.id)));
-            li.append(span, rm);
-          } else {
-            const label = document.createElement('label');
-            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = on;
-            const span = document.createElement('span'); span.className = 't'; span.textContent = t.text;
-            cb.onchange = () => {
-              const v = cb.checked, date = selDate;
-              mutate(() => { checks[date] = checks[date] || {}; if (v) checks[date][t.id] = {done:true, at:new Date().toISOString()}; else delete checks[date][t.id]; },
-                     () => api('PUT', '/api/checks', {date, tid:t.id, done:v}));
-            };
-            label.append(cb, span);
-            li.appendChild(label);
-            if (on && done[t.id].at){
-              const at = document.createElement('span'); at.className = 'at';
-              at.textContent = new Date(done[t.id].at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false});
-              at.title = '체크한 시각';
-              li.appendChild(at);
+
+      if (isOpen){
+        const body = document.createElement('div'); body.className = 'shift-body'; body.id = 'body-' + s.key;
+        if (!n){
+          const p = document.createElement('p'); p.className = 'shift-empty';
+          p.textContent = editMode ? '아래에 매일 할 항목을 추가하세요.'
+            : !anyEver ? '아직 항목이 없어요. 위의 [체크리스트 편집]에서 추가하세요.'
+            : '이날은 체크리스트 항목이 없어요.';
+          body.appendChild(p);
+        } else {
+          const ul = document.createElement('ul'); ul.className = 'checks';
+          for (const t of list_){
+            const li = document.createElement('li');
+            const on = !editMode && Boolean(done[t.id]);
+            if (on) li.classList.add('on');
+            if (editMode){
+              const span = document.createElement('span'); span.className = 't'; span.textContent = t.text; span.style.flex = '1';
+              const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = '×';
+              rm.setAttribute('aria-label', `${s.name} 항목 삭제: ${t.text}`);
+              rm.onclick = () => mutate(
+                () => { const x = templates.find(y => y.id === t.id); if (x.start >= todayIso) templates = templates.filter(y => y.id !== t.id); else x.end = todayIso; },
+                () => api('DELETE', '/api/shifts?id=' + encodeURIComponent(t.id)));
+              li.append(span, rm);
+            } else {
+              const label = document.createElement('label');
+              const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = on;
+              const span = document.createElement('span'); span.className = 't'; span.textContent = t.text;
+              cb.onchange = () => {
+                const v = cb.checked, date = selDate;
+                mutate(() => { checks[date] = checks[date] || {}; if (v) checks[date][t.id] = {done:true, at:new Date().toISOString()}; else delete checks[date][t.id]; },
+                       () => api('PUT', '/api/checks', {date, tid:t.id, done:v}));
+              };
+              label.append(cb, span);
+              li.appendChild(label);
+              if (on && done[t.id].at){
+                const at = document.createElement('span'); at.className = 'at';
+                at.textContent = new Date(done[t.id].at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false});
+                at.title = '체크한 시각';
+                li.appendChild(at);
+              }
             }
+            ul.appendChild(li);
           }
-          ul.appendChild(li);
+          body.appendChild(ul);
         }
-        card.appendChild(ul);
-      }
-      if (editMode){
-        const f = document.createElement('form'); f.className = 'shift-add'; f.autocomplete = 'off';
-        const inp = document.createElement('input'); inp.type = 'text'; inp.maxLength = 120; inp.placeholder = `${s.name} 항목 추가`; inp.id = 'add-' + s.key;
-        inp.setAttribute('aria-label', `${s.name} 항목 추가`);
-        const b = document.createElement('button'); b.type = 'submit'; b.textContent = '추가';
-        f.append(inp, b);
-        f.onsubmit = e => {
-          e.preventDefault();
-          const text = inp.value.trim(); if (!text) return inp.focus();
-          const temp = {id:'temp-'+Date.now(), shift:s.key, text, start:todayIso, end:'', createdAt:new Date().toISOString()};
-          mutate(() => { templates.push(temp); }, async () => {
-            const {item} = await api('POST', '/api/shifts', {shift:s.key, text});
-            const i = templates.findIndex(x => x.id === temp.id); if (i > -1) templates[i] = item;
-          });
-          setTimeout(() => { const el = document.getElementById('add-' + s.key); if (el) el.focus(); }, 0);
-        };
-        card.appendChild(f);
+        if (editMode){
+          const f = document.createElement('form'); f.className = 'shift-add'; f.autocomplete = 'off';
+          const inp = document.createElement('input'); inp.type = 'text'; inp.maxLength = 120; inp.placeholder = `${s.name} 항목 추가`; inp.id = 'add-' + s.key;
+          inp.setAttribute('aria-label', `${s.name} 항목 추가`);
+          const b = document.createElement('button'); b.type = 'submit'; b.textContent = '추가';
+          f.append(inp, b);
+          f.onsubmit = e => {
+            e.preventDefault();
+            const text = inp.value.trim(); if (!text) return inp.focus();
+            const temp = {id:'temp-'+Date.now(), shift:s.key, text, start:todayIso, end:'', createdAt:new Date().toISOString()};
+            mutate(() => { templates.push(temp); }, async () => {
+              const {item} = await api('POST', '/api/shifts', {shift:s.key, text});
+              const i = templates.findIndex(x => x.id === temp.id); if (i > -1) templates[i] = item;
+            });
+            setTimeout(() => { const el = document.getElementById('add-' + s.key); if (el) el.focus(); }, 0);
+          };
+          body.appendChild(f);
+        }
+        card.appendChild(body);
       }
       box.appendChild(card);
     }
