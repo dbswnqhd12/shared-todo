@@ -3,7 +3,7 @@
 import { K, pipeline, body, guard, fail, isDate, UserError } from '../lib/store.js';
 
 export default async function handler(req, res) {
-  if (!guard(req, res)) return;
+  if (!(await guard(req, res))) return;
   try {
     if (req.method !== 'PUT') {
       res.setHeader('Allow', 'PUT');
