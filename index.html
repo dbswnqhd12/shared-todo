@@ -1390,9 +1390,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     };
 
     const skipped = [prep.done ? `진열완료 ${prep.done}줄` : '', prep.other ? `기타 상태 ${prep.other}줄` : ''].filter(Boolean).join(', ');
-    const box = el('div', { class:'ho-imp', role:'dialog', 'aria-label':'엑셀로 Backlog 계산' },
+    const box = el('div', { class:'ho-imp', role:'dialog', 'aria-label':'Backlog 계산' },
       el('div', { class:'ho-imp-panel' },
-        el('h3', { text:'엑셀로 Backlog 계산' }),
+        el('h3', { text:'Backlog 계산' }),
         el('div', { class:'ho-imp-file' }, el('b', { text: file.name }),
           el('small', { text: `${prep.total}줄 읽음 · 계산 대상 ${prep.items.length}줄` + (skipped ? ` (${skipped} 제외)` : '') })),
         el('div', { class:'ho-imp-sec' },
