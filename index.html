@@ -140,7 +140,14 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .checks input[type=checkbox]:checked{background:var(--c);border-color:var(--c)}
 .checks input[type=checkbox]:checked::after{content:"✓";color:var(--paper);font-size:12px;line-height:1;font-weight:700}
 .checks .t{overflow-wrap:anywhere}
+.shift-body .checks li{padding:8px 6px;gap:8px}
+.shift-body .checks label{font-size:14.5px;line-height:1.5;gap:10px}
+.shift-body .checks input[type=checkbox]{width:20px;height:20px;margin-top:1px}
+.checks .t .dot{font-style:normal;color:var(--muted);margin:0 5px;font-weight:700}
+.checks .t .note{display:block;font-size:12px;color:var(--muted);line-height:1.4;margin-top:1px}
+.checks-sub{margin:6px 0 0;padding:8px 6px 4px;border-top:1px dashed var(--line);font-size:12px;font-weight:700;color:var(--c);letter-spacing:.02em}
 .checks li.on .t{color:var(--muted);text-decoration:line-through}
+.checks li.on .t{text-decoration:none}.checks li.on .t .m{text-decoration:line-through}
 .checks .at{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-left:auto;padding-left:4px;white-space:nowrap}
 .checks .rm{border:0;background:none;color:var(--muted);font-size:16px;line-height:1;padding:2px 6px;border-radius:5px}
 .checks .rm:hover{color:var(--high);background:var(--high-soft)}
@@ -665,6 +672,22 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     return {byShift, done, total, doneN};
   }
 
+  // 체크 항목 글자: 앞의 '공통 · '는 빼고, 끝의 (괄호 설명)은 작은 회색 글씨로
+  function chkText(text){
+    const span = document.createElement('span'); span.className = 't';
+    let main = String(text).replace(/^공통\s*·\s*/, ''), note = '';
+    const m = main.match(/^(.*\S)\s*\(([^()]*)\)\s*$/);
+    if (m){ main = m[1]; note = m[2]; }
+    const m1 = document.createElement('span'); m1.className = 'm';
+    main.split(/\s+·\s+/).forEach((part, i) => {
+      if (i){ const d = document.createElement('i'); d.className = 'dot'; d.textContent = '·'; m1.append(d); }
+      m1.append(part);
+    });
+    span.append(m1);
+    if (note){ const n = document.createElement('small'); n.className = 'note'; n.textContent = note; span.append(n); }
+    return span;
+  }
+
   function renderShifts(){
     const box = $('#shifts');
     box.innerHTML = '';
@@ -708,8 +731,19 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
             : '이날은 체크리스트 항목이 없어요.';
           body.appendChild(p);
         } else {
+          // '공통 · '으로 시작하는 항목은 아래 '공통' 묶음으로 따로 보여줘요
+          const isCommon = t => /^공통\s*·\s*/.test(t.text);
+          const mainL = list_.filter(t => !isCommon(t)), commonL = list_.filter(isCommon);
           const ul = document.createElement('ul'); ul.className = 'checks';
-          for (const t of list_){
+          const lists = [[mainL, ul]];
+          if (commonL.length){
+            const h = document.createElement('p'); h.className = 'checks-sub';
+            h.textContent = `공통 체크리스트 · ${commonL.length}`;
+            const ul2 = document.createElement('ul'); ul2.className = 'checks';
+            lists.push([commonL, ul2, h]);
+          }
+          for (const [arr, ulx] of lists) for (const t of arr){
+            const ul = ulx;
             const li = document.createElement('li');
             const on = !editMode && Boolean(done[t.id]);
             if (on) li.classList.add('on');
@@ -724,7 +758,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
             } else {
               const label = document.createElement('label');
               const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = on;
-              const span = document.createElement('span'); span.className = 't'; span.textContent = t.text;
+              const span = chkText(t.text);
               cb.onchange = () => {
                 const v = cb.checked, date = selDate;
                 mutate(() => { checks[date] = checks[date] || {}; if (v) checks[date][t.id] = {done:true, at:new Date().toISOString()}; else delete checks[date][t.id]; },
@@ -735,7 +769,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
             }
             ul.appendChild(li);
           }
-          body.appendChild(ul);
+          for (const [, ulx, h] of lists){ if (h) body.appendChild(h); if (ulx.children.length) body.appendChild(ulx); }
         }
         if (editMode){
           const f = document.createElement('form'); f.className = 'shift-add'; f.autocomplete = 'off';
