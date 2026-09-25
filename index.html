@@ -191,6 +191,9 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .ho-table .ch-first{border-left:2px solid var(--ch-line)}
 .ho-sub{display:flex;flex-direction:column;gap:6px}
 .ho-sub h4{margin:6px 0 0;font-size:14px}
+.ho-sub-head{display:flex;align-items:center;gap:10px}
+.ho-sub-head h4{margin:0}
+.ho-shot.ho-shot-sm{margin-left:0;padding:3px 10px;font-size:12.5px;border-radius:6px}
 .ho-table.ho-pp{min-width:0;width:auto}
 .ho-subs{display:flex;flex-wrap:wrap;gap:8px 28px;align-items:flex-start}
 .ho-subs .ho-sub{min-width:0;max-width:100%}
@@ -927,7 +930,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       for (const [rk] of HO_NY_ROWS){ const v = nyRowSum(rk); nySum[rk].textContent = v === null ? '–' : String(v); if (v !== null){ t += v; any = true; } }
       nyTotalCell.textContent = any ? String(Math.round(t * 10) / 10) : '–';
     };
-    subs.appendChild(el('div', { class:'ho-sub' }, el('h4', { text:'Backlog' }),
+    subs.appendChild(el('div', { class:'ho-sub' }, el('div', { class:'ho-sub-head' }, el('h4', { text:'Backlog' }), el('button', { type:'button', class:'ho-shot ho-shot-sm', text:'캡쳐', title:'Backlog만 이미지로 저장', onclick: hoCaptureBacklog })),
       el('div', { class:'ho-table-wrap' }, el('table', { class:'ho-table ho-ny' },
         el('thead', {}, el('tr', {}, el('th', { scope:'col', text:'구분' }), ...HO_NY_COLS.map(([, l]) => el('th', { scope:'col', text:l })), el('th', { scope:'col', text:'합계' }))),
         el('tbody', {},
@@ -1178,6 +1181,63 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     if (mobile) return hoShotView(cv.toDataURL('image/png'), blob, name);
     hoDownload(blob, name);
     toast('이미지를 저장했어요.');
+  }
+
+  // Backlog 표만 따로 캡쳐
+  async function hoCaptureBacklog(){
+    const a = document.activeElement;
+    if (a && $('#ho').contains(a)) a.blur();
+    await new Promise(r => setTimeout(r, 50));
+    const d = hoData.day;
+    const FONT = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif';
+    const C = { bg:'#ffffff', ink:'#1d2521', muted:'#6b746f', line:'#cfd6d2', head:'#eef2ef', acc:'#1f6f54', accSoft:'#e3f1ea' };
+    const PAD = 32, NL = 90, NW = 110, ROW = 38, TOP = 92;
+    const W = PAD * 2 + NL + NW * (HO_NY_COLS.length + 1);
+    const H = TOP + ROW * (HO_NY_ROWS.length + 2) + 44;
+    const scale = 2, cv = document.createElement('canvas');
+    cv.width = W * scale; cv.height = H * scale;
+    const ctx = cv.getContext('2d'); ctx.scale(scale, scale);
+    ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H); ctx.textBaseline = 'middle';
+    const setFont = (size, bold, mono) => ctx.font = `${bold ? 700 : 400} ${size}px ${mono ? 'ui-monospace,Menlo,Consolas,monospace' : FONT}`;
+    const cell = (x, y, w, h, fill) => { if (fill){ ctx.fillStyle = fill; ctx.fillRect(x, y, w, h); } ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, w, h); };
+    const text = (t, x, y, o = {}) => { setFont(o.size || 14, o.bold, o.mono); ctx.fillStyle = o.color || C.ink; ctx.textAlign = o.align || 'center'; ctx.fillText(t, x, y); };
+    const round = n => String(Math.round(n * 10) / 10);
+
+    text('GWJ3 IB · 인수인계', PAD, 28, { size:13, color:C.muted, align:'left' });
+    text('Backlog', PAD, 58, { size:22, bold:true, align:'left' });
+    text(hoDateOf().slice(0, 4) + '년 ' + longDate(hoDateOf()), W - PAD, 58, { size:15, bold:true, align:'right' });
+
+    let y = TOP;
+    cell(PAD, y, NL, ROW, C.head); text('구분', PAD + NL / 2, y + ROW / 2, { bold:true });
+    [...HO_NY_COLS.map(([, l]) => l), '합계'].forEach((l, i) => { const x = PAD + NL + i * NW; cell(x, y, NW, ROW, C.head); text(l, x + NW / 2, y + ROW / 2, { bold:true }); });
+    let total = 0, anyT = false;
+    HO_NY_ROWS.forEach(([rk, rl]) => {
+      y += ROW;
+      cell(PAD, y, NL, ROW, C.head); text(rl, PAD + 12, y + ROW / 2, { bold:true, align:'left' });
+      let t = 0, any = false;
+      HO_NY_COLS.forEach(([ck], i) => {
+        const x = PAD + NL + i * NW; cell(x, y, NW, ROW);
+        const v = d[`ny:${rk}:${ck}`];
+        if (v !== undefined && v !== ''){ text(String(v), x + NW / 2, y + ROW / 2, { mono:true, size:15 }); const n = parseFloat(v); if (!isNaN(n)){ t += n; any = true; } }
+      });
+      const x = PAD + NL + HO_NY_COLS.length * NW; cell(x, y, NW, ROW);
+      text(any ? round(t) : '–', x + NW / 2, y + ROW / 2, { mono:true, bold:true, size:15, color:C.muted });
+      if (any){ total += t; anyT = true; }
+    });
+    y += ROW;
+    cell(PAD, y, NL, ROW, C.head); text('Total', PAD + 12, y + ROW / 2, { bold:true, align:'left' });
+    cell(PAD + NL, y, NW * HO_NY_COLS.length, ROW, C.accSoft);
+    const xt = PAD + NL + HO_NY_COLS.length * NW; cell(xt, y, NW, ROW, C.accSoft);
+    text(anyT ? round(total) : '–', xt + NW / 2, y + ROW / 2, { mono:true, bold:true, size:15, color:C.acc });
+
+    const now = new Date();
+    text(`캡쳐 ${isoOf(now)} ${pad(now.getHours())}:${pad(now.getMinutes())}`, W - PAD, H - 18, { size:11, color:C.muted, align:'right' });
+
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    const name = `Backlog_${hoDateOf()}.png`;
+    if (matchMedia('(pointer:coarse)').matches) return hoShotView(cv.toDataURL('image/png'), blob, name);
+    hoDownload(blob, name);
+    toast('Backlog 이미지를 저장했어요.');
   }
 
   function hoDownload(blob, name){
