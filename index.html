@@ -224,6 +224,16 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .ho-imp-acts{display:flex;gap:8px}
 .ho-imp-acts .ho-shot-close{color:var(--ink);border-color:var(--line)}
 .ho-imp-acts .ho-shot-save:disabled{opacity:.6}
+.ho-sla{min-width:7.2em;padding:0 !important}
+.ho-sla-none{color:var(--muted)}
+.ho-sla-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:100%;min-height:38px;border:0;background:none;color:var(--ink);padding:4px 6px;cursor:pointer;font-family:var(--mono)}
+.ho-sla-btn:hover{background:var(--accent-soft)}
+.ho-sla-btn b{font-size:13.5px}
+.ho-sla-btn small{font-family:var(--body);font-size:11px;color:var(--muted)}
+.ho-sla.late .ho-sla-btn b,.ho-sla.late .ho-sla-btn small{color:var(--high)}
+.ho-sla-empty{color:var(--muted);font-size:15px}
+.ho-sla-in{width:100%;min-width:12em;border:1px solid var(--accent);border-radius:4px;background:var(--paper);color:var(--ink);font-size:13px;padding:6px 4px}
+.ho-imp-table .ho-sla-none{font-family:var(--mono)}
 .ho-ny-sum{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted)}
 .ho-ny-total{font-family:var(--mono);font-weight:600;color:var(--accent);background:var(--accent-soft)}
 .ho-pp td,.ho-pp thead th:not(:first-child){min-width:4.4em}
@@ -771,6 +781,27 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const HO_PP = [['sr','S.R'],['egg','Egg'],['bread','식빵'],['perilla','깻잎']];   // 프리팩 품목
   const HO_NY_ROWS = [['xd','XD'],['rc','RC'],['rm','RM']];
   const HO_NY_COLS = [['nys','NYS'],['nyr','NYR']];
+  // Backlog SLA: 하차완료 시간 + XD 12시간 / RC 18시간 (RM은 없음). 저장 형식 'YYYY-MM-DD HH:MM'
+  const HO_SLA_HOURS = { xd:12, rc:18 };
+  const slaDate = s => { const m = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/.exec(String(s || '')); return m ? new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5]) : null; };
+  const slaText = s => { const t = slaDate(s); return t ? `${t.getMonth() + 1}/${t.getDate()} ${pad(t.getHours())}:${pad(t.getMinutes())}` : ''; };
+  const slaStr = t => `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())} ${pad(t.getHours())}:${pad(t.getMinutes())}`;
+  const slaLeft = s => {
+    const t = slaDate(s); if (!t) return null;
+    const m = Math.round((t - Date.now()) / 60000), a = Math.abs(m), h = Math.floor(a / 60);
+    const txt = (h ? `${h}시간 ` : '') + `${a % 60}분`;
+    return { late: m < 0, text: m < 0 ? `${txt} 지남` : `${txt} 남음` };
+  };
+  // 남은 시간 표시를 새로 고쳐요 (30초마다)
+  const hoTickSla = root => {
+    if (!root) return;
+    for (const n of root.querySelectorAll('.ho-sla-left[data-sla]')){
+      const l = slaLeft(n.dataset.sla); if (!l) continue;
+      n.textContent = l.text;
+      n.closest('.ho-sla').classList.toggle('late', l.late);
+    }
+  };
+  setInterval(() => hoTickSla(document.getElementById('ho')), 30000);
   const HO_FROZEN = ['c5','c6','c7'];   // 냉동 챔버: 차량번호 칸
   const HO_CH = ['pre','c1','c2','c3','c5','c6','c7'];   // 챔버 순서 (음영: 1C·3C·6C)
   const hoCh = ck => HO_CH.indexOf(ck.replace(/[gm]$/, ''));
@@ -954,20 +985,53 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       for (const [rk] of HO_NY_ROWS){ const v = nyRowSum(rk); nySum[rk].textContent = v === null ? '–' : String(v); if (v !== null){ t += v; any = true; } }
       nyTotalCell.textContent = any ? String(Math.round(t * 10) / 10) : '–';
     };
+    // SLA 칸: 눌러서 직접 고칠 수 있어요 (RM은 없음)
+    const slaCell = rk => {
+      if (!HO_SLA_HOURS[rk]) return el('td', { class:'ho-sla ho-sla-none', text:'–' });
+      const f = `sla:${rk}`, td = el('td', { class:'ho-sla' });
+      const show = () => {
+        td.innerHTML = '';
+        const v = d[f];
+        const btn = el('button', { type:'button', class:'ho-sla-btn', title:'눌러서 SLA 고치기', 'aria-label': `${rk.toUpperCase()} SLA ${v ? slaText(v) : '비어 있음'}` });
+        if (v) btn.append(el('b', { text: slaText(v) }), el('small', { class:'ho-sla-left', 'data-sla': v }));
+        else btn.append(el('span', { class:'ho-sla-empty', text:'+' }));
+        btn.onclick = edit;
+        td.appendChild(btn);
+        hoTickSla(td);
+      };
+      const edit = () => {
+        td.innerHTML = '';
+        const v = d[f] || '';
+        const inp = el('input', { type:'datetime-local', class:'ho-sla-in', 'aria-label': `${rk.toUpperCase()} SLA`, value: v ? v.replace(' ', 'T') : '' });
+        let done = false;
+        const finish = () => {
+          if (done) return; done = true;
+          const nv = inp.value ? inp.value.replace('T', ' ').slice(0, 16) : '';
+          if (nv !== v){ if (nv) d[f] = nv; else delete d[f]; hoSave('day', f, nv); }
+          show();
+        };
+        inp.onblur = finish;
+        inp.onchange = () => { if (matchMedia('(pointer:coarse)').matches) finish(); };
+        inp.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); e.stopPropagation(); finish(); } else if (e.key === 'Escape'){ done = true; show(); } };
+        td.appendChild(inp); inp.focus();
+      };
+      show();
+      return td;
+    };
     const src = d.nySrc;
     const nyBox = el('div', { class:'ho-sub ho-ny-box' }, el('div', { class:'ho-sub-head' }, el('h4', { text:'Backlog' }),
         el('button', { type:'button', class:'ho-shot ho-shot-sm', text:'캡쳐', title:'Backlog만 이미지로 저장', onclick: hoCaptureBacklog }),
         el('button', { type:'button', class:'ho-shot ho-shot-sm ho-imp-btn', text:'엑셀 올리기', title:'이관 목록 엑셀로 Backlog 자동 계산', onclick: hoPickExcel })),
       el('div', { class:'ho-table-wrap' }, el('table', { class:'ho-table ho-ny' },
-        el('thead', {}, el('tr', {}, el('th', { scope:'col', text:'구분' }), ...HO_NY_COLS.map(([, l]) => el('th', { scope:'col', text:l })), el('th', { scope:'col', text:'합계' }))),
+        el('thead', {}, el('tr', {}, el('th', { scope:'col', text:'구분' }), ...HO_NY_COLS.map(([, l]) => el('th', { scope:'col', text:l })), el('th', { scope:'col', text:'합계' }), el('th', { scope:'col', text:'SLA' }))),
         el('tbody', {},
           ...HO_NY_ROWS.map(([rk, rl]) => el('tr', {}, el('th', { scope:'row', text: rl }), ...HO_NY_COLS.map(([ck, cl]) => {
             const f = `ny:${rk}:${ck}`;
             const n = el('input', { class:'ho-num', inputmode:'decimal', 'aria-label': `${rl} ${cl}`, maxlength: 8, value: d[f] ?? '' });
             n.onchange = () => { n.value = n.value.replace(/[^0-9.]/g, ''); if (n.value) d[f] = n.value; else delete d[f]; nyUpdate(); hoSave('day', f, n.value); };
             return el('td', {}, n);
-          }), nySum[rk] = el('td', { class:'ho-ny-sum' }))),
-          el('tr', { class:'ho-total' }, el('th', { scope:'row', text:'Total' }), el('td', { colspan: HO_NY_COLS.length }), nyTotalCell)))),
+          }), nySum[rk] = el('td', { class:'ho-ny-sum' }), slaCell(rk))),
+          el('tr', { class:'ho-total' }, el('th', { scope:'row', text:'Total' }), el('td', { colspan: HO_NY_COLS.length }), nyTotalCell, el('td'))))),
       src && src.file ? el('div', { class:'ho-src', text:`엑셀에서 불러옴 · ${hoWhen(src.at)} · ${src.file}` }) : null);
     subs.appendChild(nyBox);
     // PC: 엑셀 파일을 Backlog 위로 끌어다 놓기
@@ -1166,7 +1230,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     // 프리팩
     text('프리팩', PAD, y + 10, { size:15, bold:true, align:'left' });
     y += 26;
-    const PW = 100;
+    const PW = 90;
     cell(PAD, y, widths.label, ROW, C.head); text('품목', PAD + widths.label / 2, y + ROW / 2, { bold:true });
     cell(PAD, y + ROW, widths.label, ROW, C.head); text('수량', PAD + 10, y + ROW * 1.5, { bold:true, align:'left' });
     HO_PP.forEach(([k, l], i) => {
@@ -1179,10 +1243,11 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 
     // NYS·NYR (프리팩 오른쪽)
     {
-      const NL = 80, NW = 100, nx = W - PAD - NL - NW * (HO_NY_COLS.length + 1);
+      const NL = 80, NW = 90, SW = 110, nx = W - PAD - NL - NW * (HO_NY_COLS.length + 1) - SW, sx = W - PAD - SW;
       text('Backlog', nx, y - 16, { size:15, bold:true, align:'left' });
       cell(nx, y, NL, ROW, C.head); text('구분', nx + NL / 2, y + ROW / 2, { bold:true });
       [...HO_NY_COLS.map(([, l]) => l), '합계'].forEach((l, i) => { const x = nx + NL + i * NW; cell(x, y, NW, ROW, C.head); text(l, x + NW / 2, y + ROW / 2, { bold:true }); });
+      cell(sx, y, SW, ROW, C.head); text('SLA', sx + SW / 2, y + ROW / 2, { bold:true });
       let total = 0, anyT = false;
       HO_NY_ROWS.forEach(([rk, rl], r) => {
         const yy = y + ROW * (r + 1);
@@ -1195,6 +1260,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         });
         const x = nx + NL + HO_NY_COLS.length * NW; cell(x, yy, NW, ROW);
         text(any ? String(Math.round(t * 10) / 10) : '–', x + NW / 2, yy + ROW / 2, { mono:true, bold:true, size:14, color:C.muted });
+        cell(sx, yy, SW, ROW);
+        const sv = HO_SLA_HOURS[rk] ? slaText(d[`sla:${rk}`]) : '';
+        text(sv || '–', sx + SW / 2, yy + ROW / 2, sv ? { mono:true, bold:true, size:14 } : { size:13, color:C.muted });
         if (any){ total += t; anyT = true; }
       });
       const yt = y + ROW * (HO_NY_ROWS.length + 1);
@@ -1202,6 +1270,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       cell(nx + NL, yt, NW * HO_NY_COLS.length, ROW, C.accSoft);
       const xt = nx + NL + HO_NY_COLS.length * NW; cell(xt, yt, NW, ROW, C.accSoft);
       text(anyT ? String(Math.round(total * 10) / 10) : '–', xt + NW / 2, yt + ROW / 2, { mono:true, bold:true, size:14, color:C.acc });
+      cell(sx, yt, SW, ROW, C.accSoft);
     }
 
     const now = new Date();
@@ -1301,6 +1370,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const miss = [];
     for (const [k, name] of Object.entries(need)){ col[k] = H.indexOf(name); if (col[k] < 0) miss.push(name); }
     if (miss.length) throw new Error('엑셀에 이 열이 없어요: ' + miss.join(', '));
+    col.unload = H.indexOf('하차완료시간');   // SLA 계산용 (없으면 SLA는 비워 둬요)
     const items = [];
     let done = 0, other = 0;
     for (const r of rows.slice(hi + 1)){
@@ -1309,18 +1379,30 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       const kind = st === '이동중' ? 'nyr' : (st === '진열대기' || st === '진열중') ? 'nys' : null;
       if (!kind){ if (st === '진열완료') done++; else other++; continue; }
       const q = parseFloat(String(r[col.qty] || '').replace(/,/g, ''));
-      items.push({ kind, plan: !!String(r[col.plan] || '').trim(), car: String(r[col.car] || '').trim(), main: isXdRcCenter(r[col.from]), qty: isNaN(q) ? 0 : q });
+      items.push({ kind, plan: !!String(r[col.plan] || '').trim(), car: String(r[col.car] || '').trim(), main: isXdRcCenter(r[col.from]), qty: isNaN(q) ? 0 : q,
+        unload: col.unload >= 0 ? slaDate(hoXlTime(r[col.unload])) : null });
     }
     return { total: rows.length - hi - 1, items, done, other };
   }
 
+  // 엑셀 시간 칸: 글자('2026-09-25 15:48:48')나 엑셀 날짜 숫자 모두 받아요
+  const hoXlTime = s => {
+    const t = String(s || '').trim();
+    if (/^\d+(\.\d+)?$/.test(t)){ const d = new Date(Math.round((parseFloat(t) - 25569) * 86400000)); return slaStr(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes())); }
+    return t;
+  };
+
   function hoCalc(prep, rcSet){
     const v = { xd:{ nys:0, nyr:0 }, rc:{ nys:0, nyr:0 }, rm:{ nys:0, nyr:0 } };
+    const first = {};   // 줄마다 가장 이른 하차완료 시간 (NYS만)
     for (const it of prep.items){
       const row = !it.main ? 'rm' : !it.plan ? 'xd' : rcSet.has(carKey(it.car)) ? 'rc' : 'rm';
       v[row][it.kind] += it.qty;
+      if (it.kind === 'nys' && it.unload && HO_SLA_HOURS[row] && (!first[row] || it.unload < first[row])) first[row] = it.unload;
     }
     for (const r in v) for (const k in v[r]) v[r][k] = Math.round(v[r][k] * 10) / 10;
+    v.sla = {};
+    for (const r in HO_SLA_HOURS) v.sla[r] = first[r] ? slaStr(new Date(first[r].getTime() + HO_SLA_HOURS[r] * 3600000)) : '';
     return v;
   }
 
@@ -1361,14 +1443,18 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       let total = 0;
       tableBox.innerHTML = '';
       tableBox.appendChild(el('table', { class:'ho-table ho-ny ho-imp-table' },
-        el('thead', {}, el('tr', {}, el('th', { text:'구분' }), ...HO_NY_COLS.map(([, l]) => el('th', { text:l })), el('th', { text:'합계' }))),
+        el('thead', {}, el('tr', {}, el('th', { text:'구분' }), ...HO_NY_COLS.map(([, l]) => el('th', { text:l })), el('th', { text:'합계' }), el('th', { text:'SLA' }))),
         el('tbody', {}, ...HO_NY_ROWS.map(([rk, rl]) => {
           const sum = result[rk].nys + result[rk].nyr; total += sum;
           return el('tr', {}, el('th', { text: rl }), ...HO_NY_COLS.map(([ck]) => {
             const nv = fmt(result[rk][ck]), ov = cur(rk, ck), changed = String(ov) !== nv;
             return el('td', { class: changed ? 'chg' : '' }, changed && ov !== '' ? el('span', { class:'old', text: ov }) : null, el('span', { text: nv }));
-          }), el('td', { class:'ho-ny-sum', text: fmt(sum) }));
-        }), el('tr', { class:'ho-total' }, el('th', { text:'Total' }), el('td', { colspan: HO_NY_COLS.length }), el('td', { class:'ho-ny-total', text: fmt(total) })))));
+          }), el('td', { class:'ho-ny-sum', text: fmt(sum) }), (() => {
+            if (!HO_SLA_HOURS[rk]) return el('td', { class:'ho-sla-none', text:'–' });
+            const nv = result.sla[rk], ov = d[`sla:${rk}`] || '', changed = nv !== ov;
+            return el('td', { class: changed ? 'chg' : '' }, changed && ov ? el('span', { class:'old', text: slaText(ov) }) : null, el('span', { text: nv ? slaText(nv) : '–' }));
+          })());
+        }), el('tr', { class:'ho-total' }, el('th', { text:'Total' }), el('td', { colspan: HO_NY_COLS.length }), el('td', { class:'ho-ny-total', text: fmt(total) }), el('td')))));
     };
     extra.oninput = refresh;
 
@@ -1378,6 +1464,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       const fields = {};
       for (const [rk] of HO_NY_ROWS) for (const [ck] of HO_NY_COLS) fields[`ny:${rk}:${ck}`] = fmt(result[rk][ck]);
       const labels = new Map(cars.map(([k, c]) => [k, c.label]));
+      for (const rk in HO_SLA_HOURS) fields[`sla:${rk}`] = result.sla[rk];
       fields.rcCars = [...rcAll()].map(k => labels.get(k) || k).join(', ');
       fields.nySrc = { file: file.name.slice(0, 120), at: new Date().toISOString(), rows: String(prep.items.length) };
       try {
@@ -1404,7 +1491,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
           chipBox, extra),
         el('div', { class:'ho-imp-sec' },
           el('h4', { text:'계산 결과 미리보기' }),
-          el('p', { class:'ho-imp-help' }, el('span', { class:'chg', text:'빨간 숫자' }), document.createTextNode(' = 바뀌는 칸 (흐린 숫자는 지금 값) · 집품수량 합계')),
+          el('p', { class:'ho-imp-help' }, el('span', { class:'chg', text:'빨간 숫자' }), document.createTextNode(' = 바뀌는 칸 (흐린 숫자는 지금 값) · 집품수량 합계 · SLA = 하차완료 + XD 12시간 / RC 18시간')),
           tableBox),
         el('div', { class:'ho-imp-acts' }, el('button', { type:'button', class:'ho-shot-close', text:'취소', onclick: close }), apply)));
     box.addEventListener('click', e => { if (e.target === box) close(); });
@@ -1421,8 +1508,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const d = hoData.day;
     const FONT = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif';
     const C = { bg:'#ffffff', ink:'#1d2521', muted:'#6b746f', line:'#cfd6d2', head:'#eef2ef', acc:'#1f6f54', accSoft:'#e3f1ea' };
-    const PAD = 32, NL = 90, NW = 110, ROW = 38, TOP = 92;
-    const W = PAD * 2 + NL + NW * (HO_NY_COLS.length + 1);
+    const PAD = 32, NL = 90, NW = 110, SW = 140, ROW = 38, TOP = 92;
+    const W = PAD * 2 + NL + NW * (HO_NY_COLS.length + 1) + SW, sx = W - PAD - SW;
     const H = TOP + ROW * (HO_NY_ROWS.length + 2) + 44;
     const scale = 2, cv = document.createElement('canvas');
     cv.width = W * scale; cv.height = H * scale;
@@ -1440,6 +1527,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     let y = TOP;
     cell(PAD, y, NL, ROW, C.head); text('구분', PAD + NL / 2, y + ROW / 2, { bold:true });
     [...HO_NY_COLS.map(([, l]) => l), '합계'].forEach((l, i) => { const x = PAD + NL + i * NW; cell(x, y, NW, ROW, C.head); text(l, x + NW / 2, y + ROW / 2, { bold:true }); });
+    cell(sx, y, SW, ROW, C.head); text('SLA', sx + SW / 2, y + ROW / 2, { bold:true });
     let total = 0, anyT = false;
     HO_NY_ROWS.forEach(([rk, rl]) => {
       y += ROW;
@@ -1452,6 +1540,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       });
       const x = PAD + NL + HO_NY_COLS.length * NW; cell(x, y, NW, ROW);
       text(any ? round(t) : '–', x + NW / 2, y + ROW / 2, { mono:true, bold:true, size:15, color:C.muted });
+      cell(sx, y, SW, ROW);
+      const sv = HO_SLA_HOURS[rk] ? slaText(d[`sla:${rk}`]) : '';
+      text(sv || '–', sx + SW / 2, y + ROW / 2, sv ? { mono:true, bold:true, size:15 } : { size:14, color:C.muted });
       if (any){ total += t; anyT = true; }
     });
     y += ROW;
@@ -1459,6 +1550,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     cell(PAD + NL, y, NW * HO_NY_COLS.length, ROW, C.accSoft);
     const xt = PAD + NL + HO_NY_COLS.length * NW; cell(xt, y, NW, ROW, C.accSoft);
     text(anyT ? round(total) : '–', xt + NW / 2, y + ROW / 2, { mono:true, bold:true, size:15, color:C.acc });
+    cell(sx, y, SW, ROW, C.accSoft);
 
     const now = new Date();
     text(`캡쳐 ${isoOf(now)} ${pad(now.getHours())}:${pad(now.getMinutes())}`, W - PAD, H - 18, { size:11, color:C.muted, align:'right' });
