@@ -13,7 +13,7 @@
 :root{
   --bg:#EEF2F1; --paper:#FFFFFF; --ink:#18231F; --muted:#5E6B66; --line:#D5DDDA;
   --accent:#1F6F5C; --accent-soft:#DCEDE7; --high:#B4452F; --high-soft:#F6E1DB;
-  --ch-shade:rgba(47,95,158,.10); --ch-line:#9FB3AB;
+  --ch-shade:rgba(40,50,60,.09); --ch-line:#9FB3AB;
   --mid:#9A6A12; --mid-soft:#F4EAD2; --focus:#1F6F5C; --sat:#2F5F9E;
   --day:#9A6A12; --day-soft:#F4EAD2; --eve:#B0562F; --eve-soft:#F7E4DA; --night:#34508A; --night-soft:#E1E7F3;
   --display:"Gowun Batang",Georgia,serif;
@@ -25,7 +25,7 @@
     color-scheme:dark;
     --bg:#111816; --paper:#18211E; --ink:#E6EDEA; --muted:#93A29C; --line:#2A3632;
     --accent:#5CC4A6; --accent-soft:#1D3530; --high:#F08A73; --high-soft:#3A2420;
-    --ch-shade:rgba(134,174,230,.11); --ch-line:#4A5E57;
+    --ch-shade:rgba(255,255,255,.06); --ch-line:#4A5E57;
     --mid:#E0B45A; --mid-soft:#352C1A; --focus:#5CC4A6; --sat:#86AEE6;
     --day:#E0B45A; --day-soft:#352C1A; --eve:#EE9A74; --eve-soft:#3A261C; --night:#93AEE8; --night-soft:#1E2638;
   }
@@ -34,7 +34,7 @@
   color-scheme:dark;
   --bg:#111816; --paper:#18211E; --ink:#E6EDEA; --muted:#93A29C; --line:#2A3632;
   --accent:#5CC4A6; --accent-soft:#1D3530; --high:#F08A73; --high-soft:#3A2420;
-  --ch-shade:rgba(134,174,230,.11); --ch-line:#4A5E57;
+  --ch-shade:rgba(255,255,255,.06); --ch-line:#4A5E57;
   --mid:#E0B45A; --mid-soft:#352C1A; --focus:#5CC4A6; --sat:#86AEE6;
   --day:#E0B45A; --day-soft:#352C1A; --eve:#EE9A74; --eve-soft:#3A261C; --night:#93AEE8; --night-soft:#1E2638;
 }
@@ -1083,7 +1083,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     });
     chX.forEach((c, k) => {
       if (k % 2 === 1){
-        ctx.fillStyle = 'rgba(47,95,158,.10)';
+        ctx.fillStyle = 'rgba(40,50,60,.09)';
         ctx.fillRect(c.x, TOP, c.w, yCar - TOP);                // 머리글 ~ 합계
       }
       if (k > 0){
