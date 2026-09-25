@@ -410,25 +410,29 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   .ret-items.by-date .ret-item{grid-template-columns:22px minmax(0,1fr) auto auto}
   .ret-tools .ret-help{margin-left:0}
 }
-#ret-print{display:none}
+/* 회송 확인서 — 업체마다 A4 한 장. 길면 인쇄 직전에 줄여서 한 장에 맞춰요 */
+#ret-print{display:none;color:#000;background:#fff;font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
+#ret-print.measuring{display:block;position:absolute;left:-10000px;top:0;width:186mm}
+.rp-page{page-break-after:always;break-after:page;page-break-inside:avoid;break-inside:avoid}
+.rp-page:last-child{page-break-after:auto;break-after:auto}
+.rp-page h1{text-align:center;font-size:22pt;letter-spacing:6pt;margin:0 0 2mm;color:#000}
+.rp-date{text-align:center;margin:0 0 6mm;font-size:11pt}
+.rp-page table{border-collapse:collapse;width:100%}
+.rp-page th,.rp-page td{border:1px solid #333;padding:2mm 2mm;font-size:9.5pt;text-align:left;color:#000}
+.rp-page th{background:#e9e9e9 !important;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rp-info th{width:18%}.rp-vendor{font-weight:700;font-size:11pt}
+.rp-tot{font-weight:700;margin:5mm 0 2mm;font-size:10.5pt}
+.rp-items td.c{text-align:center}.rp-items td.r{text-align:right}
+.rp-items th,.rp-items td.c,.rp-items td.r{white-space:nowrap}
+.rp-sum td{font-weight:700}
+.rp-sign{display:flex;justify-content:space-between;margin-top:14mm;font-size:10.5pt}
+.rp-sign div{border-top:1px solid #333;padding-top:2mm;width:44%;text-align:center}
+.rp-foot{text-align:right;color:#666;font-size:8pt;margin-top:6mm}
 @media print{
   @page{size:A4;margin:12mm}
   body > *:not(#ret-print){display:none !important}
-  #ret-print{display:block !important;color:#000;font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
-  .rp-page{page-break-after:always;break-after:page}
-  .rp-page:last-child{page-break-after:auto;break-after:auto}
-  .rp-page h1{text-align:center;font-size:22pt;letter-spacing:6pt;margin:0 0 2mm}
-  .rp-date{text-align:center;margin:0 0 6mm;font-size:11pt}
-  .rp-page table{border-collapse:collapse;width:100%}
-  .rp-page th,.rp-page td{border:1px solid #333;padding:2mm 2mm;font-size:9.5pt;text-align:left}
-  .rp-page th{background:#e9e9e9 !important;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .rp-info th{width:18%}.rp-vendor{font-weight:700;font-size:11pt}
-  .rp-tot{font-weight:700;margin:5mm 0 2mm;font-size:10.5pt}
-  .rp-items td.c{text-align:center}.rp-items td.r{text-align:right}
-  .rp-sum td{font-weight:700}
-  .rp-sign{display:flex;justify-content:space-between;margin-top:14mm;font-size:10.5pt}
-  .rp-sign div{border-top:1px solid #333;padding-top:2mm;width:44%;text-align:center}
-  .rp-foot{text-align:right;color:#666;font-size:8pt;margin-top:6mm}
+  html,body{background:#fff !important}
+  #ret-print{display:block !important;position:static !important;width:auto !important}
 }
 </style>
 </head>
@@ -2015,6 +2019,25 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   }
 
   // ---- 회송 확인서 인쇄 (업체마다 A4 한 장) ----
+  // 확인서가 A4 한 장을 넘으면 비율을 줄여서 무조건 한 장에 들어가게 해요
+  function retFitPages(area){
+    const mm = 96 / 25.4, W = 184 * mm, H = 268 * mm;   // A4(210×297) − 여백 12mm, 테두리가 잘리지 않게 조금 여유
+    area.classList.add('measuring');
+    for (const page of area.querySelectorAll('.rp-page')){
+      const inner = page.firstElementChild;
+      // 줄인 만큼 넓게 그려서 가로는 꽉 차게 — 한 장에 들어가는 가장 큰 비율을 찾아요
+      const fits = k => { inner.style.zoom = k; inner.style.width = (W / k) + 'px'; return inner.getBoundingClientRect().height <= H; };
+      let s = 1;
+      if (!fits(1)){
+        let lo = 0.2, hi = 1;
+        for (let i = 0; i < 14; i++){ const mid = (lo + hi) / 2; if (fits(mid)) lo = mid; else hi = mid; }
+        s = lo; fits(s);
+      }
+      page.dataset.scale = s.toFixed(3);
+    }
+    area.classList.remove('measuring');
+  }
+
   function retPrint(list){
     if (!list.length) return;
     const groups = new Map();
@@ -2025,7 +2048,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const area = el('div', { id:'ret-print' }, ...[...groups.entries()].map(([vendor, items]) => {
       items.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
       const qty = items.reduce((s, t) => s + (+t.qty || 0), 0);
-      return el('div', { class:'rp-page' },
+      return el('div', { class:'rp-page' }, el('div', { class:'rp-inner' },
         el('h1', { text:'GWJ3 센터 회송 확인서' }),
         el('p', { class:'rp-date', text: `${todayIso} (${dayName})` }),
         el('table', { class:'rp-info' },
@@ -2039,10 +2062,11 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
             el('td', { text: t.name }), el('td', { text: t.reason }), el('td', { class:'c', text: retTemp(t.temp) }), el('td', { class:'r', text: retNum(t.qty) }))),
             el('tr', { class:'rp-sum' }, el('td', { colspan:'8', class:'r', text:'합계' }), el('td', { class:'r', text: retNum(qty) })))),
         el('div', { class:'rp-sign' }, el('div', { text:'인계자 (GWJ3)　　　　　　(서명)' }), el('div', { text:'인수자 (업체)　　　　　　(서명)' })),
-        el('p', { class:'rp-foot', text: `GWJ3 IB · 출력 ${stamp}` }));
+        el('p', { class:'rp-foot', text: `GWJ3 IB · 출력 ${stamp}` })));
     }));
     document.querySelectorAll('#ret-print').forEach(n => n.remove());
     document.body.appendChild(area);
+    retFitPages(area);
     const done = () => { area.remove(); window.removeEventListener('afterprint', done); };
     window.addEventListener('afterprint', done);
     setTimeout(() => window.print(), 50);
