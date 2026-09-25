@@ -65,9 +65,9 @@ export default async function handler(req, res) {
         const items = b.items.map((x, i) => {
           let id; do id = newId(); while (seen.has(id)); seen.add(id);
           const it = clean({ date: today, temp: '', qty: 0, ...x }, { id, status: 'wait', createdAt: now });
-          // 옮겨 온 건은 '오늘 입력한 회송'에 섞이지 않도록 하차일을 입력일로 둬요.
-          it.createdAt = new Date(Date.parse(it.date + 'T00:00:00+09:00') + i).toISOString();
-          if (x.status === 'done') { it.status = 'done'; if (isDate(String(x.doneAt || ''))) it.doneAt = x.doneAt; }
+          // 붙여넣기(fresh)는 지금 입력한 것으로, 옛 엑셀에서 옮겨 온 건은 하차일을 입력일로 둬요.
+          it.createdAt = b.fresh ? new Date(Date.parse(now) + i).toISOString() : new Date(Date.parse(it.date + 'T00:00:00+09:00') + i).toISOString();
+          if (!b.fresh && x.status === 'done') { it.status = 'done'; if (isDate(String(x.doneAt || ''))) it.doneAt = x.doneAt; }
           return it;
         });
         if ((await redis('HLEN', KEY)) + items.length > MAX_ITEMS) throw new UserError('저장할 수 있는 회송 건 수를 넘었어요.');
