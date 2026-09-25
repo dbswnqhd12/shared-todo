@@ -149,6 +149,8 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .ho{display:flex;flex-direction:column;gap:14px}
 .ho-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ho-head h2{font-size:18px;min-width:9.5em;text-align:center}
+.ho-shot{margin-left:auto;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:7px 14px;font-size:14px;font-weight:600}
+.ho-shot:hover{background:var(--accent);color:#fff}
 .ho-sec{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .ho-sec-head h3{font-size:16px}
 .ho-sec-head p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
@@ -833,7 +835,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       el('button', { type:'button', class:'ghost', 'aria-label':'전날', text:'‹', onclick: () => hoGo(-1) }),
       el('h2', { text: longDate(hoDate) + (hoDate === todayIso ? ' · 오늘' : '') }),
       el('button', { type:'button', class:'ghost', 'aria-label':'다음날', text:'›', onclick: () => hoGo(1) }),
-      hoDate !== todayIso ? el('button', { type:'button', class:'ghost', text:'오늘', onclick: () => { hoDate = todayIso; hoData = null; renderHandover(); loadHandover(); } }) : null));
+      hoDate !== todayIso ? el('button', { type:'button', class:'ghost', text:'오늘', onclick: () => { hoDate = todayIso; hoData = null; renderHandover(); loadHandover(); } }) : null,
+      hoData ? el('button', { type:'button', class:'ho-shot', text:'캡쳐', title:'PC 화면 크기 이미지로 저장', onclick: hoCapture }) : null));
     if (!hoData){ box.appendChild(el('p', { class:'ho-empty', text:'불러오는 중…' })); return; }
     const d = hoData.day;
 
@@ -885,6 +888,137 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       onclick: () => hoAddRow('day', 'pp:', { name:'', qty:'' }, '.ho-pp-row input') }));
     s2.appendChild(ppBox);
 
+  }
+
+  // ---------- 인수인계 캡쳐 (기기와 상관없이 PC 폭 이미지로) ----------
+  function hoWrap(ctx, text, maxW){
+    const out = [];
+    for (const para of String(text || '').split('\n')){
+      let line = '';
+      for (const ch of para){
+        if (ctx.measureText(line + ch).width > maxW && line){ out.push(line); line = ch; }
+        else line += ch;
+      }
+      out.push(line);
+    }
+    while (out.length && !out[out.length - 1]) out.pop();
+    return out;
+  }
+
+  async function hoCapture(){
+    const a = document.activeElement;
+    if (a && $('#ho').contains(a)) a.blur();             // 입력 중이던 칸 먼저 저장
+    await new Promise(r => setTimeout(r, 50));
+    const d = hoData.day;
+    const FONT = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif';
+    const C = { bg:'#ffffff', ink:'#1d2521', muted:'#6b746f', line:'#cfd6d2', head:'#eef2ef', acc:'#1f6f54', accSoft:'#e3f1ea' };
+    // 칸 너비
+    const widths = { label:110, pre:80, g:68, frozen:118 };
+    const cols = HO_COLS.map(([ck]) => ck === 'pre' ? widths.pre : HO_FROZEN.includes(ck) ? widths.frozen : widths.g);
+    const PAD = 36, W = PAD * 2 + widths.label + cols.reduce((x, y) => x + y, 0);
+    const xs = []; { let x = PAD + widths.label; for (const w of cols){ xs.push(x); x += w; } }
+    const LH = 18, ROW = 34;
+
+    const m = document.createElement('canvas').getContext('2d');
+    const setFont = (ctx, size, bold, mono) => ctx.font = `${bold ? 700 : 400} ${size}px ${mono ? 'ui-monospace,Menlo,Consolas,monospace' : FONT}`;
+    // 줄 높이 미리 계산
+    setFont(m, 13, false, true);
+    const carLines = HO_FROZEN.map(ck => hoWrap(m, d[`car:${ck}`], widths.frozen - 12));
+    const carH = Math.max(ROW, Math.max(...carLines.map(l => l.length)) * LH + 14);
+    setFont(m, 12);
+    const noteLines = HO_COLS.map(([ck], i) => hoWrap(m, d[`note:${ck}`], cols[i] - 10));
+    const noteH = Math.max(ROW, Math.max(...noteLines.map(l => l.length)) * 16 + 14);
+    const pp = hoRows(d, 'pp:').filter(([, o]) => (o.name || o.qty));
+    const ppH = 30 + Math.max(1, pp.length) * 24;
+    const TOP = 96, H1 = 34, H2 = 28;
+    const tableH = H1 + H2 + ROW * (HO_ROWS.length + 1) + carH + noteH;
+    const H = TOP + tableH + 24 + ppH + 44;
+
+    const scale = 2;
+    const cv = document.createElement('canvas');
+    cv.width = W * scale; cv.height = H * scale;
+    const ctx = cv.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+    ctx.textBaseline = 'middle';
+
+    const cell = (x, y, w, h, fill) => { if (fill){ ctx.fillStyle = fill; ctx.fillRect(x, y, w, h); } ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, w, h); };
+    const text = (t, x, y, o = {}) => { setFont(ctx, o.size || 13, o.bold, o.mono); ctx.fillStyle = o.color || C.ink; ctx.textAlign = o.align || 'center'; ctx.fillText(t, x, y); };
+
+    // 제목
+    text('GWJ3 IB · 시프트 교대 인수인계', PAD, 30, { size:13, color:C.muted, align:'left' });
+    text('챔버별 이관 현황', PAD, 58, { size:22, bold:true, align:'left' });
+    text(hoDate.slice(0, 4) + '년 ' + longDate(hoDate), W - PAD, 58, { size:17, bold:true, align:'right' });
+    text('단위 PLT', W - PAD, 30, { size:12, color:C.muted, align:'right' });
+
+    // 머리글 2줄
+    let y = TOP;
+    cell(PAD, y, widths.label, H1 + H2, C.head); text('분류', PAD + widths.label / 2, y + (H1 + H2) / 2, { bold:true });
+    HO_COLS.forEach(([ck, label], i) => {
+      const gm = /^c(\d)([gm])$/.exec(ck);
+      if (!gm){ cell(xs[i], y, cols[i], H1 + H2, C.head); text(label, xs[i] + cols[i] / 2, y + (H1 + H2) / 2, { bold:true }); return; }
+      if (gm[2] === 'g'){ cell(xs[i], y, cols[i] * 2, H1, C.head); text(gm[1] + 'C', xs[i] + cols[i], y + H1 / 2, { bold:true }); }
+      cell(xs[i], y + H1, cols[i], H2, C.head); text(gm[2].toUpperCase(), xs[i] + cols[i] / 2, y + H1 + H2 / 2, { size:12, color:C.muted, bold:true });
+    });
+    y += H1 + H2;
+
+    // 분류별 숫자 + 합계
+    const sums = HO_COLS.map(() => ({ sum:0, any:false }));
+    for (const [rk, rl] of HO_ROWS){
+      cell(PAD, y, widths.label, ROW, C.head); text(rl, PAD + 10, y + ROW / 2, { bold:true, align:'left' });
+      HO_COLS.forEach(([ck], i) => {
+        cell(xs[i], y, cols[i], ROW);
+        const v = d[`cell:${rk}:${ck}`];
+        if (v !== undefined && v !== ''){ text(String(v), xs[i] + cols[i] / 2, y + ROW / 2, { mono:true, size:14 }); const n = parseFloat(v); if (!isNaN(n)){ sums[i].sum += n; sums[i].any = true; } }
+      });
+      y += ROW;
+    }
+    cell(PAD, y, widths.label, ROW, C.head); text('합계', PAD + 10, y + ROW / 2, { bold:true, align:'left' });
+    HO_COLS.forEach((_, i) => { cell(xs[i], y, cols[i], ROW, C.accSoft); text(sums[i].any ? String(Math.round(sums[i].sum * 10) / 10) : '–', xs[i] + cols[i] / 2, y + ROW / 2, { mono:true, bold:true, size:14, color:C.acc }); });
+    y += ROW;
+
+    // 냉동 챔버 차량번호
+    cell(PAD, y, widths.label, carH, C.head); text('차량번호', PAD + 10, y + carH / 2, { bold:true, align:'left' });
+    const fz = HO_COLS.findIndex(([ck]) => ck === HO_FROZEN[0]);
+    cell(xs[0], y, xs[fz] - xs[0], carH, '#f6f8f7'); text('냉동 챔버(5C·6C·7C)', (xs[0] + xs[fz]) / 2, y + carH / 2, { size:12, color:C.muted });
+    HO_FROZEN.forEach((ck, j) => {
+      const i = HO_COLS.findIndex(c => c[0] === ck);
+      cell(xs[i], y, cols[i], carH);
+      carLines[j].forEach((ln, k) => text(ln, xs[i] + 6, y + 7 + LH / 2 + k * LH, { mono:true, size:13, align:'left' }));
+    });
+    y += carH;
+
+    // 비고
+    cell(PAD, y, widths.label, noteH, C.head); text('비고', PAD + 10, y + noteH / 2, { bold:true, align:'left' });
+    HO_COLS.forEach((_, i) => { cell(xs[i], y, cols[i], noteH); noteLines[i].forEach((ln, k) => text(ln, xs[i] + 5, y + 7 + 8 + k * 16, { size:12, align:'left' })); });
+    y += noteH + 24;
+
+    // 프리팩
+    text('프리팩', PAD, y + 10, { size:15, bold:true, align:'left' });
+    y += 30;
+    if (!pp.length) text('등록된 품목 없음', PAD, y + 12, { size:13, color:C.muted, align:'left' });
+    pp.forEach(([, o], k) => {
+      const label = '•  ' + (o.name || '');
+      text(label, PAD, y + 12 + k * 24, { size:14, align:'left' });
+      if (o.qty){ setFont(ctx, 14); const w = ctx.measureText(label).width; text(String(o.qty), PAD + w + 16, y + 12 + k * 24, { size:14, mono:true, bold:true, align:'left', color:C.acc }); }
+    });
+
+    const now = new Date();
+    text(`캡쳐 ${isoOf(now)} ${pad(now.getHours())}:${pad(now.getMinutes())}`, W - PAD, H - 20, { size:11, color:C.muted, align:'right' });
+
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    const name = `인수인계_${hoDate}.png`;
+    const file = new File([blob], name, { type:'image/png' });
+    const mobile = matchMedia('(pointer:coarse)').matches;
+    if (mobile && navigator.canShare && navigator.canShare({ files:[file] })){
+      try { await navigator.share({ files:[file], title: name }); return; }
+      catch(e){ if (e.name === 'AbortError') return; }
+    }
+    const url = URL.createObjectURL(blob);
+    const link = el('a', { href:url, download:name });
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    toast('이미지를 저장했어요.');
   }
 
   // ---------- 이벤트 ----------
