@@ -859,7 +859,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       el('button', { type:'button', class:'ho-shot', text:'캡쳐', title:'PC 화면 크기 이미지로 저장', onclick: hoCapture })));
 
     // 챔버별 이관 현황 (이날)
-    const s2 = hoSection(box, '챔버별 이관 현황', '단위 PLT · 합계는 자동으로 계산돼요.');
+    const s2 = hoSection(box, '인수인계', '단위 PLT · 합계는 자동으로 계산돼요.');
     const totalRow = el('tr', { class:'ho-total' }, el('th', { scope:'row', text:'합계' }), ...HO_COLS.map(([ck]) => el('td', { 'data-col': ck })));
     const updateTotals = () => {
       for (const [ck] of HO_COLS){
@@ -1030,8 +1030,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const text = (t, x, y, o = {}) => { setFont(ctx, o.size || 13, o.bold, o.mono); ctx.fillStyle = o.color || C.ink; ctx.textAlign = o.align || 'center'; ctx.fillText(t, x, y); };
 
     // 제목
-    text('GWJ3 IB · 시프트 교대 인수인계', PAD, 30, { size:13, color:C.muted, align:'left' });
-    text('챔버별 이관 현황', PAD, 58, { size:22, bold:true, align:'left' });
+    text('GWJ3 IB', PAD, 30, { size:13, color:C.muted, align:'left' });
+    text('인수인계', PAD, 58, { size:22, bold:true, align:'left' });
     text(hoDateOf().slice(0, 4) + '년 ' + longDate(hoDateOf()), W - PAD, 58, { size:17, bold:true, align:'right' });
     text('단위 PLT', W - PAD, 30, { size:12, color:C.muted, align:'right' });
 
