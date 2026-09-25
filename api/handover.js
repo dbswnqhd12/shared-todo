@@ -1,8 +1,9 @@
 // 시프트 교대 인수인계
 //   GET /api/handover → { rev, day }
 //   PUT /api/handover  { field, value }  (value 가 null 이나 '' 면 삭제)
+//   PUT /api/handover  { fields: { field: value, ... } }  (여러 칸을 한 번에 — 엑셀로 Backlog 채울 때)
 // 한 장짜리 인수인계 표를 모두가 이어서 고쳐 써요 (날짜도 칸 하나)
-// 칸: 날짜, 챔버별 이관 현황 (PLT 칸, 냉동 챔버 차량번호, 비고), 프리팩, NYS·NYR
+// 칸: 날짜, 챔버별 이관 현황 (PLT 칸, 냉동 챔버 차량번호, 비고), 프리팩, Backlog(NYS·NYR, RC 차량 목록, 불러온 파일 정보)
 import { K, redis, pipeline, body, guard, fail, isDate, kstToday, UserError } from '../lib/store.js';
 
 const SHEET = 'ho:sheet';
@@ -11,7 +12,7 @@ const MAX_FIELDS = 600;
 
 const COLS = 'pre|c1g|c1m|c2g|c2m|c3g|c3m|c5|c6|c7';
 const ROWS = 'ilban|rocket|wm|iwit|direct';
-const DAY_FIELD = new RegExp(`^(cell:(${ROWS}):(${COLS})|note:(pre|c1|c2|c3|c5|c6|c7)|car:(c5|c6|c7)|ppq:(sr|egg|bread|perilla)|ny:(xd|rc|rm):(nys|nyr)|date)$`);
+const DAY_FIELD = new RegExp(`^(cell:(${ROWS}):(${COLS})|note:(pre|c1|c2|c3|c5|c6|c7)|car:(c5|c6|c7)|ppq:(sr|egg|bread|perilla)|ny:(xd|rc|rm):(nys|nyr)|rcCars|nySrc|date)$`);
 
 function cleanValue(v) {
   if (v === null || v === undefined) return null;
@@ -59,6 +60,23 @@ export default async function handler(req, res) {
         }
       }
       return res.status(200).json({ rev: Number(rev) || 0, day: parseHash(d) });
+    }
+
+    if (req.method === 'PUT' && body(req).fields) {
+      const f = body(req).fields;
+      if (typeof f !== 'object' || Array.isArray(f)) throw new UserError('저장할 수 없는 값이에요.');
+      const entries = Object.entries(f);
+      if (!entries.length || entries.length > 20) throw new UserError('한 번에 저장할 수 있는 칸 수를 넘었어요.');
+      const cmds = [];
+      for (const [field, value] of entries) {
+        if (!DAY_FIELD.test(field)) throw new UserError('저장할 수 없는 칸이에요.');
+        const v = cleanValue(value);
+        if (field === 'date' && v && !isDate(v)) throw new UserError('날짜가 올바르지 않아요.');
+        cmds.push(v === null || v === '' ? ['HDEL', SHEET, field] : ['HSET', SHEET, field, JSON.stringify(v)]);
+      }
+      cmds.push(['INCR', K.rev]);
+      const out = await pipeline(cmds);
+      return res.status(200).json({ ok: true, rev: out[out.length - 1] });
     }
 
     if (req.method === 'PUT') {
