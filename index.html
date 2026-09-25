@@ -334,6 +334,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ret-table td.c{text-align:center}.ret-table td.n{font-family:var(--mono);font-size:12.5px}
 .ret-table td.late{color:var(--high);font-weight:700}
 .ret-table .nowrap{white-space:nowrap}
+.ret-main td.n.opt{font-size:11.5px}
+.ret-main td.nm{min-width:140px}.ret-main th,.ret-main td{padding:6px 5px}.ret-main td.r{overflow-wrap:anywhere}.ret-bc{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}.ret-main td.vd{min-width:80px}
 .ret-table .cb{width:34px;text-align:center}
 .ret-table input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent)}
 .ret-table tr.is-done td{color:var(--muted)}
@@ -1895,7 +1897,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       !rows.length ? el('p', { class:'ho-empty', text: retItems ? '해당하는 회송 건이 없어요.' : '불러오는 중…' }) :
       el('div', { class:'ret-wrap' }, el('table', { class:'ret-table ret-main' },
         el('thead', {}, el('tr', {}, el('th', { class:'cb' }, allBox),
-          ...[['하차일'],['업체명'],['발주/IPR','opt'],['바코드','opt'],['상품명'],['회송사유'],['온도'],['수량'],['상태'],...(retUi.status === 'wait' ? [] : [['완료일','opt']]),['']].map(([h, c]) => el('th', { class: c || '', text:h })))),
+          ...[['하차일'],['업체명'],['발주/IPR','opt'],['상품명 · 바코드'],['회송사유'],['온도'],['수량'],['상태'],...(retUi.status === 'wait' ? [] : [['완료일','opt']]),['']].map(([h, c]) => el('th', { class: c || '', text:h })))),
         el('tbody', {}, ...rows.map(t => {
           const cb = el('input', { type:'checkbox', 'aria-label':`${t.name} 선택`, onchange: e => { e.target.checked ? retUi.sel.add(t.id) : retUi.sel.delete(t.id); retRenderList(); } });
           cb.checked = retUi.sel.has(t.id);
@@ -1903,9 +1905,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
           return el('tr', { class: (t.status === 'done' ? 'is-done' : '') + (cb.checked ? ' is-sel' : '') },
             el('td', { class:'c cb' }, cb),
             el('td', { class:'c n' + (old >= 7 ? ' late' : ''), title: old ? `${old}일째 대기` : '', text: retMD(t.date) }),
-            el('td', { text: t.vendor }), el('td', { class:'n opt', text: t.po || '' }), el('td', { class:'n opt', text: t.barcode || '' }),
-            el('td', {}, el('span', { text: t.name }), t.note ? el('small', { class:'ret-note', text: t.note }) : null),
-            el('td', { text: t.reason }), el('td', { class:'c' }, retTempTag(t)), el('td', { class:'c n', text: retNum(t.qty) }),
+            el('td', { class:'vd', text: t.vendor }), el('td', { class:'n opt', text: String(t.po || '').replace(/,\s*/g, ',\u200b') }),
+            el('td', { class:'nm' }, el('span', { text: t.name }), t.barcode ? el('small', { class:'ret-bc', text: t.barcode }) : null, t.note ? el('small', { class:'ret-note', text: t.note }) : null),
+            el('td', { class:'r', text: t.reason }), el('td', { class:'c' }, retTempTag(t)), el('td', { class:'c n', text: retNum(t.qty) }),
             el('td', { class:'c' }, retStatusBtn(t)), retUi.status === 'wait' ? null : el('td', { class:'c n opt', text: retMD(t.doneAt) }),
             el('td', { class:'c nowrap' }, el('button', { type:'button', class:'ret-btn ghost sm', text:'수정', onclick: () => retStartEdit(t) }), hoDel('회송 건 삭제', () => retDelete(t))));
         })))),
