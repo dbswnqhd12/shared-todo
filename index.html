@@ -200,6 +200,30 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .ho-table.ho-ny{min-width:0;width:auto}
 .ho-ny td,.ho-ny thead th:not(:first-child){min-width:4.6em}
 .ho-pp .ho-num,.ho-ny .ho-num{width:5em}
+.ho-src{margin-top:6px;font-size:12px;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:3px 10px;align-self:flex-start;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ho-ny-box{border-radius:8px;transition:outline-color .15s;outline:2px dashed transparent;outline-offset:4px}
+.ho-ny-box.drop-on{outline-color:var(--accent)}
+.ho-imp-btn{background:var(--accent);color:#fff}
+.ho-imp{position:fixed;inset:0;z-index:50;background:rgba(15,20,18,.55);display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto}
+.ho-imp-panel{background:var(--paper);color:var(--ink);border-radius:12px;padding:18px;width:100%;max-width:520px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px #0004}
+.ho-imp-panel h3{margin:0;font-size:18px}
+.ho-imp-file{display:flex;flex-direction:column;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;word-break:break-all}
+.ho-imp-file small{color:var(--muted);font-size:12.5px}
+.ho-imp-sec{display:flex;flex-direction:column;gap:8px}
+.ho-imp-sec h4{margin:0;font-size:15px}
+.ho-imp-help{margin:0;font-size:12.5px;color:var(--muted);line-height:1.5}
+.ho-imp-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ho-chip{display:flex;flex-direction:column;align-items:center;gap:1px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:6px 10px;min-width:4.6em;font-family:var(--mono);font-size:14px;font-weight:600}
+.ho-chip small{font-family:var(--body);font-size:11px;font-weight:500;color:var(--muted)}
+.ho-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ho-chip.on small{color:#e6f3ee}
+.ho-table.ho-imp-table{width:100%}
+.ho-imp-table td{font-family:var(--mono);padding:6px 4px;line-height:1.15}
+.ho-imp-table td.chg,.ho-imp-help .chg{color:var(--high);font-weight:700}
+.ho-imp-table .old{display:block;color:var(--muted);text-decoration:line-through;font-size:11px;font-weight:400}
+.ho-imp-acts{display:flex;gap:8px}
+.ho-imp-acts .ho-shot-close{color:var(--ink);border-color:var(--line)}
+.ho-imp-acts .ho-shot-save:disabled{opacity:.6}
 .ho-ny-sum{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted)}
 .ho-ny-total{font-family:var(--mono);font-weight:600;color:var(--accent);background:var(--accent-soft)}
 .ho-pp td,.ho-pp thead th:not(:first-child){min-width:4.4em}
@@ -930,17 +954,26 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       for (const [rk] of HO_NY_ROWS){ const v = nyRowSum(rk); nySum[rk].textContent = v === null ? '–' : String(v); if (v !== null){ t += v; any = true; } }
       nyTotalCell.textContent = any ? String(Math.round(t * 10) / 10) : '–';
     };
-    subs.appendChild(el('div', { class:'ho-sub' }, el('div', { class:'ho-sub-head' }, el('h4', { text:'Backlog' }), el('button', { type:'button', class:'ho-shot ho-shot-sm', text:'캡쳐', title:'Backlog만 이미지로 저장', onclick: hoCaptureBacklog })),
+    const src = d.nySrc;
+    const nyBox = el('div', { class:'ho-sub ho-ny-box' }, el('div', { class:'ho-sub-head' }, el('h4', { text:'Backlog' }),
+        el('button', { type:'button', class:'ho-shot ho-shot-sm', text:'캡쳐', title:'Backlog만 이미지로 저장', onclick: hoCaptureBacklog }),
+        el('button', { type:'button', class:'ho-shot ho-shot-sm ho-imp-btn', text:'엑셀 올리기', title:'이관 목록 엑셀로 Backlog 자동 계산', onclick: hoPickExcel })),
       el('div', { class:'ho-table-wrap' }, el('table', { class:'ho-table ho-ny' },
         el('thead', {}, el('tr', {}, el('th', { scope:'col', text:'구분' }), ...HO_NY_COLS.map(([, l]) => el('th', { scope:'col', text:l })), el('th', { scope:'col', text:'합계' }))),
         el('tbody', {},
           ...HO_NY_ROWS.map(([rk, rl]) => el('tr', {}, el('th', { scope:'row', text: rl }), ...HO_NY_COLS.map(([ck, cl]) => {
             const f = `ny:${rk}:${ck}`;
-            const n = el('input', { class:'ho-num', inputmode:'decimal', 'aria-label': `${rl} ${cl}`, maxlength: 6, value: d[f] ?? '' });
+            const n = el('input', { class:'ho-num', inputmode:'decimal', 'aria-label': `${rl} ${cl}`, maxlength: 8, value: d[f] ?? '' });
             n.onchange = () => { n.value = n.value.replace(/[^0-9.]/g, ''); if (n.value) d[f] = n.value; else delete d[f]; nyUpdate(); hoSave('day', f, n.value); };
             return el('td', {}, n);
           }), nySum[rk] = el('td', { class:'ho-ny-sum' }))),
-          el('tr', { class:'ho-total' }, el('th', { scope:'row', text:'Total' }), el('td', { colspan: HO_NY_COLS.length }), nyTotalCell))))));
+          el('tr', { class:'ho-total' }, el('th', { scope:'row', text:'Total' }), el('td', { colspan: HO_NY_COLS.length }), nyTotalCell)))),
+      src && src.file ? el('div', { class:'ho-src', text:`엑셀에서 불러옴 · ${hoWhen(src.at)} · ${src.file}` }) : null);
+    subs.appendChild(nyBox);
+    // PC: 엑셀 파일을 Backlog 위로 끌어다 놓기
+    nyBox.addEventListener('dragover', e => { e.preventDefault(); nyBox.classList.add('drop-on'); });
+    nyBox.addEventListener('dragleave', () => nyBox.classList.remove('drop-on'));
+    nyBox.addEventListener('drop', e => { e.preventDefault(); nyBox.classList.remove('drop-on'); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) hoImportFile(f); });
     nyUpdate();
     hoGridIndex(box);
     hoShade(box.querySelector('.ho-table'));
@@ -1181,6 +1214,200 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     if (mobile) return hoShotView(cv.toDataURL('image/png'), blob, name);
     hoDownload(blob, name);
     toast('이미지를 저장했어요.');
+  }
+
+  // ---------- Backlog: 이관 목록 엑셀로 자동 계산 ----------
+  // 파일은 이 브라우저 안에서만 읽어요. 서버에는 계산된 숫자, RC 차량 목록, 파일 이름만 저장돼요.
+  // 규칙: 이관계획 번호 없음 → XD / 있음 + RC 차량 → RC / 있음 + 나머지 차량 → RM
+  //       상태 이동중 → NYR, 진열대기·진열중 → NYS (진열완료 등은 제외), 값은 집품수량 합계
+  const hoWhen = iso => { const t = new Date(iso); return isNaN(t) ? '' : `${t.getMonth() + 1}/${t.getDate()} ${pad(t.getHours())}:${pad(t.getMinutes())}`; };
+  const carKey = s => { const n = String(s || '').replace(/\D/g, ''); return n.length >= 4 ? n.slice(-4) : n; };   // 차량번호는 뒤 4자리로 비교
+  const splitCars = s => String(s || '').split(/[\s,，/]+/).map(x => x.trim()).filter(Boolean);
+
+  function hoPickExcel(){
+    const inp = el('input', { type:'file', accept:'.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    inp.onchange = () => { if (inp.files[0]) hoImportFile(inp.files[0]); };
+    inp.click();
+  }
+
+  // .xlsx(zip) 안의 첫 번째 시트를 줄 배열로 읽어요 (외부 라이브러리 없이)
+  async function hoReadXlsx(file){
+    const buf = new Uint8Array(await file.arrayBuffer());
+    const dv = new DataView(buf.buffer);
+    let e = buf.length - 22;
+    while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+    if (e < 0) throw new Error('엑셀(.xlsx) 파일이 아니에요.');
+    const count = dv.getUint16(e + 10, true);
+    let p = dv.getUint32(e + 16, true);
+    const files = {}, dec = new TextDecoder();
+    for (let i = 0; i < count; i++){
+      if (dv.getUint32(p, true) !== 0x02014b50) break;
+      const method = dv.getUint16(p + 10, true), size = dv.getUint32(p + 20, true);
+      const nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+      files[dec.decode(buf.subarray(p + 46, p + 46 + nl))] = { method, size, off };
+      p += 46 + nl + xl + cl;
+    }
+    const read = async name => {
+      const f = files[name];
+      if (!f) return null;
+      const start = f.off + 30 + dv.getUint16(f.off + 26, true) + dv.getUint16(f.off + 28, true);
+      const data = buf.subarray(start, start + f.size);
+      if (f.method === 0) return dec.decode(data);
+      if (f.method !== 8 || typeof DecompressionStream === 'undefined') throw new Error('이 브라우저에서는 엑셀을 읽을 수 없어요. 크롬이나 최신 사파리로 열어 주세요.');
+      return await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();
+    };
+    const xml = s => new DOMParser().parseFromString(s, 'application/xml');
+    // 첫 번째 시트 파일 찾기
+    let sheetPath = null;
+    try {
+      const wb = xml(await read('xl/workbook.xml'));
+      const rid = wb.getElementsByTagName('sheet')[0].getAttribute('r:id');
+      const rels = xml(await read('xl/_rels/workbook.xml.rels'));
+      for (const r of rels.getElementsByTagName('Relationship')) if (r.getAttribute('Id') === rid){ const t = r.getAttribute('Target'); sheetPath = t.startsWith('/') ? t.slice(1) : 'xl/' + t.replace(/^\.\//, ''); }
+    } catch { /* 아래에서 대신 찾기 */ }
+    if (!sheetPath || !files[sheetPath]) sheetPath = Object.keys(files).filter(n => /^xl\/worksheets\/[^/]+\.xml$/.test(n)).sort()[0];
+    if (!sheetPath) throw new Error('엑셀 안에서 시트를 찾지 못했어요.');
+    const ssx = await read('xl/sharedStrings.xml');
+    const ss = ssx ? [...xml(ssx).getElementsByTagName('si')].map(si => [...si.getElementsByTagName('t')].map(t => t.textContent).join('')) : [];
+    const doc = xml(await read(sheetPath));
+    const colIdx = ref => { let n = 0; for (const ch of ref.replace(/\d+/g, '')) n = n * 26 + ch.charCodeAt(0) - 64; return n - 1; };
+    const rows = [];
+    for (const r of doc.getElementsByTagName('row')){
+      const out = [];
+      for (const c of r.getElementsByTagName('c')){
+        const t = c.getAttribute('t'), v = c.getElementsByTagName('v')[0];
+        let val = '';
+        if (t === 's') val = ss[+(v && v.textContent)] ?? '';
+        else if (t === 'inlineStr') val = [...c.getElementsByTagName('t')].map(x => x.textContent).join('');
+        else val = v ? v.textContent : '';
+        out[colIdx(c.getAttribute('r') || '')] = val;
+      }
+      rows.push(out);
+    }
+    return rows;
+  }
+
+  // 줄 배열 → 계산에 필요한 줄만 추려 두기
+  function hoPrepRows(rows){
+    const norm = s => String(s || '').replace(/\s/g, '');
+    const hi = rows.findIndex(r => r && r.some(v => norm(v) === '상태'));
+    if (hi < 0) throw new Error("'상태' 열을 찾지 못했어요. 이관 목록(TransferOperationList) 엑셀인지 확인해 주세요.");
+    const H = rows[hi].map(norm);
+    const need = { plan:'이관계획번호', status:'상태', qty:'집품수량', car:'차량번호' };
+    const col = {};
+    const miss = [];
+    for (const [k, name] of Object.entries(need)){ col[k] = H.indexOf(name); if (col[k] < 0) miss.push(name); }
+    if (miss.length) throw new Error('엑셀에 이 열이 없어요: ' + miss.join(', '));
+    const items = [];
+    let done = 0, other = 0;
+    for (const r of rows.slice(hi + 1)){
+      if (!r || !r.some(v => String(v || '').trim())) continue;
+      const st = String(r[col.status] || '').trim();
+      const kind = st === '이동중' ? 'nyr' : (st === '진열대기' || st === '진열중') ? 'nys' : null;
+      if (!kind){ if (st === '진열완료') done++; else other++; continue; }
+      const q = parseFloat(String(r[col.qty] || '').replace(/,/g, ''));
+      items.push({ kind, plan: !!String(r[col.plan] || '').trim(), car: String(r[col.car] || '').trim(), qty: isNaN(q) ? 0 : q });
+    }
+    return { total: rows.length - hi - 1, items, done, other };
+  }
+
+  function hoCalc(prep, rcSet){
+    const v = { xd:{ nys:0, nyr:0 }, rc:{ nys:0, nyr:0 }, rm:{ nys:0, nyr:0 } };
+    for (const it of prep.items){
+      const row = !it.plan ? 'xd' : rcSet.has(carKey(it.car)) ? 'rc' : 'rm';
+      v[row][it.kind] += it.qty;
+    }
+    for (const r in v) for (const k in v[r]) v[r][k] = Math.round(v[r][k] * 10) / 10;
+    return v;
+  }
+
+  async function hoImportFile(file){
+    if (!hoData) return;
+    let prep;
+    try {
+      setSync('', '엑셀 읽는 중…');
+      prep = hoPrepRows(await hoReadXlsx(file));
+      setSync('', '');
+    } catch(e) { toast(e.message || '엑셀을 읽지 못했어요.'); setSync('err', '엑셀을 읽지 못했어요'); return; }
+    const d = hoData.day;
+    // 이관계획 번호가 있는 차량 (RC/RM 후보) — 줄이 많은 순
+    const carCount = new Map();
+    for (const it of prep.items) if (it.plan && it.car){ const k = carKey(it.car); const c = carCount.get(k) || { label: it.car, n: 0 }; c.n++; carCount.set(k, c); }
+    const cars = [...carCount.entries()].sort((a, b) => b[1].n - a[1].n);
+    const rc = new Set(splitCars(d.rcCars).map(carKey).filter(Boolean));
+
+    const close = () => { box.remove(); document.body.style.overflow = ''; };
+    const chipBox = el('div', { class:'ho-imp-chips' });
+    const extra = el('input', { class:'ho-in', placeholder:'목록에 없는 RC 차량 (쉼표로 구분)', 'aria-label':'RC 차량번호 직접 입력' });
+    extra.value = [...rc].filter(k => !carCount.has(k)).join(', ');
+    const tableBox = el('div');
+    const cur = (rk, ck) => d[`ny:${rk}:${ck}`] ?? '';
+    const fmt = n => String(Math.round(n * 10) / 10);
+    let result = null;
+    const rcAll = () => new Set([...rc, ...splitCars(extra.value).map(carKey).filter(Boolean)]);
+    const refresh = () => {
+      chipBox.innerHTML = '';
+      if (!cars.length) chipBox.appendChild(el('p', { class:'ho-empty', text:'이관계획 번호가 있는 차량이 없어요.' }));
+      for (const [k, c] of cars){
+        const on = rc.has(k);
+        chipBox.appendChild(el('button', { type:'button', class:'ho-chip' + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false',
+          onclick: () => { on ? rc.delete(k) : rc.add(k); refresh(); } },
+          el('span', { text: c.label }), el('small', { text: `${c.n}줄 · ${on ? 'RC' : 'RM'}` })));
+      }
+      result = hoCalc(prep, rcAll());
+      let total = 0;
+      tableBox.innerHTML = '';
+      tableBox.appendChild(el('table', { class:'ho-table ho-ny ho-imp-table' },
+        el('thead', {}, el('tr', {}, el('th', { text:'구분' }), ...HO_NY_COLS.map(([, l]) => el('th', { text:l })), el('th', { text:'합계' }))),
+        el('tbody', {}, ...HO_NY_ROWS.map(([rk, rl]) => {
+          const sum = result[rk].nys + result[rk].nyr; total += sum;
+          return el('tr', {}, el('th', { text: rl }), ...HO_NY_COLS.map(([ck]) => {
+            const nv = fmt(result[rk][ck]), ov = cur(rk, ck), changed = String(ov) !== nv;
+            return el('td', { class: changed ? 'chg' : '' }, changed && ov !== '' ? el('span', { class:'old', text: ov }) : null, el('span', { text: nv }));
+          }), el('td', { class:'ho-ny-sum', text: fmt(sum) }));
+        }), el('tr', { class:'ho-total' }, el('th', { text:'Total' }), el('td', { colspan: HO_NY_COLS.length }), el('td', { class:'ho-ny-total', text: fmt(total) })))));
+    };
+    extra.oninput = refresh;
+
+    const apply = el('button', { type:'button', class:'ho-shot-save', text:'적용하기' });
+    apply.onclick = async () => {
+      apply.disabled = true;
+      const fields = {};
+      for (const [rk] of HO_NY_ROWS) for (const [ck] of HO_NY_COLS) fields[`ny:${rk}:${ck}`] = fmt(result[rk][ck]);
+      const labels = new Map(cars.map(([k, c]) => [k, c.label]));
+      fields.rcCars = [...rcAll()].map(k => labels.get(k) || k).join(', ');
+      fields.nySrc = { file: file.name.slice(0, 120), at: new Date().toISOString(), rows: String(prep.items.length) };
+      try {
+        const r = await api('PUT', '/api/handover', { fields });
+        hoRev = r.rev;
+        for (const [f, v] of Object.entries(fields)){ if (v === '' || v === null) delete d[f]; else d[f] = v; }
+        close(); renderHandover(); setSync('', '저장됨'); toast('Backlog에 적용했어요.');
+      } catch(e) {
+        apply.disabled = false;
+        if (e instanceof Locked){ close(); return showLock(e.message); }
+        toast(e.message);
+      }
+    };
+
+    const skipped = [prep.done ? `진열완료 ${prep.done}줄` : '', prep.other ? `기타 상태 ${prep.other}줄` : ''].filter(Boolean).join(', ');
+    const box = el('div', { class:'ho-imp', role:'dialog', 'aria-label':'엑셀로 Backlog 계산' },
+      el('div', { class:'ho-imp-panel' },
+        el('h3', { text:'엑셀로 Backlog 계산' }),
+        el('div', { class:'ho-imp-file' }, el('b', { text: file.name }),
+          el('small', { text: `${prep.total}줄 읽음 · 계산 대상 ${prep.items.length}줄` + (skipped ? ` (${skipped} 제외)` : '') })),
+        el('div', { class:'ho-imp-sec' },
+          el('h4', { text:'RC 차량 고르기' }),
+          el('p', { class:'ho-imp-help', text:'이관계획 번호가 있는 차량이에요. RC 차량을 눌러 켜 주세요. 나머지는 RM으로 계산돼요.' }),
+          chipBox, extra),
+        el('div', { class:'ho-imp-sec' },
+          el('h4', { text:'계산 결과 미리보기' }),
+          el('p', { class:'ho-imp-help' }, el('span', { class:'chg', text:'빨간 숫자' }), document.createTextNode(' = 바뀌는 칸 (흐린 숫자는 지금 값) · 집품수량 합계')),
+          tableBox),
+        el('div', { class:'ho-imp-acts' }, el('button', { type:'button', class:'ho-shot-close', text:'취소', onclick: close }), apply)));
+    box.addEventListener('click', e => { if (e.target === box) close(); });
+    refresh();
+    document.body.style.overflow = 'hidden';
+    document.body.appendChild(box);
   }
 
   // Backlog 표만 따로 캡쳐
