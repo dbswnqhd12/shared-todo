@@ -295,6 +295,85 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   .tcount{display:inline-block}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+/* ---------- IST 회송 ---------- */
+.ret{display:flex;flex-direction:column;gap:14px}
+.ret-sec{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ret-sec-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ret-sec-head h3{margin:0;font-size:16px}
+.ret-help{margin:0;font-size:12.5px;color:var(--muted)}
+.ret-form.editing{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.ret-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px 10px}
+.ret-grid-more{grid-template-columns:repeat(5,minmax(0,1fr));margin-top:8px}
+.ret-f{display:flex;flex-direction:column;gap:3px;min-width:0}
+.ret-f.span2{grid-column:span 2}.ret-f.span3{grid-column:span 3}
+.ret-f label{font-size:12px;font-weight:600;color:var(--muted)}
+.ret-in{width:100%;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:7px 9px;font-size:14px;font-family:inherit}
+.ret-in:focus{border-color:var(--accent);background:var(--paper)}
+.ret-seg3{display:flex;gap:4px}
+.ret-seg3 button{flex:1;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:7px 0;font-size:13.5px}
+.ret-seg3 button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.ret-more summary{cursor:pointer;font-size:13px;color:var(--accent);font-weight:600}
+.ret-acts{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.ret-acts .ret-help{margin-right:auto}
+.ret-btn{border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:7px;padding:8px 16px;font-size:14px;font-weight:700;white-space:nowrap}
+.ret-btn.solid{background:var(--accent);color:#fff}
+.ret-btn.ghost{background:var(--paper);border-color:var(--line);color:var(--ink)}
+.ret-btn.sm{padding:3px 9px;font-size:12px;font-weight:600}
+.ret-btn:disabled{opacity:.45;cursor:default}
+.ret-search{max-width:420px}
+.ret-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ret-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:13px}
+.ret-chip b{font-family:var(--mono);font-size:12px;color:var(--high)}
+.ret-chip.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.ret-chip.on b{color:#FFC9BB}
+.ret-chip.v{border-radius:8px}
+.ret-wrap{overflow-x:auto}
+.ret-table{border-collapse:collapse;width:100%;font-size:13px}
+.ret-table th,.ret-table td{border:1px solid var(--line);padding:6px 7px;text-align:left;vertical-align:middle}
+.ret-table thead th{background:var(--bg);font-weight:700;text-align:center;white-space:nowrap}
+.ret-table td.c{text-align:center}.ret-table td.n{font-family:var(--mono);font-size:12.5px}
+.ret-table td.late{color:var(--high);font-weight:700}
+.ret-table .nowrap{white-space:nowrap}
+.ret-table .cb{width:34px;text-align:center}
+.ret-table input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent)}
+.ret-table tr.is-done td{color:var(--muted)}
+.ret-table tr.is-sel td{background:var(--accent-soft)}
+.ret-table tr.editing td{background:#FFF7E0}
+.ret-note{display:block;font-size:11.5px;color:var(--muted)}
+.ret-st{border:0;border-radius:999px;padding:3px 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.ret-st.wait{background:var(--high-soft);color:var(--high)}
+.ret-st.done{background:var(--accent-soft);color:var(--accent)}
+.ret-temp{font-size:11.5px;border-radius:4px;padding:1px 6px;font-weight:700;white-space:nowrap}
+.ret-temp.CH{background:#E1ECF7;color:#2F5F9E}.ret-temp.AM{background:#F4EAD2;color:#8A5F10}.ret-temp.FR{background:#E3E0F5;color:#5B4BA8}
+.ret-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:2px}
+.ret-bar-btns{display:flex;gap:8px;flex-wrap:wrap}
+@media (max-width:760px){
+  .ret-grid{grid-template-columns:1fr 1fr}
+  .ret-grid-more{grid-template-columns:1fr 1fr}
+  .ret-f.span2,.ret-f.span3{grid-column:span 2}
+  .ret-table .opt{display:none}
+  .ret-bar-btns{width:100%}.ret-bar-btns .ret-btn{flex:1}
+}
+#ret-print{display:none}
+@media print{
+  @page{size:A4;margin:12mm}
+  body > *:not(#ret-print){display:none !important}
+  #ret-print{display:block !important;color:#000;font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
+  .rp-page{page-break-after:always;break-after:page}
+  .rp-page:last-child{page-break-after:auto;break-after:auto}
+  .rp-page h1{text-align:center;font-size:22pt;letter-spacing:6pt;margin:0 0 2mm}
+  .rp-date{text-align:center;margin:0 0 6mm;font-size:11pt}
+  .rp-page table{border-collapse:collapse;width:100%}
+  .rp-page th,.rp-page td{border:1px solid #333;padding:2mm 2mm;font-size:9.5pt;text-align:left}
+  .rp-page th{background:#e9e9e9 !important;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .rp-info th{width:18%}.rp-vendor{font-weight:700;font-size:11pt}
+  .rp-tot{font-weight:700;margin:5mm 0 2mm;font-size:10.5pt}
+  .rp-items td.c{text-align:center}.rp-items td.r{text-align:right}
+  .rp-sum td{font-weight:700}
+  .rp-sign{display:flex;justify-content:space-between;margin-top:14mm;font-size:10.5pt}
+  .rp-sign div{border-top:1px solid #333;padding-top:2mm;width:44%;text-align:center}
+  .rp-foot{text-align:right;color:#666;font-size:8pt;margin-top:6mm}
+}
 </style>
 </head>
 <body>
@@ -324,9 +403,11 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     <button type="button" data-v="cal" aria-pressed="true">달력</button>
     <button type="button" data-v="list" aria-pressed="false">할 일 목록</button>
     <button type="button" data-v="ho" aria-pressed="false">인수인계</button>
+    <button type="button" data-v="ret" aria-pressed="false">IST 회송</button>
   </div>
 
   <section class="ho" id="ho" hidden aria-label="시프트 교대 인수인계"></section>
+  <section class="ret" id="ret" hidden aria-label="IST 회송"></section>
 
   <section class="cal" id="cal" aria-label="달력">
     <div class="cal-head">
@@ -471,6 +552,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       rev = data.rev; loadedMonths = months; loaded = true;
       render();
       if (view === 'ho' && hoRev !== rev && !hoFocused()) loadHandover();
+      if (view === 'ret' && retRev !== rev) loadReturns();
       setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
       if (e instanceof Locked) return showLock(teamKey ? e.message : '');
@@ -485,6 +567,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     try {
       const data = await request('GET', '/api/state?only=rev');
       if (view === 'ho' && data.rev !== hoRev && !hoFocused()) loadHandover();
+      if (view === 'ret' && data.rev !== retRev) loadReturns();
       if (data.rev !== rev) loadFull();
       else setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
@@ -737,11 +820,13 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === filter));
     document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === view));
     const cal = view === 'cal';
-    const hoView = view === 'ho';
+    const hoView = view === 'ho', retView = view === 'ret';
     $('#ho').hidden = !hoView;
-    for (const id of ['#addForm', '#list']) $(id).hidden = hoView;
-    document.querySelector('.toolbar').hidden = hoView;
+    $('#ret').hidden = !retView;
+    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView;
+    document.querySelector('.toolbar').hidden = hoView || retView;
     if (hoView && !$('#ho').hasChildNodes()) renderHandover();
+    if (retView && !retBuilt) renderReturns();
     for (const id of ['#cal', '#dayHead', '#shifts', '#todoLabel']) $(id).hidden = !cal;
     $('#editNote').hidden = !(cal && editMode);
     $('#editLock').hidden = !(cal && askEdit && !editMode);
@@ -1596,6 +1681,276 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     document.body.appendChild(box);
   }
 
+  // ---------- IST 회송 ----------
+  // ① 매일 나오는 회송 건 기입  ② 업체별로 걸러서 회송 확인서 인쇄
+  // 완료 처리는 사용자가 직접 (한 건씩 상태 버튼 / 여러 건 한 번에)
+  const RET_TEMPS = [['CH','냉장'],['AM','상온'],['FR','냉동']];
+  const RET_REASONS = ['[회송] 과착', '[회송] 유통기한', '표기사항불량>표기사항오류', '품질불량>파손', '품질불량>변질'];
+  const RET_FIELDS = ['date','vendor','po','temp','name','sku','barcode','reason','qty','note'];
+  let retItems = null, retRev = -1, retLoading = false, retBuilt = false;
+  const retUi = { status:'wait', vendor:'', q:'', sel:new Set(), editId:null };
+  const retForm = { date: todayIso, vendor:'', po:'', temp:'CH', name:'', sku:'', barcode:'', reason:'', qty:'', note:'' };
+  const retTemp = t => (RET_TEMPS.find(x => x[0] === t) || [null, ''])[1];
+  const retMD = d => d ? `${+d.slice(5, 7)}/${+d.slice(8, 10)}` : '';
+  const retLocalDay = iso => { const t = new Date(iso); return isNaN(t) ? '' : isoOf(t); };
+  const retNum = n => String(Math.round((+n || 0) * 100) / 100);
+  const retBusy = () => { const a = document.activeElement; return !!a && $('#ret').contains(a) && a.matches('.ret-list-edit input'); };
+
+  async function loadReturns(){
+    if (retLoading) return;
+    retLoading = true;
+    try {
+      const d = await request('GET', '/api/returns');
+      retItems = d.items || []; retRev = d.rev;
+      if (!retBusy()) renderReturns();
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+      setSync('err', e.message);
+    } finally { retLoading = false; }
+  }
+
+  function renderReturns(){
+    const box = $('#ret');
+    if (!retBuilt){ retBuild(box); retBuilt = true; }
+    retFillForm();
+    retRenderToday();
+    retRenderList();
+  }
+
+  // ---- ① 입력 칸 (한 번만 만들고 계속 씀) ----
+  function retBuild(box){
+    const f = (key, label, o = {}) => {
+      const inp = el(o.tag || 'input', { id:'ret-' + key, class:'ret-in', type: o.type, inputmode: o.im, list: o.list, placeholder: o.ph || '', maxlength: o.max, autocomplete:'off' });
+      inp.oninput = () => { retForm[key] = inp.value; };
+      return el('div', { class:'ret-f' + (o.cls ? ' ' + o.cls : '') }, el('label', { for:'ret-' + key, text: label + (o.req ? ' *' : '') }), inp);
+    };
+    const temp = el('div', { class:'ret-seg3', role:'group', 'aria-label':'온도' },
+      ...RET_TEMPS.map(([k, l]) => el('button', { type:'button', 'data-t': k, text: l, onclick: () => { retForm.temp = k; retFillForm(); } })));
+    const submit = el('button', { type:'submit', class:'ret-btn solid', id:'ret-submit', text:'추가' });
+    const cancel = el('button', { type:'button', class:'ret-btn ghost', id:'ret-cancel', text:'취소', hidden:true, onclick: () => retEndEdit() });
+    const more = el('details', { class:'ret-more', id:'ret-more' }, el('summary', { text:'발주번호 · SKU ID · 바코드 · 비고' }),
+      el('div', { class:'ret-grid ret-grid-more' },
+        f('po', '발주 / IPR 번호', { ph:'예: 130000001', max:40 }),
+        f('sku', 'SKU ID', { max:40, im:'numeric' }),
+        f('barcode', '바코드', { max:40, im:'numeric' }),
+        f('note', '비고', { max:300, cls:'span2' })));
+    const form = el('form', { class:'ret-sec ret-form', id:'ret-form', autocomplete:'off' },
+      el('div', { class:'ret-sec-head' }, el('h3', { id:'ret-form-title', text:'회송 건 입력' }),
+        el('p', { class:'ret-help', text:'하차일 · 업체 · 온도는 다음 건에도 그대로 남아요' })),
+      el('div', { class:'ret-grid' },
+        f('date', '하차일', { type:'date' }),
+        f('vendor', '업체명', { req:true, list:'ret-vendors', max:80, cls:'span2' }),
+        el('div', { class:'ret-f span2' }, el('label', { text:'온도' }), temp),
+        f('name', '상품명', { req:true, max:150, cls:'span3' }),
+        f('reason', '회송사유', { req:true, list:'ret-reasons', max:80, cls:'span2', ph:'목록에서 고르거나 직접 입력' }),
+        f('qty', '수량', { req:true, im:'decimal', max:10 })),
+      more,
+      el('div', { class:'ret-acts' }, el('span', { class:'ret-help', id:'ret-form-msg', text:'엔터 = 추가 · * 필수' }), cancel, submit),
+      el('datalist', { id:'ret-vendors' }), el('datalist', { id:'ret-reasons' }));
+    form.onsubmit = e => { e.preventDefault(); retSubmit(); };
+    box.append(form,
+      el('section', { class:'ret-sec', id:'ret-today' }),
+      el('section', { class:'ret-sec', id:'ret-list' },
+        el('div', { class:'ret-sec-head' }, el('h3', { text:'회송 목록' }), el('p', { class:'ret-help', text:'업체를 골라 회송 확인서를 인쇄해요' })),
+        el('input', { class:'ret-in ret-search', id:'ret-q', type:'search', placeholder:'업체명 · 상품명 · 바코드 · 발주번호 검색', 'aria-label':'회송 목록 검색',
+          oninput: e => { retUi.q = e.target.value.trim(); retRenderList(); } }),
+        el('div', { id:'ret-list-body' })));
+  }
+
+  function retFillForm(){
+    for (const k of RET_FIELDS){ const n = $('#ret-' + k); if (n && document.activeElement !== n) n.value = retForm[k] ?? ''; }
+    document.querySelectorAll('#ret-form .ret-seg3 button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === retForm.temp ? 'true' : 'false'));
+    const items = retItems || [];
+    const uniq = arr => [...new Set(arr.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
+    $('#ret-vendors').replaceChildren(...uniq(items.map(t => t.vendor)).map(v => el('option', { value: v })));
+    $('#ret-reasons').replaceChildren(...uniq([...RET_REASONS, ...items.map(t => t.reason)]).map(v => el('option', { value: v })));
+    const editing = !!retUi.editId;
+    $('#ret-form-title').textContent = editing ? '회송 건 수정' : '회송 건 입력';
+    $('#ret-submit').textContent = editing ? '수정 저장' : '추가';
+    $('#ret-cancel').hidden = !editing;
+    $('#ret-form').classList.toggle('editing', editing);
+  }
+
+  async function retSubmit(){
+    for (const k of RET_FIELDS){ const n = $('#ret-' + k); if (n) retForm[k] = n.value; }
+    const miss = [['vendor','업체명'],['name','상품명'],['reason','회송사유'],['qty','수량']].filter(([k]) => !String(retForm[k] || '').trim());
+    if (miss.length){ toast(miss.map(m => m[1]).join(', ') + '을(를) 적어 주세요.'); $('#ret-' + miss[0][0]).focus(); return; }
+    if (isNaN(+String(retForm.qty).replace(/,/g, ''))){ toast('수량은 숫자로 적어 주세요.'); $('#ret-qty').focus(); return; }
+    const payload = {};
+    for (const k of RET_FIELDS) payload[k] = k === 'qty' ? String(retForm.qty).replace(/,/g, '') : String(retForm[k] || '').trim();
+    if (!payload.date) payload.date = todayIso;
+    const btn = $('#ret-submit'); btn.disabled = true;
+    try {
+      if (retUi.editId){
+        const { item } = await api('PATCH', '/api/returns?id=' + encodeURIComponent(retUi.editId), payload);
+        const i = retItems.findIndex(t => t.id === item.id); if (i > -1) retItems[i] = item;
+        retEndEdit(true);
+        toast('수정했어요.');
+      } else {
+        const { item } = await api('POST', '/api/returns', payload);
+        retItems.push(item);
+        for (const k of ['po','name','sku','barcode','reason','qty','note']) retForm[k] = '';
+        retFillForm();
+        $('#ret-name').focus();
+      }
+      setSync('', '저장됨');
+      retRenderToday(); retRenderList();
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+      toast(e.message); setSync('err', e.message);
+    } finally { btn.disabled = false; }
+  }
+
+  function retStartEdit(t){
+    retUi.editId = t.id;
+    for (const k of RET_FIELDS) retForm[k] = k === 'qty' ? retNum(t.qty) : (t[k] ?? '');
+    if (t.po || t.sku || t.barcode || t.note) $('#ret-more').open = true;
+    retFillForm();
+    $('#ret-form').scrollIntoView({ behavior:'smooth', block:'start' });
+    $('#ret-name').focus({ preventScroll:true });
+  }
+  function retEndEdit(keepDate){
+    retUi.editId = null;
+    for (const k of ['po','name','sku','barcode','reason','qty','note']) retForm[k] = '';
+    if (!keepDate) retForm.date = todayIso;
+    retFillForm();
+  }
+
+  async function retSetStatus(ids, status){
+    if (!ids.length) return;
+    try {
+      const { items } = await api('PUT', '/api/returns', { ids, status });
+      for (const it of items){ const i = retItems.findIndex(t => t.id === it.id); if (i > -1) retItems[i] = it; }
+      for (const id of ids) retUi.sel.delete(id);
+      setSync('', '저장됨'); retRenderToday(); retRenderList();
+    } catch(e) { if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+  }
+
+  async function retDelete(t){
+    try {
+      await api('DELETE', '/api/returns?id=' + encodeURIComponent(t.id));
+      retItems = retItems.filter(x => x.id !== t.id); retUi.sel.delete(t.id);
+      if (retUi.editId === t.id) retEndEdit();
+      setSync('', '저장됨'); retRenderToday(); retRenderList();
+    } catch(e) { if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+  }
+
+  const retStatusBtn = t => el('button', { type:'button', class:'ret-st ' + (t.status === 'done' ? 'done' : 'wait'),
+    title: t.status === 'done' ? '눌러서 대기로 되돌리기' : '눌러서 완료로 바꾸기',
+    text: t.status === 'done' ? '완료' : '대기', onclick: () => retSetStatus([t.id], t.status === 'done' ? 'wait' : 'done') });
+  const retTempTag = t => t.temp ? el('span', { class:'ret-temp ' + t.temp, text: retTemp(t.temp) }) : null;
+
+  // ---- 오늘 입력한 회송 ----
+  function retRenderToday(){
+    const sec = $('#ret-today');
+    const list = (retItems || []).filter(t => retLocalDay(t.createdAt) === todayIso).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    const qty = list.reduce((s, t) => s + (+t.qty || 0), 0);
+    sec.replaceChildren(
+      el('div', { class:'ret-sec-head' }, el('h3', { text:'오늘 입력한 회송' }), el('p', { class:'ret-help', text: `${retMD(todayIso)} · ${list.length}건 · ${retNum(qty)}개` })),
+      !list.length ? el('p', { class:'ho-empty', text:'오늘 입력한 회송 건이 없어요.' }) :
+      el('div', { class:'ret-wrap' }, el('table', { class:'ret-table' },
+        el('thead', {}, el('tr', {}, ...[['하차일','opt'],['업체명'],['상품명'],['회송사유','opt'],['온도'],['수량'],['상태'],['']].map(([h, c]) => el('th', { class: c || '', text:h })))),
+        el('tbody', {}, ...list.map(t => el('tr', { class: t.id === retUi.editId ? 'editing' : '' },
+          el('td', { class:'c n opt', text: retMD(t.date) }), el('td', { text: t.vendor }), el('td', { text: t.name }), el('td', { class:'opt', text: t.reason }),
+          el('td', { class:'c' }, retTempTag(t)), el('td', { class:'c n', text: retNum(t.qty) }), el('td', { class:'c' }, retStatusBtn(t)),
+          el('td', { class:'c nowrap' }, el('button', { type:'button', class:'ret-btn ghost sm', text:'수정', onclick: () => retStartEdit(t) }), hoDel('회송 건 삭제', () => retDelete(t)))))))));
+  }
+
+  // ---- ② 목록: 상태 · 업체로 걸러서 인쇄 ----
+  function retRenderList(){
+    const body = $('#ret-list-body');
+    if (!body) return;
+    const all = retItems || [];
+    const byStatus = all.filter(t => retUi.status === 'all' || (retUi.status === 'done' ? t.status === 'done' : t.status !== 'done'));
+    const q = retUi.q.toLowerCase();
+    const hit = t => !q || [t.vendor, t.name, t.barcode, t.po, t.sku, t.reason].some(v => String(v || '').toLowerCase().includes(q));
+    const found = byStatus.filter(hit);
+    const vendors = new Map();
+    for (const t of found) vendors.set(t.vendor, (vendors.get(t.vendor) || 0) + 1);
+    if (retUi.vendor && !vendors.has(retUi.vendor)) retUi.vendor = '';
+    const rows = found.filter(t => !retUi.vendor || t.vendor === retUi.vendor)
+      .sort((a, b) => (a.vendor || '').localeCompare(b.vendor || '', 'ko') || (a.date || '').localeCompare(b.date || '') || String(a.createdAt).localeCompare(String(b.createdAt)));
+    const ids = new Set(rows.map(t => t.id));
+    for (const id of [...retUi.sel]) if (!ids.has(id)) retUi.sel.delete(id);
+    const sel = rows.filter(t => retUi.sel.has(t.id));
+    const waitN = all.filter(t => t.status !== 'done').length;
+    const chip = (on, label, n, onclick, cls = '') => el('button', { type:'button', class:'ret-chip ' + cls + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false', onclick },
+      el('span', { text: label }), n !== undefined ? el('b', { text: n }) : null);
+    const oldDays = t => t.status !== 'done' && t.date ? Math.floor((new Date(todayIso) - new Date(t.date)) / 864e5) : 0;
+    const allBox = el('input', { type:'checkbox', 'aria-label':'모두 선택', onchange: e => { for (const t of rows) e.target.checked ? retUi.sel.add(t.id) : retUi.sel.delete(t.id); retRenderList(); } });
+    allBox.checked = rows.length > 0 && sel.length === rows.length;
+    allBox.indeterminate = sel.length > 0 && sel.length < rows.length;
+    const selQty = sel.reduce((s, t) => s + (+t.qty || 0), 0);
+    const selVendors = [...new Set(sel.map(t => t.vendor))];
+
+    body.replaceChildren(
+      el('div', { class:'ret-chips' },
+        chip(retUi.status === 'wait', '대기', waitN, () => { retUi.status = 'wait'; retUi.sel.clear(); retRenderList(); }),
+        chip(retUi.status === 'done', '완료', undefined, () => { retUi.status = 'done'; retUi.sel.clear(); retRenderList(); }),
+        chip(retUi.status === 'all', '전체', undefined, () => { retUi.status = 'all'; retUi.sel.clear(); retRenderList(); })),
+      el('div', { class:'ret-chips ret-vendor-chips' },
+        chip(!retUi.vendor, '모든 업체', found.length, () => { retUi.vendor = ''; retUi.sel.clear(); retRenderList(); }, 'v'),
+        ...[...vendors.entries()].sort((a, b) => a[0].localeCompare(b[0], 'ko')).map(([v, n]) =>
+          chip(retUi.vendor === v, v, n, () => { retUi.vendor = v; retUi.sel = new Set(found.filter(t => t.vendor === v).map(t => t.id)); retRenderList(); }, 'v'))),
+      !rows.length ? el('p', { class:'ho-empty', text: retItems ? '해당하는 회송 건이 없어요.' : '불러오는 중…' }) :
+      el('div', { class:'ret-wrap' }, el('table', { class:'ret-table ret-main' },
+        el('thead', {}, el('tr', {}, el('th', { class:'cb' }, allBox),
+          ...[['하차일'],['업체명'],['발주/IPR','opt'],['바코드','opt'],['상품명'],['회송사유'],['온도'],['수량'],['상태'],...(retUi.status === 'wait' ? [] : [['완료일','opt']]),['']].map(([h, c]) => el('th', { class: c || '', text:h })))),
+        el('tbody', {}, ...rows.map(t => {
+          const cb = el('input', { type:'checkbox', 'aria-label':`${t.name} 선택`, onchange: e => { e.target.checked ? retUi.sel.add(t.id) : retUi.sel.delete(t.id); retRenderList(); } });
+          cb.checked = retUi.sel.has(t.id);
+          const old = oldDays(t);
+          return el('tr', { class: (t.status === 'done' ? 'is-done' : '') + (cb.checked ? ' is-sel' : '') },
+            el('td', { class:'c cb' }, cb),
+            el('td', { class:'c n' + (old >= 7 ? ' late' : ''), title: old ? `${old}일째 대기` : '', text: retMD(t.date) }),
+            el('td', { text: t.vendor }), el('td', { class:'n opt', text: t.po || '' }), el('td', { class:'n opt', text: t.barcode || '' }),
+            el('td', {}, el('span', { text: t.name }), t.note ? el('small', { class:'ret-note', text: t.note }) : null),
+            el('td', { text: t.reason }), el('td', { class:'c' }, retTempTag(t)), el('td', { class:'c n', text: retNum(t.qty) }),
+            el('td', { class:'c' }, retStatusBtn(t)), retUi.status === 'wait' ? null : el('td', { class:'c n opt', text: retMD(t.doneAt) }),
+            el('td', { class:'c nowrap' }, el('button', { type:'button', class:'ret-btn ghost sm', text:'수정', onclick: () => retStartEdit(t) }), hoDel('회송 건 삭제', () => retDelete(t))));
+        })))),
+      rows.length ? el('div', { class:'ret-bar' },
+        el('span', { class:'ret-help', text: sel.length ? `${sel.length}건 선택 · 총 SKU ${sel.length} · UNIT ${retNum(selQty)}` + (selVendors.length > 1 ? ` · 업체 ${selVendors.length}곳 (업체마다 한 장씩 인쇄)` : '') : '인쇄하거나 상태를 바꿀 건을 체크하세요' }),
+        el('div', { class:'ret-bar-btns' },
+          el('button', { type:'button', class:'ret-btn ghost', disabled: !sel.some(t => t.status !== 'done'), text:'선택한 건 완료 처리', onclick: () => retSetStatus(sel.filter(t => t.status !== 'done').map(t => t.id), 'done') }),
+          retUi.status !== 'wait' ? el('button', { type:'button', class:'ret-btn ghost', disabled: !sel.some(t => t.status === 'done'), text:'대기로 되돌리기', onclick: () => retSetStatus(sel.filter(t => t.status === 'done').map(t => t.id), 'wait') }) : null,
+          el('button', { type:'button', class:'ret-btn solid', disabled: !sel.length, text:'🖨 회송 확인서 인쇄', onclick: () => retPrint(sel) }))) : null);
+  }
+
+  // ---- 회송 확인서 인쇄 (업체마다 A4 한 장) ----
+  function retPrint(list){
+    if (!list.length) return;
+    const groups = new Map();
+    for (const t of list){ if (!groups.has(t.vendor)) groups.set(t.vendor, []); groups.get(t.vendor).push(t); }
+    const now = new Date();
+    const stamp = `${isoOf(now)} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const dayName = ['일','월','화','수','목','금','토'][now.getDay()];
+    const area = el('div', { id:'ret-print' }, ...[...groups.entries()].map(([vendor, items]) => {
+      items.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      const qty = items.reduce((s, t) => s + (+t.qty || 0), 0);
+      return el('div', { class:'rp-page' },
+        el('h1', { text:'GWJ3 센터 회송 확인서' }),
+        el('p', { class:'rp-date', text: `${todayIso} (${dayName})` }),
+        el('table', { class:'rp-info' },
+          el('tr', {}, el('th', { text:'업체명' }), el('td', { colspan:'3', class:'rp-vendor', text: vendor })),
+          el('tr', {}, el('th', { text:'인수자 성함' }), el('td', {}), el('th', { text:'연락처' }), el('td', {}))),
+        el('p', { class:'rp-tot', text: `총 SKU : ${items.length}　　총 UNIT : ${retNum(qty)}` }),
+        el('table', { class:'rp-items' },
+          el('thead', {}, el('tr', {}, ...['No','하차일','발주/IPR','SKU ID','바코드','상품명','회송사유','온도','수량'].map(h => el('th', { text:h })))),
+          el('tbody', {}, ...items.map((t, i) => el('tr', {},
+            el('td', { class:'c', text: i + 1 }), el('td', { class:'c', text: retMD(t.date) }), el('td', { text: t.po || '' }), el('td', { text: t.sku || '' }), el('td', { text: t.barcode || '' }),
+            el('td', { text: t.name }), el('td', { text: t.reason }), el('td', { class:'c', text: retTemp(t.temp) }), el('td', { class:'r', text: retNum(t.qty) }))),
+            el('tr', { class:'rp-sum' }, el('td', { colspan:'8', class:'r', text:'합계' }), el('td', { class:'r', text: retNum(qty) })))),
+        el('div', { class:'rp-sign' }, el('div', { text:'인계자 (GWJ3)　　　　　　(서명)' }), el('div', { text:'인수자 (업체)　　　　　　(서명)' })),
+        el('p', { class:'rp-foot', text: `GWJ3 IB · 출력 ${stamp}` }));
+    }));
+    document.querySelectorAll('#ret-print').forEach(n => n.remove());
+    document.body.appendChild(area);
+    const done = () => { area.remove(); window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    setTimeout(() => window.print(), 50);
+  }
+
   // ---------- 이벤트 ----------
   $('#addForm').addEventListener('submit', e => {
     e.preventDefault();
@@ -1621,6 +1976,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     $('#newDue').value = view === 'cal' ? selDate : '';
     render();
     if (view === 'ho') loadHandover();
+    if (view === 'ret') loadReturns();
   });
   function enterEdit(){ askEdit = false; editMode = true; render(); const el = $('#add-day'); if (el) el.focus(); }
   $('#editToggle').onclick = () => {
