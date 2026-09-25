@@ -927,7 +927,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       for (const [rk] of HO_NY_ROWS){ const v = nyRowSum(rk); nySum[rk].textContent = v === null ? '–' : String(v); if (v !== null){ t += v; any = true; } }
       nyTotalCell.textContent = any ? String(Math.round(t * 10) / 10) : '–';
     };
-    subs.appendChild(el('div', { class:'ho-sub' }, el('h4', { text:'NYS · NYR' }),
+    subs.appendChild(el('div', { class:'ho-sub' }, el('h4', { text:'Backlog' }),
       el('div', { class:'ho-table-wrap' }, el('table', { class:'ho-table ho-ny' },
         el('thead', {}, el('tr', {}, el('th', { scope:'col', text:'구분' }), ...HO_NY_COLS.map(([, l]) => el('th', { scope:'col', text:l })), el('th', { scope:'col', text:'합계' }))),
         el('tbody', {},
@@ -1144,7 +1144,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     // NYS·NYR (프리팩 오른쪽)
     {
       const NL = 80, NW = 100, nx = W - PAD - NL - NW * (HO_NY_COLS.length + 1);
-      text('NYS · NYR', nx, y - 16, { size:15, bold:true, align:'left' });
+      text('Backlog', nx, y - 16, { size:15, bold:true, align:'left' });
       cell(nx, y, NL, ROW, C.head); text('구분', nx + NL / 2, y + ROW / 2, { bold:true });
       [...HO_NY_COLS.map(([, l]) => l), '합계'].forEach((l, i) => { const x = nx + NL + i * NW; cell(x, y, NW, ROW, C.head); text(l, x + NW / 2, y + ROW / 2, { bold:true }); });
       let total = 0, anyT = false;
