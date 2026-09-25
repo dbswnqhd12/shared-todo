@@ -395,6 +395,27 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ret-tp,.ret-stc{text-align:center}
 .ret-q{font-family:var(--mono);text-align:right;font-weight:700}
 .ret-ops{display:flex;align-items:center;gap:2px;white-space:nowrap}
+/* 여러 건 붙여넣기 */
+.ret-mode{display:inline-flex;margin-left:auto;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ret-mode button{border:0;background:var(--paper);color:var(--muted);padding:5px 12px;font-size:13px;font-weight:600}
+.ret-mode button + button{border-left:1px solid var(--line)}
+.ret-mode button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.ret-paste{display:none;flex-direction:column;gap:10px}
+.ret-form.paste .ret-paste{display:flex}
+.ret-form.paste .ret-single{display:none !important}
+.ret-paste-in{resize:vertical;min-height:64px;font-size:13.5px;border-style:dashed;border-width:2px;background:var(--bg)}
+.ret-paste-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ret-paste-date{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--muted);margin-left:auto}
+.ret-paste-date .ret-in{width:auto;padding:4px 8px;font-size:13px}
+.ret-ptable{font-size:12.5px}
+.ret-ptable thead th{padding:4px}
+.ret-map{width:100%;min-width:78px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--muted);font:inherit;font-size:12px;padding:3px 4px}
+.ret-map.on{border-color:var(--accent);color:var(--accent);font-weight:700;background:var(--accent-soft)}
+.ret-ptable td{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ret-ptable td.nm{max-width:230px}
+.ret-ptable td.unused{color:var(--muted);opacity:.55}
+.ret-ptable tr.off td{opacity:.45}
+.ret-ptable td.st{white-space:normal;max-width:none;min-width:150px;font-size:12px;font-weight:600;line-height:1.35}.ret-ptable tr.off td.st{opacity:1}
+.ret-ptable .good{color:var(--accent)}.ret-ptable .warn{color:#8A5F10}.ret-ptable .bad{color:var(--high)}
 .ret-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:2px}
 .ret-bar-btns{display:flex;gap:8px;flex-wrap:wrap}
 @media (max-width:760px){
@@ -1822,7 +1843,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       ...RET_TEMPS.map(([k, l]) => el('button', { type:'button', 'data-t': k, text: l, onclick: () => { retForm.temp = k; retFillForm(); } })));
     const submit = el('button', { type:'submit', class:'ret-btn solid', id:'ret-submit', text:'추가' });
     const cancel = el('button', { type:'button', class:'ret-btn ghost', id:'ret-cancel', text:'취소', hidden:true, onclick: () => retEndEdit() });
-    const more = el('details', { class:'ret-more', id:'ret-more' }, el('summary', { text:'발주번호 · SKU ID · 바코드 · 비고' }),
+    const more = el('details', { class:'ret-more ret-single', id:'ret-more' }, el('summary', { text:'발주번호 · SKU ID · 바코드 · 비고' }),
       el('div', { class:'ret-grid ret-grid-more' },
         f('po', '발주 / IPR 번호', { ph:'예: 130000001', max:40 }),
         f('sku', 'SKU ID', { max:40, im:'numeric' }),
@@ -1830,8 +1851,16 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         f('note', '비고', { max:300, cls:'span2' })));
     const form = el('form', { class:'ret-sec ret-form', id:'ret-form', autocomplete:'off' },
       el('div', { class:'ret-sec-head' }, el('h3', { id:'ret-form-title', text:'회송 건 입력' }),
-        el('p', { class:'ret-help', text:'하차일 · 업체 · 온도는 다음 건에도 그대로 남아요' })),
-      el('div', { class:'ret-grid' },
+        el('p', { class:'ret-help ret-single', text:'하차일 · 업체 · 온도는 다음 건에도 그대로 남아요' }),
+        el('div', { class:'ret-mode', id:'ret-mode', role:'group', 'aria-label':'입력 방식' },
+          el('button', { type:'button', 'data-m':'single', text:'한 건씩', onclick: () => retSetMode('single') }),
+          el('button', { type:'button', 'data-m':'paste', text:'여러 건 붙여넣기', onclick: () => retSetMode('paste') }))),
+      el('div', { class:'ret-paste' },
+        el('textarea', { id:'ret-paste-in', class:'ret-in ret-paste-in', rows:'3', placeholder: RET_PASTE_PH, 'aria-label':'복사한 표 붙여넣기',
+          onpaste: e => { const t = e.clipboardData && e.clipboardData.getData('text'); if (t){ e.preventDefault(); retPasteText(t); } },
+          onkeydown: e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.target.value.trim()){ e.preventDefault(); retPasteText(e.target.value); } } }),
+        el('div', { id:'ret-paste-preview' })),
+      el('div', { class:'ret-grid ret-single' },
         f('date', '하차일', { type:'date' }),
         f('vendor', '업체명', { req:true, list:'ret-vendors', max:80, cls:'span2' }),
         el('div', { class:'ret-f span2' }, el('label', { text:'온도' }), temp),
@@ -1839,9 +1868,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         f('reason', '회송사유', { req:true, list:'ret-reasons', max:80, cls:'span2', ph:'목록에서 고르거나 직접 입력' }),
         f('qty', '수량', { req:true, im:'decimal', max:10 })),
       more,
-      el('div', { class:'ret-acts' }, el('span', { class:'ret-help', id:'ret-form-msg', text:'엔터 = 추가 · * 필수' }), cancel, submit),
+      el('div', { class:'ret-acts ret-single' }, el('span', { class:'ret-help', id:'ret-form-msg', text:'엔터 = 추가 · * 필수' }), cancel, submit),
       el('datalist', { id:'ret-vendors' }), el('datalist', { id:'ret-reasons' }));
-    form.onsubmit = e => { e.preventDefault(); retSubmit(); };
+    form.onsubmit = e => { e.preventDefault(); if (retUi.mode !== 'paste') retSubmit(); };
     box.append(form,
       el('section', { class:'ret-sec', id:'ret-today' }),
       el('section', { class:'ret-sec', id:'ret-list' },
@@ -1849,6 +1878,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         el('input', { class:'ret-in ret-search', id:'ret-q', type:'search', placeholder:'업체명 · 상품명 · 바코드 · 발주번호 검색', 'aria-label':'회송 목록 검색',
           oninput: e => { retUi.q = e.target.value.trim(); retRenderList(); } }),
         el('div', { id:'ret-list-body' })));
+    let m = 'single'; try { m = localStorage.getItem('ret-mode') === 'paste' ? 'paste' : 'single'; } catch {}
+    retUi.mode = m; setTimeout(() => retSetMode(m), 0);
   }
 
   function retFillForm(){
@@ -1859,10 +1890,163 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     $('#ret-vendors').replaceChildren(...uniq(items.map(t => t.vendor)).map(v => el('option', { value: v })));
     $('#ret-reasons').replaceChildren(...uniq([...RET_REASONS, ...items.map(t => t.reason)]).map(v => el('option', { value: v })));
     const editing = !!retUi.editId;
-    $('#ret-form-title').textContent = editing ? '회송 건 수정' : '회송 건 입력';
+    $('#ret-form-title').textContent = retUi.mode === 'paste' ? '회송 건 붙여넣기' : editing ? '회송 건 수정' : '회송 건 입력';
     $('#ret-submit').textContent = editing ? '수정 저장' : '추가';
     $('#ret-cancel').hidden = !editing;
     $('#ret-form').classList.toggle('editing', editing);
+  }
+
+  // ---- 여러 건 붙여넣기 (QC · WMS 화면이나 엑셀에서 복사) ----
+  const RET_COLS = [['', '(안 씀)'], ['date','하차일'], ['po','발주/IPR'], ['vendor','업체명'], ['sku','SKU ID'], ['barcode','바코드'], ['name','상품명'], ['reason','회송사유'], ['temp','온도'], ['qty','수량'], ['note','비고']];
+  const retPaste = { rows: [], map: [], header: false, date: todayIso, skip: new Set() };
+
+  // 엑셀/웹 표 복사본(탭으로 구분, 따옴표 안 줄바꿈 포함)을 칸 배열로
+  function retParseTSV(text){
+    const rows = []; let row = [], cell = '', q = false;
+    const s = String(text).replace(/\r\n?/g, '\n');
+    for (let i = 0; i < s.length; i++){
+      const c = s[i];
+      if (q){ if (c === '"'){ if (s[i + 1] === '"'){ cell += '"'; i++; } else q = false; } else cell += c; continue; }
+      if (c === '"' && cell === '') { q = true; continue; }
+      if (c === '\t'){ row.push(cell); cell = ''; continue; }
+      if (c === '\n'){ row.push(cell); rows.push(row); row = []; cell = ''; continue; }
+      cell += c;
+    }
+    row.push(cell); rows.push(row);
+    return rows.map(r => r.map(x => x.replace(/\s+/g, ' ').trim())).filter(r => r.some(Boolean));
+  }
+  const RET_HEAD = [['date', /하차|입고일|발생일|일자|날짜|date/i], ['barcode', /바코드|barcode/i], ['sku', /sku/i], ['po', /발주|ipr|\bpo\b|주문번호/i],
+    ['vendor', /업체|거래처|벤더|vendor|공급/i], ['reason', /사유|불량유형|reason/i], ['temp', /온도|보관|temp/i], ['qty', /수량|qty|개수/i], ['name', /상품|품목|품명|name/i], ['note', /비고|메모|note/i]];
+  function retGuessMap(rows){
+    const n = Math.max(...rows.map(r => r.length));
+    const head = rows[0].map(h => { const f = RET_HEAD.find(([, re]) => re.test(h)); return f ? f[0] : ''; });
+    const hits = head.filter(Boolean).length;
+    if (hits >= 2 && rows[0].every(h => !/^\d{6,}$/.test(h))) return { header: true, map: [...head, ...Array(Math.max(0, n - head.length)).fill('')].map((k, i, a) => a.indexOf(k) === i ? k : '') };
+    // 제목 줄이 없으면 내용으로 짐작 (엑셀 회송 시트 순서와 같으면 그대로)
+    const body = rows.slice(0, 30), col = i => body.map(r => r[i] || '').filter(Boolean);
+    const all = (i, re) => { const v = col(i); return v.length && v.every(x => re.test(x)); };
+    const map = Array(n).fill(''), used = new Set();
+    const put = (i, k) => { if (!map[i] && !used.has(k)){ map[i] = k; used.add(k); } };
+    for (let i = 0; i < n; i++){
+      if (all(i, /^(\d{4}[-./]\d{1,2}[-./]\d{1,2}|\d{1,2}[/.]\d{1,2})/)) put(i, 'date');
+      else if (all(i, /^(chill|ambient|frozen|냉장|상온|냉동|실온|CH|AM|FR)/i)) put(i, 'temp');
+      else if (all(i, /^(\d{12,14}|PL\d{6,}|R\d{9,})$/i)) put(i, 'barcode');
+      else if (all(i, /^\d{1,3}(,\d{3})*$|^\d{1,5}$/)) put(i, 'qty');
+    }
+    for (let i = 0; i < n; i++) if (!map[i] && all(i, /^\d{6,10}(\s*,\s*\d{6,10})*$/)) { put(i, used.has('po') ? 'sku' : 'po'); }
+    for (let i = 0; i < n; i++) if (!map[i] && col(i).some(x => /로켓|\d+\s*(g|kg|ml|l|개|입|구)\b/i.test(x))) put(i, 'name');
+    for (let i = 0; i < n; i++) if (!map[i] && col(i).some(x => /불량|과착|오착|임박|파손|회송|미발주|변질/.test(x))) put(i, 'reason');
+    for (let i = 0; i < n; i++) if (!map[i] && col(i).some(x => /\(주\)|㈜|주식회사|cplb|농협|영농|유업|식품/i.test(x))) put(i, 'vendor');
+    return { header: false, map };
+  }
+  function retParseDate(v){
+    const s = String(v || '').trim(); if (!s) return '';
+    let m = s.match(/^(\d{4})[-./년\s]+(\d{1,2})[-./월\s]+(\d{1,2})/);
+    if (m) return `${m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
+    m = s.match(/^(\d{1,2})[/.월\s]+(\d{1,2})/);
+    if (m){ let y = +todayIso.slice(0, 4); let d = `${y}-${pad(+m[1])}-${pad(+m[2])}`; if (d > todayIso) d = `${y - 1}-${pad(+m[1])}-${pad(+m[2])}`; return d; }
+    if (/^\d{5}$/.test(s)){ const t = new Date(Date.UTC(1899, 11, 30) + (+s) * 864e5); return t.toISOString().slice(0, 10); }  // 엑셀 날짜 숫자
+    return 'bad';
+  }
+  const retParseTemp = v => { const s = String(v || '').toUpperCase(); return /CHIL|냉장|^CH/.test(s) ? 'CH' : /AMB|상온|실온|^AM/.test(s) ? 'AM' : /FROZ|냉동|^FR/.test(s) ? 'FR' : ''; };
+
+  // 칸 연결대로 회송 건으로 바꾸고, 빈 온도 · 업체는 예전 기록(같은 바코드/SKU)에서 채워요
+  function retPasteItems(){
+    const past = new Map();
+    for (const t of retItems || []){ for (const k of [t.barcode, t.sku]) if (k) past.set(k, t); }
+    const have = new Set((retItems || []).map(t => [t.date, t.po, t.barcode || t.sku, retNum(t.qty)].join('|')));
+    const rows = retPaste.header ? retPaste.rows.slice(1) : retPaste.rows;
+    return rows.map((r, i) => {
+      const it = { date:'', po:'', vendor:'', sku:'', barcode:'', name:'', reason:'', temp:'', qty:'', note:'' };
+      retPaste.map.forEach((k, c) => { if (k && r[c] != null && r[c] !== '') it[k] = it[k] ? it[k] + ' ' + r[c] : r[c]; });
+      const filled = [];
+      it.date = it.date ? retParseDate(it.date) : retPaste.date;
+      it.temp = retParseTemp(it.temp);
+      it.qty = String(it.qty).replace(/[,\s개]/g, '');
+      const p = past.get(it.barcode) || past.get(it.sku);
+      if (p){
+        if (!it.temp && p.temp){ it.temp = p.temp; filled.push('온도'); }
+        if (!it.vendor && p.vendor){ it.vendor = p.vendor; filled.push('업체'); }
+        if (!it.name && p.name){ it.name = p.name; filled.push('상품명'); }
+      }
+      const miss = [['vendor','업체명'],['name','상품명'],['reason','회송사유'],['qty','수량']].filter(([k]) => !it[k]).map(x => x[1]);
+      if (it.qty && !/^\d+(\.\d+)?$/.test(it.qty)) miss.push('수량(숫자)');
+      if (it.date === 'bad') miss.push('하차일');
+      const dup = have.has([it.date, it.po, it.barcode || it.sku, retNum(it.qty)].join('|'));
+      return { i, it, filled, miss, dup, ok: !miss.length };
+    });
+  }
+
+  function retRenderPaste(){
+    const box = $('#ret-paste-preview'); if (!box) return;
+    if (!retPaste.rows.length){ box.replaceChildren(); return; }
+    const list = retPasteItems();
+    const raw = retPaste.header ? retPaste.rows.slice(1) : retPaste.rows;
+    const n = retPaste.map.length;
+    const addable = list.filter(x => x.ok && !retPaste.skip.has(x.i));
+    const sel = (c) => { const s = el('select', { class:'ret-map' + (retPaste.map[c] ? ' on' : ''), 'aria-label': `${c + 1}번째 칸`,
+      onchange: e => { const k = e.target.value; retPaste.map = retPaste.map.map((x, j) => j === c ? k : (k && x === k ? '' : x)); retSaveMap(); retRenderPaste(); } },
+      ...RET_COLS.map(([k, l]) => el('option', { value: k, text: l })));
+      s.value = retPaste.map[c] || ''; return s; };
+    box.replaceChildren(
+      el('div', { class:'ret-paste-bar' },
+        el('span', { class:'ret-help', text: `${raw.length}줄 읽음 · 칸 이름이 틀리면 위 칸에서 바꿔 주세요` + (retPaste.header ? ' · 첫 줄은 제목이라 뺐어요' : '') }),
+        retPaste.map.includes('date') ? null : el('label', { class:'ret-paste-date' }, '하차일', el('input', { type:'date', class:'ret-in', value: retPaste.date, onchange: e => { retPaste.date = e.target.value || todayIso; retRenderPaste(); } }))),
+      el('div', { class:'ret-wrap' }, el('table', { class:'ret-table ret-ptable' },
+        el('thead', {}, el('tr', {}, el('th', { class:'cb' }), el('th', { class:'st', text:'확인' }), ...Array.from({ length: n }, (_, c) => el('th', {}, sel(c))))),
+        el('tbody', {}, ...list.map(x => {
+          const on = x.ok && !retPaste.skip.has(x.i);
+          const cb = el('input', { type:'checkbox', disabled: !x.ok, 'aria-label': `${x.i + 1}번째 줄 추가`, onchange: e => { e.target.checked ? retPaste.skip.delete(x.i) : retPaste.skip.add(x.i); retRenderPaste(); } });
+          cb.checked = on;
+          const r = raw[x.i];
+          const note = !x.ok ? el('span', { class:'bad', text: x.miss.join(', ') + ' 없음' })
+            : el('span', { class: x.dup ? 'warn' : 'good', text: (x.dup ? '이미 있는 건 같아요' : '추가') + (x.it.temp ? ` · ${retTemp(x.it.temp)}` : '') + (x.filled.length ? ` (${x.filled.join('·')} 자동)` : '') });
+          return el('tr', { class: on ? '' : 'off' }, el('td', { class:'c cb' }, cb), el('td', { class:'st' }, note),
+            ...Array.from({ length: n }, (_, c) => el('td', { class: (retPaste.map[c] ? '' : 'unused') + (retPaste.map[c] === 'name' ? ' nm' : ''), title: r[c] || '', text: r[c] || '' })));
+        })))),
+      el('div', { class:'ret-acts' },
+        el('span', { class:'ret-help', text: `${addable.length}건 추가 · UNIT ${retNum(addable.reduce((s, x) => s + (+x.it.qty || 0), 0))}` + (list.length - list.filter(x => x.ok).length ? ` · 확인 필요 ${list.length - list.filter(x => x.ok).length}건은 빠져요` : '') }),
+        el('button', { type:'button', class:'ret-btn ghost', text:'지우기', onclick: () => retPasteReset() }),
+        el('button', { type:'button', class:'ret-btn solid', id:'ret-paste-add', disabled: !addable.length, text: `${addable.length}건 추가`, onclick: () => retPasteAdd(addable) })));
+  }
+  function retSaveMap(){ try { localStorage.setItem('ret-paste-map', JSON.stringify({ n: retPaste.map.length, map: retPaste.map })); } catch {} }
+  function retLoadMap(n){ try { const m = JSON.parse(localStorage.getItem('ret-paste-map') || 'null'); return m && m.n === n ? m.map : null; } catch { return null; } }
+
+  function retPasteText(text){
+    const rows = retParseTSV(text);
+    if (!rows.length){ toast('붙여넣은 내용에서 표를 찾지 못했어요.'); return; }
+    const g = retGuessMap(rows);
+    const saved = !g.header && retLoadMap(g.map.length);
+    Object.assign(retPaste, { rows, header: g.header, map: saved || g.map, skip: new Set() });
+    retPasteItems().forEach(x => { if (x.dup) retPaste.skip.add(x.i); });   // 이미 있는 건은 기본으로 빼 둬요
+    $('#ret-paste-in').value = '';
+    $('#ret-paste-in').placeholder = '다른 표를 붙여넣으면 새로 읽어요';
+    retRenderPaste();
+  }
+  function retPasteReset(){ Object.assign(retPaste, { rows: [], map: [], skip: new Set() }); $('#ret-paste-in').placeholder = RET_PASTE_PH; retRenderPaste(); }
+  const RET_PASTE_PH = '여기를 누르고 Ctrl+V — QC · WMS 화면이나 엑셀에서 여러 줄을 복사해 오세요';
+
+  async function retPasteAdd(list){
+    const btn = $('#ret-paste-add'); if (btn) btn.disabled = true;
+    try {
+      const items = list.map(x => { const o = { ...x.it }; if (!o.date) o.date = todayIso; return o; });
+      for (let i = 0; i < items.length; i += 500) await api('POST', '/api/returns', { items: items.slice(i, i + 500), fresh: true });
+      toast(`${items.length}건 추가했어요.`);
+      retPasteReset();
+      retRev = -1; await loadReturns();
+      setSync('', '저장됨');
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+      toast(e.message); if (btn) btn.disabled = false;
+    }
+  }
+  function retSetMode(m){
+    retUi.mode = m; try { localStorage.setItem('ret-mode', m); } catch {}
+    const paste = m === 'paste';
+    $('#ret-form').classList.toggle('paste', paste);
+    document.querySelectorAll('#ret-mode button').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === m ? 'true' : 'false'));
+    $('#ret-form-title').textContent = paste ? '회송 건 붙여넣기' : (retUi.editId ? '회송 건 수정' : '회송 건 입력');
+    if (paste) setTimeout(() => $('#ret-paste-in').focus(), 0);
   }
 
   async function retSubmit(){
@@ -1896,6 +2080,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   }
 
   function retStartEdit(t){
+    if (retUi.mode === 'paste') retSetMode('single');
     retUi.editId = t.id;
     for (const k of RET_FIELDS) retForm[k] = k === 'qty' ? retNum(t.qty) : (t[k] ?? '');
     if (t.po || t.sku || t.barcode || t.note) $('#ret-more').open = true;
