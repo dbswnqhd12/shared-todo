@@ -146,6 +146,39 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .shift-add input{flex:1;min-width:0;font-size:13.5px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 8px}
 .shift-add button{border:0;background:var(--cs);color:var(--c);border-radius:6px;padding:6px 10px;font-size:13px;font-weight:600}
 .edit-note{font-size:12.5px;color:var(--muted);margin:-10px 0 0}
+.ho{display:flex;flex-direction:column;gap:14px}
+.ho-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ho-head h2{font-size:18px;min-width:9.5em;text-align:center}
+.ho-sec{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ho-sec-head h3{font-size:16px}
+.ho-sec-head p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+.ho-in{width:100%;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:7px 9px;font-size:14px;line-height:1.45;resize:vertical}
+.ho-in:focus{border-color:var(--accent);background:var(--paper)}
+.ho-del{border:0;background:none;color:var(--muted);font-size:16px;line-height:1;padding:7px 8px;border-radius:5px;white-space:nowrap}
+.ho-del:hover{color:var(--high);background:var(--high-soft)}
+.ho-del.armed{color:#fff;background:var(--high);font-size:12.5px;font-weight:600}
+.ho-add{align-self:flex-start;border:1px dashed var(--line);background:none;color:var(--accent);border-radius:6px;padding:6px 12px;font-size:13.5px;font-weight:600}
+.ho-add:hover{border-color:var(--accent)}
+.ho-table-wrap{overflow-x:auto}
+.ho-table{border-collapse:collapse;min-width:620px;width:100%;font-size:13px}
+.ho-table th,.ho-table td{border:1px solid var(--line);padding:2px;text-align:center;vertical-align:middle}
+.ho-table thead th{background:var(--bg);font-weight:600;padding:6px 4px;white-space:nowrap}
+.ho-table .ho-gm th{font-size:12px;color:var(--muted);padding:3px 4px}
+.ho-table tbody th{background:var(--bg);font-weight:600;white-space:nowrap;padding:4px 8px;text-align:left;position:sticky;left:0;z-index:1}
+.ho-num{width:100%;min-width:2.6em;border:0;border-radius:4px;background:transparent;color:var(--ink);text-align:center;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums;padding:7px 2px}
+.ho-num:focus{background:var(--accent-soft)}
+.ho-total td{font-family:var(--mono);font-weight:600;color:var(--accent);background:var(--accent-soft);padding:6px 2px;font-variant-numeric:tabular-nums}
+.ho-cellnote{width:100%;min-width:3.6em;border:0;border-radius:4px;background:transparent;color:var(--ink);font-size:12px;line-height:1.35;resize:vertical;padding:4px}
+.ho-cellnote:focus{background:var(--accent-soft)}
+.ho-car-skip{font-size:12px;color:var(--muted);background:var(--bg)}
+.ho-carno{font-family:var(--mono);font-size:12.5px;min-width:6.8em;resize:none;white-space:pre;overflow:hidden}
+.ho-sub{display:flex;flex-direction:column;gap:6px}
+.ho-sub h4{margin:6px 0 0;font-size:14px}
+.ho-pp-row{display:grid;grid-template-columns:minmax(0,1fr) 6em auto;gap:6px;align-items:center}
+.ho-empty{margin:0;font-size:13px;color:var(--muted)}
+@media (max-width:560px){
+  .ho-head h2{min-width:0;flex:1}
+}
 .shift-toggle{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:var(--ink);padding:13px 14px;text-align:left}
 @media (hover:hover){.shift-toggle:hover{background:var(--bg)}}
 .shift-toggle .shift-name{flex:1}
@@ -229,7 +262,10 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   <div class="seg" role="group" aria-label="화면">
     <button type="button" data-v="cal" aria-pressed="true">달력</button>
     <button type="button" data-v="list" aria-pressed="false">할 일 목록</button>
+    <button type="button" data-v="ho" aria-pressed="false">인수인계</button>
   </div>
+
+  <section class="ho" id="ho" hidden aria-label="시프트 교대 인수인계"></section>
 
   <section class="cal" id="cal" aria-label="달력">
     <div class="cal-head">
@@ -373,6 +409,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       items = data.todos || []; templates = data.templates || []; checks = data.checks || {};
       rev = data.rev; loadedMonths = months; loaded = true;
       render();
+      if (view === 'ho' && hoRev !== rev && !hoFocused()) loadHandover();
       setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
       if (e instanceof Locked) return showLock(teamKey ? e.message : '');
@@ -386,6 +423,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     if (monthsNeeded() !== loadedMonths) return loadFull();
     try {
       const data = await request('GET', '/api/state?only=rev');
+      if (view === 'ho' && data.rev !== hoRev && !hoFocused()) loadHandover();
       if (data.rev !== rev) loadFull();
       else setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
@@ -638,6 +676,11 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === filter));
     document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === view));
     const cal = view === 'cal';
+    const hoView = view === 'ho';
+    $('#ho').hidden = !hoView;
+    for (const id of ['#addForm', '#list']) $(id).hidden = hoView;
+    document.querySelector('.toolbar').hidden = hoView;
+    if (hoView && !$('#ho').hasChildNodes()) renderHandover();
     for (const id of ['#cal', '#dayHead', '#shifts', '#todoLabel']) $(id).hidden = !cal;
     $('#editNote').hidden = !(cal && editMode);
     $('#editLock').hidden = !(cal && askEdit && !editMode);
@@ -672,6 +715,178 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     inp.onblur = () => finish(true);
   }
 
+  // ---------- 인수인계 ----------
+  const HO_COLS = [['pre','전실'],['c1g','1C G'],['c1m','1C M'],['c2g','2C G'],['c2m','2C M'],['c3g','3C G'],['c3m','3C M'],['c5','5C'],['c6','6C'],['c7','7C']];
+  const HO_FROZEN = ['c5','c6','c7'];   // 냉동 챔버: 차량번호 칸
+  const HO_ROWS = [['ilban','이관 일반'],['rocket','로켓마트'],['wm','WM'],['iwit','IWIT'],['direct','직납']];
+  let hoData = null, hoDate = todayIso, hoRev = -1, hoLoading = false;
+  const hoFocused = () => { const a = document.activeElement; return !!a && $('#ho').contains(a) && a.matches('input, textarea'); };
+  const newRowId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const hoRows = (bag, prefix) => Object.entries(bag).filter(([k]) => k.startsWith(prefix))
+    .sort((a, b) => String(a[1].createdAt || '').localeCompare(String(b[1].createdAt || '')));
+  function el(tag, props = {}, ...kids){
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)){
+      if (v === undefined || v === null || v === false) continue;
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k === 'value') n.value = v;
+      else if (k.startsWith('on')) n[k] = v;
+      else n.setAttribute(k, v === true ? '' : v);
+    }
+    n.append(...kids.filter(Boolean));
+    return n;
+  }
+
+  async function loadHandover(){
+    if (hoLoading) return;
+    hoLoading = true;
+    const date = hoDate;
+    try {
+      const d = await request('GET', '/api/handover?date=' + date);
+      if (date !== hoDate) return;
+      hoData = d; hoRev = d.rev;
+      if (!hoFocused()) renderHandover();
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+      setSync('err', e.message);
+    } finally { hoLoading = false; }
+  }
+
+  async function hoSave(scope, field, value){
+    if (!hoData) return;
+    const bag = scope === 'global' ? hoData.global : hoData.day;
+    if (value === null || value === '') delete bag[field]; else bag[field] = value;
+    try {
+      const r = await api('PUT', '/api/handover', { scope, date: hoDate, field, value });
+      hoRev = r.rev;
+      setSync('', '저장됨');
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+      toast(e.message); setSync('err', e.message);
+      loadHandover();
+    }
+  }
+
+  function hoGo(delta){
+    const dt = new Date(hoDate + 'T00:00:00');
+    dt.setDate(dt.getDate() + delta);
+    hoDate = isoOf(dt); hoData = null;
+    renderHandover(); loadHandover();
+  }
+
+  function hoDel(label, onDel){
+    const b = el('button', { type:'button', class:'ho-del', 'aria-label': label, text:'×' });
+    let armed = null;
+    b.onclick = () => {
+      if (armed){ clearTimeout(armed); armed = null; onDel(); return; }
+      b.classList.add('armed'); b.textContent = '삭제?';
+      armed = setTimeout(() => { armed = null; b.classList.remove('armed'); b.textContent = '×'; }, 3000);
+    };
+    return b;
+  }
+
+  // 한 줄(객체)의 칸 하나. 바뀌면 그 줄 전체를 저장
+  function hoField(scope, field, obj, key, o){
+    const n = el(o.multiline ? 'textarea' : 'input', {
+      class: 'ho-in' + (o.cls ? ' ' + o.cls : ''), placeholder: o.ph, 'aria-label': o.label,
+      rows: o.multiline ? 2 : undefined, inputmode: o.num ? 'numeric' : undefined, maxlength: 1000,
+      value: obj[key] || '',
+    });
+    n.onchange = () => {
+      obj[key] = n.value.trim();
+      hoSave(scope, field, { ...obj });
+    };
+    return n;
+  }
+
+  function hoAddRow(scope, prefix, blank, focusSel){
+    const bag = scope === 'global' ? hoData.global : hoData.day;
+    bag[prefix + newRowId()] = { ...blank, createdAt: new Date().toISOString() };
+    renderHandover();
+    const all = $('#ho').querySelectorAll(focusSel);
+    if (all.length) all[all.length - 1].focus();
+  }
+
+  function hoSection(box, title, sub){
+    const s = el('section', { class:'ho-sec' }, el('div', { class:'ho-sec-head' }, el('h3', { text:title }), sub ? el('p', { text:sub }) : null));
+    box.appendChild(s);
+    return s;
+  }
+
+  // 머리글 2줄: 1C·2C·3C 아래에 G / M
+  function hoHead(){
+    const top = el('tr', {}, el('th', { rowspan: 2, scope:'col', text:'분류' }));
+    const sub = el('tr', { class:'ho-gm' });
+    for (const [ck, label] of HO_COLS){
+      const m = /^c(\d)g$/.exec(ck);
+      if (m){ top.appendChild(el('th', { colspan: 2, scope:'colgroup', text: m[1] + 'C' })); sub.append(el('th', { scope:'col', text:'G' }), el('th', { scope:'col', text:'M' })); }
+      else if (!/^c\dm$/.test(ck)) top.appendChild(el('th', { rowspan: 2, scope:'col', text: label }));
+    }
+    return el('thead', {}, top, sub);
+  }
+
+  function renderHandover(){
+    const box = $('#ho');
+    box.innerHTML = '';
+    box.appendChild(el('div', { class:'ho-head' },
+      el('button', { type:'button', class:'ghost', 'aria-label':'전날', text:'‹', onclick: () => hoGo(-1) }),
+      el('h2', { text: longDate(hoDate) + (hoDate === todayIso ? ' · 오늘' : '') }),
+      el('button', { type:'button', class:'ghost', 'aria-label':'다음날', text:'›', onclick: () => hoGo(1) }),
+      hoDate !== todayIso ? el('button', { type:'button', class:'ghost', text:'오늘', onclick: () => { hoDate = todayIso; hoData = null; renderHandover(); loadHandover(); } }) : null));
+    if (!hoData){ box.appendChild(el('p', { class:'ho-empty', text:'불러오는 중…' })); return; }
+    const d = hoData.day;
+
+    // 챔버별 이관 현황 (이날)
+    const s2 = hoSection(box, '챔버별 이관 현황', '단위 PLT · 합계는 자동으로 계산돼요.');
+    const totalRow = el('tr', { class:'ho-total' }, el('th', { scope:'row', text:'합계' }), ...HO_COLS.map(([ck]) => el('td', { 'data-col': ck })));
+    const updateTotals = () => {
+      for (const [ck] of HO_COLS){
+        let sum = 0, any = false;
+        for (const [rk] of HO_ROWS){ const v = parseFloat(d[`cell:${rk}:${ck}`]); if (!isNaN(v)){ sum += v; any = true; } }
+        totalRow.querySelector(`[data-col="${ck}"]`).textContent = any ? String(Math.round(sum * 10) / 10) : '–';
+      }
+    };
+    const body = el('tbody', {},
+      ...HO_ROWS.map(([rk, rl]) => el('tr', {}, el('th', { scope:'row', text: rl }), ...HO_COLS.map(([ck, cl]) => {
+        const f = `cell:${rk}:${ck}`;
+        const n = el('input', { class:'ho-num', inputmode:'decimal', 'aria-label': `${rl} ${cl}`, maxlength: 6, value: d[f] ?? '' });
+        n.onchange = () => { n.value = n.value.replace(/[^0-9.]/g, ''); if (n.value) d[f] = n.value; else delete d[f]; updateTotals(); hoSave('day', f, n.value); };
+        return el('td', {}, n);
+      }))),
+      totalRow,
+      el('tr', { class:'ho-car' }, el('th', { scope:'row', text:'차량번호' }),
+        el('td', { colspan: HO_COLS.length - HO_FROZEN.length, class:'ho-car-skip', text:'냉동 챔버(5C·6C·7C)만 적어요' }),
+        ...HO_FROZEN.map(ck => {
+          const f = `car:${ck}`, cl = HO_COLS.find(c => c[0] === ck)[1];
+          const v = d[f] || '';
+          const n = el('textarea', { class:'ho-cellnote ho-carno', rows: Math.max(2, v.split('\n').length), placeholder:'차량번호', 'aria-label': `${cl} 차량번호`, maxlength: 300, value: v });
+          n.oninput = () => { n.rows = Math.max(2, n.value.split('\n').length); };
+          n.onchange = () => hoSave('day', f, n.value.trim());
+          return el('td', {}, n);
+        })),
+      el('tr', { class:'ho-note' }, el('th', { scope:'row', text:'비고' }), ...HO_COLS.map(([ck, cl]) => {
+        const f = `note:${ck}`;
+        const n = el('textarea', { class:'ho-cellnote', rows: 2, placeholder:'메모', 'aria-label': `${cl} 비고`, maxlength: 300, value: d[f] || '' });
+        n.onchange = () => hoSave('day', f, n.value.trim());
+        return el('td', {}, n);
+      })));
+    s2.appendChild(el('div', { class:'ho-table-wrap' }, el('table', { class:'ho-table' },
+      hoHead(), body)));
+    updateTotals();
+    const pp = hoRows(d, 'pp:');
+    const ppBox = el('div', { class:'ho-sub' }, el('h4', { text:'프리팩' }));
+    if (!pp.length) ppBox.appendChild(el('p', { class:'ho-empty', text:'등록된 품목이 없어요.' }));
+    pp.forEach(([f, o]) => ppBox.appendChild(el('div', { class:'ho-pp-row' },
+      hoField('day', f, o, 'name', { ph:'품목', label:'프리팩 품목' }),
+      hoField('day', f, o, 'qty', { ph:'수량', label:'프리팩 수량', cls:'ho-qty' }),
+      hoDel('품목 삭제', () => { hoSave('day', f, null); renderHandover(); }))));
+    ppBox.appendChild(el('button', { type:'button', class:'ho-add', text:'+ 품목 추가',
+      onclick: () => hoAddRow('day', 'pp:', { name:'', qty:'' }, '.ho-pp-row input') }));
+    s2.appendChild(ppBox);
+
+  }
+
   // ---------- 이벤트 ----------
   $('#addForm').addEventListener('submit', e => {
     e.preventDefault();
@@ -696,6 +911,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     view = b.dataset.v; store.set('todo-view2', view);
     $('#newDue').value = view === 'cal' ? selDate : '';
     render();
+    if (view === 'ho') loadHandover();
   });
   function enterEdit(){ askEdit = false; editMode = true; render(); const el = $('#add-day'); if (el) el.focus(); }
   $('#editToggle').onclick = () => {
