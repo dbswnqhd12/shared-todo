@@ -927,6 +927,12 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const cur = e.target.closest('[data-gt]');
     if (!cur) return;
     e.preventDefault();
+    if (e.altKey && cur.tagName === 'TEXTAREA'){
+      // Alt+Enter: 줄 바꾸기 (차량번호 여러 대 등) → 칸이 늘어나요
+      cur.setRangeText('\n', cur.selectionStart, cur.selectionEnd, 'end');
+      cur.dispatchEvent(new Event('input', { bubbles:true }));
+      return;
+    }
     const next = hoNextCell(cur);
     if (next){ next.n.focus(); if (next.n.select) next.n.select(); }
     else cur.blur();
