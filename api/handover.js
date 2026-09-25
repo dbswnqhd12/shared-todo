@@ -9,10 +9,11 @@ import { K, redis, pipeline, body, guard, fail, isDate, kstToday, UserError } fr
 const SHEET = 'ho:sheet';
 const dayKey = d => `ho:${d}`;         // 예전 날짜별 기록 (처음 한 번 옮겨 오기용)
 const MAX_FIELDS = 600;
+const SLA_RE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;   // Backlog SLA 'YYYY-MM-DD HH:MM'
 
 const COLS = 'pre|c1g|c1m|c2g|c2m|c3g|c3m|c5|c6|c7';
 const ROWS = 'ilban|rocket|wm|iwit|direct';
-const DAY_FIELD = new RegExp(`^(cell:(${ROWS}):(${COLS})|note:(pre|c1|c2|c3|c5|c6|c7)|car:(c5|c6|c7)|ppq:(sr|egg|bread|perilla)|ny:(xd|rc|rm):(nys|nyr)|rcCars|nySrc|date)$`);
+const DAY_FIELD = new RegExp(`^(cell:(${ROWS}):(${COLS})|note:(pre|c1|c2|c3|c5|c6|c7)|car:(c5|c6|c7)|ppq:(sr|egg|bread|perilla)|ny:(xd|rc|rm):(nys|nyr)|sla:(xd|rc)|rcCars|nySrc|date)$`);
 
 function cleanValue(v) {
   if (v === null || v === undefined) return null;
@@ -72,6 +73,7 @@ export default async function handler(req, res) {
         if (!DAY_FIELD.test(field)) throw new UserError('저장할 수 없는 칸이에요.');
         const v = cleanValue(value);
         if (field === 'date' && v && !isDate(v)) throw new UserError('날짜가 올바르지 않아요.');
+        if (field.startsWith('sla:') && v && !SLA_RE.test(v)) throw new UserError('SLA 시간이 올바르지 않아요.');
         cmds.push(v === null || v === '' ? ['HDEL', SHEET, field] : ['HSET', SHEET, field, JSON.stringify(v)]);
       }
       cmds.push(['INCR', K.rev]);
@@ -86,6 +88,7 @@ export default async function handler(req, res) {
       const v = cleanValue(b.value);
       const remove = v === null || v === '';
       if (field === 'date' && !remove && !isDate(v)) throw new UserError('날짜가 올바르지 않아요.');
+      if (field.startsWith('sla:') && !remove && !SLA_RE.test(v)) throw new UserError('SLA 시간이 올바르지 않아요.');
       if (!remove && (await redis('HLEN', SHEET)) >= MAX_FIELDS && !(await redis('HEXISTS', SHEET, field))) {
         throw new UserError('더 이상 추가할 수 없어요.');
       }
