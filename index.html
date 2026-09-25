@@ -151,6 +151,12 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .ho-head h2{font-size:18px;min-width:9.5em;text-align:center}
 .ho-shot{margin-left:auto;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:7px 14px;font-size:14px;font-weight:600}
 .ho-shot:hover{background:var(--accent);color:#fff}
+.ho-shot-view{position:fixed;inset:0;z-index:50;background:rgba(15,20,18,.92);display:flex;flex-direction:column;gap:10px;padding:14px;overflow:auto}
+.ho-shot-bar{display:flex;gap:8px}
+.ho-shot-save{flex:1;border:0;background:var(--accent);color:#fff;border-radius:8px;padding:12px;font-size:16px;font-weight:700}
+.ho-shot-close{border:1px solid #fff5;background:none;color:#fff;border-radius:8px;padding:12px 16px;font-size:15px}
+.ho-shot-tip{margin:0;color:#e6ece9;font-size:13px;line-height:1.5}
+.ho-shot-view img{width:100%;height:auto;background:#fff;border-radius:6px;-webkit-touch-callout:default}
 .ho-sec{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .ho-sec-head h3{font-size:16px}
 .ho-sec-head p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
@@ -1015,15 +1021,43 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const name = `인수인계_${hoDate}.png`;
     const file = new File([blob], name, { type:'image/png' });
     const mobile = matchMedia('(pointer:coarse)').matches;
-    if (mobile && navigator.canShare && navigator.canShare({ files:[file] })){
-      try { await navigator.share({ files:[file], title: name }); return; }
-      catch(e){ if (e.name === 'AbortError') return; }
-    }
+    if (mobile) return hoShotView(cv.toDataURL('image/png'), blob, name);
+    hoDownload(blob, name);
+    toast('이미지를 저장했어요.');
+  }
+
+  function hoDownload(blob, name){
     const url = URL.createObjectURL(blob);
     const link = el('a', { href:url, download:name });
     document.body.appendChild(link); link.click(); link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 10000);
-    toast('이미지를 저장했어요.');
+  }
+
+  // 휴대폰: 캡쳐 이미지를 띄우고 갤러리(사진)에 저장
+  function hoShotView(dataUrl, blob, name){
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const close = () => { box.remove(); document.body.style.overflow = ''; };
+    const save = el('button', { type:'button', class:'ho-shot-save', text: ios ? '사진에 저장' : '갤러리에 저장' });
+    save.onclick = async () => {
+      if (ios){
+        // iPhone은 웹에서 바로 사진 앱에 넣을 수 없어 저장 창을 띄워요 → '이미지 저장'
+        const file = new File([blob], name, { type:'image/png' });
+        if (navigator.canShare && navigator.canShare({ files:[file] })){
+          try { await navigator.share({ files:[file] }); } catch(e) {}
+          return;
+        }
+      }
+      hoDownload(blob, name);
+      toast('저장했어요. 갤러리의 다운로드(Download) 앨범에서 볼 수 있어요.');
+    };
+    const box = el('div', { class:'ho-shot-view', role:'dialog', 'aria-label':'캡쳐 이미지' },
+      el('div', { class:'ho-shot-bar' },
+        save,
+        el('button', { type:'button', class:'ho-shot-close', text:'닫기', onclick: close })),
+      el('p', { class:'ho-shot-tip', text: ios ? "'사진에 저장'을 누른 뒤 '이미지 저장'을 고르거나, 이미지를 길게 눌러 '사진 앱에 저장'을 누르세요." : '또는 이미지를 길게 눌러 저장할 수도 있어요.' }),
+      el('img', { src: dataUrl, alt:'인수인계 캡쳐' }));
+    document.body.style.overflow = 'hidden';
+    document.body.appendChild(box);
   }
 
   // ---------- 이벤트 ----------
