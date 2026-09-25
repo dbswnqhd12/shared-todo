@@ -2,7 +2,7 @@
 //   GET /api/handover → { rev, day }
 //   PUT /api/handover  { field, value }  (value 가 null 이나 '' 면 삭제)
 // 한 장짜리 인수인계 표를 모두가 이어서 고쳐 써요 (날짜도 칸 하나)
-// 칸: 날짜, 챔버별 이관 현황 (PLT 칸, 냉동 챔버 차량번호, 비고), 프리팩
+// 칸: 날짜, 챔버별 이관 현황 (PLT 칸, 냉동 챔버 차량번호, 비고), 프리팩, NYS·NYR
 import { K, redis, pipeline, body, guard, fail, isDate, kstToday, UserError } from '../lib/store.js';
 
 const SHEET = 'ho:sheet';
@@ -11,7 +11,7 @@ const MAX_FIELDS = 600;
 
 const COLS = 'pre|c1g|c1m|c2g|c2m|c3g|c3m|c5|c6|c7';
 const ROWS = 'ilban|rocket|wm|iwit|direct';
-const DAY_FIELD = new RegExp(`^(cell:(${ROWS}):(${COLS})|note:(pre|c1|c2|c3|c5|c6|c7)|car:(c5|c6|c7)|ppq:(sr|egg|bread|perilla)|date)$`);
+const DAY_FIELD = new RegExp(`^(cell:(${ROWS}):(${COLS})|note:(pre|c1|c2|c3|c5|c6|c7)|car:(c5|c6|c7)|ppq:(sr|egg|bread|perilla)|ny:(xd|rc|rm):(nys|nyr)|date)$`);
 
 function cleanValue(v) {
   if (v === null || v === undefined) return null;
