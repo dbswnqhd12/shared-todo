@@ -179,7 +179,7 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .ho-num{width:100%;min-width:2.6em;border:0;border-radius:4px;background:transparent;color:var(--ink);text-align:center;font-family:var(--mono);font-size:13.5px;font-variant-numeric:tabular-nums;padding:7px 2px}
 .ho-num:focus{background:var(--accent-soft)}
 .ho-total td{font-family:var(--mono);font-weight:600;color:var(--accent);background:var(--accent-soft);padding:6px 2px;font-variant-numeric:tabular-nums}
-.ho-cellnote{width:100%;min-width:3.6em;border:0;border-radius:4px;background:transparent;color:var(--ink);font-size:12px;line-height:1.35;resize:vertical;padding:4px}
+.ho-cellnote{width:100%;min-width:3.6em;border:0;border-radius:4px;background:transparent;color:var(--ink);font-size:12px;line-height:1.35;resize:none;overflow:hidden;padding:4px}
 .ho-cellnote:focus{background:var(--accent-soft)}
 .ho-car-skip{font-size:12px;color:var(--muted);background:var(--bg)}
 .ho-carno{font-family:var(--mono);font-size:12.5px;min-width:6.8em;resize:none;white-space:pre;overflow:hidden}
@@ -877,7 +877,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         })),
       el('tr', { class:'ho-note' }, el('th', { scope:'row', text:'비고' }), ...HO_COLS.map(([ck, cl]) => {
         const f = `note:${ck}`;
-        const n = el('textarea', { class:'ho-cellnote', rows: 2, placeholder:'메모', 'aria-label': `${cl} 비고`, maxlength: 300, value: d[f] || '' });
+        const v = d[f] || '';
+        const n = el('textarea', { class:'ho-cellnote', rows: Math.max(2, v.split('\n').length), placeholder:'메모', 'aria-label': `${cl} 비고`, maxlength: 300, value: v });
+        n.oninput = () => { n.rows = Math.max(2, n.value.split('\n').length); };
         n.onchange = () => hoSave('day', f, n.value.trim());
         return el('td', {}, n);
       })));
@@ -894,8 +896,41 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
           n.onchange = () => { n.value = n.value.trim(); if (n.value) d[f] = n.value; else delete d[f]; hoSave('day', f, n.value); };
           return el('td', {}, n);
         })))))));
-
+    hoGridIndex(box);
   }
+
+  // ---------- 인수인계: 엔터 치면 아래 칸으로 ----------
+  // 표마다 칸의 (줄, 열) 위치를 적어 두고, 엔터를 치면 같은 열의 아래 칸으로 옮겨요.
+  // 열의 맨 아래면 다음 열의 맨 위로, 표의 끝이면 다음 표의 첫 칸으로 가요.
+  function hoGridIndex(box){
+    box.querySelectorAll('table').forEach((table, t) => {
+      table.querySelectorAll('tbody tr').forEach((tr, r) => {
+        let c = 0;
+        for (const cellEl of tr.children){
+          const f = cellEl.querySelector('input, textarea');
+          if (f){ f.dataset.gt = t; f.dataset.gr = r; f.dataset.gc = c; f.setAttribute('enterkeyhint', 'next'); }
+          c += cellEl.colSpan || 1;
+        }
+      });
+    });
+  }
+  function hoNextCell(cur){
+    const all = [...$('#ho').querySelectorAll('[data-gt]')].map(n => ({ n, t:+n.dataset.gt, r:+n.dataset.gr, c:+n.dataset.gc }));
+    const me = { t:+cur.dataset.gt, r:+cur.dataset.gr, c:+cur.dataset.gc };
+    const pick = list => list.sort((a, b) => a.c - b.c || a.r - b.r)[0];
+    return pick(all.filter(x => x.t === me.t && x.c === me.c && x.r > me.r))
+        || pick(all.filter(x => x.t === me.t && x.c > me.c))
+        || pick(all.filter(x => x.t > me.t).sort((a, b) => a.t - b.t).filter((x, _, arr) => x.t === arr[0].t));
+  }
+  $('#ho').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.shiftKey || e.isComposing || e.keyCode === 229) return;
+    const cur = e.target.closest('[data-gt]');
+    if (!cur) return;
+    e.preventDefault();
+    const next = hoNextCell(cur);
+    if (next){ next.n.focus(); if (next.n.select) next.n.select(); }
+    else cur.blur();
+  });
 
   // ---------- 인수인계 캡쳐 (기기와 상관없이 PC 폭 이미지로) ----------
   function hoWrap(ctx, text, maxW){
