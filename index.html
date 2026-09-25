@@ -349,7 +349,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ret-table tr.is-sel td{background:var(--accent-soft)}
 .ret-table tr.editing td{background:#FFF7E0}
 .ret-note{display:block;font-size:11.5px;color:var(--muted)}
-.ret-st{border:0;border-radius:999px;padding:3px 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.ret-st{display:inline-block;border:0;border-radius:999px;padding:3px 11px;font-size:12px;font-weight:700;cursor:default;white-space:nowrap}
 .ret-st.wait{background:var(--high-soft);color:var(--high)}
 .ret-st.done{background:var(--accent-soft);color:var(--accent)}
 .ret-temp{font-size:11.5px;border-radius:4px;padding:1px 6px;font-weight:700;white-space:nowrap}
@@ -1929,9 +1929,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     } catch(e) { if (e instanceof Locked) return showLock(e.message); toast(e.message); }
   }
 
-  const retStatusBtn = t => el('button', { type:'button', class:'ret-st ' + (t.status === 'done' ? 'done' : 'wait'),
-    title: t.status === 'done' ? '눌러서 대기로 되돌리기' : '눌러서 완료로 바꾸기',
-    text: t.status === 'done' ? '완료' : '대기', onclick: () => retSetStatus([t.id], t.status === 'done' ? 'wait' : 'done') });
+  // 상태는 표시만 해요 (실수로 눌러 바뀌지 않게) — 바꾸려면 체크 후 아래 버튼으로
+  const retStatusBtn = t => el('span', { class:'ret-st ' + (t.status === 'done' ? 'done' : 'wait'),
+    text: t.status === 'done' ? '완료' : '대기' });
   const retTempTag = t => t.temp ? el('span', { class:'ret-temp ' + t.temp, text: retTemp(t.temp) }) : null;
 
   // ---- 오늘 입력한 회송 ----
