@@ -13,6 +13,7 @@
 :root{
   --bg:#EEF2F1; --paper:#FFFFFF; --ink:#18231F; --muted:#5E6B66; --line:#D5DDDA;
   --accent:#1F6F5C; --accent-soft:#DCEDE7; --high:#B4452F; --high-soft:#F6E1DB;
+  --ch-shade:rgba(31,111,92,.08); --ch-line:#9FB3AB;
   --mid:#9A6A12; --mid-soft:#F4EAD2; --focus:#1F6F5C; --sat:#2F5F9E;
   --day:#9A6A12; --day-soft:#F4EAD2; --eve:#B0562F; --eve-soft:#F7E4DA; --night:#34508A; --night-soft:#E1E7F3;
   --display:"Gowun Batang",Georgia,serif;
@@ -24,6 +25,7 @@
     color-scheme:dark;
     --bg:#111816; --paper:#18211E; --ink:#E6EDEA; --muted:#93A29C; --line:#2A3632;
     --accent:#5CC4A6; --accent-soft:#1D3530; --high:#F08A73; --high-soft:#3A2420;
+    --ch-shade:rgba(92,196,166,.09); --ch-line:#4A5E57;
     --mid:#E0B45A; --mid-soft:#352C1A; --focus:#5CC4A6; --sat:#86AEE6;
     --day:#E0B45A; --day-soft:#352C1A; --eve:#EE9A74; --eve-soft:#3A261C; --night:#93AEE8; --night-soft:#1E2638;
   }
@@ -32,6 +34,7 @@
   color-scheme:dark;
   --bg:#111816; --paper:#18211E; --ink:#E6EDEA; --muted:#93A29C; --line:#2A3632;
   --accent:#5CC4A6; --accent-soft:#1D3530; --high:#F08A73; --high-soft:#3A2420;
+  --ch-shade:rgba(92,196,166,.09); --ch-line:#4A5E57;
   --mid:#E0B45A; --mid-soft:#352C1A; --focus:#5CC4A6; --sat:#86AEE6;
   --day:#E0B45A; --day-soft:#352C1A; --eve:#EE9A74; --eve-soft:#3A261C; --night:#93AEE8; --night-soft:#1E2638;
 }
@@ -184,6 +187,8 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .ho-car-skip{font-size:12px;color:var(--muted);background:var(--bg)}
 .ho-carno{font-family:var(--mono);font-size:12.5px;min-width:6.8em;resize:none;white-space:pre;overflow:hidden}
 .ho-memo{min-width:3.6em;white-space:pre-wrap;word-break:break-all}
+.ho-table .ch-alt{background-image:linear-gradient(var(--ch-shade),var(--ch-shade))}
+.ho-table .ch-first{border-left:2px solid var(--ch-line)}
 .ho-sub{display:flex;flex-direction:column;gap:6px}
 .ho-sub h4{margin:6px 0 0;font-size:14px}
 .ho-table.ho-pp{min-width:0;width:auto}
@@ -731,6 +736,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const HO_COLS = [['pre','전실'],['c1g','1C G'],['c1m','1C M'],['c2g','2C G'],['c2m','2C M'],['c3g','3C G'],['c3m','3C M'],['c5','5C'],['c6','6C'],['c7','7C']];
   const HO_PP = [['sr','S.R'],['egg','Egg'],['bread','식빵'],['perilla','깻잎']];   // 프리팩 품목
   const HO_FROZEN = ['c5','c6','c7'];   // 냉동 챔버: 차량번호 칸
+  const HO_CH = ['pre','c1','c2','c3','c5','c6','c7'];   // 챔버 순서 (음영: 1C·3C·6C)
+  const hoCh = ck => HO_CH.indexOf(ck.replace(/[gm]$/, ''));
   const HO_NOTE = [['pre','전실',1],['c1','1C',2],['c2','2C',2],['c3','3C',2],['c5','5C',1],['c6','6C',1],['c7','7C',1]];   // 비고는 챔버별 (1C~3C는 G·M 합쳐서)
   // 여러 줄 칸: 내용만큼 높이를 맞춰요
   const hoFit = n => { n.style.height = 'auto'; if (n.scrollHeight) n.style.height = n.scrollHeight + 'px'; };
@@ -882,7 +889,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       el('tr', { class:'ho-note' }, el('th', { scope:'row', text:'비고' }), ...HO_NOTE.map(([k, cl, span]) => {
         const f = `note:${k}`;
         const v = d[f] || '';
-        const n = el('textarea', { class:'ho-cellnote ho-carno ho-memo', rows: 2, placeholder:'메모', 'aria-label': `${cl} 비고`, maxlength: 300, value: v });
+        const n = el('textarea', { class:'ho-cellnote ho-carno ho-memo', rows: 2, 'aria-label': `${cl} 비고`, maxlength: 300, value: v });
         n.oninput = () => hoFit(n);
         n.onchange = () => hoSave('day', f, n.value.trim());
         return el('td', { colspan: span > 1 ? span : undefined }, n);
@@ -901,7 +908,31 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
           return el('td', {}, n);
         })))))));
     hoGridIndex(box);
+    hoShade(box.querySelector('.ho-table'));
     box.querySelectorAll('textarea').forEach(hoFit);
+  }
+
+  // ---------- 인수인계: 챔버별 음영 ----------
+  // 칸마다 표 안의 실제 열 위치를 계산해서 챔버를 찾고, 1C·3C·6C에 음영, 챔버 사이에 굵은 선을 넣어요.
+  function hoShade(table){
+    if (!table) return;
+    const chOfCol = [null, ...HO_COLS.map(([ck]) => hoCh(ck))];   // 0번 열은 분류
+    const taken = [];
+    [...table.rows].forEach((tr, r) => {
+      let c = 0;
+      for (const cellEl of tr.cells){
+        while (taken[r] && taken[r][c]) c++;
+        const span = cellEl.colSpan || 1, rs = cellEl.rowSpan || 1;
+        for (let i = 0; i < rs; i++) for (let j = 0; j < span; j++) (taken[r + i] = taken[r + i] || [])[c + j] = true;
+        const chs = new Set(chOfCol.slice(c, c + span));
+        if (chs.size === 1 && !chs.has(null)){
+          const ch = [...chs][0];
+          if (ch % 2 === 1) cellEl.classList.add('ch-alt');
+          if (chOfCol[c - 1] !== ch) cellEl.classList.add('ch-first');
+        } else if (c > 0) cellEl.classList.add('ch-first');
+        c += span;
+      }
+    });
   }
 
   // ---------- 인수인계: 엔터 치면 아래 칸으로 ----------
@@ -1029,6 +1060,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     HO_COLS.forEach((_, i) => { cell(xs[i], y, cols[i], ROW, C.accSoft); text(sums[i].any ? String(Math.round(sums[i].sum * 10) / 10) : '–', xs[i] + cols[i] / 2, y + ROW / 2, { mono:true, bold:true, size:14, color:C.acc }); });
     y += ROW;
 
+    const yCar = y;
     // 냉동 챔버 차량번호
     cell(PAD, y, widths.label, carH, C.head); text('차량번호', PAD + 10, y + carH / 2, { bold:true, align:'left' });
     const fz = HO_COLS.findIndex(([ck]) => ck === HO_FROZEN[0]);
@@ -1043,6 +1075,25 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     // 비고
     cell(PAD, y, widths.label, noteH, C.head); text('비고', PAD + 10, y + noteH / 2, { bold:true, align:'left' });
     noteCells.forEach(c => { cell(c.x, y, c.w, noteH); c.lines.forEach((ln, k) => text(ln, c.x + 6, y + 7 + LH / 2 + k * LH, { mono:true, size:13, align:'left' })); });
+    // 챔버별 음영 (1C·3C·6C) + 챔버 사이 굵은 선
+    const chX = HO_CH.map(ch => {
+      const idx = HO_COLS.map(([ck], i) => [ck, i]).filter(([ck]) => HO_CH[hoCh(ck)] === ch).map(([, i]) => i);
+      return { x: xs[idx[0]], w: idx.reduce((a, i) => a + cols[i], 0), frozen: HO_FROZEN.includes(ch) };
+    });
+    chX.forEach((c, k) => {
+      if (k % 2 === 1){
+        ctx.fillStyle = 'rgba(31,111,92,.08)';
+        ctx.fillRect(c.x, TOP, c.w, yCar - TOP);                // 머리글 ~ 합계
+        if (c.frozen) ctx.fillRect(c.x, yCar, c.w, carH);       // 차량번호 (냉동 챔버만)
+        ctx.fillRect(c.x, yCar + carH, c.w, noteH);             // 비고
+      }
+      if (k > 0){
+        ctx.fillStyle = '#9FB3AB';
+        ctx.fillRect(c.x - .5, TOP, 2, yCar - TOP);
+        if (c.frozen) ctx.fillRect(c.x - .5, yCar, 2, carH);
+        ctx.fillRect(c.x - .5, yCar + carH, 2, noteH);
+      }
+    });
     y += noteH + 24;
 
     // 프리팩
