@@ -10,7 +10,7 @@ const MAX_FIELDS = 600;
 
 const COLS = 'pre|c1g|c1m|c2g|c2m|c3g|c3m|c5|c6|c7';
 const ROWS = 'ilban|rocket|wm|iwit|direct';
-const DAY_FIELD = new RegExp(`^(cell:(${ROWS}):(${COLS})|note:(${COLS})|car:(c5|c6|c7)|pp:[\\w-]{1,40})$`);
+const DAY_FIELD = new RegExp(`^(cell:(${ROWS}):(${COLS})|note:(${COLS})|car:(c5|c6|c7)|ppq:(sr|egg|bread|perilla))$`);
 
 function cleanValue(v) {
   if (v === null || v === undefined) return null;
