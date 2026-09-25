@@ -347,6 +347,47 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ret-st.done{background:var(--accent-soft);color:var(--accent)}
 .ret-temp{font-size:11.5px;border-radius:4px;padding:1px 6px;font-weight:700;white-space:nowrap}
 .ret-temp.CH{background:#E1ECF7;color:#2F5F9E}.ret-temp.AM{background:#F4EAD2;color:#8A5F10}.ret-temp.FR{background:#E3E0F5;color:#5B4BA8}
+/* 회송 목록: 업체별 묶음 */
+.ret-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ret-tools .ret-help{margin-left:auto}
+.ret-groups{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ret-group + .ret-group{border-top:1px solid var(--line)}
+.ret-gh{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--paper)}
+.ret-group.open .ret-gh{background:var(--bg);position:sticky;top:0;z-index:1}
+.ret-group.has-sel .ret-gh{box-shadow:inset 3px 0 0 var(--accent)}
+.ret-gname{display:flex;align-items:center;gap:6px;border:0;background:none;padding:2px 0;font:inherit;color:var(--ink);cursor:pointer;min-width:0;flex:1;text-align:left}
+.ret-caret{width:12px;color:var(--muted);font-size:12px}
+.ret-vn{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ret-gtemps{display:flex;gap:3px}
+.ret-gcount{font-family:var(--mono);font-size:12.5px;color:var(--ink);white-space:nowrap;min-width:88px;text-align:right}
+.ret-gold{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;min-width:104px;text-align:right}
+.ret-gold.late,.ret-gold .late{color:var(--high);font-weight:700}
+.ret-view{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ret-view button{border:0;background:var(--paper);color:var(--muted);padding:5px 12px;font-size:13px;font-weight:600}
+.ret-view button + button{border-left:1px solid var(--line)}
+.ret-view button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.ret-vn.mono{font-family:var(--mono)}
+.ret-vtag{font-weight:700;margin-right:6px;font-size:12.5px}
+.ret-items.by-date .ret-item{grid-template-columns:22px minmax(0,1fr) 40px 44px 50px auto}
+.ret-cb{display:flex;align-items:center;justify-content:center;width:22px;flex:none;cursor:pointer}
+.ret-cb input{width:17px;height:17px;accent-color:var(--accent);margin:0}
+.ret-items{border-top:1px solid var(--line)}
+.ret-item{display:grid;grid-template-columns:22px 40px minmax(0,1fr) 40px 44px 50px auto;align-items:center;gap:10px;padding:7px 10px 7px 10px;border-top:1px dashed var(--line);font-size:13px}
+.ret-item:first-child{border-top:0}
+.ret-item.is-done{color:var(--muted)}
+.ret-item.is-sel{background:var(--accent-soft)}
+.ret-item.editing{background:#FFF7E0}
+.ret-d{font-family:var(--mono);font-size:12.5px;text-align:center}
+.ret-d.late{color:var(--high);font-weight:700}
+.ret-main-txt{min-width:0}
+.ret-nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.ret-meta{display:flex;flex-wrap:wrap;gap:0 10px;font-size:11.5px;color:var(--muted);margin-top:1px}
+.ret-meta .rs{color:#8A5F10}
+.ret-item.is-done .ret-meta .rs{color:inherit}
+.ret-meta .mono{font-family:var(--mono);font-size:11px}
+.ret-tp,.ret-stc{text-align:center}
+.ret-q{font-family:var(--mono);text-align:right;font-weight:700}
+.ret-ops{display:flex;align-items:center;gap:2px;white-space:nowrap}
 .ret-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:2px}
 .ret-bar-btns{display:flex;gap:8px;flex-wrap:wrap}
 @media (max-width:760px){
@@ -355,6 +396,19 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   .ret-f.span2,.ret-f.span3{grid-column:span 2}
   .ret-table .opt{display:none}
   .ret-bar-btns{width:100%}.ret-bar-btns .ret-btn{flex:1}
+  .ret-gh{flex-wrap:wrap;row-gap:4px}
+  .ret-gname{flex-basis:calc(100% - 110px)}
+  .ret-gtemps{display:none}
+  .ret-gcount,.ret-gold{min-width:0;text-align:left}
+  .ret-gcount{margin-left:32px}
+  .ret-gprint{margin-left:auto}
+  .ret-item{grid-template-columns:22px minmax(0,1fr) auto auto;gap:4px 8px;grid-template-areas:"cb txt q st" "cb d tp ops"}
+  .ret-item .ret-cb{grid-area:cb}.ret-item .ret-main-txt{grid-area:txt}.ret-item .ret-q{grid-area:q}.ret-item .ret-stc{grid-area:st}
+  .ret-item .ret-d{grid-area:d;text-align:left}.ret-item .ret-tp{grid-area:tp}.ret-item .ret-ops{grid-area:ops;justify-content:flex-end}
+  .ret-nm{white-space:normal}
+  .ret-meta .po{display:none}
+  .ret-items.by-date .ret-item{grid-template-columns:22px minmax(0,1fr) auto auto}
+  .ret-tools .ret-help{margin-left:0}
 }
 #ret-print{display:none}
 @media print{
@@ -1690,7 +1744,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const RET_REASONS = ['[회송] 과착', '[회송] 유통기한', '표기사항불량>표기사항오류', '품질불량>파손', '품질불량>변질'];
   const RET_FIELDS = ['date','vendor','po','temp','name','sku','barcode','reason','qty','note'];
   let retItems = null, retRev = -1, retLoading = false, retBuilt = false;
-  const retUi = { status:'wait', vendor:'', q:'', sel:new Set(), editId:null };
+  const retUi = { status:'wait', vendor:'', q:'', sel:new Set(), editId:null, open:new Set(), group: (() => { try { return localStorage.getItem('ret-group') === 'date' ? 'date' : 'vendor'; } catch { return 'vendor'; } })() };
   const retForm = { date: todayIso, vendor:'', po:'', temp:'CH', name:'', sku:'', barcode:'', reason:'', qty:'', note:'' };
   const retTemp = t => (RET_TEMPS.find(x => x[0] === t) || [null, ''])[1];
   const retMD = d => d ? `${+d.slice(5, 7)}/${+d.slice(8, 10)}` : '';
@@ -1859,6 +1913,11 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   }
 
   // ---- ② 목록: 상태 · 업체로 걸러서 인쇄 ----
+  // 화면용으로 줄인 글자 (인쇄 · 저장값은 원래 그대로)
+  const retShortName = s => String(s || '').replace(/\[로켓프레시\]\s*/g, '').replace(/_PL_vege\s*$/i, '').replace(/\s+/g, ' ').trim();
+  const retShortReason = s => String(s || '').split(',').map(x => x.split('>').pop().trim()).filter(Boolean).join(' · ');
+  const retOldDays = t => t.status !== 'done' && t.date ? Math.floor((new Date(todayIso) - new Date(t.date)) / 864e5) : 0;
+
   function retRenderList(){
     const body = $('#ret-list-body');
     if (!body) return;
@@ -1866,57 +1925,93 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const byStatus = all.filter(t => retUi.status === 'all' || (retUi.status === 'done' ? t.status === 'done' : t.status !== 'done'));
     const q = retUi.q.toLowerCase();
     const hit = t => !q || [t.vendor, t.name, t.barcode, t.po, t.sku, t.reason].some(v => String(v || '').toLowerCase().includes(q));
-    const found = byStatus.filter(hit);
-    const vendors = new Map();
-    for (const t of found) vendors.set(t.vendor, (vendors.get(t.vendor) || 0) + 1);
-    if (retUi.vendor && !vendors.has(retUi.vendor)) retUi.vendor = '';
-    const rows = found.filter(t => !retUi.vendor || t.vendor === retUi.vendor)
-      .sort((a, b) => (a.vendor || '').localeCompare(b.vendor || '', 'ko') || (a.date || '').localeCompare(b.date || '') || String(a.createdAt).localeCompare(String(b.createdAt)));
+    const rows = byStatus.filter(hit);
     const ids = new Set(rows.map(t => t.id));
     for (const id of [...retUi.sel]) if (!ids.has(id)) retUi.sel.delete(id);
     const sel = rows.filter(t => retUi.sel.has(t.id));
     const waitN = all.filter(t => t.status !== 'done').length;
-    const chip = (on, label, n, onclick, cls = '') => el('button', { type:'button', class:'ret-chip ' + cls + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false', onclick },
+    const chip = (on, label, n, onclick) => el('button', { type:'button', class:'ret-chip' + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false', onclick },
       el('span', { text: label }), n !== undefined ? el('b', { text: n }) : null);
-    const oldDays = t => t.status !== 'done' && t.date ? Math.floor((new Date(todayIso) - new Date(t.date)) / 864e5) : 0;
-    const allBox = el('input', { type:'checkbox', 'aria-label':'모두 선택', onchange: e => { for (const t of rows) e.target.checked ? retUi.sel.add(t.id) : retUi.sel.delete(t.id); retRenderList(); } });
-    allBox.checked = rows.length > 0 && sel.length === rows.length;
-    allBox.indeterminate = sel.length > 0 && sel.length < rows.length;
     const selQty = sel.reduce((s, t) => s + (+t.qty || 0), 0);
     const selVendors = [...new Set(sel.map(t => t.vendor))];
 
+    // 업체별: 가장 오래 기다린 업체가 위로 / 날짜별: 최근 하차일이 위로
+    const byDateMode = retUi.group === 'date';
+    const groups = new Map();
+    for (const t of rows){ const k = byDateMode ? (t.date || '') : t.vendor; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(t); }
+    const byDate = (a, b) => (a.date || '').localeCompare(b.date || '') || String(a.createdAt).localeCompare(String(b.createdAt));
+    const byVendor = (a, b) => (a.vendor || '').localeCompare(b.vendor || '', 'ko') || String(a.createdAt).localeCompare(String(b.createdAt));
+    const list = [...groups.entries()].map(([key, items]) => ({ key, okey: retUi.group + ':' + key, items: items.sort(byDateMode ? byVendor : byDate) }))
+      .sort(byDateMode ? (a, b) => b.key.localeCompare(a.key)
+        : (a, b) => (a.items[0].date || '').localeCompare(b.items[0].date || '') || a.key.localeCompare(b.key, 'ko'));
+    const openAll = !!q;
+    const allOpen = list.length > 0 && list.every(g => openAll || retUi.open.has(g.okey));
+    const toggleSel = (items, on) => { for (const t of items) on ? retUi.sel.add(t.id) : retUi.sel.delete(t.id); retRenderList(); };
+
+    const itemRow = t => {
+      const cb = el('input', { type:'checkbox', 'aria-label':`${t.name} 선택`, onchange: e => toggleSel([t], e.target.checked) });
+      cb.checked = retUi.sel.has(t.id);
+      const old = retOldDays(t);
+      const meta = [retShortReason(t.reason), t.barcode, t.po ? '발주 ' + String(t.po).replace(/,\s*/g, ', ') : '', t.status === 'done' && t.doneAt ? '완료 ' + retMD(t.doneAt) : ''].filter(Boolean);
+      return el('div', { class:'ret-item' + (t.status === 'done' ? ' is-done' : '') + (cb.checked ? ' is-sel' : '') + (retUi.editId === t.id ? ' editing' : '') },
+        el('label', { class:'ret-cb' }, cb),
+        byDateMode ? null : el('span', { class:'ret-d' + (old >= 7 ? ' late' : ''), title: old ? `${old}일째 대기` : '', text: retMD(t.date) }),
+        el('div', { class:'ret-main-txt' },
+          el('div', { class:'ret-nm', title: t.name }, byDateMode ? el('b', { class:'ret-vtag', text: t.vendor }) : null, retShortName(t.name)),
+          el('div', { class:'ret-meta', title: t.reason }, ...meta.map((m, i) => el('span', { class: i === 0 ? 'rs' : 'mono' + (m.startsWith('발주 ') ? ' po' : ''), text: m }))),
+          t.note ? el('div', { class:'ret-note', text: t.note }) : null),
+        el('span', { class:'ret-tp' }, retTempTag(t)),
+        el('span', { class:'ret-q', text: retNum(t.qty) }),
+        el('span', { class:'ret-stc' }, retStatusBtn(t)),
+        el('span', { class:'ret-ops' }, el('button', { type:'button', class:'ret-btn ghost sm', text:'수정', onclick: () => retStartEdit(t) }), hoDel('회송 건 삭제', () => retDelete(t))));
+    };
+
+    const groupEl = g => {
+      const open = openAll || retUi.open.has(g.okey);
+      const n = g.items.length, qty = g.items.reduce((s, t) => s + (+t.qty || 0), 0);
+      const selN = g.items.filter(t => retUi.sel.has(t.id)).length;
+      const label = byDateMode ? (g.key ? `${retMD(g.key)} (${'일월화수목금토'[new Date(g.key + 'T00:00').getDay()]})` : '하차일 없음') : g.key;
+      const cb = el('input', { type:'checkbox', 'aria-label':`${label} 전체 선택`, onchange: e => toggleSel(g.items, e.target.checked) });
+      cb.checked = selN === n; cb.indeterminate = selN > 0 && selN < n;
+      const old = Math.max(0, ...g.items.map(retOldDays));
+      const temps = RET_TEMPS.filter(([k]) => g.items.some(t => t.temp === k)).map(([k]) => retTempTag({ temp: k }));
+      const toggle = () => { retUi.open.has(g.okey) ? retUi.open.delete(g.okey) : retUi.open.add(g.okey); retRenderList(); };
+      const vN = new Set(g.items.map(t => t.vendor)).size;
+      const ageText = byDateMode ? `업체 ${vN}곳` + (old ? ` · ${old}일째` : '') : (old ? `${retMD(g.items[0].date)}~ · ${old}일째` : retMD(g.items[0].date) + '~');
+      return el('div', { class:'ret-group' + (open ? ' open' : '') + (selN ? ' has-sel' : '') },
+        el('div', { class:'ret-gh' },
+          el('label', { class:'ret-cb' }, cb),
+          el('button', { type:'button', class:'ret-gname', 'aria-expanded': open ? 'true' : 'false', onclick: toggle },
+            el('span', { class:'ret-caret', text: open ? '▾' : '▸' }), el('span', { class:'ret-vn' + (byDateMode ? ' mono' : ''), text: label })),
+          el('span', { class:'ret-gtemps' }, ...temps),
+          el('span', { class:'ret-gcount', text: `${n}건 · ${retNum(qty)}개` }),
+          byDateMode ? el('span', { class:'ret-gold' }, `업체 ${vN}곳`, old ? el('span', { class: old >= 7 ? 'late' : '', text: ` · ${old}일째` }) : null)
+            : el('span', { class:'ret-gold' + (old >= 7 ? ' late' : ''), text: ageText }),
+          el('button', { type:'button', class:'ret-btn ghost sm ret-gprint', title: byDateMode ? '이 날짜 회송 확인서 인쇄 — 업체마다 한 장 (체크한 건이 있으면 그 건만)' : '이 업체 회송 확인서 인쇄 (체크한 건이 있으면 그 건만)',
+            text:'🖨 인쇄', onclick: () => retPrint(selN ? g.items.filter(t => retUi.sel.has(t.id)) : g.items) })),
+        open ? el('div', { class:'ret-items' + (byDateMode ? ' by-date' : '') }, ...g.items.map(itemRow)) : null);
+    };
+
     body.replaceChildren(
-      el('div', { class:'ret-chips' },
-        chip(retUi.status === 'wait', '대기', waitN, () => { retUi.status = 'wait'; retUi.sel.clear(); retRenderList(); }),
-        chip(retUi.status === 'done', '완료', undefined, () => { retUi.status = 'done'; retUi.sel.clear(); retRenderList(); }),
-        chip(retUi.status === 'all', '전체', undefined, () => { retUi.status = 'all'; retUi.sel.clear(); retRenderList(); })),
-      el('div', { class:'ret-chips ret-vendor-chips' },
-        chip(!retUi.vendor, '모든 업체', found.length, () => { retUi.vendor = ''; retUi.sel.clear(); retRenderList(); }, 'v'),
-        ...[...vendors.entries()].sort((a, b) => a[0].localeCompare(b[0], 'ko')).map(([v, n]) =>
-          chip(retUi.vendor === v, v, n, () => { retUi.vendor = v; retUi.sel = new Set(found.filter(t => t.vendor === v).map(t => t.id)); retRenderList(); }, 'v'))),
+      el('div', { class:'ret-tools' },
+        el('div', { class:'ret-chips' },
+          chip(retUi.status === 'wait', '대기', waitN, () => { retUi.status = 'wait'; retUi.sel.clear(); retRenderList(); }),
+          chip(retUi.status === 'done', '완료', undefined, () => { retUi.status = 'done'; retUi.sel.clear(); retRenderList(); }),
+          chip(retUi.status === 'all', '전체', undefined, () => { retUi.status = 'all'; retUi.sel.clear(); retRenderList(); })),
+        el('div', { class:'ret-view', role:'group', 'aria-label':'묶어 보기' },
+          ...[['vendor','업체별'],['date','날짜별']].map(([k, l]) => el('button', { type:'button', 'aria-pressed': retUi.group === k ? 'true' : 'false', text: l,
+            onclick: () => { retUi.group = k; try { localStorage.setItem('ret-group', k); } catch {} retRenderList(); } }))),
+        list.length ? el('span', { class:'ret-help', text: `${byDateMode ? '날짜' : '업체'} ${list.length}${byDateMode ? '일' : '곳'} · ${rows.length}건` }) : null,
+        list.length && !openAll ? el('button', { type:'button', class:'ret-btn ghost sm', text: allOpen ? '모두 접기' : '모두 펼치기',
+          onclick: () => { if (allOpen) list.forEach(g => retUi.open.delete(g.okey)); else list.forEach(g => retUi.open.add(g.okey)); retRenderList(); } }) : null),
       !rows.length ? el('p', { class:'ho-empty', text: retItems ? '해당하는 회송 건이 없어요.' : '불러오는 중…' }) :
-      el('div', { class:'ret-wrap' }, el('table', { class:'ret-table ret-main' },
-        el('thead', {}, el('tr', {}, el('th', { class:'cb' }, allBox),
-          ...[['하차일'],['업체명'],['발주/IPR','opt'],['상품명 · 바코드'],['회송사유'],['온도'],['수량'],['상태'],...(retUi.status === 'wait' ? [] : [['완료일','opt']]),['']].map(([h, c]) => el('th', { class: c || '', text:h })))),
-        el('tbody', {}, ...rows.map(t => {
-          const cb = el('input', { type:'checkbox', 'aria-label':`${t.name} 선택`, onchange: e => { e.target.checked ? retUi.sel.add(t.id) : retUi.sel.delete(t.id); retRenderList(); } });
-          cb.checked = retUi.sel.has(t.id);
-          const old = oldDays(t);
-          return el('tr', { class: (t.status === 'done' ? 'is-done' : '') + (cb.checked ? ' is-sel' : '') },
-            el('td', { class:'c cb' }, cb),
-            el('td', { class:'c n' + (old >= 7 ? ' late' : ''), title: old ? `${old}일째 대기` : '', text: retMD(t.date) }),
-            el('td', { class:'vd', text: t.vendor }), el('td', { class:'n opt', text: String(t.po || '').replace(/,\s*/g, ',\u200b') }),
-            el('td', { class:'nm' }, el('span', { text: t.name }), t.barcode ? el('small', { class:'ret-bc', text: t.barcode }) : null, t.note ? el('small', { class:'ret-note', text: t.note }) : null),
-            el('td', { class:'r', text: t.reason }), el('td', { class:'c' }, retTempTag(t)), el('td', { class:'c n', text: retNum(t.qty) }),
-            el('td', { class:'c' }, retStatusBtn(t)), retUi.status === 'wait' ? null : el('td', { class:'c n opt', text: retMD(t.doneAt) }),
-            el('td', { class:'c nowrap' }, el('button', { type:'button', class:'ret-btn ghost sm', text:'수정', onclick: () => retStartEdit(t) }), hoDel('회송 건 삭제', () => retDelete(t))));
-        })))),
+        el('div', { class:'ret-groups' }, ...list.map(groupEl)),
       rows.length ? el('div', { class:'ret-bar' },
-        el('span', { class:'ret-help', text: sel.length ? `${sel.length}건 선택 · 총 SKU ${sel.length} · UNIT ${retNum(selQty)}` + (selVendors.length > 1 ? ` · 업체 ${selVendors.length}곳 (업체마다 한 장씩 인쇄)` : '') : '인쇄하거나 상태를 바꿀 건을 체크하세요' }),
+        el('span', { class:'ret-help', text: sel.length ? `${sel.length}건 선택 · UNIT ${retNum(selQty)}` + (selVendors.length > 1 ? ` · 업체 ${selVendors.length}곳 (업체마다 한 장씩 인쇄)` : '') : (byDateMode ? '날짜를' : '업체 이름을') + ' 누르면 펼쳐져요 · 체크한 건을 한꺼번에 처리할 수 있어요' }),
         el('div', { class:'ret-bar-btns' },
           el('button', { type:'button', class:'ret-btn ghost', disabled: !sel.some(t => t.status !== 'done'), text:'선택한 건 완료 처리', onclick: () => retSetStatus(sel.filter(t => t.status !== 'done').map(t => t.id), 'done') }),
           retUi.status !== 'wait' ? el('button', { type:'button', class:'ret-btn ghost', disabled: !sel.some(t => t.status === 'done'), text:'대기로 되돌리기', onclick: () => retSetStatus(sel.filter(t => t.status === 'done').map(t => t.id), 'wait') }) : null,
-          el('button', { type:'button', class:'ret-btn solid', disabled: !sel.length, text:'🖨 회송 확인서 인쇄', onclick: () => retPrint(sel) }))) : null);
+          el('button', { type:'button', class:'ret-btn solid', disabled: !sel.length, text:'🖨 선택한 건 인쇄', onclick: () => retPrint(sel) }))) : null);
   }
 
   // ---- 회송 확인서 인쇄 (업체마다 A4 한 장) ----
