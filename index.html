@@ -183,6 +183,7 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .ho-cellnote:focus{background:var(--accent-soft)}
 .ho-car-skip{font-size:12px;color:var(--muted);background:var(--bg)}
 .ho-carno{font-family:var(--mono);font-size:12.5px;min-width:6.8em;resize:none;white-space:pre;overflow:hidden}
+.ho-memo{min-width:3.6em;white-space:pre-wrap;word-break:break-all}
 .ho-sub{display:flex;flex-direction:column;gap:6px}
 .ho-sub h4{margin:6px 0 0;font-size:14px}
 .ho-table.ho-pp{min-width:0;width:auto}
@@ -730,6 +731,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const HO_COLS = [['pre','전실'],['c1g','1C G'],['c1m','1C M'],['c2g','2C G'],['c2m','2C M'],['c3g','3C G'],['c3m','3C M'],['c5','5C'],['c6','6C'],['c7','7C']];
   const HO_PP = [['sr','S.R'],['egg','Egg'],['bread','식빵'],['perilla','깻잎']];   // 프리팩 품목
   const HO_FROZEN = ['c5','c6','c7'];   // 냉동 챔버: 차량번호 칸
+  const HO_NOTE = [['pre','전실',1],['c1','1C',2],['c2','2C',2],['c3','3C',2],['c5','5C',1],['c6','6C',1],['c7','7C',1]];   // 비고는 챔버별 (1C~3C는 G·M 합쳐서)
+  // 여러 줄 칸: 내용만큼 높이를 맞춰요
+  const hoFit = n => { n.style.height = 'auto'; if (n.scrollHeight) n.style.height = n.scrollHeight + 'px'; };
   const HO_ROWS = [['ilban','이관 일반'],['rocket','로켓마트'],['wm','WM'],['iwit','IWIT'],['direct','직납']];
   let hoData = null, hoRev = -1, hoLoading = false;
   const hoDateOf = () => (hoData && hoData.day.date) || todayIso;   // 표에 적힌 날짜 (비어 있으면 오늘)
@@ -871,17 +875,17 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
           const f = `car:${ck}`, cl = HO_COLS.find(c => c[0] === ck)[1];
           const v = d[f] || '';
           const n = el('textarea', { class:'ho-cellnote ho-carno', rows: Math.max(2, v.split('\n').length), placeholder:'차량번호', 'aria-label': `${cl} 차량번호`, maxlength: 300, value: v });
-          n.oninput = () => { n.rows = Math.max(2, n.value.split('\n').length); };
+          n.oninput = () => hoFit(n);
           n.onchange = () => hoSave('day', f, n.value.trim());
           return el('td', {}, n);
         })),
-      el('tr', { class:'ho-note' }, el('th', { scope:'row', text:'비고' }), ...HO_COLS.map(([ck, cl]) => {
-        const f = `note:${ck}`;
+      el('tr', { class:'ho-note' }, el('th', { scope:'row', text:'비고' }), ...HO_NOTE.map(([k, cl, span]) => {
+        const f = `note:${k}`;
         const v = d[f] || '';
-        const n = el('textarea', { class:'ho-cellnote', rows: Math.max(2, v.split('\n').length), placeholder:'메모', 'aria-label': `${cl} 비고`, maxlength: 300, value: v });
-        n.oninput = () => { n.rows = Math.max(2, n.value.split('\n').length); };
+        const n = el('textarea', { class:'ho-cellnote ho-carno ho-memo', rows: 2, placeholder:'메모', 'aria-label': `${cl} 비고`, maxlength: 300, value: v });
+        n.oninput = () => hoFit(n);
         n.onchange = () => hoSave('day', f, n.value.trim());
-        return el('td', {}, n);
+        return el('td', { colspan: span > 1 ? span : undefined }, n);
       })));
     s2.appendChild(el('div', { class:'ho-table-wrap' }, el('table', { class:'ho-table' },
       hoHead(), body)));
@@ -897,6 +901,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
           return el('td', {}, n);
         })))))));
     hoGridIndex(box);
+    box.querySelectorAll('textarea').forEach(hoFit);
   }
 
   // ---------- 인수인계: 엔터 치면 아래 칸으로 ----------
@@ -908,17 +913,17 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         let c = 0;
         for (const cellEl of tr.children){
           const f = cellEl.querySelector('input, textarea');
-          if (f){ f.dataset.gt = t; f.dataset.gr = r; f.dataset.gc = c; f.setAttribute('enterkeyhint', 'next'); }
+          if (f){ f.dataset.gt = t; f.dataset.gr = r; f.dataset.gc = c; f.dataset.gs = cellEl.colSpan || 1; f.setAttribute('enterkeyhint', 'next'); }
           c += cellEl.colSpan || 1;
         }
       });
     });
   }
   function hoNextCell(cur){
-    const all = [...$('#ho').querySelectorAll('[data-gt]')].map(n => ({ n, t:+n.dataset.gt, r:+n.dataset.gr, c:+n.dataset.gc }));
+    const all = [...$('#ho').querySelectorAll('[data-gt]')].map(n => ({ n, t:+n.dataset.gt, r:+n.dataset.gr, c:+n.dataset.gc, s:+n.dataset.gs || 1 }));
     const me = { t:+cur.dataset.gt, r:+cur.dataset.gr, c:+cur.dataset.gc };
     const pick = list => list.sort((a, b) => a.c - b.c || a.r - b.r)[0];
-    return pick(all.filter(x => x.t === me.t && x.c === me.c && x.r > me.r))
+    return pick(all.filter(x => x.t === me.t && x.r > me.r && x.c <= me.c && me.c < x.c + x.s))
         || pick(all.filter(x => x.t === me.t && x.c > me.c))
         || pick(all.filter(x => x.t > me.t).sort((a, b) => a.t - b.t).filter((x, _, arr) => x.t === arr[0].t));
   }
@@ -973,9 +978,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     setFont(m, 13, false, true);
     const carLines = HO_FROZEN.map(ck => hoWrap(m, d[`car:${ck}`], widths.frozen - 12));
     const carH = Math.max(ROW, Math.max(...carLines.map(l => l.length)) * LH + 14);
-    setFont(m, 12);
-    const noteLines = HO_COLS.map(([ck], i) => hoWrap(m, d[`note:${ck}`], cols[i] - 10));
-    const noteH = Math.max(ROW, Math.max(...noteLines.map(l => l.length)) * 16 + 14);
+    setFont(m, 13, false, true);
+    const noteCells = []; { let i = 0; for (const [k, , span] of HO_NOTE){ let w = 0; for (let j = 0; j < span; j++) w += cols[i + j]; noteCells.push({ x: xs[i], w, lines: hoWrap(m, d[`note:${k}`], w - 12) }); i += span; } }
+    const noteH = Math.max(ROW, Math.max(...noteCells.map(c => c.lines.length)) * LH + 14);
     const ppH = 30 + ROW * 2;
     const TOP = 96, H1 = 34, H2 = 28;
     const tableH = H1 + H2 + ROW * (HO_ROWS.length + 1) + carH + noteH;
@@ -1037,7 +1042,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 
     // 비고
     cell(PAD, y, widths.label, noteH, C.head); text('비고', PAD + 10, y + noteH / 2, { bold:true, align:'left' });
-    HO_COLS.forEach((_, i) => { cell(xs[i], y, cols[i], noteH); noteLines[i].forEach((ln, k) => text(ln, xs[i] + 5, y + 7 + 8 + k * 16, { size:12, align:'left' })); });
+    noteCells.forEach(c => { cell(c.x, y, c.w, noteH); c.lines.forEach((ln, k) => text(ln, c.x + 6, y + 7 + LH / 2 + k * LH, { mono:true, size:13, align:'left' })); });
     y += noteH + 24;
 
     // 프리팩
