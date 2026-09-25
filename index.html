@@ -1218,10 +1218,13 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 
   // ---------- Backlog: 이관 목록 엑셀로 자동 계산 ----------
   // 파일은 이 브라우저 안에서만 읽어요. 서버에는 계산된 숫자, RC 차량 목록, 파일 이름만 저장돼요.
-  // 규칙: 이관계획 번호 없음 → XD / 있음 + RC 차량 → RC / 있음 + 나머지 차량 → RM
+  // 규칙: 보내는 센터가 INC17·INC39·YON3일 때만 XD/RC — 이관계획 번호 없음 → XD / 있음 + RC 차량 → RC
+  //       그 밖의 줄(다른 센터, RC가 아닌 차량)은 모두 RM
   //       상태 이동중 → NYR, 진열대기·진열중 → NYS (진열완료 등은 제외), 값은 집품수량 합계
   const hoWhen = iso => { const t = new Date(iso); return isNaN(t) ? '' : `${t.getMonth() + 1}/${t.getDate()} ${pad(t.getHours())}:${pad(t.getMinutes())}`; };
   const carKey = s => { const n = String(s || '').replace(/\D/g, ''); return n.length >= 4 ? n.slice(-4) : n; };   // 차량번호는 뒤 4자리로 비교
+  const HO_XDRC_CENTERS = ['INC17', 'INC39', 'YON3'];   // XD·RC가 출발하는 센터 (띄어쓰기 무시)
+  const isXdRcCenter = s => HO_XDRC_CENTERS.includes(String(s || '').replace(/\s/g, '').toUpperCase());
   const splitCars = s => String(s || '').split(/[\s,，/]+/).map(x => x.trim()).filter(Boolean);
 
   function hoPickExcel(){
@@ -1293,7 +1296,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const hi = rows.findIndex(r => r && r.some(v => norm(v) === '상태'));
     if (hi < 0) throw new Error("'상태' 열을 찾지 못했어요. 이관 목록(TransferOperationList) 엑셀인지 확인해 주세요.");
     const H = rows[hi].map(norm);
-    const need = { plan:'이관계획번호', status:'상태', qty:'집품수량', car:'차량번호' };
+    const need = { plan:'이관계획번호', status:'상태', qty:'집품수량', car:'차량번호', from:'보내는센터' };
     const col = {};
     const miss = [];
     for (const [k, name] of Object.entries(need)){ col[k] = H.indexOf(name); if (col[k] < 0) miss.push(name); }
@@ -1306,7 +1309,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       const kind = st === '이동중' ? 'nyr' : (st === '진열대기' || st === '진열중') ? 'nys' : null;
       if (!kind){ if (st === '진열완료') done++; else other++; continue; }
       const q = parseFloat(String(r[col.qty] || '').replace(/,/g, ''));
-      items.push({ kind, plan: !!String(r[col.plan] || '').trim(), car: String(r[col.car] || '').trim(), qty: isNaN(q) ? 0 : q });
+      items.push({ kind, plan: !!String(r[col.plan] || '').trim(), car: String(r[col.car] || '').trim(), main: isXdRcCenter(r[col.from]), qty: isNaN(q) ? 0 : q });
     }
     return { total: rows.length - hi - 1, items, done, other };
   }
@@ -1314,7 +1317,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   function hoCalc(prep, rcSet){
     const v = { xd:{ nys:0, nyr:0 }, rc:{ nys:0, nyr:0 }, rm:{ nys:0, nyr:0 } };
     for (const it of prep.items){
-      const row = !it.plan ? 'xd' : rcSet.has(carKey(it.car)) ? 'rc' : 'rm';
+      const row = !it.main ? 'rm' : !it.plan ? 'xd' : rcSet.has(carKey(it.car)) ? 'rc' : 'rm';
       v[row][it.kind] += it.qty;
     }
     for (const r in v) for (const k in v[r]) v[r][k] = Math.round(v[r][k] * 10) / 10;
@@ -1330,9 +1333,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       setSync('', '');
     } catch(e) { toast(e.message || '엑셀을 읽지 못했어요.'); setSync('err', '엑셀을 읽지 못했어요'); return; }
     const d = hoData.day;
-    // 이관계획 번호가 있는 차량 (RC/RM 후보) — 줄이 많은 순
+    // RC 후보: INC17·INC39·YON3에서 온, 이관계획 번호가 있는 차량 — 줄이 많은 순
     const carCount = new Map();
-    for (const it of prep.items) if (it.plan && it.car){ const k = carKey(it.car); const c = carCount.get(k) || { label: it.car, n: 0 }; c.n++; carCount.set(k, c); }
+    for (const it of prep.items) if (it.main && it.plan && it.car){ const k = carKey(it.car); const c = carCount.get(k) || { label: it.car, n: 0 }; c.n++; carCount.set(k, c); }
     const cars = [...carCount.entries()].sort((a, b) => b[1].n - a[1].n);
     const rc = new Set(splitCars(d.rcCars).map(carKey).filter(Boolean));
 
@@ -1347,7 +1350,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const rcAll = () => new Set([...rc, ...splitCars(extra.value).map(carKey).filter(Boolean)]);
     const refresh = () => {
       chipBox.innerHTML = '';
-      if (!cars.length) chipBox.appendChild(el('p', { class:'ho-empty', text:'이관계획 번호가 있는 차량이 없어요.' }));
+      if (!cars.length) chipBox.appendChild(el('p', { class:'ho-empty', text:'RC 후보 차량이 없어요.' }));
       for (const [k, c] of cars){
         const on = rc.has(k);
         chipBox.appendChild(el('button', { type:'button', class:'ho-chip' + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false',
@@ -1397,7 +1400,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
           el('small', { text: `${prep.total}줄 읽음 · 계산 대상 ${prep.items.length}줄` + (skipped ? ` (${skipped} 제외)` : '') })),
         el('div', { class:'ho-imp-sec' },
           el('h4', { text:'RC 차량 고르기' }),
-          el('p', { class:'ho-imp-help', text:'이관계획 번호가 있는 차량이에요. RC 차량을 눌러 켜 주세요. 나머지는 RM으로 계산돼요.' }),
+          el('p', { class:'ho-imp-help', text:'INC17·INC39·YON3에서 온 이관계획 차량이에요. RC 차량을 눌러 켜 주세요. 나머지 차량과 다른 센터에서 온 줄은 모두 RM으로 계산돼요.' }),
           chipBox, extra),
         el('div', { class:'ho-imp-sec' },
           el('h4', { text:'계산 결과 미리보기' }),
