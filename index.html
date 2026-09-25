@@ -912,7 +912,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       table.querySelectorAll('tbody tr').forEach((tr, r) => {
         let c = 0;
         for (const cellEl of tr.children){
-          const f = cellEl.querySelector('input, textarea');
+          const f = cellEl.querySelector('input, textarea:not(.ho-memo)');   // 비고 메모는 엔터 이동에서 빼요
           if (f){ f.dataset.gt = t; f.dataset.gr = r; f.dataset.gc = c; f.dataset.gs = cellEl.colSpan || 1; f.setAttribute('enterkeyhint', 'next'); }
           c += cellEl.colSpan || 1;
         }
