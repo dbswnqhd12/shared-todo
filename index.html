@@ -41,6 +41,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding:0 16px}
+.wrap.wide{max-width:1080px}
 .wrap{max-width:760px;margin:0 auto;padding-block:40px 64px;display:flex;flex-direction:column;gap:20px}
 header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
 h1{font-family:"Big Shoulders Display",var(--display);font-weight:800;font-size:clamp(34px,7vw,46px);letter-spacing:.02em;line-height:1.05;margin:0;text-wrap:balance}
@@ -499,6 +500,34 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   .pr-table .pr-opt{display:none}
   .seg{max-width:100%;overflow-x:auto}.seg button{white-space:nowrap;padding:6px 11px;font-size:13.5px;flex:none}
   .pr-cr{grid-template-columns:52px minmax(40px,1fr) 64px 34px}.pr-cr .cz{display:none}
+}
+/* 생산성: 목록 + 상세 */
+.pr-split{display:grid;grid-template-columns:minmax(250px,300px) minmax(0,1fr);gap:12px;align-items:start}
+.pr-list{padding:10px 8px}.pr-lh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 6px 4px}
+.pr-chips.sm button{padding:3px 10px;font-size:12px}
+.pr-rows{display:flex;flex-direction:column;gap:2px}
+.pr-li{display:grid;grid-template-columns:22px minmax(0,1fr) auto auto;gap:3px 8px;align-items:center;padding:7px 8px;border-radius:8px;cursor:pointer}
+.pr-li:hover{background:var(--bg)}.pr-li.sel{background:var(--accent-soft)}
+.pr-li .r{font-family:var(--mono);color:var(--muted);font-size:12px}.pr-li .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr-li .pr-tag{margin-left:0}.pr-li .v{font-family:var(--mono);font-weight:800;text-align:right;white-space:nowrap}.pr-li .v small{font-size:11px;color:var(--muted);font-weight:500}
+.pr-li .lb{grid-column:2/5;height:5px;background:var(--bg);border-radius:3px;position:relative}.pr-li.sel .lb{background:var(--paper)}
+.pr-li .lb i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:3px}.pr-li .lb b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.4}
+.pr-li .sm{grid-column:2/5;font-size:11px;color:var(--muted);font-family:var(--mono)}.pr-li .sm b.lo{color:var(--high)}
+.pr-detail{position:sticky;top:10px}
+.pr-hero{display:flex;align-items:flex-end;gap:10px 26px;flex-wrap:wrap}
+.pr-hero .big{font-family:var(--mono);font-size:42px;font-weight:800;color:var(--accent);line-height:1.05}.pr-hero .big small{font-size:13px;color:var(--muted);font-weight:500}
+.pr-hero .st{font-size:12px;color:var(--muted)}.pr-hero .st b{display:block;font-family:var(--mono);font-size:20px;color:var(--ink)}.pr-hero .st small{font-size:11px}
+.pr-chart-wrap{overflow-x:auto}.pr-chart svg{display:block;color:var(--ink);height:auto}
+.pr-chart .pr-svgb{fill:var(--accent)}.pr-chart .pr-svgv{fill:var(--ink);font-family:var(--mono)}.pr-chart .pr-svgm{fill:var(--muted)}.pr-chart .mono{font-family:var(--mono)}
+.pr-trs{display:flex;flex-direction:column;gap:5px}
+.pr-tr{display:grid;grid-template-columns:10px 92px minmax(40px,1fr) 64px 44px 128px;gap:8px;align-items:center;font-size:12.5px}.pr-tr.none{opacity:.45}
+.pr-tr .dot{width:10px;height:10px;border-radius:3px}.pr-trs .tb{height:10px;background:var(--bg);border-radius:5px;overflow:hidden}.pr-trs .tb i{display:block;height:100%;border-radius:5px;background:var(--muted)}
+.pr-tr b,.pr-cr b{text-align:right}.pr-tr .h small{color:var(--muted)}.pr-trs .muted{color:var(--muted)}.pr-trs .mono{font-family:var(--mono)}
+.pr-cr{display:grid;grid-template-columns:56px minmax(40px,1fr) 64px 40px;gap:8px;align-items:center;font-size:12.5px}.pr-cr .cn{font-weight:700;white-space:nowrap}
+@media (max-width:760px){
+  .pr-split{grid-template-columns:1fr}.pr-detail{position:static}
+  .pr-tr{grid-template-columns:10px 84px minmax(30px,1fr) 60px;grid-template-areas:"d n b q" ". t h h"}
+  .pr-tr .dot{grid-area:d}.pr-tr > span:nth-of-type(1){grid-area:n}.pr-tr .tb{grid-area:b}.pr-tr > b{grid-area:q}.pr-tr > span.muted{grid-area:t}.pr-tr .h{grid-area:h;text-align:right}
 }
 #ret-print{display:none;color:#000;background:#fff;font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
 #ret-print.measuring{display:block;position:absolute;left:-10000px;top:0;width:186mm}
@@ -1003,6 +1032,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     $('#ho').hidden = !hoView;
     $('#ret').hidden = !retView;
     $('#prod').hidden = !prodView;
+    $('#app').classList.toggle('wide', prodView);
     for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView;
     document.querySelector('.toolbar').hidden = hoView || retView || prodView;
     if (prodView && !$('#prod').hasChildNodes()) renderProd();
@@ -2368,7 +2398,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const PR_PROC = { 'Receive_Shrink Packaging':'쉬링크 포장', TRANSFER_CART_UNLOAD:'카트 하차', RECEIVE_WS:'입고', UNLOAD_WS:'하차', UNLOAD:'하차',
     IB_TEAM_CAPTAIN:'캡틴', FORKLIFTER:'지게차', REPLENISHER:'보충', STOW_WS:'STOW_WS' };
   let prData = null;
-  const prUi = { shift:'all', type:'all', ct:'all', sel:'' };
+  const prUi = { shift:'all', type:'all', ct:'all', sel:'', sort:'q' };
 
   const prSec = v => {
     if (v === '' || v == null) return null;
@@ -2462,7 +2492,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       el('span', { class:'pr-chips', role:'group', 'aria-label': label }, ...opts.map(([v, l]) => el('button', { type:'button', 'aria-pressed': prUi[key] === v ? 'true' : 'false', text: l,
         onclick: () => { prUi[key] = v; renderProd(); } }))));
     const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'STOW 개인 생산성' }),
-      el('p', { class:'ret-help', text:'WMS 작업자 이력(worker_history) 엑셀을 올리면 IB STOW 사람별 HTP를 계산해요' }));
+      prData ? el('span', { class:'ret-help', text: (prData.dates.length ? prData.dates.map(d => retMD(d)).join(', ') + ' · ' : '') + prData.file }) :
+      el('p', { class:'ret-help', text:'WMS 작업자 이력(worker_history) 엑셀을 올리면 IB STOW 사람별 진열 수량 · HTP를 계산해요' }),
+      prData ? el('button', { type:'button', class:'ret-btn ghost sm pr-close', text:'다른 파일', onclick: prPick }) : null);
     if (!prData){
       const drop = el('div', { class:'pr-drop', tabindex:'0', role:'button', 'aria-label':'엑셀 올리기', onclick: prPick,
         onkeydown: e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); prPick(); } } },
@@ -2473,55 +2505,33 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       return;
     }
     const A = prAgg();
-    const mx = Math.max(1, ...A.list.map(p => p.uph));
-    const dateTxt = prData.dates.length ? prData.dates.map(d => retMD(d)).join(', ') + ' · ' : '';
+    const byQ = prUi.sort !== 'htp';
+    const list = [...A.list].sort((a, b) => byQ ? b.q - a.q : b.uph - a.uph);
+    const avgQ = list.length ? A.tq / list.length : 0;
+    if (!list.some(p => p.emp === prUi.sel)) prUi.sel = list[0]?.emp || '';
+    const mx = Math.max(1, ...list.map(p => byQ ? p.q : p.uph)), avgV = byQ ? avgQ : A.avg;
     const top = el('section', { class:'ret-sec' }, head,
-      el('div', { class:'pr-file' }, el('span', { class:'pr-fn', text: prData.file }),
-        el('span', { class:'ret-help', text: `${dateTxt}${prFmt(prData.nRows)}줄 · ${prData.nEmp}명 · 브라우저에서만 계산 · 저장 안 함` }),
-        el('button', { type:'button', class:'ret-btn ghost sm', text:'다른 파일', onclick: prPick })),
       el('div', { class:'pr-filters' },
         chips('조', 'shift', [['all','전체'], ['day','주간'], ['eve','오후'], ['night','심야']]),
-        chips('진열', 'type', [['all','전체'], ['PLT','PLT'], ['CASE','CASE'], ['EACH','EACH'], ['TOTE','토트']]),
-        chips('계약', 'ct', [['all','전체'], ['PERM','정규'], ['TEMP','단기']])),
-      el('div', { class:'pr-kpis' },
-        el('div', { class:'pr-kpi' }, el('small', { text:'인원' }), el('b', { text: A.list.length }), '명'),
-        el('div', { class:'pr-kpi' }, el('small', { text:'총 수량' }), el('b', { text: prFmt(A.tq) })),
-        el('div', { class:'pr-kpi' }, el('small', { text:'작업시간' }), el('b', { text: (A.td / 3600).toFixed(1) }), 'h'),
-        el('div', { class:'pr-kpi main' }, el('small', { text:'평균 HTP' }), el('b', { text: prFmt(A.avg) }))));
+        chips('진열', 'type', [['all','전체'], ['PLT','PLT'], ['CASE','CASE'], ['EACH','EACH'], ['TOTE','토트']])),
+      el('p', { class:'ret-help', text: `${list.length}명 · 총 ${prFmt(A.tq)}개 · ${(A.td / 3600).toFixed(1)}h · 평균 HTP ${prFmt(A.avg)} · 브라우저에서만 계산 · 저장 안 함` }));
     prDropZone(top);
-
-    const typeTitle = prUi.type === 'all' ? '' : ` · ${PR_TYPE_LABEL[prUi.type]}`;
-    const table = !A.list.length ? el('p', { class:'ho-empty', text:'조건에 맞는 STOW 기록이 없어요.' }) :
-      el('div', { class:'ret-wrap' }, el('table', { class:'pr-table' },
-        el('thead', {}, el('tr', {}, el('th', {}), el('th', { text:'이름' }), el('th', { class:'r', text:'수량' }), el('th', { class:'pr-mixh pr-opt', text:'진열 방식' }),
-          el('th', { class:'r pr-opt', text:'시간' }), el('th', { class:'pr-opt' }), el('th', { class:'r', text:'HTP' }), el('th', { text:'평균 대비' }))),
-        el('tbody', {}, ...A.list.map((p, i) => {
-          const pct = A.avg ? p.uph / A.avg * 100 : 0;
-          const tot = Object.values(p.t).reduce((s, v) => s + v, 0) || 1;
-          const main = Object.keys(p.t).sort((a, b) => p.t[b] - p.t[a])[0] || 'ETC';
-          const tote = p.t.TOTE && main !== 'TOTE' ? ` · 토트 ${Math.round(p.t.TOTE / tot * 100)}%` : '';
-          const flag = pct < 70 ? el('span', { class:'pr-flag lo', text:`▼ 평균의 ${Math.round(pct)}%` })
-            : pct >= 115 ? el('span', { class:'pr-flag hi', text:`▲ ${Math.round(pct)}%` }) : el('span', { class:'pr-flag', text:`${Math.round(pct)}%` });
-          const sel = () => { prUi.sel = prUi.sel === p.emp ? '' : p.emp; renderProd(); if (prUi.sel) setTimeout(() => $('#pr-detail')?.scrollIntoView({ behavior:'smooth', block:'start' }), 30); };
-          return el('tr', { class: prUi.sel === p.emp ? 'sel' : '', tabindex:'0', title:`${p.emp} · 눌러서 상세 보기`, onclick: sel, onkeydown: e => { if (e.key === 'Enter') sel(); } },
-            el('td', { class:'rk', text: i + 1 }),
-            el('td', { class:'nm' }, el('span', { text: p.name }), p.sh ? el('span', { class:'pr-tag s-' + p.sh, text: PR_SHIFT[p.sh] }) : null,
-              el('span', { class:'pr-tag c', text: p.ct === 'PERM' ? '정규' : p.ct === 'TEMP' ? '단기' : p.ct || '-' })),
-            el('td', { class:'n', text: prFmt(p.q) }),
-            el('td', { class:'pr-mix pr-opt' }, el('div', { class:'pr-mb' }, ...[...PR_TYPES, 'ETC'].filter(k => p.t[k]).map(k => el('i', { style:`width:${p.t[k] / tot * 100}%;background:${PR_COLOR[k]}`, title:`${PR_TYPE_LABEL[k]} ${prFmt(p.t[k])}` }))),
-              el('span', { text: `${PR_TYPE_SHORT[main]} ${Math.round((p.t[main] || 0) / tot * 100)}%${tote}` })),
-            el('td', { class:'n pr-opt', text: prH(p.d) }),
-            el('td', { class:'pr-bar pr-opt' }, el('div', { class:'pr-track' }, el('i', { class: pct < 70 ? 'lo' : '', style:`width:${p.uph / mx * 100}%` }), el('b', { style:`left:${A.avg / mx * 100}%` }))),
-            el('td', { class:'n uph', text: prFmt(p.uph) }),
-            el('td', {}, flag));
-        }))));
-    const legend = el('div', { class:'pr-legend' },
-      ...PR_TYPES.map(k => el('span', {}, el('i', { style:'background:' + PR_COLOR[k] }), k === 'TOTE' ? '토트 재고이동 (11F·21F·31F)' : k)),
-      el('span', {}, el('em', {}), `평균 ${prFmt(A.avg)}`), el('span', { class:'lo', text:'▼ 평균의 70% 미만' }));
-    const rank = el('section', { class:'ret-sec' },
-      el('div', { class:'ret-sec-head' }, el('h3', { text:'STOW 사람별 HTP' + typeTitle }), el('p', { class:'ret-help', text:'HTP = 시간당 진열 수량 (수량 ÷ 작업시간 · 토트 재고이동 포함) · 이름을 누르면 상세' })),
-      table, A.list.length ? legend : null);
-    box.replaceChildren(top, rank, prUi.sel ? prDetail(A) : el('p', { class:'ret-help pr-hint', text:'순위에서 이름을 누르면 시간대별 HTP · 진열 방식 · 챔버가 나와요' }));
+    const pick = p => { prUi.sel = p.emp; renderProd();
+      if (window.matchMedia('(max-width:760px)').matches) setTimeout(() => $('#pr-detail')?.scrollIntoView({ behavior:'smooth', block:'start' }), 30); };
+    const rows = list.map((p, i) => el('div', { class:'pr-li' + (p.emp === prUi.sel ? ' sel' : ''), role:'button', tabindex:'0', title: p.emp,
+        onclick: () => pick(p), onkeydown: e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pick(p); } } },
+      el('span', { class:'r', text: i + 1 }), el('span', { class:'nm', text: p.name }),
+      p.sh ? el('span', { class:'pr-tag s-' + p.sh, text: PR_SHIFT[p.sh] }) : el('span'),
+      el('span', { class:'v' }, byQ ? prFmt(p.q) : prFmt(p.uph), el('small', { text: byQ ? '개' : ' HTP' })),
+      el('div', { class:'lb' }, el('i', { style:`width:${(byQ ? p.q : p.uph) / mx * 100}%` }), el('b', { style:`left:${avgV / mx * 100}%` })),
+      el('div', { class:'sm' }, byQ ? `${prH(p.d)} · HTP ` : `${prFmt(p.q)}개 · ${prH(p.d)}`, byQ ? el('b', { class: p.uph < A.avg * 0.7 ? 'lo' : '', text: prFmt(p.uph) }) : null)));
+    const side = el('section', { class:'ret-sec pr-list' },
+      el('div', { class:'pr-lh' }, el('span', { class:'pr-fl', text: byQ ? `순위 · 평균 ${prFmt(avgQ)}개` : `순위 · 평균 HTP ${prFmt(A.avg)}` }),
+        el('span', { class:'pr-chips sm', role:'group', 'aria-label':'순위 기준' }, ...[['q','수량'], ['htp','HTP']].map(([v, l]) =>
+          el('button', { type:'button', 'aria-pressed': (prUi.sort || 'q') === v ? 'true' : 'false', text: l, onclick: () => { prUi.sort = v; renderProd(); } })))),
+      list.length ? el('div', { class:'pr-rows' }, ...rows) : el('p', { class:'ho-empty', text:'조건에 맞는 STOW 기록이 없어요.' }));
+    const sel = list.find(p => p.emp === prUi.sel);
+    box.replaceChildren(top, el('div', { class:'pr-split' }, side, sel ? prDetail(A, sel, list.indexOf(sel) + 1, list.length, avgQ, byQ) : el('span')));
   }
 
   function prDropZone(node){
@@ -2530,74 +2540,64 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     node.ondrop = e => { e.preventDefault(); node.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) prImportFile(f); };
   }
 
-  // 한 사람 상세: 방식별 · 시간대별 · 챔버별
-  function prDetail(A){
-    const emp = prUi.sel;
+  // 오른쪽 상세: 진열 수량 · 시간대별 HTP · 진열 방식 · 챔버
+  function prDetail(A, p, rank, total, avgQ, byQ){
     const passShift = r => (prUi.shift === 'all' || r.shift === prUi.shift);
-    const mine = prData.recs.filter(r => r.emp === emp && passShift(r));
-    const stow = mine.filter(r => r.stow);
-    const d = stow.reduce((s, r) => s + r.d, 0), q = stow.reduce((s, r) => s + r.q, 0);
-    const ct = stow[0]?.ct || '', shTot = {};
-    for (const r of stow) shTot[r.shift] = (shTot[r.shift] || 0) + r.d;
-    const sh = Object.entries(shTot).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
-    // 방식별
-    const byT = {};
-    for (const r of stow){ const x = byT[r.type] = byT[r.type] || { q:0, d:0 }; x.q += r.q; x.d += r.d; }
-    const tiles = [...PR_TYPES, ...(byT.ETC ? ['ETC'] : [])].map(k => { const x = byT[k] || { q:0, d:0 };
-      return el('div', { class:'pr-tt' + (x.d ? '' : ' none') }, el('div', { class:'pr-tth' }, el('i', { style:'background:' + PR_COLOR[k] }), PR_TYPE_LABEL[k]),
-        el('div', {}, el('b', { text: prFmt(x.q) }), el('small', { text:`개 · ${Math.round(x.d / 60)}분` })),
-        el('div', { class:'pr-ttu' }, 'HTP ', el('b', { text: x.d ? prFmt(prUph(x.q, x.d)) : '–' }), el('small', { text:` (전체 ${prFmt(A.typeAvg[k] || 0)})` }))); });
-    // 시간대별
+    const mine = prData.recs.filter(r => r.emp === p.emp && passShift(r));
+    const stow = mine.filter(r => r.stow && (prUi.type === 'all' || r.type === prUi.type));
+    const d = stow.reduce((s, r) => s + r.d, 0), q = stow.reduce((s, r) => s + r.q, 0), u = prUph(q, d);
+    // 시간대별 (STOW만, 다른 일은 이름만)
     const hours = new Map();
     for (const r of mine){
-      const h = hours.get(r.hour) || { q:0, d:0, t:{}, ch:{}, other:{} }; hours.set(r.hour, h);
-      if (r.stow){ h.q += r.q; h.d += r.d; h.t[r.type] = (h.t[r.type] || 0) + r.q; if (r.q){ const c = prChamber(r.loc); h.ch[c] = (h.ch[c] || 0) + r.q; } }
-      else { const p = (r.proc.match(/\((.*)\)/) || [, r.proc])[1]; h.other[p] = (h.other[p] || 0) + r.d; }
+      const h = hours.get(r.hour) || { q:0, d:0, other:{} }; hours.set(r.hour, h);
+      if (r.stow && (prUi.type === 'all' || r.type === prUi.type)){ h.q += r.q; h.d += r.d; }
+      else if (!r.stow){ const nm = (r.proc.match(/\((.*)\)/) || [, r.proc])[1]; h.other[nm] = (h.other[nm] || 0) + r.d; }
     }
-    const HH = [...hours.entries()].sort((a, b) => a[0] - b[0]);
-    const umax = Math.max(1, ...HH.map(([, h]) => prUph(h.q, h.d)));
-    let idle = 0;
-    const cols = HH.map(([hr, h]) => {
-      const lab = `${hr % 24}시`;
-      const otherName = Object.keys(h.other).sort((a, b) => h.other[b] - h.other[a])[0];
-      const oLab = otherName ? (PR_PROC[otherName] || otherName) : '';
-      if (!h.d) return el('div', { class:'pr-hc other' }, el('div', { class:'pr-hv', text:'–' }), el('div', { class:'pr-hb' }), el('div', { class:'pr-hl', text: lab }),
-        el('div', { class:'pr-hq', text:' ' }), el('div', { class:'pr-hp', text: oLab }));
-      if (!h.q){ idle++; return el('div', { class:'pr-hc' }, el('div', { class:'pr-hv idle', text:'0' }), el('div', { class:'pr-hb' }), el('div', { class:'pr-hl', text: lab }),
-        el('div', { class:'pr-hq', text:`${Math.round(h.d / 60)}분` }), el('div', { class:'pr-hp idle', text:'⚠ 실적 0' }), oLab ? el('div', { class:'pr-ho', text:'+ ' + oLab }) : null); }
-      const u = prUph(h.q, h.d), tot = Object.values(h.t).reduce((s, v) => s + v, 0) || 1;
-      const main = Object.keys(h.t).sort((a, b) => h.t[b] - h.t[a])[0];
-      return el('div', { class:'pr-hc', title:`${lab} · ${prFmt(h.q)}개 · ${Math.round(h.d / 60)}분 · HTP ${prFmt(u)}` },
-        el('div', { class:'pr-hv', text: prFmt(u) }),
-        el('div', { class:'pr-hb' }, el('span', { class:'pr-stk', style:`height:${Math.max(3, u / umax * 100)}%` },
-          ...[...PR_TYPES, 'ETC'].reverse().filter(k => h.t[k]).map(k => el('i', { style:`flex:${h.t[k]};background:${PR_COLOR[k]}` })))),
-        el('div', { class:'pr-hl', text: lab }),
-        el('div', { class:'pr-hq' }, `${prFmt(h.q)}개`, el('br'), `${Math.round(h.d / 60)}분`),
-        el('div', { class:'pr-hty', text: `${PR_TYPE_SHORT[main]} ${Math.round(h.t[main] / tot * 100)}%` }),
-        el('div', { class:'pr-hp' }, ...Object.keys(h.ch).sort((a, b) => h.ch[b] - h.ch[a]).slice(0, 2).map(c => el('span', { class:'pr-ct', text: c }))),
-        oLab ? el('div', { class:'pr-ho', text:'+ ' + oLab }) : null);
+    const HH = [...hours.entries()].filter(([, h]) => h.d).sort((a, b) => a[0] - b[0]);
+    const us = HH.map(([, h]) => prUph(h.q, h.d)), umax = Math.max(A.avg * 1.15, ...us, 1);
+    const n = Math.max(1, HH.length), W = Math.max(n * 52, 320), bw = W / n, y0 = 150, sc = 125 / umax, ay = Math.round(y0 - A.avg * sc);
+    let svg = `<svg viewBox="0 0 ${W} 196" width="100%" style="min-width:${n * 44}px;max-width:${n * 66}px" role="img" aria-label="시간대별 HTP"><line x1="0" x2="${W}" y1="${ay}" y2="${ay}" stroke="currentColor" stroke-dasharray="4 4" opacity=".45"/>`
+      + `<text x="${W - 2}" y="${ay - 4}" text-anchor="end" font-size="11" class="pr-svgm">평균 HTP ${prFmt(A.avg)}</text>`;
+    HH.forEach(([hr, h], i) => {
+      const v = us[i], hh = Math.max(3, v * sc), x = i * bw + 6, w = bw - 12, cx = x + w / 2;
+      svg += `<rect x="${x}" y="${y0 - hh}" width="${w}" height="${hh}" rx="4" class="pr-svgb"><title>${hr % 24}시 · ${prFmt(h.q)}개 · ${Math.round(h.d / 60)}분 · HTP ${prFmt(v)}</title></rect>`
+        + `<text x="${cx}" y="${y0 - hh - 6}" text-anchor="middle" font-size="11" font-weight="700" class="pr-svgv">${prFmt(v)}</text>`
+        + `<text x="${cx}" y="${y0 + 14}" text-anchor="middle" font-size="11" class="pr-svgm">${hr % 24}시</text>`
+        + `<text x="${cx}" y="${y0 + 27}" text-anchor="middle" font-size="10" class="pr-svgm mono">${prFmt(h.q)}개</text>`
+        + `<text x="${cx}" y="${y0 + 38}" text-anchor="middle" font-size="10" class="pr-svgm mono">${Math.round(h.d / 60)}분</text>`;
     });
-    // 챔버별
-    const chq = {}, chz = {};
-    for (const r of stow) if (r.q){ const c = prChamber(r.loc); chq[c] = (chq[c] || 0) + r.q; (chz[c] = chz[c] || {})[r.loc] = (chz[c][r.loc] || 0) + r.q; }
+    svg += '</svg>';
+    const chart = el('div', { class:'pr-chart' }); chart.innerHTML = svg;
+    // 진열 방식
+    const byT = {};
+    for (const r of mine.filter(r => r.stow)){ const x = byT[r.type] = byT[r.type] || { q:0, d:0 }; x.q += r.q; x.d += r.d; }
+    const tq = Object.values(byT).reduce((s, x) => s + x.q, 0) || 1;
+    const types = [...PR_TYPES, ...(byT.ETC ? ['ETC'] : [])].map(k => { const x = byT[k] || { q:0, d:0 };
+      return el('div', { class:'pr-tr' + (x.d ? '' : ' none') }, el('i', { class:'dot', style:'background:' + PR_COLOR[k] }), el('span', { text: PR_TYPE_LABEL[k] }),
+        el('div', { class:'tb' }, el('i', { style:`width:${x.q / tq * 100}%;background:${PR_COLOR[k]}` })),
+        el('b', { class:'mono', text: prFmt(x.q) + '개' }), el('span', { class:'mono muted', text: Math.round(x.d / 60) + '분' }),
+        el('span', { class:'h' }, 'HTP ', el('b', { class:'mono', text: x.d ? prFmt(prUph(x.q, x.d)) : '–' }), el('small', { text: ' 평균 ' + prFmt(A.typeAvg[k] || 0) }))); });
+    // 챔버
+    const chq = {};
+    for (const r of stow) if (r.q){ const c = prChamber(r.loc); chq[c] = (chq[c] || 0) + r.q; }
     const chL = Object.entries(chq).sort((a, b) => b[1] - a[1]), ctot = chL.reduce((s, [, v]) => s + v, 0) || 1, cmax = chL[0]?.[1] || 1;
-    const u = prUph(q, d);
-    return el('section', { class:'ret-sec', id:'pr-detail' },
-      el('div', { class:'ret-sec-head' }, el('h3', { text:`${prName(emp)} · 상세` }), sh ? el('span', { class:'pr-tag s-' + sh, text: PR_SHIFT[sh] }) : null,
-        el('span', { class:'pr-tag c', text: ct === 'PERM' ? '정규' : ct === 'TEMP' ? '단기' : ct }), el('span', { class:'ret-help', text: emp }),
-        el('button', { type:'button', class:'ret-btn ghost sm pr-close', text:'닫기', onclick: () => { prUi.sel = ''; renderProd(); } })),
-      el('div', { class:'pr-stats' }, el('span', {}, '수량 ', el('b', { text: prFmt(q) })), el('span', {}, 'STOW 시간 ', el('b', { text: prH(d) })),
-        el('span', {}, 'HTP ', el('b', { text: prFmt(u) }), el('small', { text:` (평균 ${prFmt(A.avg)})` })),
-        idle ? el('span', { class:'lo', text:`⚠ 실적 0 : ${idle}시간` }) : null),
-      el('p', { class:'pr-sub' }, '진열 방식별', el('small', { text:'같은 방식끼리 전체 평균과 비교' })),
-      el('div', { class:'pr-tts' }, ...tiles),
-      el('p', { class:'pr-sub' }, '시간대별 HTP', el('small', { text:'막대 높이 = HTP · 색 = 진열 방식 비율 · 아래는 수량 · 작업분 · 챔버' })),
-      el('div', { class:'pr-hours-wrap' }, el('div', { class:'pr-hours', style:`grid-template-columns:repeat(${HH.length},minmax(58px,1fr))` }, ...cols)),
-      el('p', { class:'pr-sub' }, '챔버별 진열', el('small', { text:'수량 기준 · 11F·21F·31F는 프리팩 · 오른쪽은 많이 진열한 로케이션' })),
-      chL.length ? el('div', { class:'pr-chs' }, ...chL.map(([c, v]) => el('div', { class:'pr-cr' }, el('span', { class:'cn', text: c }),
-        el('div', { class:'pr-track2' }, el('i', { style:`width:${v / cmax * 100}%` })), el('span', { class:'cq', text:`${prFmt(v)}개` }),
-        el('span', { class:'cp', text:`${Math.round(v / ctot * 100)}%` }),
-        el('span', { class:'cz', text: Object.entries(chz[c]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]).join(' · ') }))))
+    return el('section', { class:'ret-sec pr-detail', id:'pr-detail' },
+      el('div', { class:'ret-sec-head' }, el('h3', { text: p.name }), p.sh ? el('span', { class:'pr-tag s-' + p.sh, text: PR_SHIFT[p.sh] }) : null,
+        el('span', { class:'pr-tag c', text: p.ct === 'PERM' ? '정규' : p.ct === 'TEMP' ? '단기' : p.ct || '-' }),
+        el('span', { class:'ret-help', text: `${byQ ? '수량' : 'HTP'} ${rank}위 / ${total}명` })),
+      el('div', { class:'pr-hero' },
+        el('div', {}, el('span', { class:'pr-fl', text: prUi.type === 'all' ? '진열 수량' : `진열 수량 · ${PR_TYPE_LABEL[prUi.type]}` }),
+          el('div', { class:'big' }, prFmt(q), el('small', { text:` 개 / 평균 ${prFmt(avgQ)}` }))),
+        el('div', { class:'st' }, 'STOW 시간', el('b', { text: prH(d) })),
+        el('div', { class:'st' }, 'HTP', el('b', { text: prFmt(u) }), el('small', { text:`평균 ${prFmt(A.avg)}` }))),
+      el('p', { class:'pr-sub' }, '시간대별 HTP', el('small', { text:'점선 = 평균 · 아래는 수량 · 작업분' })),
+      HH.length ? el('div', { class:'pr-chart-wrap' }, chart) : el('p', { class:'ho-empty', text:'시간대 기록이 없어요.' }),
+      el('p', { class:'pr-sub' }, '진열 방식', el('small', { text:'수량 · 시간 · 같은 방식 평균 HTP와 비교' })),
+      el('div', { class:'pr-trs' }, ...types),
+      el('p', { class:'pr-sub' }, '챔버별 진열', el('small', { text:'11F·21F·31F는 프리팩' })),
+      chL.length ? el('div', { class:'pr-trs' }, ...chL.map(([c, v]) => el('div', { class:'pr-cr' }, el('span', { class:'cn', text: c }),
+        el('div', { class:'tb' }, el('i', { style:`width:${v / cmax * 100}%` })), el('b', { class:'mono', text: prFmt(v) + '개' }),
+        el('span', { class:'mono muted', text: Math.round(v / ctot * 100) + '%' }))))
         : el('p', { class:'ho-empty', text:'진열 기록이 없어요.' }));
   }
 
