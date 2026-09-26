@@ -14,7 +14,7 @@
   --bg:#EEF2F1; --paper:#FFFFFF; --ink:#18231F; --muted:#5E6B66; --line:#D5DDDA;
   --accent:#1F6F5C; --accent-soft:#DCEDE7; --high:#B4452F; --high-soft:#F6E1DB;
   --ch-shade:rgba(40,50,60,.09); --ch-line:#9FB3AB;
-  --mid:#9A6A12; --mid-soft:#F4EAD2; --focus:#1F6F5C; --sat:#2F5F9E;
+  --mid:#9A6A12; --mid-soft:#F4EAD2; --focus:#1F6F5C; --sat:#2F5F9E; --sat-soft:#E1E7F3; --vio:#6A4FB0; --vio-soft:#ECE6F7;
   --day:#9A6A12; --day-soft:#F4EAD2; --eve:#B0562F; --eve-soft:#F7E4DA; --night:#34508A; --night-soft:#E1E7F3;
   --display:"Gowun Batang",Georgia,serif;
   --body:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
@@ -26,7 +26,7 @@
     --bg:#111816; --paper:#18211E; --ink:#E6EDEA; --muted:#93A29C; --line:#2A3632;
     --accent:#5CC4A6; --accent-soft:#1D3530; --high:#F08A73; --high-soft:#3A2420;
     --ch-shade:rgba(255,255,255,.06); --ch-line:#4A5E57;
-    --mid:#E0B45A; --mid-soft:#352C1A; --focus:#5CC4A6; --sat:#86AEE6;
+    --mid:#E0B45A; --mid-soft:#352C1A; --focus:#5CC4A6; --sat:#86AEE6; --sat-soft:#1E2638; --vio:#B9A5F0; --vio-soft:#2A2340;
     --day:#E0B45A; --day-soft:#352C1A; --eve:#EE9A74; --eve-soft:#3A261C; --night:#93AEE8; --night-soft:#1E2638;
   }
 }
@@ -35,7 +35,7 @@
   --bg:#111816; --paper:#18211E; --ink:#E6EDEA; --muted:#93A29C; --line:#2A3632;
   --accent:#5CC4A6; --accent-soft:#1D3530; --high:#F08A73; --high-soft:#3A2420;
   --ch-shade:rgba(255,255,255,.06); --ch-line:#4A5E57;
-  --mid:#E0B45A; --mid-soft:#352C1A; --focus:#5CC4A6; --sat:#86AEE6;
+  --mid:#E0B45A; --mid-soft:#352C1A; --focus:#5CC4A6; --sat:#86AEE6; --sat-soft:#1E2638; --vio:#B9A5F0; --vio-soft:#2A2340;
   --day:#E0B45A; --day-soft:#352C1A; --eve:#EE9A74; --eve-soft:#3A261C; --night:#93AEE8; --night-soft:#1E2638;
 }
 *{box-sizing:border-box}
@@ -440,6 +440,69 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   .ret-tools .ret-help{margin-left:0}
 }
 /* 회송 확인서 — 업체마다 A4 한 장. 길면 인쇄 직전에 줄여서 한 장에 맞춰요 */
+/* ---------- IST 과매입 ---------- */
+.ov-grid .ret-f.span4{grid-column:span 4}.ov-grid .ret-f.span6{grid-column:1/-1}
+.ov-grid label small{font-weight:500;margin-left:5px;opacity:.8}
+.ov-mono{font-family:var(--mono);font-size:13.5px}
+.ov-found{grid-column:1/-1;margin:0;font-size:12.5px;color:var(--accent);background:var(--accent-soft);border-radius:7px;padding:6px 10px}
+.ov-mail{display:flex;gap:6px;min-width:0}.ov-mail .ret-in{flex:1}
+.ov-today{flex:none;border:1px solid var(--line);background:var(--paper);color:var(--accent);border-radius:6px;padding:0 10px;font-size:13px;font-weight:700;white-space:nowrap}
+.ov-today[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.ret-help.err{color:var(--high);font-weight:600}
+.ov-danger{color:var(--high)!important}
+.ov-filter{margin-left:auto}.ov-filter button b{font-family:var(--mono);font-weight:700}
+.ov-wrap{overflow-x:auto;margin:0 -2px}
+.ov-t{border-collapse:collapse;width:100%;font-size:12.5px}
+.ov-t th{font-size:11.5px;color:var(--muted);font-weight:700;text-align:left;padding:7px 5px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--bg)}
+.ov-t th.r{text-align:right}
+.ov-t td{padding:7px 5px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+.ov-t tbody tr{cursor:pointer}.ov-t tbody tr:hover td{background:var(--bg)}.ov-t tbody tr.sel td{background:var(--accent-soft)}
+.ov-t .mono{font-family:var(--mono);font-size:11.5px}
+.ov-t .ov-c-nm{max-width:230px;font-weight:600}.ov-t .ov-c-v{max-width:130px}.ov-t .ov-c-comm{max-width:120px}
+.ov-t .ov-c-q{text-align:right;font-weight:800;font-size:13px}.ov-t .no{color:var(--muted);opacity:.6}
+.ov-late{font-weight:700;color:var(--mid)}.ov-late.hi{color:var(--high)}
+.ov-msel{appearance:none;-webkit-appearance:none;border:1px dashed var(--muted);border-radius:6px;padding:2px 20px 2px 8px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 7px center}
+.ov-msel:not(.m-none){border-style:solid;border-color:transparent}
+.m-vr.ov-msel,.ov-chip.m-vr{background-color:var(--vio-soft);color:var(--vio)}
+.m-ded.ov-msel,.ov-chip.m-ded{background-color:var(--sat-soft);color:var(--sat)}
+.m-xy.ov-msel,.ov-chip.m-xy,.m-re.ov-msel,.ov-chip.m-re{background-color:var(--mid-soft);color:var(--mid)}
+.ov-chip{font-size:11.5px;font-weight:700;border-radius:5px;padding:1px 8px}
+.ov-t.done td{max-width:180px}.ov-t .ov-c-meta{display:none}.ov-c-act{text-align:right}
+.ov-vtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.ov-vtop .ret-help{margin-left:auto}
+.ov-tog{display:inline-flex;border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px;background:var(--paper)}
+.ov-tog button{border:0;background:transparent;border-radius:6px;padding:6px 14px;font-size:13.5px;font-weight:700;color:var(--muted)}
+.ov-tog button b{font-family:var(--mono);margin-left:2px}
+.ov-tog button.m-vr[aria-pressed=true]{background:var(--vio);color:#fff}.ov-tog button.m-ded[aria-pressed=true]{background:var(--sat);color:#fff}
+.ov-gs{display:flex;flex-direction:column;gap:8px}
+.ov-g{border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.ov-gh{display:flex;align-items:baseline;gap:10px;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--line)}
+.ov-gn{font-weight:800;font-size:14px}.ov-gc{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.ov-r{display:grid;grid-template-columns:minmax(0,1fr) 56px 54px auto;gap:10px;align-items:center;padding:8px 12px;font-size:13px}
+.ov-r+.ov-r{border-top:1px solid var(--line)}
+.ov-rn{min-width:0;display:flex;flex-direction:column}.ov-rn .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ov-rn .mt{font-size:11.5px;color:var(--muted)}
+.ov-rq{text-align:right;font-weight:800}.ov-rd{text-align:right;font-size:12px;color:var(--muted)}.ov-rd.hi{color:var(--high);font-weight:700}
+.ov-r .mono,.ov-rq,.ov-rd{font-family:var(--mono)}
+.ov-done{border:1px solid var(--accent);background:var(--paper);color:var(--accent);border-radius:7px;padding:4px 11px;font-size:12.5px;font-weight:800;white-space:nowrap}
+.ov-done:hover{background:var(--accent);color:#fff}
+@media (max-width:760px){
+  .ov-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ov-grid .ret-f,.ov-grid .ret-f.span2{grid-column:span 1}.ov-grid .ret-f.span4,.ov-grid .ret-f.span6,.ov-grid .ret-f:nth-child(3){grid-column:1/-1}
+  .ov-grid .ret-f:has(#ov-mail){grid-column:1/-1}
+  .ov-filter{margin-left:0}
+  .ov-t thead{display:none}
+  .ov-t,.ov-t tbody{display:block}
+  .ov-t tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:9px 4px;border-bottom:1px solid var(--line)}
+  .ov-t td{border:0;padding:0;max-width:none!important;display:block}
+  .ov-t .ov-c-nm{grid-column:1;grid-row:1;white-space:normal;font-size:13.5px}
+  .ov-t .ov-c-q{grid-column:2;grid-row:1;font-size:15px}
+  .ov-t .ov-c-v{grid-column:1;grid-row:2;color:var(--muted);font-size:12px}
+  .ov-t .ov-c-m{grid-column:2;grid-row:2 / span 2;align-self:center;text-align:right}
+  .ov-t .ov-c-sku,.ov-t .ov-c-bc,.ov-t .ov-c-d,.ov-t .ov-c-who,.ov-t .ov-c-mail,.ov-t .ov-c-comm{display:none}
+  .ov-t td.ov-c-meta{display:block;grid-column:1;grid-row:3;font-size:11.5px;color:var(--muted);white-space:normal}
+  .ov-t .ov-c-act{grid-column:2;grid-row:3}.ov-t.done .ov-c-m{grid-row:2}
+  .ov-r{grid-template-columns:minmax(0,1fr) auto auto;gap:4px 10px}
+  .ov-rd{grid-column:1;grid-row:2;text-align:left}.ov-rq{grid-row:1;grid-column:2}.ov-done{grid-column:3;grid-row:1 / span 2}
+}
 /* ---------- 생산성 ---------- */
 .pr-drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:28px 16px;border:2px dashed var(--line);border-radius:10px;background:var(--bg);cursor:pointer;text-align:center}
 .pr-drop b{font-size:15px;color:var(--accent)}.pr-drop span{font-size:13px}.pr-drop small{font-size:12px;color:var(--muted)}
@@ -598,11 +661,13 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     <button type="button" data-v="list" aria-pressed="false">할 일 목록</button>
     <button type="button" data-v="ho" aria-pressed="false">인수인계</button>
     <button type="button" data-v="ret" aria-pressed="false">IST 회송</button>
+    <button type="button" data-v="over" aria-pressed="false">IST 과매입</button>
     <button type="button" data-v="prod" aria-pressed="false">생산성</button>
   </div>
 
   <section class="ho" id="ho" hidden aria-label="시프트 교대 인수인계"></section>
   <section class="ret" id="ret" hidden aria-label="IST 회송"></section>
+  <section class="ret" id="over" hidden aria-label="IST 과매입"></section>
   <section class="ret" id="prod" hidden aria-label="STOW 개인 생산성"></section>
 
   <section class="cal" id="cal" aria-label="달력">
@@ -750,6 +815,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       render();
       if (view === 'ho' && hoRev !== rev && !hoFocused()) loadHandover();
       if (view === 'ret' && retRev !== rev) loadReturns();
+      if (view === 'over' && ovRev !== rev) loadOvers();
       if (view === 'prod' && prRev !== rev) prLoad();
       setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
@@ -766,6 +832,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       const data = await request('GET', '/api/state?only=rev');
       if (view === 'ho' && data.rev !== hoRev && !hoFocused()) loadHandover();
       if (view === 'ret' && data.rev !== retRev) loadReturns();
+      if (view === 'over' && data.rev !== ovRev) loadOvers();
       if (view === 'prod' && data.rev !== prRev) prLoad();
       if (data.rev !== rev) loadFull();
       else setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
@@ -1046,17 +1113,19 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === filter));
     document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === view));
     const cal = view === 'cal';
-    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod';
+    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over';
     $('#ho').hidden = !hoView;
     $('#ret').hidden = !retView;
     $('#prod').hidden = !prodView;
-    $('#app').classList.toggle('wide', prodView);
-    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView;
-    document.querySelector('.toolbar').hidden = hoView || retView || prodView;
+    $('#over').hidden = !overView;
+    $('#app').classList.toggle('wide', prodView || overView);
+    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView;
+    document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView;
     if (prodView && !$('#prod').hasChildNodes()) renderProd();
     if (prodView && prRev < 0) prLoad();
     if (hoView && !$('#ho').hasChildNodes()) renderHandover();
     if (retView && !retBuilt) renderReturns();
+    if (overView && !ovBuilt) renderOvers();
     for (const id of ['#cal', '#dayHead', '#shifts', '#todoLabel']) $(id).hidden = !cal;
     $('#editNote').hidden = !(cal && editMode);
     $('#editLock').hidden = !(cal && askEdit && !editMode);
@@ -2406,6 +2475,261 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     setTimeout(() => window.print(), 50);
   }
 
+  // ---------- IST 과매입 ----------
+  const OV_WHO = ['Tate', 'Charlie', 'V', 'Just', 'Aizen', 'Ayden', 'Lucan', 'Mir'];
+  const OV_METHODS = [['', '미정'], ['vr', '가상반출'], ['ded', '차감매입'], ['xy', 'XY이동'], ['re', '재진열']];
+  const ovMethod = k => (OV_METHODS.find(m => m[0] === (k || '')) || OV_METHODS[0])[1];
+  const OV_PAST = [["13390942","8801391101046","[로켓프레시] CJ 하선정 통오이지 1kg, 1개","씨제이제일제당(주)"],["49324994","8801392083211","[로켓프레시] 햇반만능김치볶음밥 400G","씨제이제일제당(주)"],["9975030","8801007029276","[로켓프레시] CJ 직화 너비아니 (냉동),560g,1개","씨제이제일제당(주)"],["8582364","8801007334332","PACK_[로켓프레시] 더건강한그릴후랑크300G*2/냉장","씨제이제일제당(주)"],["11395056","8801007579412","[로켓프레시] 비비고 묵은지 900g","씨제이제일제당(주)"],["8701938","8801007532028","[로켓프레시] 비비고/백김치 500g/냉장","씨제이제일제당(주)"],["50145231","8801007020631","[로켓프레시] 다담 된장찌개양념 530G","씨제이제일제당(주)"],["11630408","8801007611990","[로켓프레시]비비고 남도식 썰은배추김치 500g(단지)","씨제이제일제당(주)"],["13190011","8801007838960","[로켓프레시] CJ 행복한콩 아삭통통 숙주 380g","씨제이제일제당(주)"],["49788742","8801007838533","[로켓프레시] 비비고 우리아이 한입 썰은김치 270g","씨제이제일제당(주)"],["17388437","8801007917030","[로켓프레시] 비비고 고단백 순살고등어구이 60G (냉장","씨제이제일제당(주)"],["20093460","8801007529080","[로켓프레시] 비비고/포기배추김치1.8KG","씨제이제일제당(주)"],["49780118","8801007801155","[로켓프레시] 비비고 고단백 고등어구이 60g (냉장)","씨제이제일제당㈜"],["11445644","8801007801216","[로켓프레시] 비비고 고단백 가자미구이 70G (냉장)","씨제이제일제당(주)"],["16207583","8801007801193","[로켓프레시] 비비고 고단백 삼치구이 60g (냉장)","씨제이제일제당(주)"],["8582379","8801007099576","[로켓프레시] 행복한콩콩비지320G/파우치/냉장","씨제이제일제당(주)"],["12972380","8801007872346","[로켓프레시] 삼호어묵 순살가득담은 어묵 오리지널, 240g, 1개","씨제이제일제당(주)"],["49324993","8801007930749","[로켓프레시] 햇반스팸김치볶음밥440G","씨제이제일제당(주)"],["49404109","8801392045622","[로켓프레시] 육공육 잠봉 슬라이스 80G","씨제이제일제당(주)"],["17987234","PL02002110090","[로켓프레시] 국내산 흙생강 100g _PL_vege","씨피엘비 주식회사"],["35318098","8801123307081","[로켓프레시] 의성마늘프랑크 350g","롯데웰푸드 주식회사_롯데푸드㈜"],["12040557","PL02002003061","[로켓프레시] 곰곰 하루1팩 국산콩 연두부+오리엔탈소스 6개입, 1박스","맑은물에홀딩스 주식회사"],["12534244","8801074006033","[로켓프레시] 비바크부어스트 260g*3","한성기업"],["19487673","8801114141069","[로켓프레시] 풀무원 동물복지 목초란 15구 780g (소재란)","(주)풀무원식품"],["11921607","8801114147894","[로켓프레시] 풀무원 국산 숙주나물 260g","(주)풀무원식품"],["10349373","8801123309344","[로켓프레시] 의성마늘비엔나 160g*3개","롯데웰푸드 주식회사_롯데푸드㈜"],["53403121","8801047570950","[로켓프레시] 동원 그릴리 직화 델리햄 450g","(주)동원에프앤비"],["52478393","8801392105425","[로켓프레시] 비비고 썰은배추김치 1.2KG(PET)","씨제이제일제당(주)"],["33725099","8801047570790","[로켓프레시] 동원 그릴리 직화후랑크 250gx2","(주)동원에프앤비"],["43733147","8801114168837","[로켓프레시] 풀무원 평양냉면사리_130g","(주)풀무원식품"],["19184097","8801207050759","[로켓프레시] 파스퇴르 쾌변 골드키위 150ml 8개입","롯데웰푸드 주식회사_롯데푸드㈜"],["10060809","8801024949960","[로켓프레시] 청정원 국산콩 두부두모 부침찌개 겸용 300g*2","대상주식회사"],["37033619","8801052091952","[로켓프레시] 청정원 행복놀이터 동물복지유정란 15구","대상주식회사"],["8573904","8801045514819","[로켓프레시] 미트볼로냐파스타4인 1292g","주)오뚜기"],["11463621","8801155977528","Box_[로켓프레시] [동원 소와나무] 생크림 요구르트 (85g*8개)","(주)동원에프앤비"],["41909501","8801115634690","[로켓프레시] 서울우유 체다 슬라이스 치즈 15매입, 270g","서울우유협동조합"],["53720380","8801392034107","[로켓프레시] 씨제이 동물복지 유정란 25구, 1300g","씨제이제일제당(주)"],["38226381","8801114124703","[로켓프레시] 풀무원 아임리얼순수착즙오렌지_190ml","(주)풀무원식품"],["17271706","8803712121863","[로켓프레시] 뽀로로와친구들 프랑크소시지 130g*3","(주)농협목우촌(가공)"],["36475498","8809342682576","[로켓프레시][과일] 당도선별 11brix 수박 7kg 이상","농협안성_수박(함안조공)/복숭아(무주조공)/블루베리(제주조공)"],["18747395","8801123308675","[로켓프레시] 에센소시지,1000g,1개","롯데웰푸드 주식회사_롯데푸드㈜"],["20018466","8801496108452","[로켓프레시] 조인 동물복지 유정 반숙란 20구 1000g","농업회사법인조인(주)용인지점"],["11682649","8801155834685","[로켓프레시]인포켓치즈 라이트 20gx10EA","(주)동원에프앤비"],["10499706","8801007801131","[로켓프레시] 비비고 보쌈김치 400g","씨제이제일제당(주)"],["49102923","8801392067167","[로켓프레시] 비비고 통새우만두 200G","씨제이제일제당㈜"],["53403121","8801047576457","[로켓프레시] 동원 숯불구이맛 김밥햄 120g","(주)동원에프앤비"],["45876647","8801123410477","[로켓프레시] 롯데 의성마늘햄 1kg","롯데웰푸드 주식회사_롯데푸드㈜(육가공)"],["32106190","8801123309146","[로켓프레시] 의성마늘 빅그릴비엔나 300g*2","롯데웰푸드 주식회사_롯데푸드㈜"],["35160112","8801123309948","[로켓프레시] 의성마늘비엔나 500g","롯데웰푸드 주식회사_롯데푸드㈜"],["9829381","8801121102237","[로켓프레시] 매일우유 오리지널, 2.3L, 1개","매일유업 주식회사"],["33910080","8809251334542","[로켓프레시] 마니커 참나무로 훈연한 훈제닭다리 170g*3","주식회사마니커에프앤지"],["26189537","8801121023938","[로켓프레시] 상하목장 유기농우유 900ML","매일유업 주식회사"],["44798625","8801066062986","[로켓프레시] 사조대림 로얄크랩 100g","(주)사조대림"],["11456867","8801114139707","[로켓프레시] 풀순생나또_8개입세트","(주)풀무원식품"],["10757172","8801104665551","[로켓프레시] 요플레 1000배 닥터캡슐 사과, 130ml*8개입","(주)빙그레"],["8706868","8801114131923","[로켓프레시] 풀무원 우유또띠아 20cm, 225g, 1개","(주)풀무원식품"],["25236932","8801114156841","[로켓프레시] 풀무원 풀무원 3번 씻어나온 안심 콩나물 480g","(주)풀무원식품"],["40378667","8801024534128","[로켓프레시] 청정원 종가 국산숙주 230g","대상주식회사"],["11400856","8801047571087","[로켓프레시] 동원 델리햄 김밥용 150g","(주)동원에프앤비"],["31487661","8801024140244","[로켓프레시] 종가 아삭아삭 맛있게 썰어담은 맛김치, 1.2kg","대상주식회사"],["12031393","8809713220345","[로켓프레시] 해태제과 부라보 바닐라 (냉동), 160ml, 5입","(주)빙그레"],["31646506","8801114145852","[로켓프레시] 풀무원 신선란25구_1.3kg","(주)풀무원식품"],["43223503","8801066260108","[로켓프레시] 스모크치킨 180g","(주)사조대림"],["40694970","8801047574002","[로켓프레시] 동원 그릴리 직화치킨 닭가슴살 오리지널 105g","(주)동원에프앤비"],["19378007","8801123727872","[로켓프레시] Chefood 등심통돈까스 600g","롯데웰푸드 주식회사_롯데푸드㈜"],["49400475","8801392025891","[로켓프레시] 비비고 보쌈무김치 150G","씨제이제일제당(주)"],["49788728","8801007237824","[로켓프레시] 백설 한입쏙 칼집 비엔나 90G","씨제이제일제당(주)"],["49792491","8801007838557","[로켓프레시] 비비고 우리아이 한입 백김치 270g","씨제이제일제당(주)"],["52261422","8801104946476","[로켓프레시] 빙그레 프로틴 고단백 슬라이스 치즈 18g*15입 270g","(주)빙그레"],["15719355","8801052083698","[로켓프레시] 청정원 호밍스 언양식 바싹불고기 270g 2개입 (냉동)","대상주식회사"],["51128736","8801007088068","[로켓프레시] 다담 된장찌개양념 840G","씨제이제일제당(주)"],["49780118","8801007766652","[로켓프레시] 맥스봉 숯불구이맛 핫바 70G","씨제이제일제당(주)"],["46910736","8801123300242","[로켓프레시] 롯데비엔나 135g","롯데웰푸드 주식회사_롯데푸드㈜"],["12031392","8809713220130","[로켓프레시] 해태아이스크림 누가바 (냉동), 70ml, 6입","(주)빙그레"],["25665576","8801114304198","[로켓프레시] 김밥단무지400g (김치&절임)","(주)풀무원식품"],["8699964","8801047511656","PACK_[로켓프레시] 동원 더킹 크랩스 오리지널, 140g, 2개","(주)동원에프앤비"],["38254314","8801114112649","[로켓프레시] 풀무원 소가 3번 씻어나온 안심콩나물 220g","(주)풀무원식품"],["148983145","8801007626970","[로켓프레시] 고메 함박스테이크 152G 1개","씨제이제일제당(주)"],["49803564","8801007612423","[로켓프레시] 백설 숯불구이맛 김밥햄 110G","씨제이제일제당(주)"],["40694971","8801047574019","[로켓프레시] 동원 그릴리 직화치킨 닭가슴살 블랙페퍼 105g","(주)동원에프앤비"],["15825999","8801007772493","[로켓프레시] 고메 치즈함박스테이크152g","씨제이제일제당㈜"],["34272995","8809355419251","[로켓프레시] ORGA 우리콩이라 더 고소한 손맛 두부 (300gx2EA)","㈜올가홀푸드"],["10726826","8801066301221","[로켓프레시] 부산어묵마당놀이2 1,000g","(주)사조대림"],["10472425","8809294661896","[로켓프레시] valuepack_ Pack_한우물 잡채볶음밥R 번들(280g*8)","농업회사법인 (주)한우물"],["21003738","8801045750170","[로켓프레시] UNO_사각피자_불고기 99G","주)오뚜기"],["46359025","8801052117140","[로켓프레시] 집으로ON 아이라이킷한돈떡갈비 500g","대상주식회사"],["38358246","8801114123188","[로켓프레시] 풀무원 국산콩 생나또8입세트 396g","㈜풀무원식품"],["10525938","8809153049575","[로켓프레시] 웰프레쉬 냉동 블루베리 1.3kg","주식회사 대정"],["10672820","18801115212888","Box_[로켓프레시] valuepack_서울우유 비요뜨 크런치볼, 138g*12개입","서울우유협동조합"],["8706591","8801045931036","[로켓프레시] 오감포차 직화닭발 150g","주)오뚜기"],["42118038","8801066060340","[로켓프레시] 사조대림 한입쏙 쌀떡볶이떡 300g","(주)사조대림"],["10060793","8801024180196","[로켓프레시] valuepack_ 종가 포기김치 4kg","대상주식회사"],["38254122","8801114111116","[로켓프레시] 풀무원 국산콩무농약콩나물 200g","(주)풀무원식품"],["11088352","8801045935614","[로켓프레시] 오뚜기 X.O.교자 새우&홍게살 1008g","주)오뚜기"],["39393528","8801114165119","[로켓프레시] 풀무원 동물복지 구운란 20구_750g","(주)풀무원식품"],["28406868","PL02002233364","[로켓프레시] 로메인 상추 200g, 1봉_PL_vege","TAMSAA_유한회사 프레커스(CPLB) frekers"],["11249473","8801114121597","[로켓프레시] 찬김밥용단무지와우엉350g","(주)풀무원식품"],["43085155","8803712128008","[로켓프레시] 목우촌 주부9단 김밥햄 170g","(주)농협목우촌(가공)"],["14650182","8801104212205","[로켓프레시] 빙그레 바나나맛 우유 라이트 240ml*8ea","(주)빙그레"],["26634180","8801114119426","[로켓프레시] 풀무원특등급국산콩두부(부침용) 340g","(주)풀무원식품"],["40474122","8801114140703","[로켓프레시] 풀무원 밀떡볶이떡_550g","(주)풀무원식품"],["24124062","8809495075003","[로켓프레시] 한끼통살 그릴드 닭가슴살 오리지널 100g, 10개입","(주)이그니스"],["24124061","8809495075010","[로켓프레시] 한끼통살 그릴드 닭가슴살 블랙페퍼 100g, 10개입","(주)이그니스"],["12352081","8801114139363","[로켓프레시] 풀무원 실의 힘 매일아침 순생나또 12개입, 594g, 1개","(주)풀무원식품"],["51858604","8801115110033","[로켓프레시] 서울우유A2플러스 1.7L","서울우유협동조합"],["35307511","8801123309856","[로켓프레시] 롯데 에센뽀득비엔나오리지널180g","롯데웰푸드 주식회사_롯데푸드㈜"],["32859603","8801496110127","[로켓프레시] 조인 갈색특란 30구, 1,800g","농업회사법인조인(주)용인지점"],["17009204","8801114151211","[로켓프레시] 풀무원 유기농 숙주 300g","(주)풀무원식품"],["44475131","8801114170885","[로켓프레시] 동물복지정성란30구, 1.56kg (소재란)","(주)풀무원식품"],["25494473","8801114123829","[로켓프레시] 오리엔탈드레싱550g","(주)풀무원식품"],["37444955","8801123402014","[로켓프레시] 의성마늘 김밥속햄 200g","롯데웰푸드 주식회사_롯데푸드㈜"],["14615589","8801104670609","[로켓프레시] 요플레 플레인 멀티 85g*8ea","(주)빙그레"],["49136589","8801104944847","[로켓프레시] 캐치티니핑 요구르트 소다향 80ml*5개입","(주)빙그레"],["13190014","8801007369563","[로켓프레시] 비비고 썰은배추김치 100g x 5개","씨제이제일제당(주)"],["9665839","8801007421162","[로켓프레시] 햇반쿡반 차돌깍두기볶음밥 (냉동),205g,2개입","씨제이제일제당(주)"],["49803582","8801007636009","[로켓프레시] 비비고 김치볶음 150g","씨제이제일제당(주)"],["31356315","8801496109701","[로켓프레시] 조인 동물복지 백색유정 초란 30구","농업회사법인조인(주)용인지점"],["19149129","8801207140238","[로켓프레시] 파스퇴르 쾌변 ABC 150ml 8개입","롯데웰푸드 주식회사_롯데푸드㈜"],["11456868","8801114120545","[로켓프레시] 풀국산생나또12개입세트","(주)풀무원식품"],["39491432","8801114101568","[로켓프레시] 풀무원 특등급 국산콩 순두부 350g","(주)풀무원식품"],["11420803","8801114134801","[로켓프레시] [풀무원] 고소한 유부초밥 330g(4인분)","(주)풀무원식품"],["33799014","8801024055296","[로켓프레시] 종가 포기김치1.9kg(비닐)","대상주식회사"],["42268408","8809020305780","[로켓프레시] ORGA 유기농 떡국떡 500g","(주)올가홀푸드"],["36750235","8808735888601","[로켓프레시] 풀무원 식물성 지구식단 콩단백숯불직화구이 500g","(주)풀무원식품"],["52663178","8801492392084","[로켓프레시] 하림 맛닭가슴살 바베큐맛100g*5개입","주식회사하림육가공"],["10726866","8801066150072","[로켓프레시] 조기어묵 1,000g","(주)사조대림"],["55342517","8801392119316","[로켓프레시] 씨제이 고메 시나몬츄러스 262.5g","씨제이제일제당㈜"],["46075497","8801047529552","[로켓프레시] 동원 바른 85% 실꼬리돔사각 180g","(주)동원에프앤비"],["13380140","8801114151006","[로켓프레시] 새콤달콤 피크닉세트 유부초밥 6인분","(주)풀무원식품"],["9748763","8801207990604","[로켓프레시] 파스퇴르 저온살균 저지방 900ml","파스퇴르"],["49991088","8801007918310","[로켓프레시] 백설 구이한판 그릴스모크 60G","씨제이제일제당㈜"],["11390851","8801114131169","[로켓프레시] (기획)생순도토리묵300g*2입","(주)풀무원식품"],["31842164","8801114151419","[로켓프레시] 풀무원 몽글몽글 옛 순두부 450g","(주)풀무원식품"],["8706575","8801045750217","[로켓프레시] 오뚜기 UNO 컵피자 콤비네이션 150g","(주)오뚜기"],["51603449","8801047511779","[로켓프레시] 동원 핑거크랩스 40g 1개","(주)동원에프앤비"],["37225867","8801114157879","[로켓프레시] 풀무원 한끼계란연두부2입 236g","(주)풀무원식품"],["105085421","8801115118367","[로켓프레시] 서울우유 나100% 저지방우유 2300ml","서울우유협동조합"],["105085444","8801115214861","[로켓프레시] 서울우유 더 진한 순수 플레인 요거트 1.8L","서울우유협동조합"],["11341945","8801123727285","[로켓프레시] 쉐푸드 우유미니핫도그 500g","롯데웰푸드 주식회사_롯데푸드㈜(육가공)"],["11360825","8801104301862","[로켓프레시] [빙그레] 대용량 요구르트 280ml*4개입","빙그레"],["42644891","8801052114439","[로켓프레시] 호밍스 우거지순살감자탕 700g","대상주식회사"],["20157311","PL02002111442","[로켓프레시] 취청오이 2입, 1봉_PL_vege","프레커스"],["9726398","8801074255868","[로켓프레시] 크래미180G","한성기업"],["58660591","8801104949910","[로켓프레시] 빙그레 바나나맛우유 무가당 240ml, 6개","(주)빙그레"],["16865533","8801114153000","[로켓프레시] 풀무원 특등급 국산콩 무농약 콩나물 340g","(주)풀무원식품"],["8707572","8801114102381","[로켓프레시] 꼬마유부초밥145.5g","(주)풀무원식품"],["8981817","8801066020153","[로켓프레시] 사조대림 부어스트콤비네이션 385g","(주)사조대림"],["68680380","8801114176696","[로켓프레시] 풀무원 1+등급 신선란20구,1.04kg (소재란)","(주)풀무원식품"],["27873517","8801024957101","[로켓프레시] 종가 썰어담은 맛김치 900g","대상주식회사"],["8974033","8801104500593","[로켓프레시] 따옴 오렌지 주스, 730ml 확인","빙그레"],["32141898","8801114158647","[로켓프레시] 꼬마볼어묵볶이 283g","(주)풀무원식품"],["53241887","8801114157640","[로켓프레시] 풀무원 리얼해초미역면(150g)","(주)풀무원식품"],["37822785","8809495074952","[로켓프레시] 한끼통살 그릴드 닭가슴살 저크바베큐 100g, 1개입","이그니스"],["18816660","8809031552852","[로켓프레시] 맑은물에 촌두부 찌개용300g","맑은물에홀딩스 주식회사"],["150190928","8801114173916","[로켓프레시] 고소하고부드럽게구운란20구,750g","(주)풀무원식품"],["10126983","8801069225098","PACK_[로켓프레시] 남양 불가리스 딸기, 150ml, 8개입","남양유업㈜"],["10084532","8801104240581","[로켓프레시] 요플레 키즈 딸기 240g*4개","빙그레"],["133825855","8801114177839","[로켓프레시] 풀무원 지구식단 메밀두유면 150g","(주)풀무원식품"],["37923006","8801114129678","[로켓프레시] 풀무원 발효식초로 만든 백색 김밥단무지_310g (김치&절임)","(주)풀무원식품"],["46319960","8801207155041","[로켓프레시] 파스퇴르 쾌변요구르트 속편한 플레인 150ml 4개입","롯데웰푸드 주식회사_롯데푸드㈜"],["21857196","8801104667494","[로켓프레시] 빙그레 요플레 프로틴 드링크 딸기바나나 210ml*4","㈜빙그레"],["10126986","8801069225111","PACK_[로켓프레시] 남양 불가리스 사과, 150ml, 8개입","남양유업㈜"],["137019701","8801114109984","[로켓프레시] 풀무원 야채꼬마김밥키트_124g","(주)풀무원식품"],["20093458","8801007529202","[로켓프레시] 비비고/썰은배추김치900G","씨제이제일제당(주)"],["13440549","8801123726370","[로켓프레시] 쉐푸드 모짜렐라 치즈스틱 (냉동) 800g 1개","롯데웰푸드 주식회사_롯데푸드㈜"],["19142101","8801207154891","[로켓프레시] 파스퇴르 위편한 하루 150ml 8개입","롯데웰푸드 주식회사_롯데푸드㈜"],["11266938","8801114119129","[로켓프레시] 평양왕만두1.4kg","(주)풀무원식품"],["69168249","8801392159923","[로켓프레시] CJ 동물복지 유정란 20구, 1040g","씨제이제일제당(주)"],["68499097","8801496112510","[로켓프레시] 조인 무항생제 제주 새싹보리 백색유정란 15구,780g","농업회사법인조인(주)용인지점"],["49883087","8801114105009","[로켓프레시] 풀무원 살아있는실의힘 국산콩생나또_99g","(주)풀무원식품"],["37660637","8801114118726","[로켓프레시] 풀무원 부산어묵 180g","(주)풀무원식품"],["9862256","8801104240284","[로켓프레시] 요플레 딸기, 180g, 4개입","(주)빙그레"],["19378005","8801123727889","[로켓프레시] Chefood 고기왕교자 1,050g","롯데웰푸드 주식회사_롯데푸드㈜"],["69797877","8801074010337","[로켓프레시] 크래미H (90gX3번들) 1세트","한성기업"],["20093462","8801007529424","[로켓프레시] 비비고/총각김치900G","씨제이제일제당(주)"],["60635252","8801155000158","[로켓프레시] 덴마크 두꺼운 2X 모짜렐라치즈 192g","(주)동원에프앤비"],["14855628","8801114152539","[로켓프레시] 풀무원 모짜렐라 핫도그 9입(80g*9) (간식)","(주)풀무원식품"],["50057676","8801115224334","[로켓프레시] 서울우유 소프트 그릭요거트 100G","서울우유협동조합"],["28908938","8801115132134","[로켓프레시] 서울우유 커피 200ml, 4개입","서울우유협동조합"],["39733948","8801047570882","[로켓프레시] 동원 그릴리 직화부어스트 500g","(주)동원에프앤비"],["8582365","8801007552736","[로켓프레시] 비비고/열무김치 1.5KG/냉장","씨제이제일제당㈜"],["71563703","8801045250014","[로켓프레시] 오뚜기_가뿐한끼_촉촉스팀 닭가슴살 블랙페퍼 (100GX6)","주)오뚜기"],["31209184","8801114144824","[로켓프레시] 풀무원 큰네모유부초밥 395g","(주)풀무원식품"],["59573049","8801104949538","[로켓프레시] 요맘때바 블루베리 70ml, 8개입","(주)빙그레"],["9002453","8801045517605","[로켓프레시] 생쫄면4인 904g","주)오뚜기"],["49408741","8801392082665","[로켓프레시] 비비고 백김치 900g","씨제이제일제당(주)"],["9862254","8801104240642","[로켓프레시] 요플레 플레인, 180g, 4개입","(주)빙그레"],["52794718","8801115224419","[로켓프레시] 더 진한 그릭요거트 450g","서울우유협동조합"],["17081518","8801114142745","[로켓프레시] 풀무원 살아있는 실의힘 꼬마나또 버터 간장소스 3개입 89.7g 1개","(주)풀무원식품"],["17081528","8801114142752","[로켓프레시] 풀무원 살아있는 실의힘 꼬마나또 김조림 간장소스 3개입 89.7g 1개","(주)풀무원식품"],["17388438","8801007917429","[로켓프레시] 비비고 갈치구이 70G","씨제이제일제당(주)"],["30444710","8808735675119","[로켓프레시] 풀무원 풀스케어 고구마를 넣은 영양듬뿍 찰약밥 800g(40gx20ea)","(주)풀무원헬스케어"],["34311580","8801123700684","[로켓프레시] 쉐푸드 미니돈까스 870g","롯데웰푸드 주식회사_롯데푸드㈜(육가공)"],["13497230","8801007876283","[로켓프레시] 비비고 석박지 900g","씨제이제일제당(주)"],["11641008","PL02002002558","[로켓프레시] 국내산 양파,1.5kg,1개_PL_vege","다올영농조합법인"],["52794718","8801115224228","[로켓프레시] 더 진한 그릭요거트 450g","서울우유협동조합"],["22133223","8809031555662","[로켓프레시] 맑은물에 찐낫또 8입(364g)","맑은물에홀딩스(주)"],["52569649","8801448754959","[로켓프레시][과일] 충남오감 세도농협 GAP 인증 대추방울토마토 500g","농협안성농식품물류센터"],["8582611","8801007529158","[로켓프레시] 비비고/썰은배추김치 1.8KG/냉장","씨제이제일제당(주)"],["8991853","8801007337760","[로켓프레시] CJ 행복한콩 큰두부, 1kg, 1개 /냉장","씨제이제일제당㈜"],["14029393","8801066201064","[로켓프레시] 프리미엄 꽃맛살 130g","(주)사조대림"],["34947380","8809031554368","[로켓프레시] 맑은물에 촌두부 2컵두부 500g*2개","맑은물에홀딩스 주식회사"],["8582390","8801007009322","[로켓프레시] CJ 행복한콩 국산콩 두부 찌개용 380G, 냉장","씨제이제일제당㈜"],["8582352","8801007552750","[로켓프레시] 비비고/총각김치 1.5KG/냉장","씨제이제일제당㈜"],["26757048","8801123307630","[로켓프레시] 에센뽀득프랑크 70g_1EA","롯데웰푸드 주식회사_롯데푸드㈜(육가공)"],["40451007","8801114303689","[로켓프레시] 풀무원 생칼국수_550g","(주)풀무원식품"]];   // 옛 과매입 엑셀에서 뽑은 [외부 SKU, 바코드, 상품명, 업체명]
+  const OV_FIELDS = ['sku', 'barcode', 'qty', 'name', 'vendor', 'date', 'who', 'mail', 'comm'];
+  let ovItems = null, ovRev = -1, ovLoading = false, ovBuilt = false, ovToday = todayIso, ovDelArm = 0;
+  const ovLS = (k, d) => { try { return localStorage.getItem(k) || d; } catch { return d; } };
+  const ovSetLS = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+  const ovUi = { filter:'wait', view: ovLS('ov-view', 'vr') === 'ded' ? 'ded' : 'vr', editId:null, auto:false };
+  const ovBlank = () => ({ sku:'', barcode:'', qty:'', name:'', vendor:'', comm:'', mail:'', date: ovForm?.date || ovToday, who: ovForm?.who || ovLS('ov-who', '') });
+  let ovForm = null; ovForm = ovBlank();
+  const ovDays = d => d ? Math.max(0, Math.round((Date.parse(ovToday) - Date.parse(d)) / 864e5)) : 0;
+  const ovBusy = () => { const a = document.activeElement; return !!a && $('#over').contains(a) && a.matches('input, textarea'); };
+
+  async function loadOvers(){
+    if (ovLoading) return;
+    ovLoading = true;
+    try {
+      const d = await request('GET', '/api/overs');
+      ovItems = d.items || []; ovRev = d.rev; if (d.today) ovToday = d.today;
+      if (!ovForm.date) ovForm.date = ovToday;
+      if (!ovBusy()) renderOvers(); else { ovRenderList(); ovRenderView(); }
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+      setSync('err', e.message);
+    } finally { ovLoading = false; }
+  }
+
+  function renderOvers(){
+    const box = $('#over');
+    if (!ovBuilt){ ovBuild(box); ovBuilt = true; }
+    ovFillForm();
+    ovRenderList();
+    ovRenderView();
+  }
+
+  // ---- ① 입력 칸 ----
+  function ovBuild(box){
+    const f = (key, label, o = {}) => {
+      const inp = el(o.tag || 'input', { id:'ov-' + key, class:'ret-in' + (o.mono ? ' ov-mono' : ''), type: o.type, inputmode: o.im, list: o.list, placeholder: o.ph || '', maxlength: o.max, autocomplete:'off' });
+      inp.oninput = () => { ovForm[key] = inp.value; if (key === 'sku' || key === 'barcode') ovLookup(key); if (key === 'name' || key === 'vendor') ovUi.auto = false; };
+      return el('div', { class:'ret-f ' + (o.cls || 'span2') }, el('label', { for:'ov-' + key, text: label + (o.req ? ' *' : ''), }, o.note ? el('small', { text: o.note }) : null), inp);
+    };
+    const who = el('select', { id:'ov-who', class:'ret-in', onchange: e => { ovForm.who = e.target.value; ovSetLS('ov-who', e.target.value); } },
+      el('option', { value:'', text:'고르세요' }), ...OV_WHO.map(n => el('option', { value:n, text:n })));
+    const mailIn = el('input', { id:'ov-mail', class:'ret-in ov-mono', type:'date', oninput: e => { ovForm.mail = e.target.value; ovFillForm(); } });
+    const mailToday = el('button', { type:'button', class:'ov-today', id:'ov-mail-today', onclick: () => { ovForm.mail = ovForm.mail === ovToday ? '' : ovToday; ovFillForm(); } }, '오늘 보냄');
+    const form = el('form', { class:'ret-sec ret-form', id:'ov-form', autocomplete:'off' },
+      el('div', { class:'ret-sec-head' }, el('h3', { id:'ov-form-title', text:'과매입 건 입력' }),
+        el('p', { class:'ret-help', text:'Tab으로 다음 칸 · Enter로 추가 · * 필수' })),
+      el('div', { class:'ret-grid ov-grid' },
+        f('sku', '외부 SKU ID', { im:'numeric', max:40, mono:true, ph:'적으면 지난 기록에서 채워요' }),
+        f('barcode', '상품 바코드', { im:'numeric', max:40, mono:true }),
+        f('qty', '수량', { req:true, im:'decimal', max:10, mono:true }),
+        el('p', { class:'ov-found', id:'ov-found', hidden:true }),
+        f('name', '상품명', { req:true, max:150, cls:'span4' }),
+        f('vendor', '업체명', { req:true, max:80, list:'ov-vendors', note:'자동완성' }),
+        f('date', '생성일자', { type:'date', mono:true }),
+        el('div', { class:'ret-f span2' }, el('label', { for:'ov-who', text:'처리자' }), who),
+        el('div', { class:'ret-f span2' }, el('label', { for:'ov-mail', text:'메일 발송일' }), el('div', { class:'ov-mail' }, mailToday, mailIn)),
+        f('comm', '업체소통', { max:200, cls:'span6', ph:'예) 9/22 재회신 · 리마인드 보냄' })),
+      el('div', { class:'ret-acts' },
+        el('span', { class:'ret-help', id:'ov-form-msg', text:'생성일자 · 처리자는 다음 건에도 그대로 남아요' }),
+        el('button', { type:'button', class:'ret-btn ghost ov-danger', id:'ov-del', hidden:true, text:'삭제', onclick: ovDelete }),
+        el('button', { type:'button', class:'ret-btn ghost', id:'ov-status', hidden:true, onclick: () => { const t = ovItems.find(x => x.id === ovUi.editId); if (t) ovSetStatus(t, t.status === 'done' ? 'wait' : 'done'); ovEndEdit(); } }),
+        el('button', { type:'button', class:'ret-btn ghost', id:'ov-cancel', hidden:true, text:'취소', onclick: () => ovEndEdit() }),
+        el('button', { type:'submit', class:'ret-btn solid', id:'ov-submit', text:'추가' })),
+      el('datalist', { id:'ov-vendors' }));
+    form.onsubmit = e => { e.preventDefault(); ovSubmit(); };
+    box.append(form,
+      el('section', { class:'ret-sec', id:'ov-list' }),
+      el('section', { class:'ret-sec', id:'ov-view' }));
+  }
+
+  function ovFillForm(){
+    for (const k of OV_FIELDS){ const n = $('#ov-' + k); if (n && document.activeElement !== n) n.value = ovForm[k] ?? ''; }
+    const mt = $('#ov-mail-today'); mt.setAttribute('aria-pressed', ovForm.mail && ovForm.mail === ovToday ? 'true' : 'false');
+    const vendors = [...new Set([...(ovItems || []).map(t => t.vendor), ...OV_PAST.map(p => p[3])].filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
+    $('#ov-vendors').replaceChildren(...vendors.map(v => el('option', { value: v })));
+    const editing = !!ovUi.editId, it = editing && (ovItems || []).find(x => x.id === ovUi.editId);
+    $('#ov-form').classList.toggle('editing', editing);
+    $('#ov-form-title').textContent = editing ? '과매입 건 수정' : '과매입 건 입력';
+    $('#ov-submit').textContent = editing ? '수정 저장' : '추가';
+    $('#ov-cancel').hidden = $('#ov-del').hidden = $('#ov-status').hidden = !editing;
+    if (it) $('#ov-status').textContent = it.status === 'done' ? '↩ 대기로 되돌리기' : '✓ 완료';
+    $('#ov-del').textContent = ovDelArm && Date.now() - ovDelArm < 4000 ? '한 번 더 누르면 삭제' : '삭제';
+  }
+
+  // 외부 SKU · 바코드로 지난 기록 찾기 (과매입 → 옛 엑셀 → 회송)
+  function ovLookup(key){
+    if (ovUi.editId) return;
+    const v = String(ovForm[key] || '').trim();
+    const box = $('#ov-found');
+    if (v.length < 5){ box.hidden = true; return; }
+    const mine = (ovItems || []).filter(t => (key === 'sku' ? t.sku : t.barcode) === v).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    let hit = mine[0] ? { sku: mine[0].sku, barcode: mine[0].barcode, name: mine[0].name, vendor: mine[0].vendor } : null;
+    if (!hit){ const p = OV_PAST.find(p => p[key === 'sku' ? 0 : 1] === v); if (p) hit = { sku:p[0], barcode:p[1], name:p[2], vendor:p[3] }; }
+    if (!hit && key === 'barcode'){ const r = (retItems || []).find(t => t.barcode === v); if (r) hit = { sku:'', barcode:r.barcode, name:r.name, vendor:r.vendor }; }
+    if (!hit){ box.hidden = true; return; }
+    const canFill = !ovForm.name && !ovForm.vendor || ovUi.auto;
+    if (canFill){
+      for (const k of ['sku', 'barcode', 'name', 'vendor']) if (k !== key && hit[k] && (!ovForm[k] || ovUi.auto)) ovForm[k] = hit[k];
+      ovUi.auto = true;
+      ovFillForm();
+    }
+    const n = mine.length;
+    box.textContent = (canFill ? '✓ 지난 기록에서 상품명 · 업체명을 채웠어요' : '✓ 지난 기록: ' + hit.name) + (n ? ` · 이 상품 과매입 ${n + 1}번째 (지난번 ${retMD(mine[0].date)} ${retNum(mine[0].qty)}개)` : '');
+    box.hidden = false;
+  }
+
+  async function ovSubmit(){
+    const msg = $('#ov-form-msg');
+    const x = {}; for (const k of OV_FIELDS) x[k] = String(ovForm[k] ?? '').trim();
+    const q = Number(x.qty.replace(/,/g, ''));
+    const miss = [!x.name && '상품명', !(q > 0) && '수량', !x.vendor && '업체명'].filter(Boolean);
+    if (miss.length){ msg.textContent = '필수 칸을 채워 주세요: ' + miss.join(' · '); msg.classList.add('err'); $('#ov-' + (!x.qty || !(q > 0) ? 'qty' : !x.name ? 'name' : 'vendor')).focus(); return; }
+    msg.classList.remove('err');
+    const payload = { ...x, qty: q, date: x.date || ovToday };
+    if (ovUi.editId){
+      const id = ovUi.editId, before = ovItems.find(t => t.id === id);
+      const prev = { ...before };
+      Object.assign(before, payload);
+      ovEndEdit();
+      try { const r = await api('PATCH', '/api/overs?id=' + encodeURIComponent(id), payload); Object.assign(before, r.item); ovRev = -2; toast('고쳤어요.'); }
+      catch(e){ Object.assign(before, prev); renderOvers(); if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+      return;
+    }
+    const temp = { ...payload, id:'temp-' + Date.now(), status:'wait', method:'', createdAt:new Date().toISOString() };
+    ovItems = [...(ovItems || []), temp];
+    ovForm = { ...ovBlank(), date: payload.date, who: payload.who };
+    ovUi.auto = false; $('#ov-found').hidden = true;
+    renderOvers(); $('#ov-sku').focus();
+    try {
+      const r = await api('POST', '/api/overs', payload);
+      const i = ovItems.findIndex(t => t.id === temp.id); if (i > -1) ovItems[i] = r.item;
+      ovRev = -2; renderOvers(); toast('추가했어요.');
+    } catch(e) {
+      ovItems = ovItems.filter(t => t.id !== temp.id); renderOvers();
+      if (e instanceof Locked) return showLock(e.message);
+      toast(e.message);
+    }
+  }
+
+  function ovStartEdit(t){
+    ovUi.editId = t.id; ovDelArm = 0;
+    ovForm = { sku:t.sku || '', barcode:t.barcode || '', qty: retNum(t.qty), name:t.name, vendor:t.vendor, comm:t.comm || '', mail:t.mail || '', date:t.date || ovToday, who:t.who || '' };
+    ovUi.auto = false; $('#ov-found').hidden = true;
+    renderOvers();
+    $('#ov-form').scrollIntoView({ behavior:'smooth', block:'start' });
+    setTimeout(() => $('#ov-qty').focus({ preventScroll:true }), 250);
+  }
+  function ovEndEdit(){
+    const keep = { date: ovForm.date, who: ovForm.who };
+    ovUi.editId = null; ovDelArm = 0;
+    ovForm = { ...ovBlank(), ...keep, who: ovLS('ov-who', keep.who) };
+    renderOvers();
+  }
+  async function ovDelete(){
+    if (!ovDelArm || Date.now() - ovDelArm > 4000){ ovDelArm = Date.now(); ovFillForm(); setTimeout(() => { if (ovDelArm && Date.now() - ovDelArm >= 4000){ ovDelArm = 0; if (ovBuilt) ovFillForm(); } }, 4100); return; }
+    const id = ovUi.editId, keep = ovItems;
+    ovItems = ovItems.filter(t => t.id !== id); ovEndEdit();
+    try { await api('DELETE', '/api/overs?id=' + encodeURIComponent(id)); ovRev = -2; toast('삭제했어요.'); }
+    catch(e){ ovItems = keep; renderOvers(); if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+  }
+
+  async function ovPatch(t, patch, okMsg){
+    const prev = { ...t };
+    Object.assign(t, patch);
+    if (patch.status === 'done') t.doneAt = ovToday; else if (patch.status === 'wait') delete t.doneAt;
+    ovRenderList(); ovRenderView(); ovFillForm();
+    try { const r = await api('PATCH', '/api/overs?id=' + encodeURIComponent(t.id), patch); Object.assign(t, r.item); ovRev = -2; if (okMsg) toast(okMsg); }
+    catch(e){ for (const k of Object.keys(t)) delete t[k]; Object.assign(t, prev); ovRenderList(); ovRenderView(); if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+  }
+  const ovSetStatus = (t, s) => ovPatch(t, { status: s }, s === 'done' ? '완료했어요 · 완료 목록에서 되돌릴 수 있어요' : '대기로 되돌렸어요.');
+
+  function ovMethodSel(t){
+    const s = el('select', { class:'ov-msel m-' + (t.method || 'none'), 'aria-label':'처리방법', title:'처리방법 고르기',
+      onclick: e => e.stopPropagation(), onkeydown: e => e.stopPropagation(),
+      onchange: e => ovPatch(t, { method: e.target.value }, e.target.value ? ovMethod(e.target.value) + '(으)로 정했어요.' : '') },
+      ...OV_METHODS.map(([k, l]) => el('option', { value:k, text: k ? l : '선택' })));
+    s.value = t.method || '';
+    return s;
+  }
+
+  // ---- ② 과매입 목록 (대기 · 완료) ----
+  function ovRenderList(){
+    const box = $('#ov-list'); if (!box) return;
+    const all = ovItems || [];
+    const wait = all.filter(t => t.status !== 'done'), done = all.filter(t => t.status === 'done');
+    const isWait = ovUi.filter !== 'done';
+    const seg = el('div', { class:'ret-view ov-filter', role:'group', 'aria-label':'상태' },
+      ...[['wait', '대기', wait.length], ['done', '완료', done.length]].map(([k, l, n]) =>
+        el('button', { type:'button', 'aria-pressed': (isWait ? 'wait' : 'done') === k ? 'true' : 'false', onclick: () => { ovUi.filter = k; ovRenderList(); } }, l + ' ', el('b', { text: n }))));
+    const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'과매입 목록' }),
+      el('p', { class:'ret-help', text: isWait ? '처리방법 칸을 눌러 골라요 · 줄을 누르면 고치기' : '완료일 순 · 잘못 눌렀으면 되돌리기' }), seg);
+    if (!ovItems){ box.replaceChildren(head, el('p', { class:'ret-help', text:'불러오는 중…' })); return; }
+    const rows = (isWait ? wait.sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.createdAt || '').localeCompare(b.createdAt || ''))
+                        : done.sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || '') || (b.date || '').localeCompare(a.date || '')));
+    if (!rows.length){ box.replaceChildren(head, el('p', { class:'ho-empty', text: isWait ? '대기 중인 과매입 건이 없어요.' : '완료한 과매입 건이 없어요.' })); return; }
+    const td = (cls, txt, ...kids) => el('td', { class: cls }, ...(txt != null ? [String(txt)] : []), ...kids);
+    const mailCell = t => {
+      if (!t.mail) return td('ov-c-mail no', '-');
+      const n = ovDays(t.mail);
+      return td('ov-c-mail mono', retMD(t.mail), !t.method && n >= 1 ? el('span', { class:'ov-late' + (n >= 7 ? ' hi' : ''), text: ` ${n}일` }) : null);
+    };
+    const thead = isWait
+      ? ['외부 SKU ID', '상품 바코드', '상품명', '수량', '업체명', '생성일자', '처리자', '메일 발송일', '처리방법', '업체소통']
+      : ['외부 SKU ID', '상품명', '수량', '업체명', '처리자', '처리방법', '완료일', ''];
+    const body = rows.map(t => {
+      const tr = el('tr', { class: t.id === ovUi.editId ? 'sel' : '', tabindex:'0', title:'눌러서 고치기',
+        onclick: () => ovStartEdit(t), onkeydown: e => { if (e.key === 'Enter'){ e.preventDefault(); ovStartEdit(t); } } });
+      if (isWait) tr.append(
+        td('ov-c-sku mono', t.sku || '-'), td('ov-c-bc mono', t.barcode || '-'), td('ov-c-nm', t.name), td('ov-c-q mono', retNum(t.qty)),
+        td('ov-c-v', t.vendor), td('ov-c-d mono', retMD(t.date)), td('ov-c-who', t.who || '-'), mailCell(t), td('ov-c-m', null, ovMethodSel(t)),
+        td('ov-c-comm' + (t.comm ? '' : ' no'), t.comm || '-'),
+        td('ov-c-meta', [t.sku && '외부 ' + t.sku, t.barcode, retMD(t.date) + ' 생성', t.who, t.mail ? '메일 ' + retMD(t.mail) + (!t.method && ovDays(t.mail) >= 1 ? ` (${ovDays(t.mail)}일)` : '') : '메일 전', t.comm].filter(Boolean).join(' · ')));
+      else tr.append(
+        td('ov-c-sku mono', t.sku || '-'), td('ov-c-nm', t.name), td('ov-c-q mono', retNum(t.qty)), td('ov-c-v', t.vendor), td('ov-c-who', t.who || '-'),
+        td('ov-c-m', null, t.method ? el('span', { class:'ov-chip m-' + t.method, text: ovMethod(t.method) }) : el('span', { class:'no', text:'-' })),
+        td('ov-c-d mono', retMD(t.doneAt)),
+        td('ov-c-meta', [t.who, retMD(t.doneAt) + ' 완료'].filter(Boolean).join(' · ')),
+        td('ov-c-act', null, el('button', { type:'button', class:'ret-btn ghost sm', text:'↩ 되돌리기', onclick: e => { e.stopPropagation(); ovSetStatus(t, 'wait'); } })));
+      return tr;
+    });
+    box.replaceChildren(head, el('div', { class:'ov-wrap' },
+      el('table', { class:'ov-t' + (isWait ? '' : ' done') }, el('thead', {}, el('tr', {}, ...thead.map(h => el('th', { class: h === '수량' ? 'r' : '', text: h })), el('th', { class:'ov-c-meta' }))), el('tbody', {}, ...body))));
+  }
+
+  // ---- ③ 처리방법별 보기 (가상반출 · 차감매입, 업체별) ----
+  function ovRenderView(){
+    const box = $('#ov-view'); if (!box) return;
+    const wait = (ovItems || []).filter(t => t.status !== 'done');
+    const by = { vr: wait.filter(t => t.method === 'vr'), ded: wait.filter(t => t.method === 'ded') };
+    const k = ovUi.view, list = by[k];
+    const seg = el('div', { class:'ov-tog', role:'group', 'aria-label':'처리방법' },
+      ...[['vr', '가상반출'], ['ded', '차감매입']].map(([v, l]) => el('button', { type:'button', class:'m-' + v, 'aria-pressed': k === v ? 'true' : 'false',
+        onclick: () => { ovUi.view = v; ovSetLS('ov-view', v); ovRenderView(); } }, l + ' ', el('b', { text: by[v].length }))));
+    const groups = new Map();
+    const vkey = v => String(v || '').replace(/㈜/g, '(주)').replace(/\s+/g, '');
+    for (const t of [...list].sort((a, b) => (a.date || '').localeCompare(b.date || ''))){ const g = vkey(t.vendor); if (!groups.has(g)) groups.set(g, { name: t.vendor, ts: [] }); groups.get(g).ts.push(t); }
+    const sumQ = list.reduce((s, t) => s + (+t.qty || 0), 0);
+    const top = el('div', { class:'ov-vtop' }, seg, el('span', { class:'ret-help', text: list.length ? `업체 ${groups.size}곳 · ${retNum(sumQ)}개 · 오래된 순` : '' }));
+    const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'처리방법별 보기' }), el('p', { class:'ret-help', text:'대기 건 중 가상반출 · 차감매입만 · 업체별로 묶어서 봐요' }));
+    if (!list.length){ box.replaceChildren(head, top, el('p', { class:'ho-empty', text: `${ovMethod(k)}(으)로 고른 대기 건이 없어요. 과매입 목록의 처리방법 칸에서 골라 주세요.` })); return; }
+    const gs = [...groups.values()].map(({ name: v, ts }) => el('div', { class:'ov-g' },
+      el('div', { class:'ov-gh' }, el('span', { class:'ov-gn', text: v }), el('span', { class:'ov-gc', text: `${ts.length}건 · ${retNum(ts.reduce((s, t) => s + (+t.qty || 0), 0))}개` })),
+      ...ts.map(t => { const n = ovDays(t.date); return el('div', { class:'ov-r' },
+        el('div', { class:'ov-rn' }, el('span', { class:'nm', text: t.name }), el('span', { class:'mt mono', text: [t.barcode || t.sku, t.who].filter(Boolean).join(' · ') })),
+        el('span', { class:'ov-rq mono', text: retNum(t.qty) + '개' }),
+        el('span', { class:'ov-rd mono' + (n >= 7 ? ' hi' : ''), text: n + '일째' }),
+        el('button', { type:'button', class:'ov-done', text:'✓ 완료', onclick: () => ovSetStatus(t, 'done') })); })));
+    box.replaceChildren(head, top, el('div', { class:'ov-gs' }, ...gs));
+  }
+
   // ---------- 생산성 (STOW 개인 UPH) ----------
   // WMS 작업자 이력(worker_history) 엑셀을 이 브라우저에서만 읽어요. 서버에는 아무것도 저장하지 않아요.
   const PR_TOTE = new Set(['11F', '21F', '31F']);        // 토트 재고이동 (챔버는 '프리팩')
@@ -2736,6 +3060,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     render();
     if (view === 'ho') loadHandover();
     if (view === 'ret') loadReturns();
+    if (view === 'over') loadOvers();
   });
   function enterEdit(){ askEdit = false; editMode = true; render(); const el = $('#add-day'); if (el) el.focus(); }
   $('#editToggle').onclick = () => {
