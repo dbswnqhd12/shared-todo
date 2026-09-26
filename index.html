@@ -2461,7 +2461,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       el('span', { class:'pr-chips', role:'group', 'aria-label': label }, ...opts.map(([v, l]) => el('button', { type:'button', 'aria-pressed': prUi[key] === v ? 'true' : 'false', text: l,
         onclick: () => { prUi[key] = v; renderProd(); } }))));
     const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'STOW 개인 생산성' }),
-      el('p', { class:'ret-help', text:'WMS 작업자 이력(worker_history) 엑셀을 올리면 IB STOW 사람별 UPH를 계산해요' }));
+      el('p', { class:'ret-help', text:'WMS 작업자 이력(worker_history) 엑셀을 올리면 IB STOW 사람별 HTP를 계산해요' }));
     if (!prData){
       const drop = el('div', { class:'pr-drop', tabindex:'0', role:'button', 'aria-label':'엑셀 올리기', onclick: prPick,
         onkeydown: e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); prPick(); } } },
@@ -2485,15 +2485,15 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       el('div', { class:'pr-kpis' },
         el('div', { class:'pr-kpi' }, el('small', { text:'인원' }), el('b', { text: A.list.length }), '명'),
         el('div', { class:'pr-kpi' }, el('small', { text:'총 수량' }), el('b', { text: prFmt(A.tq) })),
-        el('div', { class:'pr-kpi' }, el('small', { text:'작업시간 (HTP)' }), el('b', { text: (A.td / 3600).toFixed(1) }), 'h'),
-        el('div', { class:'pr-kpi main' }, el('small', { text:'평균 UPH' }), el('b', { text: prFmt(A.avg) }))));
+        el('div', { class:'pr-kpi' }, el('small', { text:'작업시간' }), el('b', { text: (A.td / 3600).toFixed(1) }), 'h'),
+        el('div', { class:'pr-kpi main' }, el('small', { text:'평균 HTP' }), el('b', { text: prFmt(A.avg) }))));
     prDropZone(top);
 
     const typeTitle = prUi.type === 'all' ? '' : ` · ${PR_TYPE_LABEL[prUi.type]}`;
     const table = !A.list.length ? el('p', { class:'ho-empty', text:'조건에 맞는 STOW 기록이 없어요.' }) :
       el('div', { class:'ret-wrap' }, el('table', { class:'pr-table' },
         el('thead', {}, el('tr', {}, el('th', {}), el('th', { text:'이름' }), el('th', { class:'r', text:'수량' }), el('th', { class:'pr-mixh pr-opt', text:'진열 방식' }),
-          el('th', { class:'r pr-opt', text:'시간' }), el('th', { class:'pr-opt' }), el('th', { class:'r', text:'UPH' }), el('th', { text:'평균 대비' }))),
+          el('th', { class:'r pr-opt', text:'시간' }), el('th', { class:'pr-opt' }), el('th', { class:'r', text:'HTP' }), el('th', { text:'평균 대비' }))),
         el('tbody', {}, ...A.list.map((p, i) => {
           const pct = A.avg ? p.uph / A.avg * 100 : 0;
           const tot = Object.values(p.t).reduce((s, v) => s + v, 0) || 1;
@@ -2518,9 +2518,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       ...PR_TYPES.map(k => el('span', {}, el('i', { style:'background:' + PR_COLOR[k] }), k === 'TOTE' ? '토트 재고이동 (11F·21F·31F)' : k)),
       el('span', {}, el('em', {}), `평균 ${prFmt(A.avg)}`), el('span', { class:'lo', text:'▼ 평균의 70% 미만' }));
     const rank = el('section', { class:'ret-sec' },
-      el('div', { class:'ret-sec-head' }, el('h3', { text:'STOW 사람별 UPH' + typeTitle }), el('p', { class:'ret-help', text:'UPH = 수량 ÷ 작업시간 (토트 재고이동 포함) · 이름을 누르면 상세' })),
+      el('div', { class:'ret-sec-head' }, el('h3', { text:'STOW 사람별 HTP' + typeTitle }), el('p', { class:'ret-help', text:'HTP = 시간당 진열 수량 (수량 ÷ 작업시간 · 토트 재고이동 포함) · 이름을 누르면 상세' })),
       table, A.list.length ? legend : null);
-    box.replaceChildren(top, rank, prUi.sel ? prDetail(A) : el('p', { class:'ret-help pr-hint', text:'순위에서 이름을 누르면 시간대별 UPH · 진열 방식 · 챔버가 나와요' }));
+    box.replaceChildren(top, rank, prUi.sel ? prDetail(A) : el('p', { class:'ret-help pr-hint', text:'순위에서 이름을 누르면 시간대별 HTP · 진열 방식 · 챔버가 나와요' }));
   }
 
   function prDropZone(node){
@@ -2545,7 +2545,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const tiles = [...PR_TYPES, ...(byT.ETC ? ['ETC'] : [])].map(k => { const x = byT[k] || { q:0, d:0 };
       return el('div', { class:'pr-tt' + (x.d ? '' : ' none') }, el('div', { class:'pr-tth' }, el('i', { style:'background:' + PR_COLOR[k] }), PR_TYPE_LABEL[k]),
         el('div', {}, el('b', { text: prFmt(x.q) }), el('small', { text:`개 · ${Math.round(x.d / 60)}분` })),
-        el('div', { class:'pr-ttu' }, 'UPH ', el('b', { text: x.d ? prFmt(prUph(x.q, x.d)) : '–' }), el('small', { text:` (전체 ${prFmt(A.typeAvg[k] || 0)})` }))); });
+        el('div', { class:'pr-ttu' }, 'HTP ', el('b', { text: x.d ? prFmt(prUph(x.q, x.d)) : '–' }), el('small', { text:` (전체 ${prFmt(A.typeAvg[k] || 0)})` }))); });
     // 시간대별
     const hours = new Map();
     for (const r of mine){
@@ -2566,7 +2566,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         el('div', { class:'pr-hq', text:`${Math.round(h.d / 60)}분` }), el('div', { class:'pr-hp idle', text:'⚠ 실적 0' }), oLab ? el('div', { class:'pr-ho', text:'+ ' + oLab }) : null); }
       const u = prUph(h.q, h.d), tot = Object.values(h.t).reduce((s, v) => s + v, 0) || 1;
       const main = Object.keys(h.t).sort((a, b) => h.t[b] - h.t[a])[0];
-      return el('div', { class:'pr-hc', title:`${lab} · ${prFmt(h.q)}개 · ${Math.round(h.d / 60)}분 · UPH ${prFmt(u)}` },
+      return el('div', { class:'pr-hc', title:`${lab} · ${prFmt(h.q)}개 · ${Math.round(h.d / 60)}분 · HTP ${prFmt(u)}` },
         el('div', { class:'pr-hv', text: prFmt(u) }),
         el('div', { class:'pr-hb' }, el('span', { class:'pr-stk', style:`height:${Math.max(3, u / umax * 100)}%` },
           ...[...PR_TYPES, 'ETC'].reverse().filter(k => h.t[k]).map(k => el('i', { style:`flex:${h.t[k]};background:${PR_COLOR[k]}` })))),
@@ -2586,11 +2586,11 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         el('span', { class:'pr-tag c', text: ct === 'PERM' ? '정규' : ct === 'TEMP' ? '단기' : ct }), el('span', { class:'ret-help', text: emp }),
         el('button', { type:'button', class:'ret-btn ghost sm pr-close', text:'닫기', onclick: () => { prUi.sel = ''; renderProd(); } })),
       el('div', { class:'pr-stats' }, el('span', {}, '수량 ', el('b', { text: prFmt(q) })), el('span', {}, 'STOW 시간 ', el('b', { text: prH(d) })),
-        el('span', {}, 'UPH ', el('b', { text: prFmt(u) }), el('small', { text:` (평균 ${prFmt(A.avg)})` })),
+        el('span', {}, 'HTP ', el('b', { text: prFmt(u) }), el('small', { text:` (평균 ${prFmt(A.avg)})` })),
         idle ? el('span', { class:'lo', text:`⚠ 실적 0 : ${idle}시간` }) : null),
       el('p', { class:'pr-sub' }, '진열 방식별', el('small', { text:'같은 방식끼리 전체 평균과 비교' })),
       el('div', { class:'pr-tts' }, ...tiles),
-      el('p', { class:'pr-sub' }, '시간대별 UPH', el('small', { text:'막대 높이 = UPH · 색 = 진열 방식 비율 · 아래는 수량 · 작업분 · 챔버' })),
+      el('p', { class:'pr-sub' }, '시간대별 HTP', el('small', { text:'막대 높이 = HTP · 색 = 진열 방식 비율 · 아래는 수량 · 작업분 · 챔버' })),
       el('div', { class:'pr-hours-wrap' }, el('div', { class:'pr-hours', style:`grid-template-columns:repeat(${HH.length},minmax(58px,1fr))` }, ...cols)),
       el('p', { class:'pr-sub' }, '챔버별 진열', el('small', { text:'수량 기준 · 11F·21F·31F는 프리팩 · 오른쪽은 많이 진열한 로케이션' })),
       chL.length ? el('div', { class:'pr-chs' }, ...chL.map(([c, v]) => el('div', { class:'pr-cr' }, el('span', { class:'cn', text: c }),
