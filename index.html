@@ -529,6 +529,12 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   .ov-tog{max-width:100%;overflow-x:auto}.ov-tog button{white-space:nowrap;padding:6px 11px}
   .ov-r .ov-rn .nm{white-space:normal}.ov-gh{flex-wrap:wrap}
 }
+/* IST 안의 회송 · 과매입 */
+.ist-sub{display:flex;gap:22px;border-bottom:1px solid var(--line);margin:-4px 2px 2px;padding:0 4px}
+.ist-sub button{border:0;background:none;padding:8px 2px 9px;font-size:15px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;display:flex;gap:7px;align-items:center}
+.ist-sub button b{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--high)}
+.ist-sub button[aria-pressed=true]{color:var(--ink);border-bottom-color:var(--accent)}
+.ist-sub button:hover{color:var(--ink)}
 /* ---------- 생산성 ---------- */
 .pr-drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:28px 16px;border:2px dashed var(--line);border-radius:10px;background:var(--bg);cursor:pointer;text-align:center}
 .pr-drop b{font-size:15px;color:var(--accent)}.pr-drop span{font-size:13px}.pr-drop small{font-size:12px;color:var(--muted)}
@@ -686,12 +692,15 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     <button type="button" data-v="cal" aria-pressed="true">달력</button>
     <button type="button" data-v="list" aria-pressed="false">할 일 목록</button>
     <button type="button" data-v="ho" aria-pressed="false">인수인계</button>
-    <button type="button" data-v="ret" aria-pressed="false">IST 회송</button>
-    <button type="button" data-v="over" aria-pressed="false">IST 과매입</button>
+    <button type="button" data-v="ist" aria-pressed="false">IST</button>
     <button type="button" data-v="prod" aria-pressed="false">생산성</button>
   </div>
 
   <section class="ho" id="ho" hidden aria-label="시프트 교대 인수인계"></section>
+  <nav class="ist-sub" id="istSub" hidden aria-label="IST">
+    <button type="button" data-s="ret" aria-pressed="false">회송 <b id="istCntRet"></b></button>
+    <button type="button" data-s="over" aria-pressed="false">과매입 <b id="istCntOver"></b></button>
+  </nav>
   <section class="ret" id="ret" hidden aria-label="IST 회송"></section>
   <section class="ret" id="over" hidden aria-label="IST 과매입"></section>
   <section class="ret" id="prod" hidden aria-label="STOW 개인 생산성"></section>
@@ -840,8 +849,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       rev = data.rev; loadedMonths = months; loaded = true;
       render();
       if (view === 'ho' && hoRev !== rev && !hoFocused()) loadHandover();
-      if (view === 'ret' && retRev !== rev) loadReturns();
-      if (view === 'over' && ovRev !== rev) loadOvers();
+      const ist = view === 'ret' || view === 'over';   // IST 안에서는 회송 · 과매입 건수를 둘 다 보여줘요
+      if (ist && retRev !== rev) loadReturns();
+      if (ist && ovRev !== rev) loadOvers();
       if (view === 'prod' && prRev !== rev) prLoad();
       setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
@@ -857,8 +867,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     try {
       const data = await request('GET', '/api/state?only=rev');
       if (view === 'ho' && data.rev !== hoRev && !hoFocused()) loadHandover();
-      if (view === 'ret' && data.rev !== retRev) loadReturns();
-      if (view === 'over' && data.rev !== ovRev) loadOvers();
+      const ist = view === 'ret' || view === 'over';
+      if (ist && data.rev !== retRev) loadReturns();
+      if (ist && data.rev !== ovRev) loadOvers();
       if (view === 'prod' && data.rev !== prRev) prLoad();
       if (data.rev !== rev) loadFull();
       else setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
@@ -1137,14 +1148,17 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 
   function render(){
     document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === filter));
-    document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === view));
+    document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === view || (b.dataset.v === 'ist' && (view === 'ret' || view === 'over'))));
+    $('#istSub').hidden = !(view === 'ret' || view === 'over');
+    document.querySelectorAll('#istSub button').forEach(b => b.setAttribute('aria-pressed', b.dataset.s === view ? 'true' : 'false'));
+    istCounts();
     const cal = view === 'cal';
     const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over';
     $('#ho').hidden = !hoView;
     $('#ret').hidden = !retView;
     $('#prod').hidden = !prodView;
     $('#over').hidden = !overView;
-    $('#app').classList.toggle('wide', prodView || overView);
+    $('#app').classList.toggle('wide', prodView);
     for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView;
     document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView;
     if (prodView && !$('#prod').hasChildNodes()) renderProd();
@@ -2040,6 +2054,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     retFillForm();
     retRenderToday();
     retRenderList();
+    istCounts();
   }
 
   // ---- ① 입력 칸 (한 번만 만들고 계속 씀) ----
@@ -2352,6 +2367,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const retOldDays = t => t.status !== 'done' && t.date ? Math.floor((new Date(todayIso) - new Date(t.date)) / 864e5) : 0;
 
   function retRenderList(){
+    istCounts();
     const body = $('#ret-list-body');
     if (!body) return;
     const all = retItems || [];
@@ -2536,6 +2552,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     ovFillForm();
     ovRenderList();
     ovRenderView();
+    istCounts();
   }
 
   // ---- ① 입력 칸 ----
@@ -2672,7 +2689,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const prev = { ...t };
     Object.assign(t, patch);
     if (patch.status === 'done') t.doneAt = ovToday; else if (patch.status === 'wait') delete t.doneAt;
-    ovRenderList(); ovRenderView(); ovFillForm();
+    ovRenderList(); ovRenderView(); ovFillForm(); istCounts();
     try { const r = await api('PATCH', '/api/overs?id=' + encodeURIComponent(t.id), patch); Object.assign(t, r.item); ovRev = -2; if (okMsg) toast(okMsg); }
     catch(e){ for (const k of Object.keys(t)) delete t[k]; Object.assign(t, prev); ovRenderList(); ovRenderView(); if (e instanceof Locked) return showLock(e.message); toast(e.message); }
   }
@@ -3089,13 +3106,24 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 
   document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { filter = b.dataset.f; store.set('todo-filter', filter); render(); });
   document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
-    view = b.dataset.v; store.set('todo-view2', view);
+    view = b.dataset.v === 'ist' ? (store.get('ist-sub', 'ret') === 'over' ? 'over' : 'ret') : b.dataset.v; store.set('todo-view2', view);
     $('#newDue').value = view === 'cal' ? selDate : '';
     render();
     if (view === 'ho') loadHandover();
-    if (view === 'ret') loadReturns();
-    if (view === 'over') loadOvers();
+    if (view === 'ret' || view === 'over'){ loadReturns(); loadOvers(); }   // 두 쪽 건수를 같이 보여줘요
   });
+  // IST 안의 회송 · 과매입 (마지막에 본 쪽을 기억)
+  document.querySelectorAll('#istSub button').forEach(b => b.onclick = () => {
+    view = b.dataset.s; store.set('todo-view2', view); store.set('ist-sub', view);
+    render();
+    if (view === 'ret') loadReturns(); else loadOvers();
+  });
+  function istCounts(){
+    const r = retItems ? retItems.filter(t => t.status !== 'done').length : null;
+    const o = ovItems ? ovItems.filter(t => t.status !== 'done').length : null;
+    $('#istCntRet').textContent = r == null ? '' : '대기 ' + r;
+    $('#istCntOver').textContent = o == null ? '' : '대기 ' + o;
+  }
   function enterEdit(){ askEdit = false; editMode = true; render(); const el = $('#add-day'); if (el) el.focus(); }
   $('#editToggle').onclick = () => {
     if (editMode) { editMode = false; render(); return; }
