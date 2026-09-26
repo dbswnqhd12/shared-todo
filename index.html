@@ -529,6 +529,16 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   .pr-tr{grid-template-columns:10px 84px minmax(30px,1fr) 60px;grid-template-areas:"d n b q" ". t h h"}
   .pr-tr .dot{grid-area:d}.pr-tr > span:nth-of-type(1){grid-area:n}.pr-tr .tb{grid-area:b}.pr-tr > b{grid-area:q}.pr-tr > span.muted{grid-area:t}.pr-tr .h{grid-area:h;text-align:right}
 }
+/* 체크인 현황 · 역할 태그 */
+.pr-tag.role-mgr{background:var(--accent);color:#fff}.pr-tag.role-perm{background:var(--bg);color:var(--muted)}.pr-tag.role-temp{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+.pr-li .nm{display:flex;align-items:center;gap:5px;min-width:0}.pr-li .nm > span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr-ci{max-width:560px}
+.pr-ci-t{border-collapse:collapse;width:100%;font-size:14px}
+.pr-ci-t th{font-size:12px;color:var(--muted);font-weight:600;text-align:right;padding:6px 10px;border-bottom:1px solid var(--line)}.pr-ci-t th:first-child{text-align:left}
+.pr-ci-t td{padding:8px 10px;border-bottom:1px solid var(--bg);text-align:right;font-family:var(--mono);font-size:15px}
+.pr-ci-t td:first-child{text-align:left;font-family:var(--body);font-weight:700}
+.pr-ci-t .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px}.pr-ci-t .dot.s-day{background:var(--day)}.pr-ci-t .dot.s-eve{background:var(--eve)}.pr-ci-t .dot.s-night{background:var(--night)}
+.pr-ci-t tr.tot td{font-weight:800;border-top:2px solid var(--line);background:var(--accent-soft);color:var(--accent)}
 #ret-print{display:none;color:#000;background:#fff;font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
 #ret-print.measuring{display:block;position:absolute;left:-10000px;top:0;width:186mm}
 .rp-page{page-break-after:always;break-after:page;page-break-inside:avoid;break-inside:avoid}
@@ -2397,8 +2407,13 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const PR_SHIFT = { day:'주간', eve:'오후', night:'심야' };
   const PR_PROC = { 'Receive_Shrink Packaging':'쉬링크 포장', TRANSFER_CART_UNLOAD:'카트 하차', RECEIVE_WS:'입고', UNLOAD_WS:'하차', UNLOAD:'하차',
     IB_TEAM_CAPTAIN:'캡틴', FORKLIFTER:'지게차', REPLENISHER:'보충', STOW_WS:'STOW_WS' };
+  // 관리자 (이름으로 구분) · 나머지는 계약직(PERM) / 단기(TEMP)
+  const PR_MGR = new Set(['윤주봉', '박주영', '김민지', '최재준', '송종은', '김균현', '신준희', '김형남']);
+  const prRole = (emp, ct) => PR_MGR.has(prName(emp).trim()) ? 'mgr' : String(ct).toUpperCase() === 'TEMP' ? 'temp' : 'perm';
+  const PR_ROLE = { mgr:'관리자', perm:'계약직', temp:'단기' };
+  const prRoleTag = (emp, ct) => { const r = prRole(emp, ct); return el('span', { class:'pr-tag role-' + r, text: PR_ROLE[r] }); };
   let prData = null;
-  const prUi = { shift:'all', type:'all', ct:'all', sel:'', sort:'q' };
+  const prUi = { shift:'all', type:'all', ct:'all', sel:'', sort:'q', ciScope:'ib' };
 
   const prSec = v => {
     if (v === '' || v == null) return null;
@@ -2432,8 +2447,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const H = rows[hi].map(v => String(v || '').trim());
     const c = n => H.indexOf(n);
     const col = { date:c('Work Date'), emp:c('Employee'), hs:c('HTP Start'), he:c('HTP End'), proc:c('Process(Task)'), qty:c('Unit Qty'),
-      loc:c('Location'), pr:c('Pick/Receive Type'), ct:c('Contract Type'), shift:c('Shift'), hour:c('HourOfWorkDate') };
-    const miss = Object.entries(col).filter(([k, i]) => i < 0 && k !== 'date').map(([k]) => k);
+      loc:c('Location'), pr:c('Pick/Receive Type'), ct:c('Contract Type'), shift:c('Shift'), hour:c('HourOfWorkDate'), uwt:c('User Work Type') };
+    const miss = Object.entries(col).filter(([k, i]) => i < 0 && k !== 'date' && k !== 'uwt').map(([k]) => k);
     if (miss.length) throw new Error('엑셀에 필요한 열이 없어요: ' + miss.join(', '));
     const recs = [], emps = new Set(), dates = new Set();
     for (const r of rows.slice(hi + 1)){
@@ -2444,7 +2459,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       const proc = String(r[col.proc] || '');
       const rec = { emp: String(r[col.emp]), proc, stow: proc === 'STOW(STOW)', d, q: +r[col.qty] || 0,
         loc: String(r[col.loc] || ''), type: prType(r[col.loc], r[col.pr]), ct: String(r[col.ct] || '').toUpperCase(),
-        shift: prShift(String(r[col.shift] || '')), hour: Math.floor(+r[col.hour] || 0) };
+        shift: prShift(String(r[col.shift] || '')), hour: Math.floor(+r[col.hour] || 0), ib: col.uwt < 0 || String(r[col.uwt] || '').toUpperCase() === 'INBOUND' };
       recs.push(rec); emps.add(rec.emp); if (col.date >= 0 && r[col.date]) dates.add(String(r[col.date]).slice(0, 10));
     }
     if (!recs.some(x => x.stow)) throw new Error('이 파일에는 STOW 기록이 없어요.');
@@ -2520,7 +2535,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       if (window.matchMedia('(max-width:760px)').matches) setTimeout(() => $('#pr-detail')?.scrollIntoView({ behavior:'smooth', block:'start' }), 30); };
     const rows = list.map((p, i) => el('div', { class:'pr-li' + (p.emp === prUi.sel ? ' sel' : ''), role:'button', tabindex:'0', title: p.emp,
         onclick: () => pick(p), onkeydown: e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pick(p); } } },
-      el('span', { class:'r', text: i + 1 }), el('span', { class:'nm', text: p.name }),
+      el('span', { class:'r', text: i + 1 }), el('span', { class:'nm' }, el('span', { text: p.name }), prRoleTag(p.emp, p.ct)),
       p.sh ? el('span', { class:'pr-tag s-' + p.sh, text: PR_SHIFT[p.sh] }) : el('span'),
       el('span', { class:'v' }, byQ ? prFmt(p.q) : prFmt(p.uph), el('small', { text: byQ ? '개' : ' HTP' })),
       el('div', { class:'lb' }, el('i', { style:`width:${(byQ ? p.q : p.uph) / mx * 100}%` }), el('b', { style:`left:${avgV / mx * 100}%` })),
@@ -2531,7 +2546,27 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
           el('button', { type:'button', 'aria-pressed': (prUi.sort || 'q') === v ? 'true' : 'false', text: l, onclick: () => { prUi.sort = v; renderProd(); } })))),
       list.length ? el('div', { class:'pr-rows' }, ...rows) : el('p', { class:'ho-empty', text:'조건에 맞는 STOW 기록이 없어요.' }));
     const sel = list.find(p => p.emp === prUi.sel);
-    box.replaceChildren(top, el('div', { class:'pr-split' }, side, sel ? prDetail(A, sel, list.indexOf(sel) + 1, list.length, avgQ, byQ) : el('span')));
+    box.replaceChildren(top, prCheckin(), el('div', { class:'pr-split' }, side, sel ? prDetail(A, sel, list.indexOf(sel) + 1, list.length, avgQ, byQ) : el('span')));
+  }
+
+  // 체크인 현황: 그날 작업 기록이 있는 사람 수 (조 × 관리자 · 계약직 · 단기)
+  function prCheckin(){
+    const seen = { day:new Map(), eve:new Map(), night:new Map() };
+    for (const r of prData.recs) if (seen[r.shift] && (prUi.ciScope === 'all' || r.ib)) seen[r.shift].set(r.emp, prRole(r.emp, r.ct));
+    const cnt = k => { const c = { mgr:0, perm:0, temp:0 }; for (const v of seen[k].values()) c[v]++; return c; };
+    const rows = ['day', 'eve', 'night'].map(k => [k, cnt(k)]);
+    const tot = rows.reduce((t, [, c]) => ({ mgr: t.mgr + c.mgr, perm: t.perm + c.perm, temp: t.temp + c.temp }), { mgr:0, perm:0, temp:0 });
+    const sum = c => c.mgr + c.perm + c.temp;
+    const date = prData.dates.length ? prData.dates.map(d => retMD(d)).join(', ') + ' · ' : '';
+    return el('section', { class:'ret-sec pr-ci' },
+      el('div', { class:'ret-sec-head' }, el('h3', { text:'체크인 현황' }), el('span', { class:'ret-help', text: date + '그날 작업 기록이 있는 사람 수' }),
+        el('span', { class:'pr-chips sm pr-close', role:'group', 'aria-label':'범위' }, ...[['ib','IB'], ['all','센터 전체']].map(([v, l]) =>
+          el('button', { type:'button', 'aria-pressed': prUi.ciScope === v ? 'true' : 'false', text: l, onclick: () => { prUi.ciScope = v; renderProd(); } })))),
+      el('table', { class:'pr-ci-t' },
+        el('thead', {}, el('tr', {}, ...['조', '관리자', '계약직', '단기', '합계'].map(h => el('th', { text: h })))),
+        el('tbody', {}, ...rows.map(([k, c]) => el('tr', {}, el('td', {}, el('i', { class:'dot s-' + k }), PR_SHIFT[k]),
+            el('td', { text: c.mgr }), el('td', { text: c.perm }), el('td', { text: c.temp }), el('td', {}, el('b', { text: sum(c) })))),
+          el('tr', { class:'tot' }, el('td', { text:'합계' }), el('td', { text: tot.mgr }), el('td', { text: tot.perm }), el('td', { text: tot.temp }), el('td', { text: sum(tot) })))));
   }
 
   function prDropZone(node){
@@ -2555,9 +2590,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     }
     const HH = [...hours.entries()].filter(([, h]) => h.d).sort((a, b) => a[0] - b[0]);
     const us = HH.map(([, h]) => prUph(h.q, h.d)), umax = Math.max(A.avg * 1.15, ...us, 1);
-    const n = Math.max(1, HH.length), W = Math.max(n * 52, 320), bw = W / n, y0 = 150, sc = 125 / umax, ay = Math.round(y0 - A.avg * sc);
-    let svg = `<svg viewBox="0 0 ${W} 196" width="100%" style="min-width:${n * 44}px;max-width:${n * 66}px" role="img" aria-label="시간대별 HTP"><line x1="0" x2="${W}" y1="${ay}" y2="${ay}" stroke="currentColor" stroke-dasharray="4 4" opacity=".45"/>`
-      + `<text x="${W - 2}" y="${ay - 4}" text-anchor="end" font-size="11" class="pr-svgm">평균 HTP ${prFmt(A.avg)}</text>`;
+    const n = Math.max(1, HH.length), W = Math.max(n * 52, 320), bw = W / n, y0 = 156, sc = 118 / umax, ay = Math.round(y0 - A.avg * sc);
+    let svg = `<svg viewBox="0 0 ${W} 200" width="100%" style="min-width:${n * 44}px;max-width:${n * 66}px" role="img" aria-label="시간대별 HTP"><line x1="0" x2="${W}" y1="${ay}" y2="${ay}" stroke="currentColor" stroke-dasharray="4 4" opacity=".45"/>`
+      + `<line x1="${W - 118}" x2="${W - 96}" y1="8" y2="8" stroke="currentColor" stroke-dasharray="4 4" opacity=".45"/><text x="${W - 2}" y="12" text-anchor="end" font-size="11" class="pr-svgm">평균 HTP ${prFmt(A.avg)}</text>`;
     HH.forEach(([hr, h], i) => {
       const v = us[i], hh = Math.max(3, v * sc), x = i * bw + 6, w = bw - 12, cx = x + w / 2;
       svg += `<rect x="${x}" y="${y0 - hh}" width="${w}" height="${hh}" rx="4" class="pr-svgb"><title>${hr % 24}시 · ${prFmt(h.q)}개 · ${Math.round(h.d / 60)}분 · HTP ${prFmt(v)}</title></rect>`
@@ -2583,7 +2618,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const chL = Object.entries(chq).sort((a, b) => b[1] - a[1]), ctot = chL.reduce((s, [, v]) => s + v, 0) || 1, cmax = chL[0]?.[1] || 1;
     return el('section', { class:'ret-sec pr-detail', id:'pr-detail' },
       el('div', { class:'ret-sec-head' }, el('h3', { text: p.name }), p.sh ? el('span', { class:'pr-tag s-' + p.sh, text: PR_SHIFT[p.sh] }) : null,
-        el('span', { class:'pr-tag c', text: p.ct === 'PERM' ? '정규' : p.ct === 'TEMP' ? '단기' : p.ct || '-' }),
+        prRoleTag(p.emp, p.ct),
         el('span', { class:'ret-help', text: `${byQ ? '수량' : 'HTP'} ${rank}위 / ${total}명` })),
       el('div', { class:'pr-hero' },
         el('div', {}, el('span', { class:'pr-fl', text: prUi.type === 'all' ? '진열 수량' : `진열 수량 · ${PR_TYPE_LABEL[prUi.type]}` }),
