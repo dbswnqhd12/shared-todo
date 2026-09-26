@@ -748,6 +748,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       render();
       if (view === 'ho' && hoRev !== rev && !hoFocused()) loadHandover();
       if (view === 'ret' && retRev !== rev) loadReturns();
+      if (view === 'prod' && prRev !== rev) prLoad();
       setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
       if (e instanceof Locked) return showLock(teamKey ? e.message : '');
@@ -763,6 +764,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       const data = await request('GET', '/api/state?only=rev');
       if (view === 'ho' && data.rev !== hoRev && !hoFocused()) loadHandover();
       if (view === 'ret' && data.rev !== retRev) loadReturns();
+      if (view === 'prod' && data.rev !== prRev) prLoad();
       if (data.rev !== rev) loadFull();
       else setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
@@ -1050,6 +1052,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView;
     document.querySelector('.toolbar').hidden = hoView || retView || prodView;
     if (prodView && !$('#prod').hasChildNodes()) renderProd();
+    if (prodView && prRev < 0) prLoad();
     if (hoView && !$('#ho').hasChildNodes()) renderHandover();
     if (retView && !retBuilt) renderReturns();
     for (const id of ['#cal', '#dayHead', '#shifts', '#todoLabel']) $(id).hidden = !cal;
@@ -2416,7 +2419,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const prRole = (emp, ct) => PR_MGR.has(prName(emp).trim()) ? 'mgr' : String(ct).toUpperCase() === 'TEMP' ? 'temp' : 'perm';
   const PR_ROLE = { mgr:'관리자', perm:'계약직', temp:'단기' };
   const prRoleTag = (emp, ct) => { const r = prRole(emp, ct); return el('span', { class:'pr-tag role-' + r, text: PR_ROLE[r] }); };
-  let prData = null;
+  let prData = null, prRev = -1, prLoading = false;
   const prUi = { shift:'all', type:'all', ct:'all', sel:'', sort:'q', ciScope:'ib' };
 
   const prSec = v => {
@@ -2476,8 +2479,46 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       prData = prPrep(await hoReadXlsx(file), file.name);
       prUi.sel = '';
       renderProd();
-      toast('계산했어요.');
-    } catch(e) { toast(e.message || '엑셀을 읽지 못했어요.'); }
+    } catch(e) { return toast(e.message || '엑셀을 읽지 못했어요.'); }
+    try {
+      toast('계산했어요 · 팀에 공유하는 중…');
+      const r = await api('PUT', '/api/prod', { snap: prEncode(prData) });
+      prData.at = r.at; prRev = r.rev; renderProd();
+      toast('계산해서 팀 모두에게 공유했어요.');
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+      toast('계산은 됐지만 공유 저장을 못 했어요: ' + (e.message || ''));
+    }
+  }
+
+  // 공유용으로 줄이기: STOW 줄은 계산에 필요한 칸만, 나머지는 체크인용 (사람 · 조 · IB) 만
+  function prEncode(D){
+    const ei = new Map(), emps = [];
+    const idx = (e, ct) => { if (!ei.has(e)){ ei.set(e, emps.length); emps.push([e, ct]); } return ei.get(e); };
+    const stow = [], seen = new Set();
+    for (const r of D.recs){
+      const i = idx(r.emp, r.ct);
+      if (r.stow) stow.push([i, Math.round(r.d), r.q, r.loc, r.type, r.shift, r.hour, r.ib ? 1 : 0]);
+      seen.add(`${i}|${r.shift}|${r.ib ? 1 : 0}`);
+    }
+    return { file: D.file, dates: D.dates, emps, stow, seen: [...seen].map(k => { const [i, sh, ib] = k.split('|'); return [+i, sh, +ib]; }) };
+  }
+  function prDecode(S){
+    const E = S.emps || [];
+    const recs = (S.stow || []).map(([i, d, q, loc, type, shift, hour, ib]) => ({ emp: E[i][0], ct: E[i][1], stow: true, d, q, loc, type, shift, hour, ib: !!ib }));
+    for (const [i, shift, ib] of S.seen || []) recs.push({ emp: E[i][0], ct: E[i][1], stow: false, d: 0, q: 0, loc: '', type: '', shift, hour: -1, ib: !!ib });
+    return { file: S.file, dates: S.dates || [], recs, at: S.at };
+  }
+  async function prLoad(){
+    if (prLoading) return;
+    prLoading = true;
+    try {
+      const d = await request('GET', '/api/prod');
+      prRev = d.rev;
+      if (d.snap && d.snap.at !== prData?.at){ prData = prDecode(d.snap); prUi.sel = ''; if (view === 'prod') renderProd(); }
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+    } finally { prLoading = false; }
   }
   function prPick(){
     const inp = el('input', { type:'file', accept:'.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -2511,14 +2552,15 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       el('span', { class:'pr-chips', role:'group', 'aria-label': label }, ...opts.map(([v, l]) => el('button', { type:'button', 'aria-pressed': prUi[key] === v ? 'true' : 'false', text: l,
         onclick: () => { prUi[key] = v; renderProd(); } }))));
     const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'STOW 개인 생산성' }),
-      prData ? el('span', { class:'ret-help', text: (prData.dates.length ? prData.dates.map(d => retMD(d)).join(', ') + ' · ' : '') + prData.file }) :
+      prData ? el('span', { class:'ret-help', text: (prData.dates.length ? prData.dates.map(d => retMD(d)).join(', ') + ' · ' : '') + prData.file
+        + (prData.at ? ' · ' + new Date(prData.at).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }) + ' 올림' : '') }) :
       el('p', { class:'ret-help', text:'WMS 작업자 이력(worker_history) 엑셀을 올리면 IB STOW 사람별 진열 수량 · HTP를 계산해요' }),
       prData ? el('button', { type:'button', class:'ret-btn ghost sm pr-close', text:'다른 파일', onclick: prPick }) : null);
     if (!prData){
       const drop = el('div', { class:'pr-drop', tabindex:'0', role:'button', 'aria-label':'엑셀 올리기', onclick: prPick,
         onkeydown: e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); prPick(); } } },
         el('b', { text:'엑셀 올리기' }), el('span', { text:'worker_history_….xlsx 파일을 끌어다 놓거나 눌러서 고르세요' }),
-        el('small', { text:'파일은 이 브라우저에서만 읽고 계산해요 · 서버에 저장하지 않아요' }));
+        el('small', { text:'계산한 결과는 팀 모두에게 보이고, 다음 파일을 올리면 바뀌어요' }));
       prDropZone(drop);
       box.replaceChildren(el('section', { class:'ret-sec' }, head, drop));
       return;
@@ -2533,7 +2575,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       el('div', { class:'pr-filters' },
         chips('조', 'shift', [['all','전체'], ['day','주간'], ['eve','오후'], ['night','심야']]),
         chips('진열', 'type', [['all','전체'], ['PLT','PLT'], ['CASE','CASE'], ['EACH','EACH'], ['TOTE','토트']])),
-      el('p', { class:'ret-help', text: `${list.length}명 · 총 ${prFmt(A.tq)}개 · ${(A.td / 3600).toFixed(1)}h · 평균 HTP ${prFmt(A.avg)} · 브라우저에서만 계산 · 저장 안 함` }));
+      el('p', { class:'ret-help', text: `${list.length}명 · 총 ${prFmt(A.tq)}개 · ${(A.td / 3600).toFixed(1)}h · 평균 HTP ${prFmt(A.avg)} · 팀 공유 · 다음 파일을 올리면 바뀌어요` }));
     prDropZone(top);
     const pick = p => { prUi.sel = p.emp; renderProd();
       if (window.matchMedia('(max-width:760px)').matches) setTimeout(() => $('#pr-detail')?.scrollIntoView({ behavior:'smooth', block:'start' }), 30); };
@@ -2603,7 +2645,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   // 오른쪽 상세: 진열 수량 · 시간대별 HTP · 진열 방식 · 챔버
   function prDetail(A, p, rank, total, avgQ, byQ){
     const passShift = r => (prUi.shift === 'all' || r.shift === prUi.shift);
-    const mine = prData.recs.filter(r => r.emp === p.emp && passShift(r));
+    const mine = prData.recs.filter(r => r.stow && r.emp === p.emp && passShift(r));
     const stow = mine.filter(r => r.stow && (prUi.type === 'all' || r.type === prUi.type));
     const d = stow.reduce((s, r) => s + r.d, 0), q = stow.reduce((s, r) => s + r.q, 0), u = prUph(q, d);
     // 시간대별 (STOW만, 다른 일은 이름만)
@@ -2611,7 +2653,6 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     for (const r of mine){
       const h = hours.get(r.hour) || { q:0, d:0, other:{} }; hours.set(r.hour, h);
       if (r.stow && (prUi.type === 'all' || r.type === prUi.type)){ h.q += r.q; h.d += r.d; }
-      else if (!r.stow){ const nm = (r.proc.match(/\((.*)\)/) || [, r.proc])[1]; h.other[nm] = (h.other[nm] || 0) + r.d; }
     }
     const HH = [...hours.entries()].filter(([, h]) => h.d).sort((a, b) => a[0] - b[0]);
     const us = HH.map(([, h]) => prUph(h.q, h.d)), umax = Math.max(A.avg * 1.15, ...us, 1);
