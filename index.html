@@ -2707,10 +2707,6 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     if (!ovItems) s1.replaceChildren(h1, el('p', { class:'ret-help', text:'불러오는 중…' }));
     else if (!before.length) s1.replaceChildren(h1, el('p', { class:'ho-empty', text:'처리방법을 고를 과매입 건이 없어요.' }));
     else s1.replaceChildren(h1, el('div', { class:'ov-rows' }, ...before.map(t => {
-      const more = el('select', { class:'ov-more', 'aria-label':'다른 처리방법', title:'다른 처리방법',
-        onclick: e => e.stopPropagation(), onkeydown: e => e.stopPropagation(),
-        onchange: e => { const v = e.target.value; e.target.value = ''; if (v) ovPatch(t, { method: v }, ovMethod(v) + '(으)로 정했어요.'); } },
-        el('option', { value:'', text:'⋯' }), el('option', { value:'xy', text:'XY이동' }), el('option', { value:'re', text:'재진열' }));
       return el('div', { class:'ov-r1' + (t.id === ovUi.editId ? ' sel' : ''), tabindex:'0', title:'눌러서 고치기',
           onclick: () => ovStartEdit(t), onkeydown: e => { if (e.key === 'Enter' && e.target === e.currentTarget){ e.preventDefault(); ovStartEdit(t); } } },
         el('div', { class:'ov-rn' }, el('span', { class:'nm', text: t.name }),
@@ -2718,8 +2714,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         el('span', { class:'ov-rq mono', text: retNum(t.qty) + '개' }),
         el('div', { class:'ov-pick' },
           el('button', { type:'button', class:'m-vr', text:'가상반출', onclick: e => { e.stopPropagation(); ovPatch(t, { method:'vr' }, '가상반출로 넘겼어요.'); } }),
-          el('button', { type:'button', class:'m-ded', text:'차감매입', onclick: e => { e.stopPropagation(); ovPatch(t, { method:'ded' }, '차감매입으로 넘겼어요.'); } }),
-          more));
+          el('button', { type:'button', class:'m-ded', text:'차감매입', onclick: e => { e.stopPropagation(); ovPatch(t, { method:'ded' }, '차감매입으로 넘겼어요.'); } })));
     })));
     const h3 = ovStage(3, '과매입 처리 완료', done.length, '최근 완료 순 · 잘못 눌렀으면 되돌리기');
     if (!ovItems) { s3.replaceChildren(h3); return; }
