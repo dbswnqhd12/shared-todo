@@ -2562,7 +2562,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         f('date', '생성일자', { type:'date', mono:true }),
         el('div', { class:'ret-f span2' }, el('label', { for:'ov-who', text:'처리자' }), who),
         el('div', { class:'ret-f span2' }, el('label', { for:'ov-mail', text:'메일 발송일' }), el('div', { class:'ov-mail' }, mailToday, mailIn)),
-        f('comm', '업체소통', { max:200, cls:'span6', ph:'예) 9/22 재회신 · 리마인드 보냄' })),
+        f('comm', '비고', { max:200, cls:'span6', ph:'예) 9/22 재회신 · 리마인드 보냄' })),
       el('div', { class:'ret-acts' },
         el('span', { class:'ret-help', id:'ov-form-msg', text:'생성일자 · 처리자는 다음 건에도 그대로 남아요' }),
         el('button', { type:'button', class:'ret-btn ghost ov-danger', id:'ov-del', hidden:true, text:'삭제', onclick: ovDelete }),
