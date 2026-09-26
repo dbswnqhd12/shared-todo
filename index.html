@@ -439,6 +439,67 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   .ret-tools .ret-help{margin-left:0}
 }
 /* 회송 확인서 — 업체마다 A4 한 장. 길면 인쇄 직전에 줄여서 한 장에 맞춰요 */
+/* ---------- 생산성 ---------- */
+.pr-drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:28px 16px;border:2px dashed var(--line);border-radius:10px;background:var(--bg);cursor:pointer;text-align:center}
+.pr-drop b{font-size:15px;color:var(--accent)}.pr-drop span{font-size:13px}.pr-drop small{font-size:12px;color:var(--muted)}
+.pr-drop:hover,.pr-drop.drag,.ret-sec.drag{border-color:var(--accent);background:var(--accent-soft)}
+.pr-file{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;border:1px dashed var(--line);border-radius:8px;background:var(--bg)}
+.pr-fn{font-family:var(--mono);font-size:12.5px;font-weight:600;overflow-wrap:anywhere}.pr-file .ret-btn{margin-left:auto}
+.pr-filters{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.pr-f{display:inline-flex;align-items:center;gap:6px}.pr-fl{font-size:12px;font-weight:700;color:var(--muted)}
+.pr-chips{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.pr-chips button{border:0;background:var(--paper);color:var(--muted);padding:5px 11px;font-size:12.5px;font-weight:600}
+.pr-chips button + button{border-left:1px solid var(--line)}
+.pr-chips button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.pr-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pr-kpi{border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px}
+.pr-kpi small{display:block;font-size:12px;color:var(--muted)}.pr-kpi b{font-family:var(--mono);font-size:20px;margin-right:2px}
+.pr-kpi.main{background:var(--accent-soft);border-color:transparent}.pr-kpi.main b{color:var(--accent)}
+.pr-table{border-collapse:collapse;width:100%;font-size:13px}
+.pr-table th{font-size:11.5px;color:var(--muted);font-weight:600;text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap}.pr-table th.r{text-align:right}
+.pr-table td{padding:6px;border-bottom:1px solid var(--bg);vertical-align:middle}
+.pr-table tbody tr{cursor:pointer}.pr-table tbody tr:hover td{background:var(--bg)}.pr-table tbody tr.sel td{background:var(--accent-soft)}
+.pr-table td.n{font-family:var(--mono);text-align:right;white-space:nowrap}.pr-table td.rk{font-family:var(--mono);color:var(--muted);width:22px}.pr-table td.uph{font-weight:700;font-size:14px}
+.pr-table td.nm{white-space:nowrap;font-weight:600}
+.pr-tag{font-size:10.5px;font-weight:700;border-radius:4px;padding:1px 5px;margin-left:5px;white-space:nowrap}
+.pr-tag.s-day{background:var(--day-soft);color:var(--day)}.pr-tag.s-eve{background:var(--eve-soft);color:var(--eve)}.pr-tag.s-night{background:var(--night-soft);color:var(--night)}.pr-tag.c{background:var(--bg);color:var(--muted)}
+.pr-mix{min-width:130px}.pr-mb{display:flex;gap:2px;height:10px;border-radius:5px;overflow:hidden;background:var(--bg)}.pr-mb i{display:block;height:100%}
+.pr-mix span{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
+.pr-bar{min-width:120px;width:26%}.pr-track{position:relative;height:10px;background:var(--bg);border-radius:5px}
+.pr-track i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:5px}.pr-track i.lo{background:var(--ch-line)}
+.pr-track b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.55}
+.pr-flag{font-size:11.5px;font-weight:700;color:var(--muted);white-space:nowrap}.pr-flag.lo{color:var(--high)}.pr-flag.hi{color:var(--accent)}
+.pr-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11.5px;color:var(--muted);align-items:center}
+.pr-legend i{display:inline-block;width:12px;height:8px;border-radius:4px;margin-right:4px}
+.pr-legend em{display:inline-block;width:2px;height:12px;background:var(--ink);opacity:.55;margin-right:5px;vertical-align:-2px}
+.pr-legend .lo{color:var(--high);font-weight:700}
+.pr-hint{text-align:center;padding:6px}
+.pr-close{margin-left:auto}
+.pr-stats{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px}.pr-stats b{font-family:var(--mono)}.pr-stats small{color:var(--muted)}.pr-stats .lo{color:var(--high);font-weight:700}
+.pr-sub{margin:6px 0 0;font-size:13.5px;font-weight:700}.pr-sub small{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.pr-tts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.pr-tt{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px}.pr-tt.none{opacity:.5}
+.pr-tth{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}.pr-tth i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.pr-tt b{font-family:var(--mono);font-size:17px}.pr-tt small{color:var(--muted);font-size:11.5px}.pr-ttu b{font-size:14px}
+.pr-hours-wrap{overflow-x:auto;padding-bottom:4px}
+.pr-hours{display:grid;gap:6px;min-width:100%}
+.pr-hc{text-align:center;min-width:0}.pr-hc.other{opacity:.6}
+.pr-hv{font-family:var(--mono);font-size:12px;font-weight:700}.pr-hv.idle{color:var(--high)}
+.pr-hb{height:100px;background:var(--bg);border-radius:6px;display:flex;align-items:flex-end;overflow:hidden;margin:3px 4px}
+.pr-stk{display:flex;flex-direction:column;gap:2px;width:100%;border-radius:4px 4px 0 0;overflow:hidden}.pr-stk i{display:block;width:100%;min-height:2px}
+.pr-hl{font-family:var(--mono);font-size:12px;color:var(--muted)}.pr-hq{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.35}
+.pr-hty{font-size:10.5px;font-weight:700}.pr-hp{font-size:10.5px;color:var(--muted)}.pr-hp.idle{color:var(--high);font-weight:700}.pr-ho{font-size:10px;color:var(--muted)}
+.pr-ct{display:inline-block;font-size:10.5px;font-weight:700;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin:1px;color:var(--ink);white-space:nowrap}
+.pr-chs{display:flex;flex-direction:column;gap:6px}
+.pr-cr{display:grid;grid-template-columns:56px minmax(60px,1fr) 70px 40px minmax(0,150px);gap:10px;align-items:center;font-size:13px}
+.pr-cr .cn{font-weight:700;white-space:nowrap}.pr-track2{height:12px;background:var(--bg);border-radius:6px;position:relative}.pr-track2 i{position:absolute;inset:0 auto 0 0;background:var(--muted);border-radius:6px}
+.pr-cr .cq{font-family:var(--mono);text-align:right}.pr-cr .cp{font-family:var(--mono);color:var(--muted);text-align:right}.pr-cr .cz{font-family:var(--mono);font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:760px){
+  .pr-kpis{grid-template-columns:1fr 1fr}
+  .pr-table .pr-opt{display:none}
+  .seg{max-width:100%;overflow-x:auto}.seg button{white-space:nowrap;padding:6px 11px;font-size:13.5px;flex:none}
+  .pr-cr{grid-template-columns:52px minmax(40px,1fr) 64px 34px}.pr-cr .cz{display:none}
+}
 #ret-print{display:none;color:#000;background:#fff;font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
 #ret-print.measuring{display:block;position:absolute;left:-10000px;top:0;width:186mm}
 .rp-page{page-break-after:always;break-after:page;page-break-inside:avoid;break-inside:avoid}
@@ -492,10 +553,12 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     <button type="button" data-v="list" aria-pressed="false">할 일 목록</button>
     <button type="button" data-v="ho" aria-pressed="false">인수인계</button>
     <button type="button" data-v="ret" aria-pressed="false">IST 회송</button>
+    <button type="button" data-v="prod" aria-pressed="false">생산성</button>
   </div>
 
   <section class="ho" id="ho" hidden aria-label="시프트 교대 인수인계"></section>
   <section class="ret" id="ret" hidden aria-label="IST 회송"></section>
+  <section class="ret" id="prod" hidden aria-label="STOW 개인 생산성"></section>
 
   <section class="cal" id="cal" aria-label="달력">
     <div class="cal-head">
@@ -935,11 +998,13 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === filter));
     document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === view));
     const cal = view === 'cal';
-    const hoView = view === 'ho', retView = view === 'ret';
+    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod';
     $('#ho').hidden = !hoView;
     $('#ret').hidden = !retView;
-    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView;
-    document.querySelector('.toolbar').hidden = hoView || retView;
+    $('#prod').hidden = !prodView;
+    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView;
+    document.querySelector('.toolbar').hidden = hoView || retView || prodView;
+    if (prodView && !$('#prod').hasChildNodes()) renderProd();
     if (hoView && !$('#ho').hasChildNodes()) renderHandover();
     if (retView && !retBuilt) renderReturns();
     for (const id of ['#cal', '#dayHead', '#shifts', '#todoLabel']) $(id).hidden = !cal;
@@ -2289,6 +2354,250 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const done = () => { area.remove(); window.removeEventListener('afterprint', done); };
     window.addEventListener('afterprint', done);
     setTimeout(() => window.print(), 50);
+  }
+
+  // ---------- 생산성 (STOW 개인 UPH) ----------
+  // WMS 작업자 이력(worker_history) 엑셀을 이 브라우저에서만 읽어요. 서버에는 아무것도 저장하지 않아요.
+  const PR_TOTE = new Set(['11F', '21F', '31F']);        // 토트 재고이동 (챔버는 '프리팩')
+  const PR_TYPES = ['PLT', 'CASE', 'EACH', 'TOTE'];
+  const PR_TYPE_LABEL = { PLT:'PLT', CASE:'CASE', EACH:'EACH', TOTE:'토트 재고이동', ETC:'기타' };
+  const PR_TYPE_SHORT = { PLT:'PLT', CASE:'CASE', EACH:'EACH', TOTE:'토트', ETC:'기타' };
+  const PR_COLOR = { PLT:'#2a78d6', CASE:'#eb6834', EACH:'#1baf7a', TOTE:'#4a3aa7', ETC:'#9AA5A1' };
+  const PR_SHIFT = { day:'주간', eve:'오후', night:'심야' };
+  const PR_PROC = { 'Receive_Shrink Packaging':'쉬링크 포장', TRANSFER_CART_UNLOAD:'카트 하차', RECEIVE_WS:'입고', UNLOAD_WS:'하차', UNLOAD:'하차',
+    IB_TEAM_CAPTAIN:'캡틴', FORKLIFTER:'지게차', REPLENISHER:'보충', STOW_WS:'STOW_WS' };
+  let prData = null;
+  const prUi = { shift:'all', type:'all', ct:'all', sel:'' };
+
+  const prSec = v => {
+    if (v === '' || v == null) return null;
+    const n = Number(v);
+    if (!isNaN(n) && String(v).indexOf(':') < 0) return Math.round((n % 1) * 86400);   // 엑셀 시간 숫자
+    const m = String(v).match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    return m ? (+m[1]) * 3600 + (+m[2]) * 60 + (+(m[3] || 0)) : null;
+  };
+  const prChamber = loc => {
+    loc = String(loc || '').toUpperCase();
+    if (PR_TOTE.has(loc)) return '프리팩';
+    if (!/^\d/.test(loc)) return '기타';
+    const c = loc[0], f = loc[1];
+    return /[123]/.test(c) ? `${c}C ${f === '2' ? 'M' : 'G'}` : `${c}C`;
+  };
+  const prType = (loc, t) => {
+    if (PR_TOTE.has(String(loc || '').toUpperCase())) return 'TOTE';
+    t = String(t || '').toUpperCase();
+    return t.startsWith('PAL') ? 'PLT' : t === 'CASE' ? 'CASE' : t === 'EACH' ? 'EACH' : 'ETC';
+  };
+  const prShift = s => /^day/i.test(s) ? 'day' : /^swing/i.test(s) ? 'eve' : /^(over|night)/i.test(s) ? 'night' : '';
+  const prName = e => String(e || '').replace(/\s*\(.*\)\s*$/, '') || String(e || '');
+  const prFmt = n => Math.round(n).toLocaleString('ko-KR');
+  const prH = n => (n / 3600).toFixed(1) + 'h';
+  const prUph = (q, d) => d > 0 ? q / (d / 3600) : 0;
+
+  // 엑셀 줄 → 필요한 칸만 뽑아 두기
+  function prPrep(rows, fileName){
+    const hi = rows.findIndex(r => r && r.includes('Employee') && r.some(v => /^Process/.test(v || '')));
+    if (hi < 0) throw new Error("'Employee' · 'Process(Task)' 열을 찾지 못했어요. WMS 작업자 이력(worker_history) 엑셀인지 확인해 주세요.");
+    const H = rows[hi].map(v => String(v || '').trim());
+    const c = n => H.indexOf(n);
+    const col = { date:c('Work Date'), emp:c('Employee'), hs:c('HTP Start'), he:c('HTP End'), proc:c('Process(Task)'), qty:c('Unit Qty'),
+      loc:c('Location'), pr:c('Pick/Receive Type'), ct:c('Contract Type'), shift:c('Shift'), hour:c('HourOfWorkDate') };
+    const miss = Object.entries(col).filter(([k, i]) => i < 0 && k !== 'date').map(([k]) => k);
+    if (miss.length) throw new Error('엑셀에 필요한 열이 없어요: ' + miss.join(', '));
+    const recs = [], emps = new Set(), dates = new Set();
+    for (const r of rows.slice(hi + 1)){
+      if (!r || !r[col.emp]) continue;
+      const a = prSec(r[col.hs]), b = prSec(r[col.he]);
+      if (a == null || b == null) continue;
+      const d = b >= a ? b - a : b + 86400 - a;
+      const proc = String(r[col.proc] || '');
+      const rec = { emp: String(r[col.emp]), proc, stow: proc === 'STOW(STOW)', d, q: +r[col.qty] || 0,
+        loc: String(r[col.loc] || ''), type: prType(r[col.loc], r[col.pr]), ct: String(r[col.ct] || '').toUpperCase(),
+        shift: prShift(String(r[col.shift] || '')), hour: Math.floor(+r[col.hour] || 0) };
+      recs.push(rec); emps.add(rec.emp); if (col.date >= 0 && r[col.date]) dates.add(String(r[col.date]).slice(0, 10));
+    }
+    if (!recs.some(x => x.stow)) throw new Error('이 파일에는 STOW 기록이 없어요.');
+    return { file: fileName, recs, nRows: recs.length, nEmp: emps.size, dates: [...dates].sort() };
+  }
+
+  async function prImportFile(file){
+    try {
+      toast('엑셀을 읽는 중이에요…');
+      prData = prPrep(await hoReadXlsx(file), file.name);
+      prUi.sel = '';
+      renderProd();
+      toast('계산했어요.');
+    } catch(e) { toast(e.message || '엑셀을 읽지 못했어요.'); }
+  }
+  function prPick(){
+    const inp = el('input', { type:'file', accept:'.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    inp.onchange = () => { if (inp.files[0]) prImportFile(inp.files[0]); };
+    inp.click();
+  }
+
+  // 필터에 맞는 STOW 줄로 사람별 합계
+  function prAgg(){
+    const pass = r => r.stow && (prUi.shift === 'all' || r.shift === prUi.shift) && (prUi.ct === 'all' || r.ct === prUi.ct);
+    const base = prData.recs.filter(pass);
+    const rows = base.filter(r => prUi.type === 'all' || r.type === prUi.type);
+    const people = new Map();
+    for (const r of rows){
+      let p = people.get(r.emp);
+      if (!p){ p = { emp:r.emp, name:prName(r.emp), d:0, q:0, t:{}, shift:{}, ct:r.ct }; people.set(r.emp, p); }
+      p.d += r.d; p.q += r.q; p.t[r.type] = (p.t[r.type] || 0) + r.q; p.shift[r.shift] = (p.shift[r.shift] || 0) + r.d;
+    }
+    const list = [...people.values()].filter(p => p.d > 0).map(p => ({ ...p, uph: prUph(p.q, p.d), sh: Object.entries(p.shift).sort((a, b) => b[1] - a[1])[0]?.[0] || '' }))
+      .sort((a, b) => b.uph - a.uph);
+    const tq = list.reduce((s, p) => s + p.q, 0), td = list.reduce((s, p) => s + p.d, 0);
+    // 방식별 전체 평균 (방식 필터와 상관없이, 조 · 계약 필터 안에서)
+    const typeAvg = {};
+    for (const k of [...PR_TYPES, 'ETC']){ const x = base.filter(r => r.type === k); typeAvg[k] = prUph(x.reduce((s, r) => s + r.q, 0), x.reduce((s, r) => s + r.d, 0)); }
+    return { list, tq, td, avg: prUph(tq, td), typeAvg };
+  }
+
+  function renderProd(){
+    const box = $('#prod');
+    const chips = (label, key, opts) => el('span', { class:'pr-f' }, el('span', { class:'pr-fl', text: label }),
+      el('span', { class:'pr-chips', role:'group', 'aria-label': label }, ...opts.map(([v, l]) => el('button', { type:'button', 'aria-pressed': prUi[key] === v ? 'true' : 'false', text: l,
+        onclick: () => { prUi[key] = v; renderProd(); } }))));
+    const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'STOW 개인 생산성' }),
+      el('p', { class:'ret-help', text:'WMS 작업자 이력(worker_history) 엑셀을 올리면 IB STOW 사람별 UPH를 계산해요' }));
+    if (!prData){
+      const drop = el('div', { class:'pr-drop', tabindex:'0', role:'button', 'aria-label':'엑셀 올리기', onclick: prPick,
+        onkeydown: e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); prPick(); } } },
+        el('b', { text:'엑셀 올리기' }), el('span', { text:'worker_history_….xlsx 파일을 끌어다 놓거나 눌러서 고르세요' }),
+        el('small', { text:'파일은 이 브라우저에서만 읽고 계산해요 · 서버에 저장하지 않아요' }));
+      prDropZone(drop);
+      box.replaceChildren(el('section', { class:'ret-sec' }, head, drop));
+      return;
+    }
+    const A = prAgg();
+    const mx = Math.max(1, ...A.list.map(p => p.uph));
+    const dateTxt = prData.dates.length ? prData.dates.map(d => retMD(d)).join(', ') + ' · ' : '';
+    const top = el('section', { class:'ret-sec' }, head,
+      el('div', { class:'pr-file' }, el('span', { class:'pr-fn', text: prData.file }),
+        el('span', { class:'ret-help', text: `${dateTxt}${prFmt(prData.nRows)}줄 · ${prData.nEmp}명 · 브라우저에서만 계산 · 저장 안 함` }),
+        el('button', { type:'button', class:'ret-btn ghost sm', text:'다른 파일', onclick: prPick })),
+      el('div', { class:'pr-filters' },
+        chips('조', 'shift', [['all','전체'], ['day','주간'], ['eve','오후'], ['night','심야']]),
+        chips('진열', 'type', [['all','전체'], ['PLT','PLT'], ['CASE','CASE'], ['EACH','EACH'], ['TOTE','토트']]),
+        chips('계약', 'ct', [['all','전체'], ['PERM','정규'], ['TEMP','단기']])),
+      el('div', { class:'pr-kpis' },
+        el('div', { class:'pr-kpi' }, el('small', { text:'인원' }), el('b', { text: A.list.length }), '명'),
+        el('div', { class:'pr-kpi' }, el('small', { text:'총 수량' }), el('b', { text: prFmt(A.tq) })),
+        el('div', { class:'pr-kpi' }, el('small', { text:'작업시간 (HTP)' }), el('b', { text: (A.td / 3600).toFixed(1) }), 'h'),
+        el('div', { class:'pr-kpi main' }, el('small', { text:'평균 UPH' }), el('b', { text: prFmt(A.avg) }))));
+    prDropZone(top);
+
+    const typeTitle = prUi.type === 'all' ? '' : ` · ${PR_TYPE_LABEL[prUi.type]}`;
+    const table = !A.list.length ? el('p', { class:'ho-empty', text:'조건에 맞는 STOW 기록이 없어요.' }) :
+      el('div', { class:'ret-wrap' }, el('table', { class:'pr-table' },
+        el('thead', {}, el('tr', {}, el('th', {}), el('th', { text:'이름' }), el('th', { class:'r', text:'수량' }), el('th', { class:'pr-mixh pr-opt', text:'진열 방식' }),
+          el('th', { class:'r pr-opt', text:'시간' }), el('th', { class:'pr-opt' }), el('th', { class:'r', text:'UPH' }), el('th', { text:'평균 대비' }))),
+        el('tbody', {}, ...A.list.map((p, i) => {
+          const pct = A.avg ? p.uph / A.avg * 100 : 0;
+          const tot = Object.values(p.t).reduce((s, v) => s + v, 0) || 1;
+          const main = Object.keys(p.t).sort((a, b) => p.t[b] - p.t[a])[0] || 'ETC';
+          const tote = p.t.TOTE && main !== 'TOTE' ? ` · 토트 ${Math.round(p.t.TOTE / tot * 100)}%` : '';
+          const flag = pct < 70 ? el('span', { class:'pr-flag lo', text:`▼ 평균의 ${Math.round(pct)}%` })
+            : pct >= 115 ? el('span', { class:'pr-flag hi', text:`▲ ${Math.round(pct)}%` }) : el('span', { class:'pr-flag', text:`${Math.round(pct)}%` });
+          const sel = () => { prUi.sel = prUi.sel === p.emp ? '' : p.emp; renderProd(); if (prUi.sel) setTimeout(() => $('#pr-detail')?.scrollIntoView({ behavior:'smooth', block:'start' }), 30); };
+          return el('tr', { class: prUi.sel === p.emp ? 'sel' : '', tabindex:'0', title:`${p.emp} · 눌러서 상세 보기`, onclick: sel, onkeydown: e => { if (e.key === 'Enter') sel(); } },
+            el('td', { class:'rk', text: i + 1 }),
+            el('td', { class:'nm' }, el('span', { text: p.name }), p.sh ? el('span', { class:'pr-tag s-' + p.sh, text: PR_SHIFT[p.sh] }) : null,
+              el('span', { class:'pr-tag c', text: p.ct === 'PERM' ? '정규' : p.ct === 'TEMP' ? '단기' : p.ct || '-' })),
+            el('td', { class:'n', text: prFmt(p.q) }),
+            el('td', { class:'pr-mix pr-opt' }, el('div', { class:'pr-mb' }, ...[...PR_TYPES, 'ETC'].filter(k => p.t[k]).map(k => el('i', { style:`width:${p.t[k] / tot * 100}%;background:${PR_COLOR[k]}`, title:`${PR_TYPE_LABEL[k]} ${prFmt(p.t[k])}` }))),
+              el('span', { text: `${PR_TYPE_SHORT[main]} ${Math.round((p.t[main] || 0) / tot * 100)}%${tote}` })),
+            el('td', { class:'n pr-opt', text: prH(p.d) }),
+            el('td', { class:'pr-bar pr-opt' }, el('div', { class:'pr-track' }, el('i', { class: pct < 70 ? 'lo' : '', style:`width:${p.uph / mx * 100}%` }), el('b', { style:`left:${A.avg / mx * 100}%` }))),
+            el('td', { class:'n uph', text: prFmt(p.uph) }),
+            el('td', {}, flag));
+        }))));
+    const legend = el('div', { class:'pr-legend' },
+      ...PR_TYPES.map(k => el('span', {}, el('i', { style:'background:' + PR_COLOR[k] }), k === 'TOTE' ? '토트 재고이동 (11F·21F·31F)' : k)),
+      el('span', {}, el('em', {}), `평균 ${prFmt(A.avg)}`), el('span', { class:'lo', text:'▼ 평균의 70% 미만' }));
+    const rank = el('section', { class:'ret-sec' },
+      el('div', { class:'ret-sec-head' }, el('h3', { text:'STOW 사람별 UPH' + typeTitle }), el('p', { class:'ret-help', text:'UPH = 수량 ÷ 작업시간 (토트 재고이동 포함) · 이름을 누르면 상세' })),
+      table, A.list.length ? legend : null);
+    box.replaceChildren(top, rank, prUi.sel ? prDetail(A) : el('p', { class:'ret-help pr-hint', text:'순위에서 이름을 누르면 시간대별 UPH · 진열 방식 · 챔버가 나와요' }));
+  }
+
+  function prDropZone(node){
+    node.ondragover = e => { e.preventDefault(); node.classList.add('drag'); };
+    node.ondragleave = () => node.classList.remove('drag');
+    node.ondrop = e => { e.preventDefault(); node.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) prImportFile(f); };
+  }
+
+  // 한 사람 상세: 방식별 · 시간대별 · 챔버별
+  function prDetail(A){
+    const emp = prUi.sel;
+    const passShift = r => (prUi.shift === 'all' || r.shift === prUi.shift);
+    const mine = prData.recs.filter(r => r.emp === emp && passShift(r));
+    const stow = mine.filter(r => r.stow);
+    const d = stow.reduce((s, r) => s + r.d, 0), q = stow.reduce((s, r) => s + r.q, 0);
+    const ct = stow[0]?.ct || '', shTot = {};
+    for (const r of stow) shTot[r.shift] = (shTot[r.shift] || 0) + r.d;
+    const sh = Object.entries(shTot).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
+    // 방식별
+    const byT = {};
+    for (const r of stow){ const x = byT[r.type] = byT[r.type] || { q:0, d:0 }; x.q += r.q; x.d += r.d; }
+    const tiles = [...PR_TYPES, ...(byT.ETC ? ['ETC'] : [])].map(k => { const x = byT[k] || { q:0, d:0 };
+      return el('div', { class:'pr-tt' + (x.d ? '' : ' none') }, el('div', { class:'pr-tth' }, el('i', { style:'background:' + PR_COLOR[k] }), PR_TYPE_LABEL[k]),
+        el('div', {}, el('b', { text: prFmt(x.q) }), el('small', { text:`개 · ${Math.round(x.d / 60)}분` })),
+        el('div', { class:'pr-ttu' }, 'UPH ', el('b', { text: x.d ? prFmt(prUph(x.q, x.d)) : '–' }), el('small', { text:` (전체 ${prFmt(A.typeAvg[k] || 0)})` }))); });
+    // 시간대별
+    const hours = new Map();
+    for (const r of mine){
+      const h = hours.get(r.hour) || { q:0, d:0, t:{}, ch:{}, other:{} }; hours.set(r.hour, h);
+      if (r.stow){ h.q += r.q; h.d += r.d; h.t[r.type] = (h.t[r.type] || 0) + r.q; if (r.q){ const c = prChamber(r.loc); h.ch[c] = (h.ch[c] || 0) + r.q; } }
+      else { const p = (r.proc.match(/\((.*)\)/) || [, r.proc])[1]; h.other[p] = (h.other[p] || 0) + r.d; }
+    }
+    const HH = [...hours.entries()].sort((a, b) => a[0] - b[0]);
+    const umax = Math.max(1, ...HH.map(([, h]) => prUph(h.q, h.d)));
+    let idle = 0;
+    const cols = HH.map(([hr, h]) => {
+      const lab = `${hr % 24}시`;
+      const otherName = Object.keys(h.other).sort((a, b) => h.other[b] - h.other[a])[0];
+      const oLab = otherName ? (PR_PROC[otherName] || otherName) : '';
+      if (!h.d) return el('div', { class:'pr-hc other' }, el('div', { class:'pr-hv', text:'–' }), el('div', { class:'pr-hb' }), el('div', { class:'pr-hl', text: lab }),
+        el('div', { class:'pr-hq', text:' ' }), el('div', { class:'pr-hp', text: oLab }));
+      if (!h.q){ idle++; return el('div', { class:'pr-hc' }, el('div', { class:'pr-hv idle', text:'0' }), el('div', { class:'pr-hb' }), el('div', { class:'pr-hl', text: lab }),
+        el('div', { class:'pr-hq', text:`${Math.round(h.d / 60)}분` }), el('div', { class:'pr-hp idle', text:'⚠ 실적 0' }), oLab ? el('div', { class:'pr-ho', text:'+ ' + oLab }) : null); }
+      const u = prUph(h.q, h.d), tot = Object.values(h.t).reduce((s, v) => s + v, 0) || 1;
+      const main = Object.keys(h.t).sort((a, b) => h.t[b] - h.t[a])[0];
+      return el('div', { class:'pr-hc', title:`${lab} · ${prFmt(h.q)}개 · ${Math.round(h.d / 60)}분 · UPH ${prFmt(u)}` },
+        el('div', { class:'pr-hv', text: prFmt(u) }),
+        el('div', { class:'pr-hb' }, el('span', { class:'pr-stk', style:`height:${Math.max(3, u / umax * 100)}%` },
+          ...[...PR_TYPES, 'ETC'].reverse().filter(k => h.t[k]).map(k => el('i', { style:`flex:${h.t[k]};background:${PR_COLOR[k]}` })))),
+        el('div', { class:'pr-hl', text: lab }),
+        el('div', { class:'pr-hq' }, `${prFmt(h.q)}개`, el('br'), `${Math.round(h.d / 60)}분`),
+        el('div', { class:'pr-hty', text: `${PR_TYPE_SHORT[main]} ${Math.round(h.t[main] / tot * 100)}%` }),
+        el('div', { class:'pr-hp' }, ...Object.keys(h.ch).sort((a, b) => h.ch[b] - h.ch[a]).slice(0, 2).map(c => el('span', { class:'pr-ct', text: c }))),
+        oLab ? el('div', { class:'pr-ho', text:'+ ' + oLab }) : null);
+    });
+    // 챔버별
+    const chq = {}, chz = {};
+    for (const r of stow) if (r.q){ const c = prChamber(r.loc); chq[c] = (chq[c] || 0) + r.q; (chz[c] = chz[c] || {})[r.loc] = (chz[c][r.loc] || 0) + r.q; }
+    const chL = Object.entries(chq).sort((a, b) => b[1] - a[1]), ctot = chL.reduce((s, [, v]) => s + v, 0) || 1, cmax = chL[0]?.[1] || 1;
+    const u = prUph(q, d);
+    return el('section', { class:'ret-sec', id:'pr-detail' },
+      el('div', { class:'ret-sec-head' }, el('h3', { text:`${prName(emp)} · 상세` }), sh ? el('span', { class:'pr-tag s-' + sh, text: PR_SHIFT[sh] }) : null,
+        el('span', { class:'pr-tag c', text: ct === 'PERM' ? '정규' : ct === 'TEMP' ? '단기' : ct }), el('span', { class:'ret-help', text: emp }),
+        el('button', { type:'button', class:'ret-btn ghost sm pr-close', text:'닫기', onclick: () => { prUi.sel = ''; renderProd(); } })),
+      el('div', { class:'pr-stats' }, el('span', {}, '수량 ', el('b', { text: prFmt(q) })), el('span', {}, 'STOW 시간 ', el('b', { text: prH(d) })),
+        el('span', {}, 'UPH ', el('b', { text: prFmt(u) }), el('small', { text:` (평균 ${prFmt(A.avg)})` })),
+        idle ? el('span', { class:'lo', text:`⚠ 실적 0 : ${idle}시간` }) : null),
+      el('p', { class:'pr-sub' }, '진열 방식별', el('small', { text:'같은 방식끼리 전체 평균과 비교' })),
+      el('div', { class:'pr-tts' }, ...tiles),
+      el('p', { class:'pr-sub' }, '시간대별 UPH', el('small', { text:'막대 높이 = UPH · 색 = 진열 방식 비율 · 아래는 수량 · 작업분 · 챔버' })),
+      el('div', { class:'pr-hours-wrap' }, el('div', { class:'pr-hours', style:`grid-template-columns:repeat(${HH.length},minmax(58px,1fr))` }, ...cols)),
+      el('p', { class:'pr-sub' }, '챔버별 진열', el('small', { text:'수량 기준 · 11F·21F·31F는 프리팩 · 오른쪽은 많이 진열한 로케이션' })),
+      chL.length ? el('div', { class:'pr-chs' }, ...chL.map(([c, v]) => el('div', { class:'pr-cr' }, el('span', { class:'cn', text: c }),
+        el('div', { class:'pr-track2' }, el('i', { style:`width:${v / cmax * 100}%` })), el('span', { class:'cq', text:`${prFmt(v)}개` }),
+        el('span', { class:'cp', text:`${Math.round(v / ctot * 100)}%` }),
+        el('span', { class:'cz', text: Object.entries(chz[c]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]).join(' · ') }))))
+        : el('p', { class:'ho-empty', text:'진열 기록이 없어요.' }));
   }
 
   // ---------- 이벤트 ----------
