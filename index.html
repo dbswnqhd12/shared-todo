@@ -506,6 +506,10 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .pr-list{padding:10px 8px}.pr-lh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 6px 4px}
 .pr-chips.sm button{padding:3px 10px;font-size:12px}
 .pr-rows{display:flex;flex-direction:column;gap:2px}
+.pr-list{display:flex;flex-direction:column;position:sticky;top:10px}
+.pr-list .pr-rows{overflow-y:auto;min-height:0;overscroll-behavior:contain;scrollbar-width:thin;margin-right:-4px;padding-right:4px;-webkit-mask-image:linear-gradient(#000 calc(100% - 22px),transparent);mask-image:linear-gradient(#000 calc(100% - 22px),transparent)}
+.pr-list .pr-rows.end{-webkit-mask-image:none;mask-image:none}
+.pr-lcount{font-size:11px;color:var(--muted);text-align:center;padding-top:6px;border-top:1px solid var(--bg);margin-top:4px}
 .pr-li{display:grid;grid-template-columns:22px minmax(0,1fr) auto auto;gap:3px 8px;align-items:center;padding:7px 8px;border-radius:8px;cursor:pointer}
 .pr-li:hover{background:var(--bg)}.pr-li.sel{background:var(--accent-soft)}
 .pr-li .r{font-family:var(--mono);color:var(--muted);font-size:12px}.pr-li .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -525,7 +529,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .pr-tr b,.pr-cr b{text-align:right}.pr-tr .h small{color:var(--muted)}.pr-trs .muted{color:var(--muted)}.pr-trs .mono{font-family:var(--mono)}
 .pr-cr{display:grid;grid-template-columns:56px minmax(40px,1fr) 64px 40px;gap:8px;align-items:center;font-size:12.5px}.pr-cr .cn{font-weight:700;white-space:nowrap}
 @media (max-width:760px){
-  .pr-split{grid-template-columns:1fr}.pr-detail{position:static}
+  .pr-split{grid-template-columns:1fr}.pr-detail{position:static}.pr-list{position:static}.pr-list .pr-rows{max-height:52vh}
   .pr-tr{grid-template-columns:10px 84px minmax(30px,1fr) 60px;grid-template-areas:"d n b q" ". t h h"}
   .pr-tr .dot{grid-area:d}.pr-tr > span:nth-of-type(1){grid-area:n}.pr-tr .tb{grid-area:b}.pr-tr > b{grid-area:q}.pr-tr > span.muted{grid-area:t}.pr-tr .h{grid-area:h;text-align:right}
 }
@@ -2544,9 +2548,30 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       el('div', { class:'pr-lh' }, el('span', { class:'pr-fl', text: byQ ? `순위 · 평균 ${prFmt(avgQ)}개` : `순위 · 평균 HTP ${prFmt(A.avg)}` }),
         el('span', { class:'pr-chips sm', role:'group', 'aria-label':'순위 기준' }, ...[['q','수량'], ['htp','HTP']].map(([v, l]) =>
           el('button', { type:'button', 'aria-pressed': (prUi.sort || 'q') === v ? 'true' : 'false', text: l, onclick: () => { prUi.sort = v; renderProd(); } })))),
-      list.length ? el('div', { class:'pr-rows' }, ...rows) : el('p', { class:'ho-empty', text:'조건에 맞는 STOW 기록이 없어요.' }));
+      list.length ? el('div', { class:'pr-rows' }, ...rows) : el('p', { class:'ho-empty', text:'조건에 맞는 STOW 기록이 없어요.' }),
+      list.length > 8 ? el('div', { class:'pr-lcount', text: `${list.length}명 · 스크롤해서 더 보기` }) : null);
     const sel = list.find(p => p.emp === prUi.sel);
-    box.replaceChildren(top, prCheckin(), el('div', { class:'pr-split' }, side, sel ? prDetail(A, sel, list.indexOf(sel) + 1, list.length, avgQ, byQ) : el('span')));
+    const oldTop = box.querySelector('.pr-rows')?.scrollTop || 0;
+    const detail = sel ? prDetail(A, sel, list.indexOf(sel) + 1, list.length, avgQ, byQ) : el('span');
+    box.replaceChildren(top, prCheckin(), el('div', { class:'pr-split' }, side, detail));
+    prFitList(side, detail, oldTop);
+  }
+
+  // 목록 높이를 오른쪽 상세 높이에 맞추고 안쪽만 스크롤 (넓은 화면)
+  let prRO = null;
+  function prFitList(side, detail, oldTop){
+    const rows = side.querySelector('.pr-rows'); if (!rows) return;
+    const fit = () => {
+      if (window.matchMedia('(max-width:760px)').matches){ side.style.height = ''; }
+      else side.style.height = Math.max(420, Math.min(detail.offsetHeight || 0, window.innerHeight - 20)) + 'px';
+      rows.classList.toggle('end', rows.scrollTop + rows.clientHeight >= rows.scrollHeight - 2);
+    };
+    rows.addEventListener('scroll', () => rows.classList.toggle('end', rows.scrollTop + rows.clientHeight >= rows.scrollHeight - 2), { passive:true });
+    prRO?.disconnect(); prRO = new ResizeObserver(fit); prRO.observe(detail);
+    fit(); rows.scrollTop = oldTop;
+    const s = rows.querySelector('.pr-li.sel');
+    const y = s ? s.offsetTop - rows.offsetTop : 0;
+    if (s && (y < rows.scrollTop || y + s.offsetHeight > rows.scrollTop + rows.clientHeight)) rows.scrollTop = y - 8;
   }
 
   // 체크인 현황: 그날 작업 기록이 있는 사람 수 (조 × 관리자 · 계약직 · 단기)
