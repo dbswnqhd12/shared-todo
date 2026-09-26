@@ -553,7 +553,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     <button type="button" data-v="list" aria-pressed="false">할 일 목록</button>
     <button type="button" data-v="ho" aria-pressed="false">인수인계</button>
     <button type="button" data-v="ret" aria-pressed="false">IST 회송</button>
-    <button type="button" data-v="prod" aria-pressed="false">생산성</button>
+    <button type="button" data-v="prod" aria-pressed="false" hidden>생산성</button><!-- 생산성 탭: 다듬는 중이라 잠시 숨김 (hidden 지우면 다시 보여요) -->
   </div>
 
   <section class="ho" id="ho" hidden aria-label="시프트 교대 인수인계"></section>
@@ -648,6 +648,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   };
   let filter = store.get('todo-filter', 'all');
   let view = store.get('todo-view2', 'cal');
+  if (view === 'prod' && document.querySelector('.seg [data-v=prod]')?.hidden) view = 'cal';   // 숨긴 탭에 머물러 있지 않게
   let teamKey = store.get('team-key', '');
   let editKey = '', askEdit = false;
   let openShifts = new Set();
