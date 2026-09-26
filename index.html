@@ -503,6 +503,32 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   .ov-r{grid-template-columns:minmax(0,1fr) auto auto;gap:4px 10px}
   .ov-rd{grid-column:1;grid-row:2;text-align:left}.ov-rq{grid-row:1;grid-column:2}.ov-done{grid-column:3;grid-row:1 / span 2}
 }
+/* 과매입 3단계 */
+.ov-sec.s1{border-top:3px solid var(--mid)}.ov-sec.s2{border-top:3px solid var(--vio)}.ov-sec.s3{border-top:3px solid var(--accent)}
+.ov-stage{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:10px}.ov-stage h3{margin:0;font-size:16px}
+.ov-no{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;flex:none}
+.s1 .ov-no{background:var(--mid)}.s2 .ov-no{background:var(--vio)}.s3 .ov-no{background:var(--accent)}
+.ov-cnt{font-family:var(--mono);font-size:15px}.ov-stage .ret-help{margin:0 0 0 auto}
+.ov-rows{display:flex;flex-direction:column}.ov-rows .ov-r1:first-child{border-top:0}
+.ov-r1{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px 12px;align-items:center;padding:9px 6px;border-top:1px solid var(--line);cursor:pointer;border-radius:6px}
+.ov-r1:hover,.ov-r1.sel,.ov-r:hover,.ov-r.sel{background:var(--bg)}.ov-r{cursor:pointer}
+.ov-rn .mt .no{opacity:.7}
+.ov-pick{display:flex;gap:5px;align-items:center}
+.ov-pick button{border:1px solid var(--line);background:var(--paper);border-radius:7px;padding:4px 10px;font-size:12.5px;font-weight:800;white-space:nowrap}
+.ov-pick .m-vr{color:var(--vio);border-color:color-mix(in srgb,var(--vio) 35%,var(--line))}.ov-pick .m-vr:hover{background:var(--vio);color:#fff}
+.ov-pick .m-ded{color:var(--sat);border-color:color-mix(in srgb,var(--sat) 35%,var(--line))}.ov-pick .m-ded:hover{background:var(--sat);color:#fff}
+.ov-more{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--paper);border-radius:7px;padding:4px 8px;font:inherit;font-size:12.5px;font-weight:800;color:var(--muted);cursor:pointer;width:34px;text-align:center}
+.ov-tog button.m-etc[aria-pressed=true]{background:var(--mid);color:#fff}
+.ov-acts{display:flex;gap:5px;align-items:center}
+.ov-back{border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:7px;padding:4px 8px;font-size:12.5px;font-weight:800}
+.ov-moreall{margin-top:8px}
+@media (max-width:760px){
+  .ov-stage .ret-help{margin-left:0;flex-basis:100%}
+  .ov-r1{grid-template-columns:minmax(0,1fr) auto}.ov-r1 .ov-pick{grid-column:1/-1;justify-content:flex-end}
+  .ov-acts{grid-column:3;grid-row:1 / span 2}
+  .ov-tog{max-width:100%;overflow-x:auto}.ov-tog button{white-space:nowrap;padding:6px 11px}
+  .ov-r .ov-rn .nm{white-space:normal}.ov-gh{flex-wrap:wrap}
+}
 /* ---------- 생산성 ---------- */
 .pr-drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:28px 16px;border:2px dashed var(--line);border-radius:10px;background:var(--bg);cursor:pointer;text-align:center}
 .pr-drop b{font-size:15px;color:var(--accent)}.pr-drop span{font-size:13px}.pr-drop small{font-size:12px;color:var(--muted)}
@@ -2484,7 +2510,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   let ovItems = null, ovRev = -1, ovLoading = false, ovBuilt = false, ovToday = todayIso, ovDelArm = 0;
   const ovLS = (k, d) => { try { return localStorage.getItem(k) || d; } catch { return d; } };
   const ovSetLS = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
-  const ovUi = { filter:'wait', view: ovLS('ov-view', 'vr') === 'ded' ? 'ded' : 'vr', editId:null, auto:false };
+  const ovUi = { view: ['ded', 'etc'].includes(ovLS('ov-view', 'vr')) ? ovLS('ov-view', 'vr') : 'vr', editId:null, auto:false, doneAll:false };
   const ovBlank = () => ({ sku:'', barcode:'', qty:'', name:'', vendor:'', comm:'', mail:'', date: ovForm?.date || ovToday, who: ovForm?.who || ovLS('ov-who', '') });
   let ovForm = null; ovForm = ovBlank();
   const ovDays = d => d ? Math.max(0, Math.round((Date.parse(ovToday) - Date.parse(d)) / 864e5)) : 0;
@@ -2546,8 +2572,9 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       el('datalist', { id:'ov-vendors' }));
     form.onsubmit = e => { e.preventDefault(); ovSubmit(); };
     box.append(form,
-      el('section', { class:'ret-sec', id:'ov-list' }),
-      el('section', { class:'ret-sec', id:'ov-view' }));
+      el('section', { class:'ret-sec ov-sec s1', id:'ov-s1' }),
+      el('section', { class:'ret-sec ov-sec s2', id:'ov-s2' }),
+      el('section', { class:'ret-sec ov-sec s3', id:'ov-s3' }));
   }
 
   function ovFillForm(){
@@ -2660,73 +2687,85 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     return s;
   }
 
-  // ---- ② 과매입 목록 (대기 · 완료) ----
+  // ---- 단계 머리 ----
+  const ovStage = (n, title, count, help) => el('div', { class:'ov-stage s' + n },
+    el('span', { class:'ov-no', text: n }), el('h3', { text: title }), el('b', { class:'ov-cnt', text: count }), el('p', { class:'ret-help', text: help }));
+  const ovMeta = t => [t.vendor, t.barcode || (t.sku && '외부 ' + t.sku), t.who].filter(Boolean).join(' · ');
+  const ovMailBits = t => {
+    if (!t.mail) return [el('span', { class:'no', text:'메일 전' })];
+    const n = ovDays(t.mail);
+    return ['메일 ' + retMD(t.mail) + ' ', el('span', { class:'ov-late' + (n >= 7 ? ' hi' : ''), text: n + '일째' })];
+  };
+
+  // ---- ① 과매입 처리 전 (가상반출 · 차감매입 고르기 전) + ③ 과매입 처리 완료 ----
   function ovRenderList(){
-    const box = $('#ov-list'); if (!box) return;
+    const s1 = $('#ov-s1'), s3 = $('#ov-s3'); if (!s1) return;
     const all = ovItems || [];
-    const wait = all.filter(t => t.status !== 'done'), done = all.filter(t => t.status === 'done');
-    const isWait = ovUi.filter !== 'done';
-    const seg = el('div', { class:'ret-view ov-filter', role:'group', 'aria-label':'상태' },
-      ...[['wait', '대기', wait.length], ['done', '완료', done.length]].map(([k, l, n]) =>
-        el('button', { type:'button', 'aria-pressed': (isWait ? 'wait' : 'done') === k ? 'true' : 'false', onclick: () => { ovUi.filter = k; ovRenderList(); } }, l + ' ', el('b', { text: n }))));
-    const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'과매입 목록' }),
-      el('p', { class:'ret-help', text: isWait ? '처리방법 칸을 눌러 골라요 · 줄을 누르면 고치기' : '완료일 순 · 잘못 눌렀으면 되돌리기' }), seg);
-    if (!ovItems){ box.replaceChildren(head, el('p', { class:'ret-help', text:'불러오는 중…' })); return; }
-    const rows = (isWait ? wait.sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.createdAt || '').localeCompare(b.createdAt || ''))
-                        : done.sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || '') || (b.date || '').localeCompare(a.date || '')));
-    if (!rows.length){ box.replaceChildren(head, el('p', { class:'ho-empty', text: isWait ? '대기 중인 과매입 건이 없어요.' : '완료한 과매입 건이 없어요.' })); return; }
+    const before = all.filter(t => t.status !== 'done' && !t.method).sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.createdAt || '').localeCompare(b.createdAt || ''));
+    const done = all.filter(t => t.status === 'done').sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || '') || (b.date || '').localeCompare(a.date || ''));
+    const h1 = ovStage(1, '과매입 처리 전', before.length, '가상반출 · 차감매입을 누르면 ② 처리 대기로 넘어가요 · 줄을 누르면 고치기');
+    if (!ovItems) s1.replaceChildren(h1, el('p', { class:'ret-help', text:'불러오는 중…' }));
+    else if (!before.length) s1.replaceChildren(h1, el('p', { class:'ho-empty', text:'처리방법을 고를 과매입 건이 없어요.' }));
+    else s1.replaceChildren(h1, el('div', { class:'ov-rows' }, ...before.map(t => {
+      const more = el('select', { class:'ov-more', 'aria-label':'다른 처리방법', title:'다른 처리방법',
+        onclick: e => e.stopPropagation(), onkeydown: e => e.stopPropagation(),
+        onchange: e => { const v = e.target.value; e.target.value = ''; if (v) ovPatch(t, { method: v }, ovMethod(v) + '(으)로 정했어요.'); } },
+        el('option', { value:'', text:'⋯' }), el('option', { value:'xy', text:'XY이동' }), el('option', { value:'re', text:'재진열' }));
+      return el('div', { class:'ov-r1' + (t.id === ovUi.editId ? ' sel' : ''), tabindex:'0', title:'눌러서 고치기',
+          onclick: () => ovStartEdit(t), onkeydown: e => { if (e.key === 'Enter' && e.target === e.currentTarget){ e.preventDefault(); ovStartEdit(t); } } },
+        el('div', { class:'ov-rn' }, el('span', { class:'nm', text: t.name }),
+          el('span', { class:'mt' }, ovMeta(t) + ' · ', ...ovMailBits(t), t.comm ? ' · ' + t.comm : '')),
+        el('span', { class:'ov-rq mono', text: retNum(t.qty) + '개' }),
+        el('div', { class:'ov-pick' },
+          el('button', { type:'button', class:'m-vr', text:'가상반출', onclick: e => { e.stopPropagation(); ovPatch(t, { method:'vr' }, '가상반출로 넘겼어요.'); } }),
+          el('button', { type:'button', class:'m-ded', text:'차감매입', onclick: e => { e.stopPropagation(); ovPatch(t, { method:'ded' }, '차감매입으로 넘겼어요.'); } }),
+          more));
+    })));
+    const h3 = ovStage(3, '과매입 처리 완료', done.length, '최근 완료 순 · 잘못 눌렀으면 되돌리기');
+    if (!ovItems) { s3.replaceChildren(h3); return; }
+    if (!done.length){ s3.replaceChildren(h3, el('p', { class:'ho-empty', text:'완료한 과매입 건이 없어요.' })); return; }
     const td = (cls, txt, ...kids) => el('td', { class: cls }, ...(txt != null ? [String(txt)] : []), ...kids);
-    const mailCell = t => {
-      if (!t.mail) return td('ov-c-mail no', '-');
-      const n = ovDays(t.mail);
-      return td('ov-c-mail mono', retMD(t.mail), !t.method && n >= 1 ? el('span', { class:'ov-late' + (n >= 7 ? ' hi' : ''), text: ` ${n}일` }) : null);
-    };
-    const thead = isWait
-      ? ['외부 SKU ID', '상품 바코드', '상품명', '수량', '업체명', '생성일자', '처리자', '메일 발송일', '처리방법', '업체소통']
-      : ['외부 SKU ID', '상품명', '수량', '업체명', '처리자', '처리방법', '완료일', ''];
-    const body = rows.map(t => {
-      const tr = el('tr', { class: t.id === ovUi.editId ? 'sel' : '', tabindex:'0', title:'눌러서 고치기',
-        onclick: () => ovStartEdit(t), onkeydown: e => { if (e.key === 'Enter'){ e.preventDefault(); ovStartEdit(t); } } });
-      if (isWait) tr.append(
-        td('ov-c-sku mono', t.sku || '-'), td('ov-c-bc mono', t.barcode || '-'), td('ov-c-nm', t.name), td('ov-c-q mono', retNum(t.qty)),
-        td('ov-c-v', t.vendor), td('ov-c-d mono', retMD(t.date)), td('ov-c-who', t.who || '-'), mailCell(t), td('ov-c-m', null, ovMethodSel(t)),
-        td('ov-c-comm' + (t.comm ? '' : ' no'), t.comm || '-'),
-        td('ov-c-meta', [t.sku && '외부 ' + t.sku, t.barcode, retMD(t.date) + ' 생성', t.who, t.mail ? '메일 ' + retMD(t.mail) + (!t.method && ovDays(t.mail) >= 1 ? ` (${ovDays(t.mail)}일)` : '') : '메일 전', t.comm].filter(Boolean).join(' · ')));
-      else tr.append(
-        td('ov-c-sku mono', t.sku || '-'), td('ov-c-nm', t.name), td('ov-c-q mono', retNum(t.qty)), td('ov-c-v', t.vendor), td('ov-c-who', t.who || '-'),
-        td('ov-c-m', null, t.method ? el('span', { class:'ov-chip m-' + t.method, text: ovMethod(t.method) }) : el('span', { class:'no', text:'-' })),
-        td('ov-c-d mono', retMD(t.doneAt)),
-        td('ov-c-meta', [t.who, retMD(t.doneAt) + ' 완료'].filter(Boolean).join(' · ')),
-        td('ov-c-act', null, el('button', { type:'button', class:'ret-btn ghost sm', text:'↩ 되돌리기', onclick: e => { e.stopPropagation(); ovSetStatus(t, 'wait'); } })));
-      return tr;
-    });
-    box.replaceChildren(head, el('div', { class:'ov-wrap' },
-      el('table', { class:'ov-t' + (isWait ? '' : ' done') }, el('thead', {}, el('tr', {}, ...thead.map(h => el('th', { class: h === '수량' ? 'r' : '', text: h })), el('th', { class:'ov-c-meta' }))), el('tbody', {}, ...body))));
+    const shown = done.slice(0, ovUi.doneAll ? done.length : 20);
+    const body = shown.map(t => el('tr', { tabindex:'0', title:'눌러서 고치기', class: t.id === ovUi.editId ? 'sel' : '',
+        onclick: () => ovStartEdit(t), onkeydown: e => { if (e.key === 'Enter'){ e.preventDefault(); ovStartEdit(t); } } },
+      td('ov-c-sku mono', t.sku || '-'), td('ov-c-nm', t.name), td('ov-c-q mono', retNum(t.qty)), td('ov-c-v', t.vendor), td('ov-c-who', t.who || '-'),
+      td('ov-c-m', null, t.method ? el('span', { class:'ov-chip m-' + t.method, text: ovMethod(t.method) }) : el('span', { class:'no', text:'-' })),
+      td('ov-c-d mono', retMD(t.doneAt)),
+      td('ov-c-meta', [t.who, retMD(t.doneAt) + ' 완료'].filter(Boolean).join(' · ')),
+      td('ov-c-act', null, el('button', { type:'button', class:'ret-btn ghost sm', text:'↩ 되돌리기', onclick: e => { e.stopPropagation(); ovSetStatus(t, 'wait'); } }))));
+    s3.replaceChildren(h3, el('div', { class:'ov-wrap' },
+      el('table', { class:'ov-t done' }, el('thead', {}, el('tr', {}, ...['외부 SKU ID', '상품명', '수량', '업체명', '처리자', '처리방법', '완료일', ''].map(h => el('th', { class: h === '수량' ? 'r' : '', text: h })), el('th', { class:'ov-c-meta' }))), el('tbody', {}, ...body))),
+      ...(done.length > 20 ? [el('button', { type:'button', class:'ret-btn ghost sm ov-moreall', text: ovUi.doneAll ? '최근 20건만 보기' : `완료 ${done.length}건 모두 보기`, onclick: () => { ovUi.doneAll = !ovUi.doneAll; ovRenderList(); } })] : []));
   }
 
-  // ---- ③ 처리방법별 보기 (가상반출 · 차감매입, 업체별) ----
+  // ---- ② 과매입 처리 대기 (가상반출 · 차감매입, 업체별) ----
   function ovRenderView(){
-    const box = $('#ov-view'); if (!box) return;
-    const wait = (ovItems || []).filter(t => t.status !== 'done');
-    const by = { vr: wait.filter(t => t.method === 'vr'), ded: wait.filter(t => t.method === 'ded') };
-    const k = ovUi.view, list = by[k];
+    const box = $('#ov-s2'); if (!box) return;
+    const wait = (ovItems || []).filter(t => t.status !== 'done' && t.method);
+    const by = { vr: wait.filter(t => t.method === 'vr'), ded: wait.filter(t => t.method === 'ded'), etc: wait.filter(t => t.method === 'xy' || t.method === 're') };
+    if (ovUi.view === 'etc' && !by.etc.length) ovUi.view = 'vr';
+    const k = ovUi.view, list = by[k] || [];
     const seg = el('div', { class:'ov-tog', role:'group', 'aria-label':'처리방법' },
-      ...[['vr', '가상반출'], ['ded', '차감매입']].map(([v, l]) => el('button', { type:'button', class:'m-' + v, 'aria-pressed': k === v ? 'true' : 'false',
+      ...[['vr', '가상반출'], ['ded', '차감매입'], ...(by.etc.length ? [['etc', 'XY이동 · 재진열']] : [])].map(([v, l]) => el('button', { type:'button', class:'m-' + v, 'aria-pressed': k === v ? 'true' : 'false',
         onclick: () => { ovUi.view = v; ovSetLS('ov-view', v); ovRenderView(); } }, l + ' ', el('b', { text: by[v].length }))));
     const groups = new Map();
     const vkey = v => String(v || '').replace(/㈜/g, '(주)').replace(/\s+/g, '');
     for (const t of [...list].sort((a, b) => (a.date || '').localeCompare(b.date || ''))){ const g = vkey(t.vendor); if (!groups.has(g)) groups.set(g, { name: t.vendor, ts: [] }); groups.get(g).ts.push(t); }
     const sumQ = list.reduce((s, t) => s + (+t.qty || 0), 0);
     const top = el('div', { class:'ov-vtop' }, seg, el('span', { class:'ret-help', text: list.length ? `업체 ${groups.size}곳 · ${retNum(sumQ)}개 · 오래된 순` : '' }));
-    const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'처리방법별 보기' }), el('p', { class:'ret-help', text:'대기 건 중 가상반출 · 차감매입만 · 업체별로 묶어서 봐요' }));
-    if (!list.length){ box.replaceChildren(head, top, el('p', { class:'ho-empty', text: `${ovMethod(k)}(으)로 고른 대기 건이 없어요. 과매입 목록의 처리방법 칸에서 골라 주세요.` })); return; }
+    const head = ovStage(2, '과매입 처리 대기', wait.length, '✓ 완료를 누르면 ③ 처리 완료로 · ↩는 ① 처리 전으로');
+    if (!list.length){ box.replaceChildren(head, top, el('p', { class:'ho-empty', text: ovItems ? `${k === 'etc' ? 'XY이동 · 재진열' : ovMethod(k)} 대기 건이 없어요.` : '불러오는 중…' })); return; }
     const gs = [...groups.values()].map(({ name: v, ts }) => el('div', { class:'ov-g' },
       el('div', { class:'ov-gh' }, el('span', { class:'ov-gn', text: v }), el('span', { class:'ov-gc', text: `${ts.length}건 · ${retNum(ts.reduce((s, t) => s + (+t.qty || 0), 0))}개` })),
-      ...ts.map(t => { const n = ovDays(t.date); return el('div', { class:'ov-r' },
-        el('div', { class:'ov-rn' }, el('span', { class:'nm', text: t.name }), el('span', { class:'mt mono', text: [t.barcode || t.sku, t.who].filter(Boolean).join(' · ') })),
+      ...ts.map(t => { const n = ovDays(t.date); return el('div', { class:'ov-r' + (t.id === ovUi.editId ? ' sel' : ''), tabindex:'0', title:'눌러서 고치기',
+          onclick: () => ovStartEdit(t), onkeydown: e => { if (e.key === 'Enter' && e.target === e.currentTarget){ e.preventDefault(); ovStartEdit(t); } } },
+        el('div', { class:'ov-rn' }, el('span', { class:'nm', text: t.name }),
+          el('span', { class:'mt mono', text: [k === 'etc' ? ovMethod(t.method) : '', t.barcode || t.sku, t.who, t.comm].filter(Boolean).join(' · ') })),
         el('span', { class:'ov-rq mono', text: retNum(t.qty) + '개' }),
         el('span', { class:'ov-rd mono' + (n >= 7 ? ' hi' : ''), text: n + '일째' }),
-        el('button', { type:'button', class:'ov-done', text:'✓ 완료', onclick: () => ovSetStatus(t, 'done') })); })));
+        el('span', { class:'ov-acts' },
+          el('button', { type:'button', class:'ov-back', title:'① 처리 전으로 되돌리기', 'aria-label':'처리 전으로 되돌리기', text:'↩', onclick: e => { e.stopPropagation(); ovPatch(t, { method:'' }, '① 처리 전으로 되돌렸어요.'); } }),
+          el('button', { type:'button', class:'ov-done', text:'✓ 완료', onclick: e => { e.stopPropagation(); ovSetStatus(t, 'done'); } }))); })));
     box.replaceChildren(head, top, el('div', { class:'ov-gs' }, ...gs));
   }
 
