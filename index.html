@@ -596,7 +596,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ob-t .c-act{background:var(--paper)!important;border-left:1px solid var(--line);vertical-align:middle}
 .ob-t .ob-dd{display:inline-block;min-width:48px;padding:2px 6px}
 .ob-same{color:var(--muted);opacity:.5}
-.ob-t .ob-acts{min-width:0;justify-content:flex-start}
+.ob-t .ob-acts{min-width:0;justify-content:flex-start;flex-wrap:wrap}
+.ob-acts .ob-prt{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
 .ob-t .ob-cp{padding:1px 6px;font-size:10.5px}
 .ob-ln{display:block;font-size:12px;color:var(--ink);white-space:normal;line-height:1.35;overflow-wrap:anywhere;cursor:text;user-select:text;-webkit-user-select:text}
 .ob-ln.mono{font-family:var(--mono);font-size:11.5px;font-weight:600}.ob-ln.no{color:var(--muted);cursor:inherit}
@@ -3020,6 +3021,36 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   }
   const obCopy = async (text, what) => { try { await navigator.clipboard.writeText(text); toast(what + ' 복사했어요.'); } catch { toast('복사하지 못했어요. 길게 눌러 복사해 주세요.'); } };
 
+  // 박스 라벨 인쇄: A4 한 장 = 박스 1개. 박스 칸 합계만큼 1/N, 2/N … 로 찍어요. 소비기한은 손으로 적는 빈칸.
+  function obPrintLabel(g){
+    const E = v => String(v ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+    const n = Math.max(1, Math.min(50, Math.round(g.box) || 1));
+    const now = new Date(Date.now() + 9 * 36e5).toISOString();
+    const stamp = now.slice(5, 10) + ' ' + now.slice(11, 16);
+    const many = g.ts.length > 12, rowH = g.ts.length > 18 ? 7 : many ? 9 : 12;
+    const rows = g.ts.map(t => `<tr><td class="nm">${E(t.name || '-')}</td><td class="bc">${E(t.barcode || '')}</td><td class="q">${t.qty !== '' && t.qty != null ? E(retNum(t.qty)) : '-'}</td><td class="ex"><div></div></td></tr>`).join('');
+    const one = i => `<section class="lb"><div class="top"><div><div class="to">받는 곳</div><div class="vd">${E(g.vendor || '-')}</div></div><div class="bx"><div class="n">${i}/${n}</div><div class="l">BOX</div></div></div>
+<dl class="ids"><dt>반출그룹</dt><dd>${E(g.grp || '-')}</dd><dt>외부반출</dt><dd>${E(g.ext || '-')}</dd><dt>마감일</dt><dd>${E(g.due || '-')}</dd></dl>
+<table><thead><tr><th>상품명</th><th>바코드</th><th class="q">수량</th><th class="ex">소비기한 (수기)</th></tr></thead><tbody>${rows}</tbody></table>
+<div class="ad">${E(g.addr || '')}${g.addr && g.phone ? '<br>' : ''}<b>${E(g.phone || '')}</b></div>
+<div class="ft"><span>GWJ3 IB · IST 반출</span><span>인쇄 ${stamp}</span></div></section>`;
+    const css = `@page{size:A4;margin:10mm}*{box-sizing:border-box}html,body{margin:0;background:#fff;color:#111;font-family:-apple-system,"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.lb{height:276mm;border:.7mm solid #111;border-radius:3mm;padding:7mm;display:flex;flex-direction:column;gap:4mm;page-break-after:always;break-after:page;overflow:hidden}.lb:last-child{page-break-after:auto;break-after:auto}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:5mm}.to{font-size:10pt;color:#555;font-weight:700}.vd{font-size:30pt;font-weight:900;line-height:1.15;word-break:keep-all;overflow-wrap:anywhere}
+.bx{border:.7mm solid #111;border-radius:2.5mm;text-align:center;padding:1.5mm 4mm;flex:none}.bx .n{font-size:30pt;font-weight:900;line-height:1;white-space:nowrap}.bx .l{font-size:9pt;font-weight:800}
+.ids{display:grid;grid-template-columns:auto 1fr;gap:1mm 5mm;margin:0;font-size:13pt;border-top:.4mm solid #111;border-bottom:.4mm solid #111;padding:3mm 0}.ids dt{color:#555;font-weight:700}.ids dd{margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:800}
+table{border-collapse:collapse;width:100%;font-size:${many ? 9.5 : 11.5}pt;table-layout:fixed}th{text-align:left;font-size:9pt;color:#555;border-bottom:.4mm solid #111;padding:1mm;white-space:nowrap}
+td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:middle}td.nm{overflow-wrap:anywhere;line-height:1.25}td.bc{font-family:ui-monospace,Menlo,Consolas,monospace;width:34mm}
+.q{width:15mm;text-align:right}td.q{font-weight:900;font-size:${many ? 11 : 14}pt}.ex{width:38mm;text-align:center}td.ex div{border:.35mm solid #111;border-radius:1mm;height:${Math.max(5, rowH - 3)}mm}
+.ad{margin-top:auto;font-size:12pt;line-height:1.4;border-top:.4mm solid #111;padding-top:3mm;overflow-wrap:anywhere}.ad b{font-family:ui-monospace,Menlo,Consolas,monospace}.ft{display:flex;justify-content:space-between;font-size:9pt;color:#555}`;
+    const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>반출 라벨 ${E(g.grp || g.vendor || '')}</title><style>${css}</style></head><body>${Array.from({ length: n }, (_, i) => one(i + 1)).join('')}</body></html>`;
+    document.getElementById('ob-print-frame')?.remove();
+    const f = el('iframe', { id:'ob-print-frame', title:'라벨 인쇄', 'aria-hidden':'true', style:'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden' });
+    document.body.append(f);
+    const d = f.contentDocument; d.open(); d.write(html); d.close();
+    setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch { toast('인쇄 화면을 열지 못했어요.'); } }, 300);
+  }
+
   function obRenderList(){
     const box = $('#ob-list'); if (!box) return;
     const G = obItems ? obGroups() : [];
@@ -3063,6 +3094,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
             td('c-note', t.note || ''));
           if (first){
             const acts = el('div', { class:'ob-acts' },
+              s === 2 || s === 3 ? el('button', { type:'button', class:'ob-prt', title:'박스에 붙일 라벨 인쇄 (박스 수만큼)', onclick: e => { e.stopPropagation(); obPrintLabel(g); } }, '\u{1F5A8} 라벨') : null,
               comKey ? el('button', { type:'button', class:'ob-com' + (g[comKey] ? ' on' : ''), title:'업체 소통 완료 (' + OB_STAGES[s] + ')',
                 onclick: e => { e.stopPropagation(); obPut(g, { [comKey]: !g[comKey] }, g[comKey] ? '' : '업체 소통 완료로 표시했어요.'); } }, (g[comKey] ? '✓' : '□') + ' 소통') : null,
               s > 1 ? el('button', { type:'button', class:'ob-back', title:'이전 단계로', 'aria-label':'이전 단계로', text:'↩', onclick: e => { e.stopPropagation(); obPut(g, { stage: s - 1 }, OB_STAGES[s - 1] + ' 단계로 되돌렸어요.'); } }) : null,
