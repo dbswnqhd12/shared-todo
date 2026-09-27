@@ -576,6 +576,29 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   .ob-acts{grid-column:1 / -1;grid-row:2;justify-self:end;min-width:0}
   .ob-det{padding:0 8px 10px}
 }
+/* 반출: 단계별 칸 + 표 */
+.ob-list{display:flex;flex-direction:column;gap:14px}
+.ob-sec.s1{border-top:3px solid var(--mid)}.ob-sec.s2{border-top:3px solid var(--vio)}.ob-sec.s3{border-top:3px solid var(--sat)}.ob-sec.s4{border-top:3px solid var(--accent)}
+.ov-stage.s4 .ov-no{background:var(--accent)}.ob-sec.s3 .ov-no{background:var(--sat)}
+.ob-t{border-collapse:collapse;width:100%;font-size:12.5px;table-layout:fixed;min-width:860px}
+.ob-t .w-c-dd{width:66px}.ob-t .w-c-v{width:120px}.ob-t .w-c-g{width:92px}.ob-t .w-c-q{width:44px}.ob-t .w-c-b{width:40px}.ob-t .w-c-p{width:158px}.ob-t .w-c-note{width:110px}.ob-t .w-c-act{width:190px}
+.ob-t th{overflow:hidden;text-overflow:ellipsis}
+.ob-t td{overflow:hidden;text-overflow:ellipsis}
+.ob-t th{font-size:11.5px;color:var(--muted);font-weight:700;text-align:left;padding:6px 5px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--bg)}.ob-t th.r{text-align:right}
+.ob-t td{padding:7px 5px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+.ob-t tr.g-first td{border-top:0}.ob-t tbody tr{cursor:pointer}.ob-t tbody tr:hover td{background:var(--bg)}.ob-t tbody tr.sel td{background:var(--accent-soft)}
+.ob-t tr.g-more td{border-top:0}.ob-t tbody tr:has(+ tr.g-more) td:not(.c-act){border-bottom-style:dashed}
+.ob-t .mono{font-family:var(--mono);font-size:11.5px}
+.ob-t .c-v{font-weight:700}
+.ob-t .c-n .nm{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis}.ob-t .c-n .bc{display:block;font-size:10.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.ob-t .c-q,.ob-t .c-b{text-align:right;font-weight:800}
+.ob-t .c-note{color:var(--muted);font-size:12px}
+.ob-t .c-act{background:var(--paper)!important;border-left:1px solid var(--line);vertical-align:middle}
+.ob-t .ob-dd{display:inline-block;min-width:48px;padding:2px 6px}
+.ob-same{color:var(--muted);opacity:.5}
+.ob-t .ob-acts{min-width:0;justify-content:flex-start}
+.ob-t .ob-cp{padding:1px 6px;font-size:10.5px}.ob-t .c-p .ob-cp+.ob-cp{margin-left:4px}
+.ob-t .c-g .gg{display:block}.ob-t .c-g .gx{display:block;font-size:10.5px;color:var(--muted)}
 /* ---------- 생산성 ---------- */
 .pr-drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:28px 16px;border:2px dashed var(--line);border-radius:10px;background:var(--bg);cursor:pointer;text-align:center}
 .pr-drop b{font-size:15px;color:var(--accent)}.pr-drop span{font-size:13px}.pr-drop small{font-size:12px;color:var(--muted)}
@@ -1204,7 +1227,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     $('#prod').hidden = !prodView;
     $('#over').hidden = !overView;
     $('#out').hidden = !outView;
-    $('#app').classList.toggle('wide', prodView);
+    $('#app').classList.toggle('wide', prodView || outView);
     for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView || outView;
     document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView || outView;
     if (prodView && !$('#prod').hasChildNodes()) renderProd();
@@ -2834,7 +2857,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const OB_FIELDS = ['grp', 'ext', 'cdate', 'due', 'vendor', 'addr', 'phone', 'name', 'barcode', 'qty', 'box', 'tote', 'note'];
   const OB_KEEP = ['grp', 'ext', 'cdate', 'due', 'vendor', 'addr', 'phone'];   // 같은 그룹 상품을 이어 넣을 때 남겨 두는 칸
   let obItems = null, obRev = -1, obLoading = false, obBuilt = false, obToday = todayIso, obDelArm = 0;
-  const obUi = { filter:'go', editId:null, open:new Set(), doneAll:false };
+  const obUi = { editId:null, open:new Set(), doneAll:false };
   const obBlank = () => Object.fromEntries(OB_FIELDS.map(k => [k, k === 'cdate' ? obToday : '']));
   let obForm = obBlank();
   const obDue = d => d ? Math.round((Date.parse(d) - Date.parse(obToday)) / 864e5) : null;
@@ -2890,7 +2913,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         el('button', { type:'submit', class:'ret-btn solid', id:'ob-submit', text:'추가' })),
       el('datalist', { id:'ob-vendors' }));
     form.onsubmit = e => { e.preventDefault(); obSubmit(); };
-    box.append(form, el('section', { class:'ret-sec', id:'ob-list' }));
+    box.append(form, el('div', { class:'ob-list', id:'ob-list' }));
   }
 
   function obFillForm(force){
@@ -2996,60 +3019,61 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   function obRenderList(){
     const box = $('#ob-list'); if (!box) return;
     const G = obItems ? obGroups() : [];
-    const go = G.filter(g => g.stage < 4), done = G.filter(g => g.stage === 4);
-    const n = s => go.filter(g => g.stage === s).length;
-    const f = obUi.filter;
-    const chips = el('div', { class:'ob-chips', role:'group', 'aria-label':'단계' },
-      ...[['go', '진행 중', go.length], ['1', '① 생성', n(1)], ['2', '② 포장', n(2)], ['3', '③ 택배접수', n(3)], ['4', '④ 반출완료', done.length]].map(([k, l, c]) =>
-        el('button', { type:'button', 'aria-pressed': f === k ? 'true' : 'false', onclick: () => { obUi.filter = k; obRenderList(); } }, l + ' ', el('b', { text: c }))));
-    const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'반출 목록' }),
-      el('p', { class:'ret-help', text: f === '4' ? '최근 완료 순 · 잘못 넘겼으면 ↩' : '마감 빠른 순 · 버튼 하나로 다음 단계 · 줄을 누르면 주소 · 번호 · 상품' }));
-    if (!obItems){ box.replaceChildren(head, chips, el('p', { class:'ret-help', text:'불러오는 중…' })); return; }
-    let list = f === 'go' ? go : f === '4' ? done : go.filter(g => g.stage === +f);
-    if (f === '4') list = [...list].sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || ''));
-    else list = [...list].sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999') || (a.cdate || '').localeCompare(b.cdate || ''));
-    const total = list.length;
-    if (f === '4' && !obUi.doneAll) list = list.slice(0, 30);
-    if (!list.length){ box.replaceChildren(head, chips, el('p', { class:'ho-empty', text: f === '4' ? '반출 완료한 건이 없어요.' : '이 단계의 반출 건이 없어요.' })); return; }
-    const rows = list.map(g => {
+    const byDue = (a, b) => (a.due || '9999').localeCompare(b.due || '9999') || (a.cdate || '').localeCompare(b.cdate || '');
+    const td = (cls, txt, ...kids) => el('td', { class: cls }, ...(txt != null && txt !== '' ? [String(txt)] : []), ...kids);
+    const ddOf = g => {
       const dd = obDue(g.due);
-      const ddTxt = g.stage === 4 ? retMD(g.doneAt) + ' 완료' : dd == null ? '마감 -' : dd < 0 ? `D+${-dd}` : dd === 0 ? 'D-DAY' : `D-${dd}`;
-      const ddCls = g.stage === 4 ? '' : dd == null ? '' : dd <= 1 ? ' over' : dd <= 3 ? ' warn' : '';
-      const prog = el('div', { class:'ob-prog', 'aria-label': OB_STAGES[g.stage] },
-        ...[1, 2, 3, 4].flatMap(s => [el('i', { class: s < g.stage || g.stage === 4 ? 'd' : s === g.stage ? 'c' : '', title: OB_STAGES[s], text: s < g.stage || g.stage === 4 ? '✓' : String(s) }), s < 4 ? el('b', { class: s < g.stage ? 'd' : '' }) : null]).filter(Boolean));
-      const comKey = g.stage === 2 ? 'com2' : g.stage === 3 ? 'com3' : '';
-      const acts = el('div', { class:'ob-acts' },
-        comKey ? el('button', { type:'button', class:'ob-com' + (g[comKey] ? ' on' : ''), title:'업체 소통 완료 (' + OB_STAGES[g.stage] + ')',
-          onclick: e => { e.stopPropagation(); obPut(g, { [comKey]: !g[comKey] }, g[comKey] ? '' : '업체 소통 완료로 표시했어요.'); } }, (g[comKey] ? '✓' : '□') + ' 소통') : null,
-        g.stage > 1 ? el('button', { type:'button', class:'ob-back', title:'이전 단계로', 'aria-label':'이전 단계로', text:'↩', onclick: e => { e.stopPropagation(); obPut(g, { stage: g.stage - 1 }, OB_STAGES[g.stage - 1] + ' 단계로 되돌렸어요.'); } }) : null,
-        g.stage < 4 ? el('button', { type:'button', class:'ob-next', text: OB_NEXT[g.stage], onclick: e => { e.stopPropagation(); obPut(g, { stage: g.stage + 1 }, OB_STAGES[g.stage + 1] + ' 단계로 넘겼어요.'); } }) : null);
-      const first = g.ts[0];
-      const sum = [first.name || '(상품명 없음)', g.ts.length > 1 ? `외 ${g.ts.length - 1}건` : '', g.qty ? retNum(g.qty) + '개' : '', g.box ? '박스 ' + retNum(g.box) : ''].filter(Boolean).join(' · ');
-      const open = obUi.open.has(g.key);
-      const row = el('div', { class:'ob-row' + (open ? ' open' : ''), tabindex:'0', 'aria-expanded': open ? 'true' : 'false',
-          onclick: () => { open ? obUi.open.delete(g.key) : obUi.open.add(g.key); obRenderList(); },
-          onkeydown: e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget){ e.preventDefault(); e.currentTarget.click(); } } },
-        el('span', { class:'ob-dd' + ddCls, text: ddTxt }),
-        el('div', { class:'ob-main' }, el('div', { class:'v' }, g.vendor || '(업체명 없음)', g.grp ? el('span', { class:'g mono', text: ' ' + g.grp }) : null), el('div', { class:'p', text: sum })),
-        prog, acts);
-      if (!open) return row;
-      const det = el('div', { class:'ob-det' },
-        el('div', { class:'ob-info' },
-          el('span', { class:'mono', text: ['그룹 ' + (g.grp || '-'), '외부 ' + (g.ext || '-'), (g.cdate ? retMD(g.cdate) : '-') + ' 생성', '마감 ' + (g.due ? retMD(g.due) : '-')].join(' · ') }),
-          el('span', {}, '📍 ' + (g.addr || '주소 없음') + ' ', g.addr ? el('button', { type:'button', class:'ob-cp', text:'주소 복사', onclick: e => { e.stopPropagation(); obCopy(g.addr, '주소를'); } }) : null),
-          el('span', {}, '📱 ' + (g.phone || '번호 없음') + ' ', g.phone ? el('button', { type:'button', class:'ob-cp', text:'번호 복사', onclick: e => { e.stopPropagation(); obCopy(g.phone, '번호를'); } }) : null),
-          comKey || g.stage === 4 ? el('span', { class:'ret-help', text: `포장 소통 ${g.com2 ? '완료' : '전'} · 택배접수 소통 ${g.com3 ? '완료' : '전'}` }) : null),
-        el('div', { class:'ob-items' }, ...g.ts.map(t => el('div', { class:'ob-it', tabindex:'0', title:'눌러서 고치기',
-            onclick: e => { e.stopPropagation(); obStartEdit(t); }, onkeydown: e => { if (e.key === 'Enter'){ e.preventDefault(); e.stopPropagation(); obStartEdit(t); } } },
-          el('span', { class:'nm', text: t.name || '(상품명 없음)' }),
-          el('span', { class:'mono mt', text: [t.barcode, t.tote && '토트 ' + t.tote].filter(Boolean).join(' · ') }),
-          el('span', { class:'mono q', text: (t.qty !== '' && t.qty != null ? retNum(t.qty) + '개' : '-') + (t.box ? ' · 박스 ' + retNum(t.box) : '') }),
-          t.note ? el('span', { class:'nt', text: t.note }) : null,
-          el('span', { class:'ed', text:'고치기' })))));
-      return el('div', { class:'ob-wrap' + (open ? ' open' : '') }, row, det);
+      const txt = dd == null ? '-' : dd < 0 ? `D+${-dd}` : dd === 0 ? 'D-DAY' : `D-${dd}`;
+      return el('span', { class:'ob-dd' + (dd == null ? '' : dd <= 1 ? ' over' : dd <= 3 ? ' warn' : ''), text: txt, title: g.due ? '마감 ' + g.due : '마감일 없음' });
+    };
+    const copyBtn = (text, label, what) => el('button', { type:'button', class:'ob-cp', title: text, text: label, onclick: e => { e.stopPropagation(); obCopy(text, what); } });
+    const sections = [1, 2, 3, 4].map(s => {
+      let gs = G.filter(g => g.stage === s);
+      gs = s === 4 ? gs.sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || '')) : gs.sort(byDue);
+      const total = gs.length;
+      if (s === 4 && !obUi.doneAll) gs = gs.slice(0, 20);
+      const help = ['', '포장을 시작하면 ②로 · 줄을 누르면 고치기', '업체 소통 체크 → 택배 접수로', '업체 소통 체크 → 반출 완료로', '최근 완료 순 · 잘못 넘겼으면 ↩'][s];
+      const head = el('div', { class:'ov-stage s' + s }, el('span', { class:'ov-no', text: s }), el('h3', { text: OB_STAGES[s] }), el('b', { class:'ov-cnt', text: total }), el('p', { class:'ret-help', text: help }));
+      const sec = el('section', { class:'ret-sec ob-sec s' + s });
+      if (!obItems){ sec.append(head, el('p', { class:'ret-help', text:'불러오는 중…' })); return sec; }
+      if (!gs.length){ sec.append(head, el('p', { class:'ho-empty', text: s === 4 ? '반출 완료한 건이 없어요.' : '이 단계의 반출 건이 없어요.' })); return sec; }
+      const cols = [s === 4 ? '완료일' : '마감', '업체명', '그룹 / 외부번호', '상품명 / 바코드 · 집품토트', '수량', '박스', '연락처', '비고', ''];
+      const body = [];
+      for (const g of gs){
+        const comKey = s === 2 ? 'com2' : s === 3 ? 'com3' : '';
+        g.ts.forEach((t, i) => {
+          const first = i === 0, same = v => !first ? el('span', { class:'ob-same', text:'〃' }) : null;
+          const tr = el('tr', { class: (first ? 'g-first' : 'g-more') + (t.id === obUi.editId ? ' sel' : ''), tabindex:'0', title:'눌러서 고치기',
+            onclick: () => obStartEdit(t), onkeydown: e => { if (e.key === 'Enter' && e.target === e.currentTarget){ e.preventDefault(); obStartEdit(t); } } });
+          tr.append(
+            first ? td('c-dd', null, s === 4 ? el('span', { class:'ob-dd', text: retMD(g.doneAt) }) : ddOf(g)) : td('c-dd'),
+            first ? td('c-v', g.vendor || '-') : td('c-v', null, same()),
+            first ? td('c-g mono', null, el('span', { class:'gg', text: g.grp || '-' }), el('span', { class:'gx', text: g.ext || '' })) : td('c-g', null, same()),
+            td('c-n', null, el('span', { class:'nm', text: t.name || '-', title: t.name || '' }), t.barcode || t.tote ? el('span', { class:'bc mono', text: [t.barcode, t.tote && '토트 ' + t.tote].filter(Boolean).join(' · ') }) : null),
+            td('c-q mono', t.qty !== '' && t.qty != null ? retNum(t.qty) : '-'),
+            td('c-b mono', t.box !== '' && t.box != null ? retNum(t.box) : '-'),
+            first ? td('c-p mono', null, g.phone ? copyBtn(g.phone, g.phone, '번호를') : null, g.addr ? copyBtn(g.addr, '📍', '주소를') : null, !g.phone && !g.addr ? el('span', { class:'no', text:'-' }) : null) : td('c-p', null, same()),
+            td('c-note', t.note || ''));
+          if (first){
+            const acts = el('div', { class:'ob-acts' },
+              comKey ? el('button', { type:'button', class:'ob-com' + (g[comKey] ? ' on' : ''), title:'업체 소통 완료 (' + OB_STAGES[s] + ')',
+                onclick: e => { e.stopPropagation(); obPut(g, { [comKey]: !g[comKey] }, g[comKey] ? '' : '업체 소통 완료로 표시했어요.'); } }, (g[comKey] ? '✓' : '□') + ' 소통') : null,
+              s > 1 ? el('button', { type:'button', class:'ob-back', title:'이전 단계로', 'aria-label':'이전 단계로', text:'↩', onclick: e => { e.stopPropagation(); obPut(g, { stage: s - 1 }, OB_STAGES[s - 1] + ' 단계로 되돌렸어요.'); } }) : null,
+              s < 4 ? el('button', { type:'button', class:'ob-next', text: OB_NEXT[s], onclick: e => { e.stopPropagation(); obPut(g, { stage: s + 1 }, OB_STAGES[s + 1] + ' 단계로 넘겼어요.'); } }) : null);
+            const c = el('td', { class:'c-act', rowspan: String(g.ts.length) }, acts);
+            c.onclick = e => e.stopPropagation();
+            tr.append(c);
+          }
+          body.push(tr);
+        });
+      }
+      sec.append(head, el('div', { class:'ov-wrap' },
+        el('table', { class:'ob-t' }, el('colgroup', {}, ...['c-dd', 'c-v', 'c-g', 'c-n', 'c-q', 'c-b', 'c-p', 'c-note', 'c-act'].map(c => el('col', { class:'w-' + c }))),
+          el('thead', {}, el('tr', {}, ...cols.map((h, i) => el('th', { class: ['수량', '박스'].includes(h) ? 'r' : '', text: h })))), el('tbody', {}, ...body))),
+        ...(s === 4 && total > 20 ? [el('button', { type:'button', class:'ret-btn ghost sm ov-moreall', text: obUi.doneAll ? '최근 20건만 보기' : `완료 ${total}건 모두 보기`, onclick: () => { obUi.doneAll = !obUi.doneAll; obRenderList(); } })] : []));
+      return sec;
     });
-    box.replaceChildren(head, chips, el('div', { class:'ob-rows' }, ...rows),
-      ...(f === '4' && total > 30 ? [el('button', { type:'button', class:'ret-btn ghost sm ov-moreall', text: obUi.doneAll ? '최근 30건만 보기' : `완료 ${total}건 모두 보기`, onclick: () => { obUi.doneAll = !obUi.doneAll; obRenderList(); } })] : []));
+    box.replaceChildren(...sections);
   }
 
   // ---------- 생산성 (STOW 개인 UPH) ----------
