@@ -3094,7 +3094,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   function obBuild(box){
     const f = (key, label, o = {}) => {
       const inp = el('input', { id:'ob-' + key, class:'ret-in' + (o.mono ? ' ov-mono' : ''), type: o.type, inputmode: o.im, list: o.list, placeholder: o.ph || '', maxlength: o.max || 80, autocomplete:'off' });
-      inp.oninput = () => { obForm[key] = inp.value; if (key === 'vendor') obFillVendor(); if (key === 'barcode') obFillName(); };
+      inp.oninput = () => { obForm[key] = inp.value; if (key === 'barcode') obFillName(); };
       return el('div', { class:'ret-f ' + (o.cls || 'span2') }, el('label', { for:'ob-' + key, text: label }, o.note ? el('small', { text: o.note }) : null), inp);
     };
     const grp = (title, note, cls, ...kids) => el('fieldset', { class:'ob-grp' }, el('legend', {}, title, note ? el('small', { text: ' · ' + note }) : null), el('div', { class:'ret-grid ov-grid ' + cls }, ...kids));
@@ -3104,8 +3104,8 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       grp('반출 정보', '', 'ob-g4',
         f('grp', '반출그룹번호', { mono:true, max:40, im:'numeric', cls:'s1' }), f('ext', '외부반출번호', { mono:true, max:40, im:'numeric', cls:'s1' }),
         f('cdate', '반출생성일자', { type:'date', mono:true, cls:'s1' }), f('due', '반출마감일자', { type:'date', mono:true, cls:'s1' })),
-      grp('업체', '업체명을 적으면 지난 주소 · 번호가 채워져요', '',
-        f('vendor', '업체명', { list:'ob-vendors', max:80 }), f('addr', '주소', { max:200, cls:'span3' }), f('phone', '핸드폰 번호', { mono:true, im:'tel', max:40, cls:'s1' })),
+      grp('업체', '', '',
+        f('vendor', '업체명', { max:80 }), f('addr', '주소', { max:200, cls:'span3' }), f('phone', '핸드폰 번호', { mono:true, im:'tel', max:40, cls:'s1' })),
       grp('상품 · 포장', '바코드를 적으면 상품명이 채워져요', '',
         f('name', '상품명', { max:150, cls:'span3' }), f('barcode', '상품바코드', { mono:true, max:40 }), f('qty', '수량', { mono:true, im:'decimal', max:10, cls:'s1' }),
         f('box', '박스수량', { mono:true, im:'decimal', max:10, cls:'s1' }), f('tote', '집품토트', { mono:true, max:40 }),
@@ -3115,16 +3115,13 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
         el('button', { type:'button', class:'ret-btn ghost ov-danger', id:'ob-del', hidden:true, text:'삭제', onclick: obDelete }),
         el('button', { type:'button', class:'ret-btn ghost', id:'ob-cancel', hidden:true, text:'취소', onclick: () => obEndEdit() }),
         el('button', { type:'button', class:'ret-btn ghost', id:'ob-clear', text:'칸 비우기', onclick: () => { obForm = obBlank(); obFillForm(true); $('#ob-grp').focus(); } }),
-        el('button', { type:'submit', class:'ret-btn solid', id:'ob-submit', text:'추가' })),
-      el('datalist', { id:'ob-vendors' }));
+        el('button', { type:'submit', class:'ret-btn solid', id:'ob-submit', text:'추가' })));
     form.onsubmit = e => { e.preventDefault(); obSubmit(); };
     box.append(form, el('div', { class:'ob-list', id:'ob-list' }));
   }
 
   function obFillForm(force){
     for (const k of OB_FIELDS){ const n = $('#ob-' + k); if (n && (force || document.activeElement !== n)) n.value = obForm[k] ?? ''; }
-    const vendors = [...new Set((obItems || []).map(t => t.vendor).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
-    $('#ob-vendors').replaceChildren(...vendors.map(v => el('option', { value: v })));
     const editing = !!obUi.editId;
     $('#ob-form').classList.toggle('editing', editing);
     $('#ob-form-title').textContent = editing ? '반출 건 수정' : '반출 건 입력';
@@ -3132,16 +3129,6 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     $('#ob-cancel').hidden = $('#ob-del').hidden = !editing;
     $('#ob-clear').hidden = editing;
     $('#ob-del').textContent = obDelArm && Date.now() - obDelArm < 4000 ? '한 번 더 누르면 삭제' : '삭제';
-  }
-  // 업체명 → 지난 주소 · 번호 (비어 있을 때만)
-  function obFillVendor(){
-    if (obUi.editId) return;
-    const v = String(obForm.vendor || '').trim(); if (!v) return;
-    const hit = [...(obItems || [])].filter(t => t.vendor === v).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
-    if (!hit) return;
-    let changed = false;
-    for (const k of ['addr', 'phone']) if (!obForm[k] && hit[k]){ obForm[k] = hit[k]; changed = true; }
-    if (changed) obFillForm();
   }
   // 바코드 → 상품명 (반출 → 과매입 → 회송 기록)
   function obFillName(){
