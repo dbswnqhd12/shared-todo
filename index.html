@@ -2186,15 +2186,18 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       ...RET_TEMPS.map(([k, l]) => el('button', { type:'button', 'data-t': k, text: l, onclick: () => { retForm.temp = k; retFillForm(); } })));
     const submit = el('button', { type:'submit', class:'ret-btn solid', id:'ret-submit', text:'추가' });
     const cancel = el('button', { type:'button', class:'ret-btn ghost', id:'ret-cancel', text:'취소', hidden:true, onclick: () => retEndEdit() });
-    const more = el('details', { class:'ret-more ret-single', id:'ret-more' }, el('summary', { text:'발주번호 · SKU ID · 바코드 · 비고' }),
-      el('div', { class:'ret-grid ret-grid-more' },
-        f('po', '발주 / IPR 번호', { ph:'예: 130000001', max:40 }),
-        f('sku', 'SKU ID', { max:40, im:'numeric' }),
-        f('barcode', '바코드', { max:40, im:'numeric' }),
-        f('note', '비고', { max:300, cls:'span2' })));
+    // 반출처럼 묶음으로: ① 하차 · 업체  ② 상품
+    const grp = (title, note, id, ...kids) => el('fieldset', { class:'ob-grp ret-single', id }, el('legend', {}, title, note ? el('small', { text: ' · ' + note }) : null), el('div', { class:'ret-grid' }, ...kids));
+    const more = grp('상품', '상품명 · 바코드 · 수량 · 사유', 'ret-more',
+      f('name', '상품명', { max:150, cls:'span3' }),
+      f('barcode', '바코드', { max:40, im:'numeric' }),
+      f('sku', 'SKU ID', { max:40, im:'numeric' }),
+      f('qty', '수량', { im:'decimal', max:10 }),
+      f('reason', '회송사유', { list:'ret-reasons', max:80, cls:'span3', ph:'목록에서 고르거나 직접 입력' }),
+      f('note', '비고', { max:300, cls:'span3' }));
     const form = el('form', { class:'ret-sec ret-form', id:'ret-form', autocomplete:'off' },
       el('div', { class:'ret-sec-head' }, el('h3', { id:'ret-form-title', text:'회송 건 입력' }),
-        el('p', { class:'ret-help ret-single', text:'하차일 · 업체 · 온도는 다음 건에도 그대로 남아요' }),
+        el('p', { class:'ret-help ret-single', text:'빈 칸이 있어도 추가돼요 · Tab으로 다음 칸' }),
         el('div', { class:'ret-mode', id:'ret-mode', role:'group', 'aria-label':'입력 방식' },
           el('button', { type:'button', 'data-m':'single', text:'한 건씩', onclick: () => retSetMode('single') }),
           el('button', { type:'button', 'data-m':'paste', text:'여러 건 붙여넣기', onclick: () => retSetMode('paste') }))),
@@ -2203,15 +2206,13 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
           onpaste: e => { const t = e.clipboardData && e.clipboardData.getData('text'); if (t){ e.preventDefault(); retPasteText(t); } },
           onkeydown: e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.target.value.trim()){ e.preventDefault(); retPasteText(e.target.value); } } }),
         el('div', { id:'ret-paste-preview' })),
-      el('div', { class:'ret-grid ret-single' },
+      grp('하차 · 업체', '다음 건에도 그대로 남아요', 'ret-head',
         f('date', '하차일', { type:'date' }),
-        f('vendor', '업체명', { req:true, list:'ret-vendors', max:80, cls:'span2' }),
-        el('div', { class:'ret-f span2' }, el('label', { text:'온도' }), temp),
-        f('name', '상품명', { req:true, max:150, cls:'span3' }),
-        f('reason', '회송사유', { req:true, list:'ret-reasons', max:80, cls:'span2', ph:'목록에서 고르거나 직접 입력' }),
-        f('qty', '수량', { req:true, im:'decimal', max:10 })),
+        f('vendor', '업체명', { list:'ret-vendors', max:80, cls:'span2' }),
+        f('po', '발주 / IPR 번호', { ph:'예: 130000001', max:40 }),
+        el('div', { class:'ret-f span2' }, el('label', { text:'온도' }), temp)),
       more,
-      el('div', { class:'ret-acts ret-single' }, el('span', { class:'ret-help', id:'ret-form-msg', text:'엔터 = 추가 · * 필수' }), cancel, submit),
+      el('div', { class:'ret-acts ret-single' }, el('span', { class:'ret-help', id:'ret-form-msg', text:'엔터 = 추가' }), cancel, submit),
       el('datalist', { id:'ret-vendors' }), el('datalist', { id:'ret-reasons' }));
     form.onsubmit = e => { e.preventDefault(); if (retUi.mode !== 'paste') retSubmit(); };
     box.append(form,
@@ -2394,9 +2395,8 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 
   async function retSubmit(){
     for (const k of RET_FIELDS){ const n = $('#ret-' + k); if (n) retForm[k] = n.value; }
-    const miss = [['vendor','업체명'],['name','상품명'],['reason','회송사유'],['qty','수량']].filter(([k]) => !String(retForm[k] || '').trim());
-    if (miss.length){ toast(miss.map(m => m[1]).join(', ') + '을(를) 적어 주세요.'); $('#ret-' + miss[0][0]).focus(); return; }
-    if (isNaN(+String(retForm.qty).replace(/,/g, ''))){ toast('수량은 숫자로 적어 주세요.'); $('#ret-qty').focus(); return; }
+    if (!['vendor', 'name', 'barcode', 'sku', 'po'].some(k => String(retForm[k] || '').trim())){ toast('업체명 · 상품명 · 바코드 중 하나는 적어 주세요.'); $('#ret-vendor').focus(); return; }
+    if (isNaN(+String(retForm.qty || '').replace(/,/g, ''))){ toast('수량은 숫자로 적어 주세요.'); $('#ret-qty').focus(); return; }
     const payload = {};
     for (const k of RET_FIELDS) payload[k] = k === 'qty' ? String(retForm.qty).replace(/,/g, '') : String(retForm[k] || '').trim();
     if (!payload.date) payload.date = todayIso;
@@ -2410,7 +2410,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       } else {
         const { item } = await api('POST', '/api/returns', payload);
         retItems.push(item);
-        for (const k of ['po','name','sku','barcode','reason','qty','note']) retForm[k] = '';
+        for (const k of ['name','sku','barcode','reason','qty','note']) retForm[k] = '';   // 하차일 · 업체 · 발주번호 · 온도는 남겨요
         retFillForm();
         $('#ret-name').focus();
       }
@@ -2477,7 +2477,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
           const on = retUi.inl?.id === t.id && retUi.inl.where === 'today';
           const tr = el('tr', { class: on ? 'editing' : '', title:'상품명 · 수량 칸을 두 번 누르면 바로 수정', ondblclick: e => retQuick(e, t) },
             el('td', { class:'c n opt', text: retMD(t.date) }), el('td', { text: t.vendor }), el('td', { class:'q-name', text: t.name }), el('td', { class:'opt', text: t.reason }),
-            el('td', { class:'c' }, retTempTag(t)), el('td', { class:'c n q-qty', text: retNum(t.qty) }), el('td', { class:'c' }, retStatusBtn(t)),
+            el('td', { class:'c' }, retTempTag(t)), el('td', { class:'c n q-qty', text: t.qty === '' ? '-' : retNum(t.qty) }), el('td', { class:'c' }, retStatusBtn(t)),
             el('td', { class:'c nowrap' }, xeBtn(on, () => retToggleInl(t, 'today')), hoDel('회송 건 삭제', () => retDelete(t))));
           return on ? [tr, el('tr', { class:'xe-row' }, el('td', { colspan:'8' }, retInlPanel(t)))] : [tr];
         })))));
@@ -2534,7 +2534,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
           el('div', { class:'ret-meta', title: t.reason }, ...meta.map((m, i) => el('span', { class: i === 0 ? 'rs' : 'mono' + (m.startsWith('발주 ') ? ' po' : ''), text: m }))),
           t.note ? el('div', { class:'ret-note', text: t.note }) : null),
         el('span', { class:'ret-tp' }, retTempTag(t)),
-        el('span', { class:'ret-q', text: retNum(t.qty) }),
+        el('span', { class:'ret-q', text: t.qty === '' ? '-' : retNum(t.qty) }),
         el('span', { class:'ret-stc' }, retStatusBtn(t)),
         el('span', { class:'ret-ops' }, xeBtn(on, () => retToggleInl(t, 'list')), hoDel('회송 건 삭제', () => retDelete(t))));
       return on ? [row, retInlPanel(t)] : [row];
@@ -2963,8 +2963,8 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   function retInlPanel(t){
     const x = retUi.inl;
     return edPanel({ title: retShortName(t.name) || '회송 건', d: x.d, cols: 4, busy: x.busy, msg: x.msg, err: x.err, armed: x.arm && Date.now() - x.arm < 4000,
-      fields: [['date', '하차일', { type:'date', mono:true }], ['vendor', '업체명', { req:true, list:'ret-vendors', max:80 }], ['temp', '온도', { opts: [['', '-'], ...RET_TEMPS] }], ['qty', '수량', { req:true, mono:true, im:'decimal', max:10 }],
-        ['name', '상품명', { req:true, span:2 }], ['reason', '회송사유', { req:true, list:'ret-reasons', max:80, span:2 }],
+      fields: [['date', '하차일', { type:'date', mono:true }], ['vendor', '업체명', { list:'ret-vendors', max:80 }], ['temp', '온도', { opts: [['', '-'], ...RET_TEMPS] }], ['qty', '수량', { mono:true, im:'decimal', max:10 }],
+        ['name', '상품명', { span:2 }], ['reason', '회송사유', { list:'ret-reasons', max:80, span:2 }],
         ['po', '발주 / IPR 번호', { mono:true, max:40 }], ['sku', 'SKU ID', { mono:true, max:40 }], ['barcode', '바코드', { mono:true, max:40 }], ['note', '비고', { max:300 }]],
       onCancel: () => { retUi.inl = null; retRerender(); },
       onSave: () => retSaveInl(t),
@@ -2976,9 +2976,8 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   async function retSaveInl(t){
     const x = retUi.inl; if (!x || x.busy) return;
     const d = Object.fromEntries(Object.entries(x.d).map(([k, v]) => [k, String(v ?? '').trim()]));
-    const miss = [['vendor','업체명'],['name','상품명'],['reason','회송사유'],['qty','수량']].filter(([k]) => !d[k]);
     const bad = m => { x.msg = m; x.err = true; retRerender(); };
-    if (miss.length) return bad(miss.map(m => m[1]).join(', ') + '을(를) 적어 주세요.');
+    if (!['vendor', 'name', 'barcode', 'sku', 'po'].some(k => d[k])) return bad('업체명 · 상품명 · 바코드 중 하나는 적어 주세요.');
     if (isNaN(+d.qty.replace(/,/g, ''))) return bad('수량은 숫자로 적어 주세요.');
     const payload = { ...d, qty: d.qty.replace(/,/g, ''), date: d.date || todayIso };
     x.busy = true; x.msg = ''; x.err = false; retRerender();
@@ -2994,8 +2993,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     const k = host.matches('.ret-q, td.q-qty') ? 'qty' : host.matches('.ret-note') ? 'note' : 'name';
     qEdit(host, t[k], { im: k === 'qty' ? 'decimal' : undefined, max: k === 'note' ? 300 : 150, label: k },
       async v => {
-        if (k !== 'note' && !v){ toast((k === 'qty' ? '수량' : '상품명') + '은 비울 수 없어요.'); return retRerender(); }
-        if (k === 'qty' && isNaN(+v.replace(/,/g, ''))){ toast('수량은 숫자로 적어 주세요.'); return retRerender(); }
+                if (k === 'qty' && isNaN(+v.replace(/,/g, ''))){ toast('수량은 숫자로 적어 주세요.'); return retRerender(); }
         try { const { item } = await api('PATCH', '/api/returns?id=' + encodeURIComponent(t.id), { [k]: k === 'qty' ? v.replace(/,/g, '') : v });
           const i = retItems.findIndex(x => x.id === item.id); if (i > -1) retItems[i] = item; setSync('', '저장됨'); toast('고쳤어요.'); }
         catch(err){ if (err instanceof Locked) return showLock(err.message); toast(err.message); }
