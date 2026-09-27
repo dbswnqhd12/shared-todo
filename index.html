@@ -598,6 +598,25 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ob-same{color:var(--muted);opacity:.5}
 .ob-t .ob-acts{min-width:0;justify-content:flex-start;flex-wrap:wrap}
 .ob-acts .ob-prt{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.ob-t td.ie{padding:0!important;outline:2px solid var(--accent);outline-offset:-2px;background:var(--paper)!important;cursor:text}
+.ob-t td.ie input{width:100%;min-width:0;border:0;background:transparent;font:inherit;font-size:12.5px;padding:7px 5px;color:var(--ink);outline:0}
+.ob-t td.c-q.ie input,.ob-t td.c-b.ie input{text-align:right;font-family:var(--mono);font-weight:800}
+.ob-t tr.ob-edrow td,.ob-t tr.ob-edrow:hover td{padding:4px 2px 12px;background:var(--paper)!important;cursor:default;white-space:normal;overflow:visible}
+.ob-ed{border:2px solid var(--accent);border-radius:10px;padding:10px 12px;background:var(--paper)}
+.ob-ed h4{margin:0;font-size:13px;color:var(--accent)}.ob-ed h4 small{font-weight:600;color:var(--muted);margin-left:6px}
+.ob-ed .sub{font-size:11px;font-weight:800;color:var(--muted);margin:10px 0 4px}
+.ob-ed .eg{display:grid;gap:5px 8px;align-items:center}
+.ob-ed .ec{grid-template-columns:1fr 1fr 1.05fr 1.05fr 1.2fr 1.2fr 2fr}
+.ob-ed .er{grid-template-columns:2.4fr 1.5fr .7fr .7fr 1fr 1.6fr 30px}
+.ob-ed label,.ob-ed .lh{display:block;font-size:10.5px;font-weight:700;color:var(--muted)}
+.ob-ed input{width:100%;min-width:0;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font:inherit;font-size:12.5px;background:var(--paper);color:var(--ink)}
+.ob-ed input:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+.ob-ed input.mono{font-family:var(--mono);font-size:12px}
+.ob-ed .del input{text-decoration:line-through;opacity:.45}
+.ob-ed .x{border:0;background:none;color:var(--high);font-weight:800;font-size:13px;cursor:pointer;height:28px;padding:0}.ob-ed .del .x{color:var(--muted)}
+.ob-ed .new input{border-style:dashed}
+.ob-ed .ebtn{display:flex;gap:6px;justify-content:flex-end;align-items:center;margin-top:10px}.ob-ed .ebtn .ov-danger{margin-right:auto}
+.ob-ed .emsg{font-size:12px;color:var(--muted)}.ob-ed .emsg.err{color:var(--high)}
 .ob-t .ob-cp{padding:1px 6px;font-size:10.5px}
 .ob-ln{display:block;font-size:12px;color:var(--ink);white-space:normal;line-height:1.35;overflow-wrap:anywhere;cursor:text;user-select:text;-webkit-user-select:text}
 .ob-ln.mono{font-family:var(--mono);font-size:11.5px;font-weight:600}.ob-ln.no{color:var(--muted);cursor:inherit}
@@ -2862,7 +2881,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const OB_FIELDS = ['grp', 'ext', 'cdate', 'due', 'vendor', 'addr', 'phone', 'name', 'barcode', 'qty', 'box', 'tote', 'note'];
   const OB_KEEP = ['grp', 'ext', 'cdate', 'due', 'vendor', 'addr', 'phone'];   // 같은 그룹 상품을 이어 넣을 때 남겨 두는 칸
   let obItems = null, obRev = -1, obLoading = false, obBuilt = false, obToday = todayIso, obDelArm = 0;
-  const obUi = { editId:null, open:new Set(), doneAll:false };
+  const obUi = { editId:null, open:new Set(), doneAll:false, draft:null, delArm:0 };
+  let obClickT = 0;
   const obBlank = () => Object.fromEntries(OB_FIELDS.map(k => [k, k === 'cdate' ? obToday : '']));
   let obForm = obBlank();
   const obDue = d => d ? Math.round((Date.parse(d) - Date.parse(obToday)) / 864e5) : null;
@@ -2875,6 +2895,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       const d = await request('GET', '/api/outs');
       obItems = d.items || []; obRev = d.rev; if (d.today) obToday = d.today;
       if (!obForm.cdate) obForm.cdate = obToday;
+      const a = document.activeElement;
+      if (a && $('#ob-list')?.contains(a) && a.matches('input')) return;   // 표 안에서 고치는 중이면 다시 그리지 않아요
       if (!obBusy()) renderOuts(); else obRenderList();
     } catch(e) {
       if (e instanceof Locked) return showLock(e.message);
@@ -3021,6 +3043,133 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   }
   const obCopy = async (text, what) => { try { await navigator.clipboard.writeText(text); toast(what + ' 복사했어요.'); } catch { toast('복사하지 못했어요. 길게 눌러 복사해 주세요.'); } };
 
+  // ---- A: 칸을 두 번 눌러 바로 고치기 (Enter 저장 · Esc 취소) ----
+  const OB_INLINE = { 'c-dd':'due', 'c-v':'vendor', 'c-n':'name', 'c-q':'qty', 'c-b':'box', 'c-note':'note' };
+  const OB_GROUPWIDE = ['grp', 'ext', 'cdate', 'due', 'vendor', 'addr', 'phone'];   // 그룹 전체에 같이 들어가는 칸
+  function obInline(td, t, g, key){
+    if (td.classList.contains('ie')) return;
+    const wide = OB_GROUPWIDE.includes(key);
+    const cur = wide ? (g[key] ?? '') : (t[key] ?? '');
+    const inp = el('input', { type: key === 'due' ? 'date' : 'text', inputmode: key === 'qty' || key === 'box' ? 'decimal' : undefined, maxlength: key === 'note' ? 300 : 150, autocomplete:'off' });
+    inp.value = cur === null ? '' : String(cur);
+    let done = false;
+    const finish = save => { if (done) return; done = true; if (save) obSaveCell(g, t, key, inp.value); else obRenderList(); };
+    inp.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); finish(true); } else if (e.key === 'Escape'){ e.preventDefault(); finish(false); } };
+    inp.onblur = () => finish(true);
+    inp.onclick = e => e.stopPropagation();
+    td.classList.add('ie'); td.replaceChildren(inp);
+    inp.focus(); if (inp.type === 'text') inp.select();
+  }
+  async function obSaveCell(g, t, key, raw){
+    let v = String(raw ?? '').replace(/\t/g, ' ').trim();
+    if ((key === 'qty' || key === 'box') && v){ const q = Number(v.replace(/,/g, '')); if (!Number.isFinite(q) || q < 0){ toast((key === 'qty' ? '수량' : '박스') + '은 숫자로 적어 주세요.'); return obRenderList(); } v = q; }
+    const targets = OB_GROUPWIDE.includes(key) ? g.ts : [t];
+    const todo = targets.filter(x => String(x[key] ?? '') !== String(v) && !String(x.id).startsWith('temp-'));
+    if (!todo.length) return obRenderList();
+    if (!v && key !== 'qty' && key !== 'box' && key !== 'due' && key !== 'note' && todo.some(x => !['grp', 'vendor', 'name'].some(k => k !== key && x[k]))){ toast('반출그룹번호 · 업체명 · 상품명 중 하나는 남아 있어야 해요.'); return obRenderList(); }
+    const prev = todo.map(x => [x, x[key]]);
+    todo.forEach(x => { x[key] = v; });
+    obRenderList();
+    try {
+      const rs = await Promise.all(todo.map(x => api('PATCH', '/api/outs?id=' + encodeURIComponent(x.id), { [key]: v })));
+      rs.forEach(r => { const x = obItems.find(y => y.id === r.item?.id); if (x) Object.assign(x, r.item); });
+      obRev = -2; toast(todo.length > 1 ? `같은 그룹 ${todo.length}개 상품에 같이 고쳤어요.` : '고쳤어요.');
+    } catch(e){ prev.forEach(([x, old]) => { x[key] = old; }); obRenderList(); if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+  }
+
+  // ---- B: 그룹 바로 아래에 수정 칸 펼치기 ----
+  const OB_ROWF = ['name', 'barcode', 'qty', 'box', 'tote', 'note'];
+  const obDraftDirty = d => !!d && JSON.stringify({ c: d.common, r: d.rows }) !== d.orig;
+  function obOpenGroup(g){
+    const d0 = obUi.draft;
+    if (d0 && d0.key === g.key) return;
+    if (d0 && obDraftDirty(d0)){ toast('고치던 그룹을 먼저 저장하거나 취소해 주세요.'); document.querySelector('.ob-ed')?.scrollIntoView({ behavior:'smooth', block:'nearest' }); return; }
+    const str = v => v == null ? '' : String(v);
+    const common = Object.fromEntries(OB_GROUPWIDE.map(k => [k, str(k === 'due' ? g.due : g[k] ?? g.ts[0][k])]));
+    const rows = g.ts.map(t => ({ id: t.id, del: false, ...Object.fromEntries(OB_ROWF.map(k => [k, str(t[k])])) }));
+    obUi.draft = { key: g.key, stage: g.stage, com2: g.com2, com3: g.com3, common, rows, busy: false, msg: '' };
+    obUi.draft.orig = JSON.stringify({ c: common, r: rows });
+    obUi.delArm = 0;
+    obRenderList();
+    setTimeout(() => { const p = document.querySelector('.ob-ed'); p?.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 30);
+  }
+  function obCloseGroup(){ obUi.draft = null; obUi.delArm = 0; obRenderList(); }
+  function obPanel(g){
+    const d = obUi.draft;
+    const inp = (obj, k, o = {}) => {
+      const n = el('input', { class: o.mono ? 'mono' : '', type: o.type || 'text', inputmode: o.im, maxlength: o.max || 150, autocomplete:'off', 'aria-label': o.label, placeholder: o.ph || '' });
+      n.value = obj[k] ?? '';
+      n.oninput = () => { obj[k] = n.value; };
+      return n;
+    };
+    const C = d.common;
+    const cf = (k, label, o = {}) => el('div', {}, el('label', { text: label }), inp(C, k, { ...o, label }));
+    const common = el('div', { class:'eg ec' },
+      cf('grp', '반출그룹번호', { mono:true, max:40 }), cf('ext', '외부반출번호', { mono:true, max:40 }),
+      cf('cdate', '생성일자', { type:'date', mono:true }), cf('due', '마감일자', { type:'date', mono:true }),
+      cf('vendor', '업체명', { max:80 }), cf('phone', '핸드폰', { mono:true, im:'tel', max:40 }), cf('addr', '주소', { max:200 }));
+    const heads = el('div', { class:'eg er' }, ...['상품명', '바코드', '수량', '박스', '집품토트', '비고', ''].map(h => el('span', { class:'lh', text: h })));
+    const rows = d.rows.map((r, i) => el('div', { class:'eg er' + (r.del ? ' del' : '') + (r.id ? '' : ' new') },
+      inp(r, 'name', { label:'상품명' }), inp(r, 'barcode', { mono:true, max:40, label:'바코드' }),
+      inp(r, 'qty', { mono:true, im:'decimal', max:10, label:'수량' }), inp(r, 'box', { mono:true, im:'decimal', max:10, label:'박스' }),
+      inp(r, 'tote', { mono:true, max:40, label:'집품토트' }), inp(r, 'note', { max:300, label:'비고' }),
+      el('button', { type:'button', class:'x', title: r.del ? '삭제 취소' : '이 상품 빼기', 'aria-label': r.del ? '삭제 취소' : '이 상품 빼기', text: r.del ? '↺' : '✕',
+        onclick: () => { if (!r.id) d.rows.splice(i, 1); else r.del = !r.del; obRenderList(); } })));
+    const armed = obUi.delArm && Date.now() - obUi.delArm < 4000;
+    const panel = el('div', { class:'ob-ed' },
+      el('h4', {}, '✎ ' + ([C.grp, C.vendor].filter(Boolean).join(' · ') || '반출 건') + ' 고치는 중', el('small', { text: 'Enter 저장 · Esc 취소' })),
+      el('div', { class:'sub', text: `그룹 공통 (상품 ${d.rows.filter(r => r.id && !r.del).length}개에 모두 적용)` }), common,
+      el('div', { class:'sub', text:'상품별' }), heads, ...rows,
+      el('div', { class:'ebtn' },
+        el('button', { type:'button', class:'ret-btn ghost sm ov-danger', text: armed ? '한 번 더 누르면 그룹 전체 삭제' : '그룹 전체 삭제', onclick: obDeleteGroup }),
+        el('span', { class:'emsg' + (d.msgErr ? ' err' : ''), text: d.busy ? '저장 중…' : d.msg || '' }),
+        el('button', { type:'button', class:'ret-btn ghost sm', text:'+ 상품 추가', onclick: () => { d.rows.push({ id:null, del:false, ...Object.fromEntries(OB_ROWF.map(k => [k, ''])) }); obRenderList(); const ns = document.querySelectorAll('.ob-ed .er.new'); ns[ns.length - 1]?.querySelector('input')?.focus(); } }),
+        el('button', { type:'button', class:'ret-btn ghost sm', text:'취소', onclick: obCloseGroup }),
+        el('button', { type:'button', class:'ret-btn solid sm', text:'저장', disabled: d.busy, onclick: obSaveGroup })));
+    panel.onkeydown = e => {
+      if (e.key === 'Escape'){ e.preventDefault(); obCloseGroup(); }
+      else if (e.key === 'Enter' && e.target.matches('input')){ e.preventDefault(); obSaveGroup(); }
+    };
+    const tr = el('tr', { class:'ob-edrow' }, el('td', { colspan:'9' }, panel));
+    tr.onclick = e => e.stopPropagation();
+    return tr;
+  }
+  async function obSaveGroup(){
+    const d = obUi.draft; if (!d || d.busy) return;
+    const trim = v => String(v ?? '').replace(/\t/g, ' ').trim();
+    const C = Object.fromEntries(Object.entries(d.common).map(([k, v]) => [k, trim(v)]));
+    const fail = m => { d.msg = m; d.msgErr = true; obRenderList(); };
+    const live = d.rows.filter(r => !r.del && (r.id || OB_ROWF.some(k => trim(r[k]))));
+    for (const r of live){
+      for (const k of ['qty', 'box']) if (trim(r[k]) && !Number.isFinite(Number(trim(r[k]).replace(/,/g, '')))) return fail((k === 'qty' ? '수량' : '박스') + '은 숫자로 적어 주세요.');
+      if (!C.grp && !C.vendor && !trim(r.name)) return fail('반출그룹번호 · 업체명 · 상품명 중 하나는 적어 주세요.');
+    }
+    const ops = [], news = [];
+    for (const r of d.rows){
+      if (r.id && r.del){ ops.push(() => api('DELETE', '/api/outs?id=' + encodeURIComponent(r.id))); continue; }
+      const x = { ...C, ...Object.fromEntries(OB_ROWF.map(k => [k, trim(r[k])])) };
+      if (!r.id){ if (OB_ROWF.some(k => x[k])) news.push({ ...x, stage: d.stage, com2: d.com2, com3: d.com3 }); continue; }
+      const t = (obItems || []).find(v => v.id === r.id); if (!t) continue;
+      const patch = {}; for (const [k, v] of Object.entries(x)) if (String(t[k] ?? '') !== String(v)) patch[k] = v;
+      if (Object.keys(patch).length) ops.push(() => api('PATCH', '/api/outs?id=' + encodeURIComponent(r.id), patch));
+    }
+    if (news.length) ops.push(() => api('POST', '/api/outs', { items: news }));
+    if (!ops.length){ obCloseGroup(); toast('바뀐 내용이 없어요.'); return; }
+    d.busy = true; d.msg = ''; d.msgErr = false; obRenderList();
+    try { await Promise.all(ops.map(f => f())); obUi.draft = null; toast('저장했어요.'); }
+    catch(e){ d.busy = false; if (e instanceof Locked){ obRenderList(); return showLock(e.message); } fail(e.message); }
+    obRev = -2; await loadOuts(); obRenderList(); istCounts();
+  }
+  async function obDeleteGroup(){
+    const d = obUi.draft; if (!d) return;
+    if (!obUi.delArm || Date.now() - obUi.delArm > 4000){ obUi.delArm = Date.now(); obRenderList(); setTimeout(() => { if (obUi.delArm && Date.now() - obUi.delArm >= 4000){ obUi.delArm = 0; obRenderList(); } }, 4100); return; }
+    const ids = d.rows.map(r => r.id).filter(Boolean);
+    d.busy = true; obRenderList();
+    try { await Promise.all(ids.map(id => api('DELETE', '/api/outs?id=' + encodeURIComponent(id)))); obUi.draft = null; obUi.delArm = 0; toast('그룹을 삭제했어요.'); }
+    catch(e){ d.busy = false; obUi.delArm = 0; if (e instanceof Locked){ obRenderList(); return showLock(e.message); } d.msg = e.message; d.msgErr = true; }
+    obRev = -2; await loadOuts(); obRenderList(); istCounts();
+  }
+
   // 박스 라벨 인쇄: A4 한 장 = 박스 1개. 박스 칸 합계만큼 1/N, 2/N … 로 찍어요. 소비기한은 손으로 적는 빈칸.
   function obPrintLabel(g){
     const E = v => String(v ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
@@ -3067,7 +3216,7 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
       gs = s === 4 ? gs.sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || '')) : gs.sort(byDue);
       const total = gs.length;
       if (s === 4 && !obUi.doneAll) gs = gs.slice(0, 20);
-      const help = ['', '포장이 끝나면 ②로 · 줄을 누르면 고치기', '업체 소통 체크 → 택배 접수 완료로', '업체 소통 체크 → 반출 완료로', '최근 완료 순 · 잘못 넘겼으면 ↩'][s];
+      const help = ['', '포장이 끝나면 ②로 · 줄을 누르면 그룹 수정 · 칸을 두 번 누르면 바로 수정', '업체 소통 체크 → 택배 접수 완료로', '업체 소통 체크 → 반출 완료로', '최근 완료 순 · 잘못 넘겼으면 ↩'][s];
       const head = el('div', { class:'ov-stage s' + s }, el('span', { class:'ov-no', text: s }), el('h3', { text: OB_STAGES[s] }), el('b', { class:'ov-cnt', text: total }), el('p', { class:'ret-help', text: help }));
       const sec = el('section', { class:'ret-sec ob-sec s' + s });
       if (!obItems){ sec.append(head, el('p', { class:'ret-help', text:'불러오는 중…' })); return sec; }
@@ -3078,9 +3227,18 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
         const comKey = s === 2 ? 'com2' : s === 3 ? 'com3' : '';
         g.ts.forEach((t, i) => {
           const first = i === 0, same = v => !first ? el('span', { class:'ob-same', text:'〃' }) : null;
-          const tr = el('tr', { class: (first ? 'g-first' : 'g-more') + (t.id === obUi.editId ? ' sel' : ''), tabindex:'0', title:'눌러서 고치기',
-            onclick: () => { if (String(window.getSelection?.() || '').trim()) return; obStartEdit(t); },   // 글자를 드래그해서 고른 거면 수정 창을 열지 않아요
-            onkeydown: e => { if (e.key === 'Enter' && e.target === e.currentTarget){ e.preventDefault(); obStartEdit(t); } } });
+          const tr = el('tr', { class: (first ? 'g-first' : 'g-more') + (obUi.draft?.key === g.key ? ' sel' : ''), tabindex:'0', title:'누르면 그룹 수정 · 칸을 두 번 누르면 바로 수정',
+            onclick: e => {
+              if (e.detail > 1 || e.target.closest('input')) return;
+              if (String(window.getSelection?.() || '').trim()) return;   // 글자를 드래그해서 고른 거면 열지 않아요
+              clearTimeout(obClickT); obClickT = setTimeout(() => obOpenGroup(g), 230);
+            },
+            ondblclick: e => {
+              const c = e.target.closest('td'); const key = c && OB_INLINE[[...c.classList].find(k => OB_INLINE[k])];
+              if (!key || (key === 'due' && s === 4)) return;
+              clearTimeout(obClickT); window.getSelection?.().removeAllRanges(); obInline(c, t, g, key);
+            },
+            onkeydown: e => { if (e.key === 'Enter' && e.target === e.currentTarget){ e.preventDefault(); obOpenGroup(g); } } });
           tr.append(
             first ? td('c-dd', null, s === 4 ? el('span', { class:'ob-dd', text: retMD(g.doneAt) }) : ddOf(g)) : td('c-dd'),
             first ? td('c-v', g.vendor || '-') : td('c-v', null, same()),
@@ -3105,6 +3263,7 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
           }
           body.push(tr);
         });
+        if (obUi.draft?.key === g.key) body.push(obPanel(g));
       }
       sec.append(head, el('div', { class:'ov-wrap' },
         el('table', { class:'ob-t' }, el('colgroup', {}, ...['c-dd', 'c-v', 'c-g', 'c-n', 'c-q', 'c-b', 'c-p', 'c-note', 'c-act'].map(c => el('col', { class:'w-' + c }))),
