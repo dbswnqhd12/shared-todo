@@ -599,6 +599,18 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ob-t .ob-acts{min-width:0;justify-content:flex-start;flex-wrap:wrap}
 .ob-acts .ob-prt{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
 .ob-acts .ob-edit.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ob-t .ob-a{display:flex;flex-direction:column;align-items:stretch;gap:6px;flex-wrap:nowrap}
+.ob-t .ob-a .ob-next{height:32px;border-radius:8px;font-size:12.5px;color:var(--paper);text-align:center;padding:0 8px}
+.ob-t .ob-a .ob-tools{display:flex;gap:4px;align-items:center}
+.ob-t .ob-a .ob-tools button{height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:7px}
+.ob-t .ob-a .ob-ib{width:30px;flex:none;font-size:13px;color:var(--muted);font-weight:700}
+.ob-t .ob-a .ob-ib:hover{color:var(--ink);border-color:var(--muted)}
+.ob-t .ob-a .ob-ib.ob-edit.on{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.ob-t .ob-a .ob-prt{background:var(--paper);border-color:var(--line)}
+.ob-t .ob-a .ob-com{flex:1;min-width:0;gap:5px;padding:0 6px!important;font-size:12px;font-weight:700;color:var(--muted)}
+.ob-t .ob-a .ob-com .bx{width:14px;height:14px;border:1.5px solid currentColor;border-radius:4px;flex:none;display:grid;place-items:center;font-style:normal;font-size:10px;line-height:1}
+.ob-t .ob-a .ob-com.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.ob-t .ob-a .ob-com.on .bx{background:var(--accent);border-color:var(--accent);color:var(--paper)}.ob-t .ob-a .ob-com.on .bx::after{content:"✓";font-weight:900}
 .ob-t tbody tr,.ob-t tbody tr:hover td{cursor:default}
 .ob-t td.ie{padding:0!important;outline:2px solid var(--accent);outline-offset:-2px;background:var(--paper)!important;cursor:text}
 .ob-t td.ie input{width:100%;min-width:0;border:0;background:transparent;font:inherit;font-size:12.5px;padding:7px 5px;color:var(--ink);outline:0}
@@ -3412,14 +3424,18 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
               el('span', { class:'ob-ln' + (g.addr ? '' : ' no'), text: g.addr || '주소 없음' })) : td('c-p', null, same()),
             td('c-note', t.note || ''));
           if (first){
-            const acts = el('div', { class:'ob-acts' },
-              el('button', { type:'button', class:'ob-edit' + (obUi.draft?.key === g.key ? ' on' : ''), title:'이 그룹 고치기 (그룹 공통 · 상품별)',
-                onclick: e => { e.stopPropagation(); if (obUi.draft?.key !== g.key) return obOpenGroup(g); if (obDraftDirty(obUi.draft)) return toast('고친 내용을 저장하거나 취소해 주세요.'); obCloseGroup(); } }, '✎ 수정'),
-              s < 4 ? el('button', { type:'button', class:'ob-prt', title:'박스 라벨 인쇄 (박스 수만큼)', 'aria-label':'박스 라벨 인쇄', onclick: e => { e.stopPropagation(); obPrintLabel(g); } }, '\u{1F5A8}') : null,
-              comKey ? el('button', { type:'button', class:'ob-com' + (g[comKey] ? ' on' : ''), title:'업체 소통 완료 (' + OB_STAGES[s] + ')',
-                onclick: e => { e.stopPropagation(); obPut(g, { [comKey]: !g[comKey] }, g[comKey] ? '' : '업체 소통 완료로 표시했어요.'); } }, (g[comKey] ? '✓' : '□') + ' 소통') : null,
-              s > 1 ? el('button', { type:'button', class:'ob-back', title:'이전 단계로', 'aria-label':'이전 단계로', text:'↩', onclick: e => { e.stopPropagation(); obPut(g, { stage: s - 1 }, OB_STAGES[s - 1] + ' 단계로 되돌렸어요.'); } }) : null,
-              s < 4 ? el('button', { type:'button', class:'ob-next', text: OB_NEXT[s], onclick: e => { e.stopPropagation(); obPut(g, { stage: s + 1 }, OB_STAGES[s + 1] + ' 단계로 넘겼어요.'); } }) : null);
+            // 위: 다음 단계 큰 버튼 / 아래: 소통 체크 + ✎ 🖨 ↩ 아이콘
+            const stop = f => e => { e.stopPropagation(); f(); };
+            const editOn = obUi.draft?.key === g.key;
+            const acts = el('div', { class:'ob-acts ob-a' },
+              s < 4 ? el('button', { type:'button', class:'ob-next', text: OB_NEXT[s], onclick: stop(() => obPut(g, { stage: s + 1 }, OB_STAGES[s + 1] + ' 단계로 넘겼어요.')) }) : null,
+              el('div', { class:'ob-tools' },
+                comKey ? el('button', { type:'button', class:'ob-com' + (g[comKey] ? ' on' : ''), role:'checkbox', 'aria-checked': g[comKey] ? 'true' : 'false', title:'업체 소통 완료 (' + OB_STAGES[s] + ')',
+                  onclick: stop(() => obPut(g, { [comKey]: !g[comKey] }, g[comKey] ? '' : '업체 소통 완료로 표시했어요.')) }, el('i', { class:'bx', 'aria-hidden':'true' }), '소통 완료') : null,
+                el('button', { type:'button', class:'ob-ib ob-edit' + (editOn ? ' on' : ''), title:'이 그룹 고치기', 'aria-label':'이 그룹 고치기', text:'✎',
+                  onclick: stop(() => { if (!editOn) return obOpenGroup(g); if (obDraftDirty(obUi.draft)) return toast('고친 내용을 저장하거나 취소해 주세요.'); obCloseGroup(); }) }),
+                s < 4 ? el('button', { type:'button', class:'ob-ib ob-prt', title:'박스 라벨 인쇄 (박스 수만큼)', 'aria-label':'박스 라벨 인쇄', text:'\u{1F5A8}', onclick: stop(() => obPrintLabel(g)) }) : null,
+                s > 1 ? el('button', { type:'button', class:'ob-ib ob-back', title:'이전 단계로', 'aria-label':'이전 단계로', text:'↩', onclick: stop(() => obPut(g, { stage: s - 1 }, OB_STAGES[s - 1] + ' 단계로 되돌렸어요.')) }) : null));
             const c = el('td', { class:'c-act', rowspan: String(g.ts.length) }, acts);
             c.onclick = e => e.stopPropagation();
             tr.append(c);
