@@ -581,7 +581,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ob-sec.s1{border-top:3px solid var(--mid)}.ob-sec.s2{border-top:3px solid var(--vio)}.ob-sec.s3{border-top:3px solid var(--sat)}.ob-sec.s4{border-top:3px solid var(--accent)}
 .ov-stage.s4 .ov-no{background:var(--accent)}.ob-sec.s3 .ov-no{background:var(--sat)}
 .ob-t{border-collapse:collapse;width:100%;font-size:12.5px;table-layout:fixed;min-width:860px}
-.ob-t .w-c-dd{width:66px}.ob-t .w-c-v{width:120px}.ob-t .w-c-g{width:92px}.ob-t .w-c-q{width:44px}.ob-t .w-c-b{width:40px}.ob-t .w-c-p{width:158px}.ob-t .w-c-note{width:110px}.ob-t .w-c-act{width:190px}
+.ob-t .w-c-dd{width:66px}.ob-t .w-c-v{width:112px}.ob-t .w-c-g{width:92px}.ob-t .w-c-q{width:44px}.ob-t .w-c-b{width:40px}.ob-t .w-c-p{width:210px}.ob-t .w-c-note{width:100px}.ob-t .w-c-act{width:186px}
 .ob-t th{overflow:hidden;text-overflow:ellipsis}
 .ob-t td{overflow:hidden;text-overflow:ellipsis}
 .ob-t th{font-size:11.5px;color:var(--muted);font-weight:700;text-align:left;padding:6px 5px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--bg)}.ob-t th.r{text-align:right}
@@ -589,7 +589,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ob-t tr.g-first td{border-top:0}.ob-t tbody tr{cursor:pointer}.ob-t tbody tr:hover td{background:var(--bg)}.ob-t tbody tr.sel td{background:var(--accent-soft)}
 .ob-t tr.g-more td{border-top:0}.ob-t tbody tr:has(+ tr.g-more) td:not(.c-act){border-bottom-style:dashed}
 .ob-t .mono{font-family:var(--mono);font-size:11.5px}
-.ob-t .c-v{font-weight:700}
+.ob-t .c-v{font-weight:700;white-space:normal;line-height:1.35;overflow-wrap:anywhere}
 .ob-t .c-n .nm{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis}.ob-t .c-n .bc{display:block;font-size:10.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
 .ob-t .c-q,.ob-t .c-b{text-align:right;font-weight:800}
 .ob-t .c-note{color:var(--muted);font-size:12px}
@@ -597,7 +597,13 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ob-t .ob-dd{display:inline-block;min-width:48px;padding:2px 6px}
 .ob-same{color:var(--muted);opacity:.5}
 .ob-t .ob-acts{min-width:0;justify-content:flex-start}
-.ob-t .ob-cp{padding:1px 6px;font-size:10.5px}.ob-t .c-p .ob-cp+.ob-cp{margin-left:4px}
+.ob-t .ob-cp{padding:1px 6px;font-size:10.5px}
+.ob-ln{display:flex;align-items:center;gap:5px;width:100%;border:0;background:none;padding:1px 3px;border-radius:5px;font:inherit;font-size:12px;color:var(--ink);text-align:left;cursor:pointer}
+.ob-ln.mono{font-family:var(--mono);font-size:11.5px;font-weight:600}.ob-ln .tx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ob-ln .ci{flex:none;font-size:10px;font-weight:700;color:var(--accent);border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--paper)}
+.ob-ln:not(.mono) .tx{white-space:normal;line-height:1.35;overflow-wrap:anywhere}.ob-ln{align-items:flex-start}
+.ob-t .c-n .nm{white-space:normal;line-height:1.35;overflow-wrap:anywhere}
+.ob-ln:hover{background:var(--accent-soft)}.ob-ln.no{color:var(--muted);cursor:default}.ob-ln.no:hover{background:none}
 .ob-t .c-g .gg{display:block}.ob-t .c-g .gx{display:block;font-size:10.5px;color:var(--muted)}
 /* ---------- 생산성 ---------- */
 .pr-drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:28px 16px;border:2px dashed var(--line);border-radius:10px;background:var(--bg);cursor:pointer;text-align:center}
@@ -3037,7 +3043,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       const sec = el('section', { class:'ret-sec ob-sec s' + s });
       if (!obItems){ sec.append(head, el('p', { class:'ret-help', text:'불러오는 중…' })); return sec; }
       if (!gs.length){ sec.append(head, el('p', { class:'ho-empty', text: s === 4 ? '반출 완료한 건이 없어요.' : '이 단계의 반출 건이 없어요.' })); return sec; }
-      const cols = [s === 4 ? '완료일' : '마감', '업체명', '그룹 / 외부번호', '상품명 / 바코드 · 집품토트', '수량', '박스', '연락처', '비고', ''];
+      const cols = [s === 4 ? '완료일' : '마감', '업체명', '그룹 / 외부번호', '상품명 / 바코드 · 집품토트', '수량', '박스', '핸드폰 / 주소 (눌러서 복사)', '비고', ''];
       const body = [];
       for (const g of gs){
         const comKey = s === 2 ? 'com2' : s === 3 ? 'com3' : '';
@@ -3052,7 +3058,11 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
             td('c-n', null, el('span', { class:'nm', text: t.name || '-', title: t.name || '' }), t.barcode || t.tote ? el('span', { class:'bc mono', text: [t.barcode, t.tote && '토트 ' + t.tote].filter(Boolean).join(' · ') }) : null),
             td('c-q mono', t.qty !== '' && t.qty != null ? retNum(t.qty) : '-'),
             td('c-b mono', t.box !== '' && t.box != null ? retNum(t.box) : '-'),
-            first ? td('c-p mono', null, g.phone ? copyBtn(g.phone, g.phone, '번호를') : null, g.addr ? copyBtn(g.addr, '📍', '주소를') : null, !g.phone && !g.addr ? el('span', { class:'no', text:'-' }) : null) : td('c-p', null, same()),
+            first ? td('c-p', null,
+              el('button', { type:'button', class:'ob-ln mono' + (g.phone ? '' : ' no'), title: g.phone ? '눌러서 번호 복사' : '', disabled: !g.phone, onclick: e => { e.stopPropagation(); if (g.phone) obCopy(g.phone, '번호를'); } },
+                el('span', { class:'tx', text: g.phone || '번호 없음' }), g.phone ? el('span', { class:'ci', text:'복사' }) : null),
+              el('button', { type:'button', class:'ob-ln' + (g.addr ? '' : ' no'), title: g.addr ? g.addr + ' (눌러서 주소 복사)' : '', disabled: !g.addr, onclick: e => { e.stopPropagation(); if (g.addr) obCopy(g.addr, '주소를'); } },
+                el('span', { class:'tx', text: g.addr || '주소 없음' }), g.addr ? el('span', { class:'ci', text:'복사' }) : null)) : td('c-p', null, same()),
             td('c-note', t.note || ''));
           if (first){
             const acts = el('div', { class:'ob-acts' },
