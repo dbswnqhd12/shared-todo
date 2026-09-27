@@ -26,13 +26,16 @@ function clean(input, base) {
   }
   if ('temp' in input) out.temp = TEMPS.includes(input.temp) ? input.temp : '';
   if ('qty' in input) {
-    const q = Number(String(input.qty ?? '').replace(/,/g, ''));
-    if (!Number.isFinite(q) || q < 0 || q > 1e6) throw new UserError('수량을 숫자로 적어 주세요.');
-    out.qty = Math.round(q * 100) / 100;
+    const raw = String(input.qty ?? '').replace(/,/g, '').trim();
+    if (!raw) out.qty = '';   // 수량은 비워 둬도 돼요 (나중에 채우기)
+    else {
+      const q = Number(raw);
+      if (!Number.isFinite(q) || q < 0 || q > 1e6) throw new UserError('수량을 숫자로 적어 주세요.');
+      out.qty = Math.round(q * 100) / 100;
+    }
   }
-  if (!out.vendor) throw new UserError('업체명을 적어 주세요.');
-  if (!out.name) throw new UserError('상품명을 적어 주세요.');
-  if (!out.reason) throw new UserError('회송사유를 적어 주세요.');
+  // 빈 칸이 있어도 저장해요 — 다만 아무것도 없는 줄은 막아요
+  if (!out.vendor && !out.name && !out.barcode && !out.sku && !out.po) throw new UserError('업체명 · 상품명 · 바코드 중 하나는 적어 주세요.');
   return out;
 }
 
