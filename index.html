@@ -535,6 +535,47 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ist-sub button b{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--high)}
 .ist-sub button[aria-pressed=true]{color:var(--ink);border-bottom-color:var(--accent)}
 .ist-sub button:hover{color:var(--ink)}
+/* IST 반출 */
+.ob-grp{border:1px solid var(--line);border-radius:9px;padding:6px 12px 12px;margin:0 0 10px}
+.ob-grp legend{font-size:12px;font-weight:800;color:var(--muted);padding:0 4px}.ob-grp legend small{font-weight:500}
+.ob-g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ob-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.ob-chips button{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:700;background:var(--paper);color:var(--muted)}
+.ob-chips button b{font-family:var(--mono)}.ob-chips button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.ob-rows{display:flex;flex-direction:column}
+.ob-wrap{border-top:1px solid var(--line)}.ob-wrap:first-child{border-top:0}.ob-wrap.open{background:var(--bg);border-radius:8px}
+.ob-row{display:grid;grid-template-columns:64px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:9px 6px;cursor:pointer}
+.ob-row:hover{background:var(--bg)}
+.ob-dd{font-family:var(--mono);font-size:12px;font-weight:800;text-align:center;border-radius:6px;padding:3px 0;background:var(--bg);color:var(--muted);white-space:nowrap}
+.ob-wrap.open .ob-dd{background:var(--paper)}
+.ob-dd.warn{background:var(--mid-soft);color:var(--mid)}.ob-dd.over{background:var(--high-soft);color:var(--high)}
+.ob-main{min-width:0}.ob-main .v{font-weight:800;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ob-main .g{font-weight:500;font-size:11.5px;color:var(--muted)}
+.ob-main .p{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ob-prog{display:flex;align-items:center}
+.ob-prog i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:10.5px;font-weight:800;border:2px solid var(--line);color:var(--muted);background:var(--paper)}
+.ob-prog i.d{background:var(--accent);border-color:var(--accent);color:#fff}.ob-prog i.c{border-color:var(--accent);color:var(--accent)}
+.ob-prog b{width:10px;height:2px;background:var(--line)}.ob-prog b.d{background:var(--accent)}
+.ob-acts{display:flex;gap:5px;justify-content:flex-end;align-items:center;min-width:150px}
+.ob-acts button{border:1px solid var(--line);border-radius:7px;padding:4px 9px;font-size:12px;font-weight:800;background:var(--paper);color:var(--ink);white-space:nowrap}
+.ob-acts .ob-next{background:var(--accent);border-color:var(--accent);color:#fff}
+.ob-acts .ob-com{color:var(--muted)}.ob-acts .ob-com.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.ob-acts .ob-back{color:var(--muted);padding:4px 7px}
+.ob-det{padding:0 10px 10px 80px;display:flex;flex-direction:column;gap:8px}
+.ob-info{display:flex;flex-direction:column;gap:3px;font-size:12.5px}.ob-info .mono{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.ob-cp{border:1px solid var(--line);border-radius:5px;padding:0 7px;font-size:11px;font-weight:700;color:var(--accent);background:var(--paper)}
+.ob-items{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;background:var(--paper);overflow:hidden}
+.ob-it{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:2px 10px;padding:7px 10px;font-size:12.5px;cursor:pointer;align-items:center}
+.ob-it+.ob-it{border-top:1px solid var(--line)}.ob-it:hover{background:var(--accent-soft)}
+.ob-it .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ob-it .mt{grid-column:1;font-size:11px;color:var(--muted);font-family:var(--mono)}
+.ob-it .q{grid-column:2;grid-row:1;font-weight:800;text-align:right;font-family:var(--mono)}.ob-it .nt{grid-column:1/3;font-size:11.5px;color:var(--muted)}
+.ob-it .ed{grid-column:3;grid-row:1 / span 2;font-size:11.5px;color:var(--accent);font-weight:700}
+@media (max-width:760px){
+  .ob-g4{grid-template-columns:1fr 1fr}
+  .ob-row{grid-template-columns:56px minmax(0,1fr);gap:6px 10px}
+  .ob-prog{grid-column:1 / -1;grid-row:2;justify-self:start;transform:scale(.85);transform-origin:left center}
+  .ob-acts{grid-column:1 / -1;grid-row:2;justify-self:end;min-width:0}
+  .ob-det{padding:0 8px 10px}
+}
 /* ---------- 생산성 ---------- */
 .pr-drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:28px 16px;border:2px dashed var(--line);border-radius:10px;background:var(--bg);cursor:pointer;text-align:center}
 .pr-drop b{font-size:15px;color:var(--accent)}.pr-drop span{font-size:13px}.pr-drop small{font-size:12px;color:var(--muted)}
@@ -700,9 +741,11 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   <nav class="ist-sub" id="istSub" hidden aria-label="IST">
     <button type="button" data-s="ret" aria-pressed="false">회송 <b id="istCntRet"></b></button>
     <button type="button" data-s="over" aria-pressed="false">과매입 <b id="istCntOver"></b></button>
+    <button type="button" data-s="out" aria-pressed="false">반출 <b id="istCntOut"></b></button>
   </nav>
   <section class="ret" id="ret" hidden aria-label="IST 회송"></section>
   <section class="ret" id="over" hidden aria-label="IST 과매입"></section>
+  <section class="ret" id="out" hidden aria-label="IST 반출"></section>
   <section class="ret" id="prod" hidden aria-label="STOW 개인 생산성"></section>
 
   <section class="cal" id="cal" aria-label="달력">
@@ -849,9 +892,10 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       rev = data.rev; loadedMonths = months; loaded = true;
       render();
       if (view === 'ho' && hoRev !== rev && !hoFocused()) loadHandover();
-      const ist = view === 'ret' || view === 'over';   // IST 안에서는 회송 · 과매입 건수를 둘 다 보여줘요
+      const ist = view === 'ret' || view === 'over' || view === 'out';   // IST 안에서는 회송 · 과매입 · 반출 건수를 다 보여줘요
       if (ist && retRev !== rev) loadReturns();
       if (ist && ovRev !== rev) loadOvers();
+      if (ist && obRev !== rev) loadOuts();
       if (view === 'prod' && prRev !== rev) prLoad();
       setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
@@ -867,9 +911,10 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     try {
       const data = await request('GET', '/api/state?only=rev');
       if (view === 'ho' && data.rev !== hoRev && !hoFocused()) loadHandover();
-      const ist = view === 'ret' || view === 'over';
+      const ist = view === 'ret' || view === 'over' || view === 'out';
       if (ist && data.rev !== retRev) loadReturns();
       if (ist && data.rev !== ovRev) loadOvers();
+      if (ist && data.rev !== obRev) loadOuts();
       if (view === 'prod' && data.rev !== prRev) prLoad();
       if (data.rev !== rev) loadFull();
       else setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
@@ -1148,24 +1193,26 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 
   function render(){
     document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === filter));
-    document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === view || (b.dataset.v === 'ist' && (view === 'ret' || view === 'over'))));
-    $('#istSub').hidden = !(view === 'ret' || view === 'over');
+    document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === view || (b.dataset.v === 'ist' && (view === 'ret' || view === 'over' || view === 'out'))));
+    $('#istSub').hidden = !(view === 'ret' || view === 'over' || view === 'out');
     document.querySelectorAll('#istSub button').forEach(b => b.setAttribute('aria-pressed', b.dataset.s === view ? 'true' : 'false'));
     istCounts();
     const cal = view === 'cal';
-    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over';
+    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over', outView = view === 'out';
     $('#ho').hidden = !hoView;
     $('#ret').hidden = !retView;
     $('#prod').hidden = !prodView;
     $('#over').hidden = !overView;
+    $('#out').hidden = !outView;
     $('#app').classList.toggle('wide', prodView);
-    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView;
-    document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView;
+    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView || outView;
+    document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView || outView;
     if (prodView && !$('#prod').hasChildNodes()) renderProd();
     if (prodView && prRev < 0) prLoad();
     if (hoView && !$('#ho').hasChildNodes()) renderHandover();
     if (retView && !retBuilt) renderReturns();
     if (overView && !ovBuilt) renderOvers();
+    if (outView && !obBuilt) renderOuts();
     for (const id of ['#cal', '#dayHead', '#shifts', '#todoLabel']) $(id).hidden = !cal;
     $('#editNote').hidden = !(cal && editMode);
     $('#editLock').hidden = !(cal && askEdit && !editMode);
@@ -2781,6 +2828,230 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     box.replaceChildren(head, top, el('div', { class:'ov-gs' }, ...gs));
   }
 
+  // ---------- IST 반출 ----------
+  const OB_STAGES = ['', '생성', '포장', '택배접수', '반출완료'];
+  const OB_NEXT = ['', '포장 시작 →', '택배 접수 →', '반출 완료 ✓', ''];
+  const OB_FIELDS = ['grp', 'ext', 'cdate', 'due', 'vendor', 'addr', 'phone', 'name', 'barcode', 'qty', 'box', 'tote', 'note'];
+  const OB_KEEP = ['grp', 'ext', 'cdate', 'due', 'vendor', 'addr', 'phone'];   // 같은 그룹 상품을 이어 넣을 때 남겨 두는 칸
+  let obItems = null, obRev = -1, obLoading = false, obBuilt = false, obToday = todayIso, obDelArm = 0;
+  const obUi = { filter:'go', editId:null, open:new Set(), doneAll:false };
+  const obBlank = () => Object.fromEntries(OB_FIELDS.map(k => [k, k === 'cdate' ? obToday : '']));
+  let obForm = obBlank();
+  const obDue = d => d ? Math.round((Date.parse(d) - Date.parse(obToday)) / 864e5) : null;
+  const obBusy = () => { const a = document.activeElement; return !!a && $('#out').contains(a) && a.matches('input, textarea'); };
+
+  async function loadOuts(){
+    if (obLoading) return;
+    obLoading = true;
+    try {
+      const d = await request('GET', '/api/outs');
+      obItems = d.items || []; obRev = d.rev; if (d.today) obToday = d.today;
+      if (!obForm.cdate) obForm.cdate = obToday;
+      if (!obBusy()) renderOuts(); else obRenderList();
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+      setSync('err', e.message);
+    } finally { obLoading = false; }
+  }
+
+  function renderOuts(){
+    const box = $('#out');
+    if (!obBuilt){ obBuild(box); obBuilt = true; }
+    obFillForm();
+    obRenderList();
+    istCounts();
+  }
+
+  // ---- 입력 칸 ----
+  function obBuild(box){
+    const f = (key, label, o = {}) => {
+      const inp = el('input', { id:'ob-' + key, class:'ret-in' + (o.mono ? ' ov-mono' : ''), type: o.type, inputmode: o.im, list: o.list, placeholder: o.ph || '', maxlength: o.max || 80, autocomplete:'off' });
+      inp.oninput = () => { obForm[key] = inp.value; if (key === 'vendor') obFillVendor(); if (key === 'barcode') obFillName(); };
+      return el('div', { class:'ret-f ' + (o.cls || 'span2') }, el('label', { for:'ob-' + key, text: label }, o.note ? el('small', { text: o.note }) : null), inp);
+    };
+    const grp = (title, note, cls, ...kids) => el('fieldset', { class:'ob-grp' }, el('legend', {}, title, note ? el('small', { text: ' · ' + note }) : null), el('div', { class:'ret-grid ov-grid ' + cls }, ...kids));
+    const form = el('form', { class:'ret-sec ret-form', id:'ob-form', autocomplete:'off' },
+      el('div', { class:'ret-sec-head' }, el('h3', { id:'ob-form-title', text:'반출 건 입력' }),
+        el('p', { class:'ret-help', text:'빈 칸이 있어도 추가돼요 · 나중에 줄을 눌러 채울 수 있어요 · Tab으로 다음 칸' })),
+      grp('반출 정보', '', 'ob-g4',
+        f('grp', '반출그룹번호', { mono:true, max:40, im:'numeric', cls:'s1' }), f('ext', '외부반출번호', { mono:true, max:40, im:'numeric', cls:'s1' }),
+        f('cdate', '반출생성일자', { type:'date', mono:true, cls:'s1' }), f('due', '반출마감일자', { type:'date', mono:true, cls:'s1' })),
+      grp('업체', '업체명을 적으면 지난 주소 · 번호가 채워져요', '',
+        f('vendor', '업체명', { list:'ob-vendors', max:80 }), f('addr', '주소', { max:200, cls:'span3' }), f('phone', '핸드폰 번호', { mono:true, im:'tel', max:40, cls:'s1' })),
+      grp('상품 · 포장', '바코드를 적으면 상품명이 채워져요', '',
+        f('name', '상품명', { max:150, cls:'span3' }), f('barcode', '상품바코드', { mono:true, max:40 }), f('qty', '수량', { mono:true, im:'decimal', max:10, cls:'s1' }),
+        f('box', '박스수량', { mono:true, im:'decimal', max:10, cls:'s1' }), f('tote', '집품토트', { mono:true, max:40 }),
+        f('note', '비고', { max:300, cls:'span3', ph:'예) 로젠 착불 진행 · 월요일 이후 발송' })),
+      el('div', { class:'ret-acts' },
+        el('span', { class:'ret-help', id:'ob-form-msg', text:'그룹번호 · 업체 · 주소 · 번호 · 날짜는 다음 건에도 남아요 (같은 그룹 상품 이어 넣기)' }),
+        el('button', { type:'button', class:'ret-btn ghost ov-danger', id:'ob-del', hidden:true, text:'삭제', onclick: obDelete }),
+        el('button', { type:'button', class:'ret-btn ghost', id:'ob-cancel', hidden:true, text:'취소', onclick: () => obEndEdit() }),
+        el('button', { type:'button', class:'ret-btn ghost', id:'ob-clear', text:'칸 비우기', onclick: () => { obForm = obBlank(); obFillForm(true); $('#ob-grp').focus(); } }),
+        el('button', { type:'submit', class:'ret-btn solid', id:'ob-submit', text:'추가' })),
+      el('datalist', { id:'ob-vendors' }));
+    form.onsubmit = e => { e.preventDefault(); obSubmit(); };
+    box.append(form, el('section', { class:'ret-sec', id:'ob-list' }));
+  }
+
+  function obFillForm(force){
+    for (const k of OB_FIELDS){ const n = $('#ob-' + k); if (n && (force || document.activeElement !== n)) n.value = obForm[k] ?? ''; }
+    const vendors = [...new Set((obItems || []).map(t => t.vendor).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
+    $('#ob-vendors').replaceChildren(...vendors.map(v => el('option', { value: v })));
+    const editing = !!obUi.editId;
+    $('#ob-form').classList.toggle('editing', editing);
+    $('#ob-form-title').textContent = editing ? '반출 건 수정' : '반출 건 입력';
+    $('#ob-submit').textContent = editing ? '수정 저장' : '추가';
+    $('#ob-cancel').hidden = $('#ob-del').hidden = !editing;
+    $('#ob-clear').hidden = editing;
+    $('#ob-del').textContent = obDelArm && Date.now() - obDelArm < 4000 ? '한 번 더 누르면 삭제' : '삭제';
+  }
+  // 업체명 → 지난 주소 · 번호 (비어 있을 때만)
+  function obFillVendor(){
+    if (obUi.editId) return;
+    const v = String(obForm.vendor || '').trim(); if (!v) return;
+    const hit = [...(obItems || [])].filter(t => t.vendor === v).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
+    if (!hit) return;
+    let changed = false;
+    for (const k of ['addr', 'phone']) if (!obForm[k] && hit[k]){ obForm[k] = hit[k]; changed = true; }
+    if (changed) obFillForm();
+  }
+  // 바코드 → 상품명 (반출 → 과매입 → 회송 기록)
+  function obFillName(){
+    if (obUi.editId || obForm.name) return;
+    const b = String(obForm.barcode || '').trim(); if (b.length < 6) return;
+    const hit = (obItems || []).find(t => t.barcode === b)?.name || (ovItems || []).find(t => t.barcode === b)?.name
+      || (typeof OV_PAST !== 'undefined' ? (OV_PAST.find(p => p[1] === b) || [])[2] : '') || (retItems || []).find(t => t.barcode === b)?.name;
+    if (hit){ obForm.name = hit; obFillForm(); }
+  }
+
+  async function obSubmit(){
+    const x = {}; for (const k of OB_FIELDS) x[k] = String(obForm[k] ?? '').trim();
+    const msg = $('#ob-form-msg');
+    if (!x.grp && !x.vendor && !x.name){ msg.textContent = '반출그룹번호 · 업체명 · 상품명 중 하나는 적어 주세요.'; msg.classList.add('err'); $('#ob-grp').focus(); return; }
+    for (const k of ['qty', 'box']) if (x[k] && isNaN(+x[k].replace(/,/g, ''))){ msg.textContent = (k === 'qty' ? '수량' : '박스수량') + '은 숫자로 적어 주세요.'; msg.classList.add('err'); $('#ob-' + k).focus(); return; }
+    msg.classList.remove('err'); msg.textContent = '그룹번호 · 업체 · 주소 · 번호 · 날짜는 다음 건에도 남아요 (같은 그룹 상품 이어 넣기)';
+    if (obUi.editId){
+      const id = obUi.editId, t = obItems.find(v => v.id === id), prev = { ...t };
+      Object.assign(t, x); obEndEdit();
+      try { const r = await api('PATCH', '/api/outs?id=' + encodeURIComponent(id), x); Object.assign(t, r.item); obRev = -2; toast('고쳤어요.'); }
+      catch(e){ Object.assign(t, prev); renderOuts(); if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+      return;
+    }
+    const temp = { ...x, id:'temp-' + Date.now(), stage:1, com2:false, com3:false, createdAt:new Date().toISOString() };
+    obItems = [...(obItems || []), temp];
+    const keep = Object.fromEntries(OB_KEEP.map(k => [k, x[k]]));
+    obForm = { ...obBlank(), ...keep };
+    if (x.grp) obUi.open.add(obKey(temp));
+    renderOuts(); $('#ob-name').focus();
+    try {
+      const r = await api('POST', '/api/outs', x);
+      const i = obItems.findIndex(t => t.id === temp.id); if (i > -1) obItems[i] = r.item;
+      obRev = -2; renderOuts(); toast('추가했어요 · 같은 그룹 상품은 이어서 넣으면 돼요.');
+    } catch(e) {
+      obItems = obItems.filter(t => t.id !== temp.id); renderOuts();
+      if (e instanceof Locked) return showLock(e.message);
+      toast(e.message);
+    }
+  }
+  function obStartEdit(t){
+    obUi.editId = t.id; obDelArm = 0;
+    obForm = Object.fromEntries(OB_FIELDS.map(k => [k, t[k] == null ? '' : String(t[k])]));
+    renderOuts();
+    $('#ob-form').scrollIntoView({ behavior:'smooth', block:'start' });
+    setTimeout(() => $('#ob-name').focus({ preventScroll:true }), 250);
+  }
+  function obEndEdit(){ obUi.editId = null; obDelArm = 0; obForm = obBlank(); renderOuts(); }
+  async function obDelete(){
+    if (!obDelArm || Date.now() - obDelArm > 4000){ obDelArm = Date.now(); obFillForm(); setTimeout(() => { if (obDelArm && Date.now() - obDelArm >= 4000){ obDelArm = 0; if (obBuilt) obFillForm(); } }, 4100); return; }
+    const id = obUi.editId, keep = obItems;
+    obItems = obItems.filter(t => t.id !== id); obEndEdit();
+    try { await api('DELETE', '/api/outs?id=' + encodeURIComponent(id)); obRev = -2; toast('삭제했어요.'); }
+    catch(e){ obItems = keep; renderOuts(); if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+  }
+
+  // 같은 반출그룹번호(+업체)끼리 한 줄
+  const obKey = t => t.grp ? 'g:' + t.grp + '|' + (t.vendor || '') : 'i:' + t.id;
+  function obGroups(){
+    const m = new Map();
+    for (const t of obItems || []){ const k = obKey(t); if (!m.has(k)) m.set(k, []); m.get(k).push(t); }
+    return [...m.entries()].map(([key, ts]) => {
+      ts.sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+      const f = ts[0], pick = k => ts.map(t => t[k]).find(Boolean) || '';
+      const stage = Math.min(...ts.map(t => t.stage || 1));
+      return { key, ts, stage, grp: f.grp, ext: pick('ext'), vendor: pick('vendor'), addr: pick('addr'), phone: pick('phone'), due: ts.map(t => t.due).filter(Boolean).sort()[0] || '',
+        cdate: pick('cdate'), com2: ts.every(t => t.com2), com3: ts.every(t => t.com3), doneAt: ts.map(t => t.doneAt).filter(Boolean).sort().pop() || '',
+        qty: ts.reduce((s, t) => s + (+t.qty || 0), 0), box: ts.reduce((s, t) => s + (+t.box || 0), 0), note: ts.map(t => t.note).filter(Boolean).join(' · ') };
+    });
+  }
+  async function obPut(g, patch, okMsg){
+    const ids = g.ts.map(t => t.id).filter(id => !id.startsWith('temp-'));
+    const prev = g.ts.map(t => ({ ...t }));
+    for (const t of g.ts){ Object.assign(t, patch); if ('stage' in patch){ if (patch.stage === 4) t.doneAt = obToday; else delete t.doneAt; } }
+    obRenderList(); istCounts();
+    try { const r = await api('PUT', '/api/outs', { ids, ...patch }); for (const it of r.items || []){ const t = obItems.find(x => x.id === it.id); if (t) Object.assign(t, it); } obRev = -2; if (okMsg) toast(okMsg); }
+    catch(e){ prev.forEach(p => { const t = obItems.find(x => x.id === p.id); if (t){ for (const k of Object.keys(t)) delete t[k]; Object.assign(t, p); } }); obRenderList(); if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+  }
+  const obCopy = async (text, what) => { try { await navigator.clipboard.writeText(text); toast(what + ' 복사했어요.'); } catch { toast('복사하지 못했어요. 길게 눌러 복사해 주세요.'); } };
+
+  function obRenderList(){
+    const box = $('#ob-list'); if (!box) return;
+    const G = obItems ? obGroups() : [];
+    const go = G.filter(g => g.stage < 4), done = G.filter(g => g.stage === 4);
+    const n = s => go.filter(g => g.stage === s).length;
+    const f = obUi.filter;
+    const chips = el('div', { class:'ob-chips', role:'group', 'aria-label':'단계' },
+      ...[['go', '진행 중', go.length], ['1', '① 생성', n(1)], ['2', '② 포장', n(2)], ['3', '③ 택배접수', n(3)], ['4', '④ 반출완료', done.length]].map(([k, l, c]) =>
+        el('button', { type:'button', 'aria-pressed': f === k ? 'true' : 'false', onclick: () => { obUi.filter = k; obRenderList(); } }, l + ' ', el('b', { text: c }))));
+    const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'반출 목록' }),
+      el('p', { class:'ret-help', text: f === '4' ? '최근 완료 순 · 잘못 넘겼으면 ↩' : '마감 빠른 순 · 버튼 하나로 다음 단계 · 줄을 누르면 주소 · 번호 · 상품' }));
+    if (!obItems){ box.replaceChildren(head, chips, el('p', { class:'ret-help', text:'불러오는 중…' })); return; }
+    let list = f === 'go' ? go : f === '4' ? done : go.filter(g => g.stage === +f);
+    if (f === '4') list = [...list].sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || ''));
+    else list = [...list].sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999') || (a.cdate || '').localeCompare(b.cdate || ''));
+    const total = list.length;
+    if (f === '4' && !obUi.doneAll) list = list.slice(0, 30);
+    if (!list.length){ box.replaceChildren(head, chips, el('p', { class:'ho-empty', text: f === '4' ? '반출 완료한 건이 없어요.' : '이 단계의 반출 건이 없어요.' })); return; }
+    const rows = list.map(g => {
+      const dd = obDue(g.due);
+      const ddTxt = g.stage === 4 ? retMD(g.doneAt) + ' 완료' : dd == null ? '마감 -' : dd < 0 ? `D+${-dd}` : dd === 0 ? 'D-DAY' : `D-${dd}`;
+      const ddCls = g.stage === 4 ? '' : dd == null ? '' : dd <= 1 ? ' over' : dd <= 3 ? ' warn' : '';
+      const prog = el('div', { class:'ob-prog', 'aria-label': OB_STAGES[g.stage] },
+        ...[1, 2, 3, 4].flatMap(s => [el('i', { class: s < g.stage || g.stage === 4 ? 'd' : s === g.stage ? 'c' : '', title: OB_STAGES[s], text: s < g.stage || g.stage === 4 ? '✓' : String(s) }), s < 4 ? el('b', { class: s < g.stage ? 'd' : '' }) : null]).filter(Boolean));
+      const comKey = g.stage === 2 ? 'com2' : g.stage === 3 ? 'com3' : '';
+      const acts = el('div', { class:'ob-acts' },
+        comKey ? el('button', { type:'button', class:'ob-com' + (g[comKey] ? ' on' : ''), title:'업체 소통 완료 (' + OB_STAGES[g.stage] + ')',
+          onclick: e => { e.stopPropagation(); obPut(g, { [comKey]: !g[comKey] }, g[comKey] ? '' : '업체 소통 완료로 표시했어요.'); } }, (g[comKey] ? '✓' : '□') + ' 소통') : null,
+        g.stage > 1 ? el('button', { type:'button', class:'ob-back', title:'이전 단계로', 'aria-label':'이전 단계로', text:'↩', onclick: e => { e.stopPropagation(); obPut(g, { stage: g.stage - 1 }, OB_STAGES[g.stage - 1] + ' 단계로 되돌렸어요.'); } }) : null,
+        g.stage < 4 ? el('button', { type:'button', class:'ob-next', text: OB_NEXT[g.stage], onclick: e => { e.stopPropagation(); obPut(g, { stage: g.stage + 1 }, OB_STAGES[g.stage + 1] + ' 단계로 넘겼어요.'); } }) : null);
+      const first = g.ts[0];
+      const sum = [first.name || '(상품명 없음)', g.ts.length > 1 ? `외 ${g.ts.length - 1}건` : '', g.qty ? retNum(g.qty) + '개' : '', g.box ? '박스 ' + retNum(g.box) : ''].filter(Boolean).join(' · ');
+      const open = obUi.open.has(g.key);
+      const row = el('div', { class:'ob-row' + (open ? ' open' : ''), tabindex:'0', 'aria-expanded': open ? 'true' : 'false',
+          onclick: () => { open ? obUi.open.delete(g.key) : obUi.open.add(g.key); obRenderList(); },
+          onkeydown: e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget){ e.preventDefault(); e.currentTarget.click(); } } },
+        el('span', { class:'ob-dd' + ddCls, text: ddTxt }),
+        el('div', { class:'ob-main' }, el('div', { class:'v' }, g.vendor || '(업체명 없음)', g.grp ? el('span', { class:'g mono', text: ' ' + g.grp }) : null), el('div', { class:'p', text: sum })),
+        prog, acts);
+      if (!open) return row;
+      const det = el('div', { class:'ob-det' },
+        el('div', { class:'ob-info' },
+          el('span', { class:'mono', text: ['그룹 ' + (g.grp || '-'), '외부 ' + (g.ext || '-'), (g.cdate ? retMD(g.cdate) : '-') + ' 생성', '마감 ' + (g.due ? retMD(g.due) : '-')].join(' · ') }),
+          el('span', {}, '📍 ' + (g.addr || '주소 없음') + ' ', g.addr ? el('button', { type:'button', class:'ob-cp', text:'주소 복사', onclick: e => { e.stopPropagation(); obCopy(g.addr, '주소를'); } }) : null),
+          el('span', {}, '📱 ' + (g.phone || '번호 없음') + ' ', g.phone ? el('button', { type:'button', class:'ob-cp', text:'번호 복사', onclick: e => { e.stopPropagation(); obCopy(g.phone, '번호를'); } }) : null),
+          comKey || g.stage === 4 ? el('span', { class:'ret-help', text: `포장 소통 ${g.com2 ? '완료' : '전'} · 택배접수 소통 ${g.com3 ? '완료' : '전'}` }) : null),
+        el('div', { class:'ob-items' }, ...g.ts.map(t => el('div', { class:'ob-it', tabindex:'0', title:'눌러서 고치기',
+            onclick: e => { e.stopPropagation(); obStartEdit(t); }, onkeydown: e => { if (e.key === 'Enter'){ e.preventDefault(); e.stopPropagation(); obStartEdit(t); } } },
+          el('span', { class:'nm', text: t.name || '(상품명 없음)' }),
+          el('span', { class:'mono mt', text: [t.barcode, t.tote && '토트 ' + t.tote].filter(Boolean).join(' · ') }),
+          el('span', { class:'mono q', text: (t.qty !== '' && t.qty != null ? retNum(t.qty) + '개' : '-') + (t.box ? ' · 박스 ' + retNum(t.box) : '') }),
+          t.note ? el('span', { class:'nt', text: t.note }) : null,
+          el('span', { class:'ed', text:'고치기' })))));
+      return el('div', { class:'ob-wrap' + (open ? ' open' : '') }, row, det);
+    });
+    box.replaceChildren(head, chips, el('div', { class:'ob-rows' }, ...rows),
+      ...(f === '4' && total > 30 ? [el('button', { type:'button', class:'ret-btn ghost sm ov-moreall', text: obUi.doneAll ? '최근 30건만 보기' : `완료 ${total}건 모두 보기`, onclick: () => { obUi.doneAll = !obUi.doneAll; obRenderList(); } })] : []));
+  }
+
   // ---------- 생산성 (STOW 개인 UPH) ----------
   // WMS 작업자 이력(worker_history) 엑셀을 이 브라우저에서만 읽어요. 서버에는 아무것도 저장하지 않아요.
   const PR_TOTE = new Set(['11F', '21F', '31F']);        // 토트 재고이동 (챔버는 '프리팩')
@@ -3106,23 +3377,25 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 
   document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { filter = b.dataset.f; store.set('todo-filter', filter); render(); });
   document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
-    view = b.dataset.v === 'ist' ? (store.get('ist-sub', 'ret') === 'over' ? 'over' : 'ret') : b.dataset.v; store.set('todo-view2', view);
+    view = b.dataset.v === 'ist' ? (['over', 'out'].includes(store.get('ist-sub', 'ret')) ? store.get('ist-sub', 'ret') : 'ret') : b.dataset.v; store.set('todo-view2', view);
     $('#newDue').value = view === 'cal' ? selDate : '';
     render();
     if (view === 'ho') loadHandover();
-    if (view === 'ret' || view === 'over'){ loadReturns(); loadOvers(); }   // 두 쪽 건수를 같이 보여줘요
+    if (view === 'ret' || view === 'over' || view === 'out'){ loadReturns(); loadOvers(); loadOuts(); }   // 세 쪽 건수를 같이 보여줘요
   });
   // IST 안의 회송 · 과매입 (마지막에 본 쪽을 기억)
   document.querySelectorAll('#istSub button').forEach(b => b.onclick = () => {
     view = b.dataset.s; store.set('todo-view2', view); store.set('ist-sub', view);
     render();
-    if (view === 'ret') loadReturns(); else loadOvers();
+    if (view === 'ret') loadReturns(); else if (view === 'over') loadOvers(); else loadOuts();
   });
   function istCounts(){
     const r = retItems ? retItems.filter(t => t.status !== 'done').length : null;
     const o = ovItems ? ovItems.filter(t => t.status !== 'done').length : null;
     $('#istCntRet').textContent = r == null ? '' : '대기 ' + r;
     $('#istCntOver').textContent = o == null ? '' : '대기 ' + o;
+    const g = obItems ? new Set(obItems.filter(t => (t.stage || 1) < 4).map(t => obKey(t))).size : null;
+    $('#istCntOut').textContent = g == null ? '' : '진행 ' + g;
   }
   function enterEdit(){ askEdit = false; editMode = true; render(); const el = $('#add-day'); if (el) el.focus(); }
   $('#editToggle').onclick = () => {
