@@ -598,6 +598,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ob-same{color:var(--muted);opacity:.5}
 .ob-t .ob-acts{min-width:0;justify-content:flex-start;flex-wrap:wrap}
 .ob-acts .ob-prt{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.ob-acts .ob-edit.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ob-t tbody tr,.ob-t tbody tr:hover td{cursor:default}
 .ob-t td.ie{padding:0!important;outline:2px solid var(--accent);outline-offset:-2px;background:var(--paper)!important;cursor:text}
 .ob-t td.ie input{width:100%;min-width:0;border:0;background:transparent;font:inherit;font-size:12.5px;padding:7px 5px;color:var(--ink);outline:0}
 .ob-t td.c-q.ie input,.ob-t td.c-b.ie input{text-align:right;font-family:var(--mono);font-weight:800}
@@ -2882,7 +2884,6 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const OB_KEEP = ['grp', 'ext', 'cdate', 'due', 'vendor', 'addr', 'phone'];   // 같은 그룹 상품을 이어 넣을 때 남겨 두는 칸
   let obItems = null, obRev = -1, obLoading = false, obBuilt = false, obToday = todayIso, obDelArm = 0;
   const obUi = { editId:null, open:new Set(), doneAll:false, draft:null, delArm:0 };
-  let obClickT = 0;
   const obBlank = () => Object.fromEntries(OB_FIELDS.map(k => [k, k === 'cdate' ? obToday : '']));
   let obForm = obBlank();
   const obDue = d => d ? Math.round((Date.parse(d) - Date.parse(obToday)) / 864e5) : null;
@@ -3216,7 +3217,7 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
       gs = s === 4 ? gs.sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || '')) : gs.sort(byDue);
       const total = gs.length;
       if (s === 4 && !obUi.doneAll) gs = gs.slice(0, 20);
-      const help = ['', '포장이 끝나면 ②로 · 줄을 누르면 그룹 수정 · 칸을 두 번 누르면 바로 수정', '업체 소통 체크 → 택배 접수 완료로', '업체 소통 체크 → 반출 완료로', '최근 완료 순 · 잘못 넘겼으면 ↩'][s];
+      const help = ['', '포장이 끝나면 ②로 · ✎ 수정으로 그룹 고치기 · 칸을 두 번 누르면 바로 수정', '업체 소통 체크 → 택배 접수 완료로', '업체 소통 체크 → 반출 완료로', '최근 완료 순 · 잘못 넘겼으면 ↩'][s];
       const head = el('div', { class:'ov-stage s' + s }, el('span', { class:'ov-no', text: s }), el('h3', { text: OB_STAGES[s] }), el('b', { class:'ov-cnt', text: total }), el('p', { class:'ret-help', text: help }));
       const sec = el('section', { class:'ret-sec ob-sec s' + s });
       if (!obItems){ sec.append(head, el('p', { class:'ret-help', text:'불러오는 중…' })); return sec; }
@@ -3227,16 +3228,11 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
         const comKey = s === 2 ? 'com2' : s === 3 ? 'com3' : '';
         g.ts.forEach((t, i) => {
           const first = i === 0, same = v => !first ? el('span', { class:'ob-same', text:'〃' }) : null;
-          const tr = el('tr', { class: (first ? 'g-first' : 'g-more') + (obUi.draft?.key === g.key ? ' sel' : ''), tabindex:'0', title:'누르면 그룹 수정 · 칸을 두 번 누르면 바로 수정',
-            onclick: e => {
-              if (e.detail > 1 || e.target.closest('input')) return;
-              if (String(window.getSelection?.() || '').trim()) return;   // 글자를 드래그해서 고른 거면 열지 않아요
-              clearTimeout(obClickT); obClickT = setTimeout(() => obOpenGroup(g), 230);
-            },
+          const tr = el('tr', { class: (first ? 'g-first' : 'g-more') + (obUi.draft?.key === g.key ? ' sel' : ''), tabindex:'0', title:'칸을 두 번 누르면 바로 수정 · 그룹 전체는 ✎ 수정',
             ondblclick: e => {
               const c = e.target.closest('td'); const key = c && OB_INLINE[[...c.classList].find(k => OB_INLINE[k])];
               if (!key || (key === 'due' && s === 4)) return;
-              clearTimeout(obClickT); window.getSelection?.().removeAllRanges(); obInline(c, t, g, key);
+              window.getSelection?.().removeAllRanges(); obInline(c, t, g, key);
             },
             onkeydown: e => { if (e.key === 'Enter' && e.target === e.currentTarget){ e.preventDefault(); obOpenGroup(g); } } });
           tr.append(
@@ -3252,6 +3248,8 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
             td('c-note', t.note || ''));
           if (first){
             const acts = el('div', { class:'ob-acts' },
+              el('button', { type:'button', class:'ob-edit' + (obUi.draft?.key === g.key ? ' on' : ''), title:'이 그룹 고치기 (그룹 공통 · 상품별)',
+                onclick: e => { e.stopPropagation(); if (obUi.draft?.key !== g.key) return obOpenGroup(g); if (obDraftDirty(obUi.draft)) return toast('고친 내용을 저장하거나 취소해 주세요.'); obCloseGroup(); } }, '✎ 수정'),
               s < 4 ? el('button', { type:'button', class:'ob-prt', title:'박스 라벨 인쇄 (박스 수만큼)', 'aria-label':'박스 라벨 인쇄', onclick: e => { e.stopPropagation(); obPrintLabel(g); } }, '\u{1F5A8}') : null,
               comKey ? el('button', { type:'button', class:'ob-com' + (g[comKey] ? ' on' : ''), title:'업체 소통 완료 (' + OB_STAGES[s] + ')',
                 onclick: e => { e.stopPropagation(); obPut(g, { [comKey]: !g[comKey] }, g[comKey] ? '' : '업체 소통 완료로 표시했어요.'); } }, (g[comKey] ? '✓' : '□') + ' 소통') : null,
