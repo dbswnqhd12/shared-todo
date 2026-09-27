@@ -619,6 +619,16 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ob-ed .new input{border-style:dashed}
 .ob-ed .ebtn{display:flex;gap:6px;justify-content:flex-end;align-items:center;margin-top:10px}.ob-ed .ebtn .ov-danger{margin-right:auto}
 .ob-ed .emsg{font-size:12px;color:var(--muted)}.ob-ed .emsg.err{color:var(--high)}
+.ob-ed select{width:100%;min-width:0;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font:inherit;font-size:12.5px;background:var(--paper);color:var(--ink)}
+.xe{margin:6px 8px 10px;cursor:default;text-align:left;white-space:normal}.xe .eg{margin-top:8px}.xe .eg label{margin-bottom:2px}
+tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper)!important;cursor:default;white-space:normal;max-width:none!important;border-left:0;border-right:0}
+.ie{outline:2px solid var(--accent);outline-offset:1px;border-radius:4px;background:var(--paper)}
+.qe-in{width:100%;min-width:56px;border:0;background:transparent;font:inherit;color:var(--ink);padding:1px 3px;outline:0}
+.ret-q.ie .qe-in,.ov-rq.ie .qe-in,.ov-c-q.ie .qe-in{text-align:right;font-family:var(--mono);font-weight:800}
+.xe-btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:7px;padding:4px 9px;font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}
+.xe-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ov-r1,.ov-r,.ov-t.done tbody tr{cursor:default}
+@media (max-width:760px){.xe .eg{grid-template-columns:1fr 1fr!important}.xe .eg>div{grid-column:auto!important}.ov-t tr.xe-row{display:block}}
 .ob-t .ob-cp{padding:1px 6px;font-size:10.5px}
 .ob-ln{display:block;font-size:12px;color:var(--ink);white-space:normal;line-height:1.35;overflow-wrap:anywhere;cursor:text;user-select:text;-webkit-user-select:text}
 .ob-ln.mono{font-family:var(--mono);font-size:11.5px;font-weight:600}.ob-ln.no{color:var(--muted);cursor:inherit}
@@ -2123,13 +2133,13 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   const RET_REASONS = ['[회송] 과착', '[회송] 유통기한', '표기사항불량>표기사항오류', '품질불량>파손', '품질불량>변질'];
   const RET_FIELDS = ['date','vendor','po','temp','name','sku','barcode','reason','qty','note'];
   let retItems = null, retRev = -1, retLoading = false, retBuilt = false;
-  const retUi = { status:'wait', vendor:'', q:'', sel:new Set(), editId:null, open:new Set(), group: (() => { try { return localStorage.getItem('ret-group') === 'date' ? 'date' : 'vendor'; } catch { return 'vendor'; } })() };
+  const retUi = { inl:null, status:'wait', vendor:'', q:'', sel:new Set(), editId:null, open:new Set(), group: (() => { try { return localStorage.getItem('ret-group') === 'date' ? 'date' : 'vendor'; } catch { return 'vendor'; } })() };
   const retForm = { date: todayIso, vendor:'', po:'', temp:'CH', name:'', sku:'', barcode:'', reason:'', qty:'', note:'' };
   const retTemp = t => (RET_TEMPS.find(x => x[0] === t) || [null, ''])[1];
   const retMD = d => d ? `${+d.slice(5, 7)}/${+d.slice(8, 10)}` : '';
   const retLocalDay = iso => { const t = new Date(iso); return isNaN(t) ? '' : isoOf(t); };
   const retNum = n => String(Math.round((+n || 0) * 100) / 100);
-  const retBusy = () => { const a = document.activeElement; return !!a && $('#ret').contains(a) && a.matches('.ret-list-edit input'); };
+  const retBusy = () => { const a = document.activeElement; return !!a && $('#ret').contains(a) && a.matches('.ret-list-edit input, .xe input, .xe select, .qe-in'); };
 
   async function loadReturns(){
     if (retLoading) return;
@@ -2431,6 +2441,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       await api('DELETE', '/api/returns?id=' + encodeURIComponent(t.id));
       retItems = retItems.filter(x => x.id !== t.id); retUi.sel.delete(t.id);
       if (retUi.editId === t.id) retEndEdit();
+      if (retUi.inl?.id === t.id) retUi.inl = null;
       setSync('', '저장됨'); retRenderToday(); retRenderList();
     } catch(e) { if (e instanceof Locked) return showLock(e.message); toast(e.message); }
   }
@@ -2450,10 +2461,14 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       !list.length ? el('p', { class:'ho-empty', text:'오늘 입력한 회송 건이 없어요.' }) :
       el('div', { class:'ret-wrap' }, el('table', { class:'ret-table' },
         el('thead', {}, el('tr', {}, ...[['하차일','opt'],['업체명'],['상품명'],['회송사유','opt'],['온도'],['수량'],['상태'],['']].map(([h, c]) => el('th', { class: c || '', text:h })))),
-        el('tbody', {}, ...list.map(t => el('tr', { class: t.id === retUi.editId ? 'editing' : '' },
-          el('td', { class:'c n opt', text: retMD(t.date) }), el('td', { text: t.vendor }), el('td', { text: t.name }), el('td', { class:'opt', text: t.reason }),
-          el('td', { class:'c' }, retTempTag(t)), el('td', { class:'c n', text: retNum(t.qty) }), el('td', { class:'c' }, retStatusBtn(t)),
-          el('td', { class:'c nowrap' }, el('button', { type:'button', class:'ret-btn ghost sm', text:'수정', onclick: () => retStartEdit(t) }), hoDel('회송 건 삭제', () => retDelete(t)))))))));
+        el('tbody', {}, ...list.flatMap(t => {
+          const on = retUi.inl?.id === t.id && retUi.inl.where === 'today';
+          const tr = el('tr', { class: on ? 'editing' : '', title:'상품명 · 수량 칸을 두 번 누르면 바로 수정', ondblclick: e => retQuick(e, t) },
+            el('td', { class:'c n opt', text: retMD(t.date) }), el('td', { text: t.vendor }), el('td', { class:'q-name', text: t.name }), el('td', { class:'opt', text: t.reason }),
+            el('td', { class:'c' }, retTempTag(t)), el('td', { class:'c n q-qty', text: retNum(t.qty) }), el('td', { class:'c' }, retStatusBtn(t)),
+            el('td', { class:'c nowrap' }, xeBtn(on, () => retToggleInl(t, 'today')), hoDel('회송 건 삭제', () => retDelete(t))));
+          return on ? [tr, el('tr', { class:'xe-row' }, el('td', { colspan:'8' }, retInlPanel(t)))] : [tr];
+        })))));
   }
 
   // ---- ② 목록: 상태 · 업체로 걸러서 인쇄 ----
@@ -2498,7 +2513,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       cb.checked = retUi.sel.has(t.id);
       const old = retOldDays(t);
       const meta = [retShortReason(t.reason), t.barcode, t.po ? '발주 ' + String(t.po).replace(/,\s*/g, ', ') : '', t.status === 'done' && t.doneAt ? '완료 ' + retMD(t.doneAt) : ''].filter(Boolean);
-      return el('div', { class:'ret-item' + (t.status === 'done' ? ' is-done' : '') + (cb.checked ? ' is-sel' : '') + (retUi.editId === t.id ? ' editing' : '') },
+      const on = retUi.inl?.id === t.id && retUi.inl.where === 'list';
+      const row = el('div', { class:'ret-item' + (t.status === 'done' ? ' is-done' : '') + (cb.checked ? ' is-sel' : '') + (on ? ' editing' : ''), title:'상품명 · 수량 · 비고를 두 번 누르면 바로 수정', ondblclick: e => retQuick(e, t) },
         el('label', { class:'ret-cb' }, cb),
         byDateMode ? null : el('span', { class:'ret-d' + (old >= 7 ? ' late' : ''), title: old ? `${old}일째 대기` : '', text: retMD(t.date) }),
         el('div', { class:'ret-main-txt' },
@@ -2508,7 +2524,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
         el('span', { class:'ret-tp' }, retTempTag(t)),
         el('span', { class:'ret-q', text: retNum(t.qty) }),
         el('span', { class:'ret-stc' }, retStatusBtn(t)),
-        el('span', { class:'ret-ops' }, el('button', { type:'button', class:'ret-btn ghost sm', text:'수정', onclick: () => retStartEdit(t) }), hoDel('회송 건 삭제', () => retDelete(t))));
+        el('span', { class:'ret-ops' }, xeBtn(on, () => retToggleInl(t, 'list')), hoDel('회송 건 삭제', () => retDelete(t))));
+      return on ? [row, retInlPanel(t)] : [row];
     };
 
     const groupEl = g => {
@@ -2534,7 +2551,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
             : el('span', { class:'ret-gold' + (old >= 7 ? ' late' : ''), text: ageText }),
           el('button', { type:'button', class:'ret-btn ghost sm ret-gprint', title: byDateMode ? '이 날짜 회송 확인서 인쇄 — 업체마다 한 장 (체크한 건이 있으면 그 건만)' : '이 업체 회송 확인서 인쇄 (체크한 건이 있으면 그 건만)',
             text:'🖨 인쇄', onclick: () => retPrint(selN ? g.items.filter(t => retUi.sel.has(t.id)) : g.items) })),
-        open ? el('div', { class:'ret-items' + (byDateMode ? ' by-date' : '') }, ...g.items.map(itemRow)) : null);
+        open ? el('div', { class:'ret-items' + (byDateMode ? ' by-date' : '') }, ...g.items.flatMap(itemRow)) : null);
     };
 
     body.replaceChildren(
@@ -2622,7 +2639,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   let ovItems = null, ovRev = -1, ovLoading = false, ovBuilt = false, ovToday = todayIso, ovDelArm = 0;
   const ovLS = (k, d) => { try { return localStorage.getItem(k) || d; } catch { return d; } };
   const ovSetLS = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
-  const ovUi = { view: ['ded', 'etc'].includes(ovLS('ov-view', 'vr')) ? ovLS('ov-view', 'vr') : 'vr', editId:null, auto:false, doneAll:false };
+  const ovUi = { inl:null, view: ['ded', 'etc'].includes(ovLS('ov-view', 'vr')) ? ovLS('ov-view', 'vr') : 'vr', editId:null, auto:false, doneAll:false };
   const ovBlank = () => ({ sku:'', barcode:'', qty:'', name:'', vendor:'', comm:'', mail:'', date: ovForm?.date || ovToday, who: ovForm?.who || ovLS('ov-who', '') });
   let ovForm = null; ovForm = ovBlank();
   const ovDays = d => d ? Math.max(0, Math.round((Date.parse(ovToday) - Date.parse(d)) / 864e5)) : 0;
@@ -2635,6 +2652,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
       const d = await request('GET', '/api/overs');
       ovItems = d.items || []; ovRev = d.rev; if (d.today) ovToday = d.today;
       if (!ovForm.date) ovForm.date = ovToday;
+      const a = document.activeElement;
+      if (a && a.closest?.('#ov-s1, #ov-s2, #ov-s3') && a.matches('input, select')) return;   // 목록 안에서 고치는 중이면 다시 그리지 않아요
       if (!ovBusy()) renderOvers(); else { ovRenderList(); ovRenderView(); }
     } catch(e) {
       if (e instanceof Locked) return showLock(e.message);
@@ -2816,31 +2835,33 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     const all = ovItems || [];
     const before = all.filter(t => t.status !== 'done' && !t.method).sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.createdAt || '').localeCompare(b.createdAt || ''));
     const done = all.filter(t => t.status === 'done').sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || '') || (b.date || '').localeCompare(a.date || ''));
-    const h1 = ovStage(1, '과매입 처리 전', before.length, '가상반출 · 차감매입을 누르면 ② 처리 대기로 넘어가요 · 줄을 누르면 고치기');
+    const h1 = ovStage(1, '과매입 처리 전', before.length, '가상반출 · 차감매입을 누르면 ② 처리 대기로 · ✎ 수정 · 칸을 두 번 누르면 바로 수정');
     if (!ovItems) s1.replaceChildren(h1, el('p', { class:'ret-help', text:'불러오는 중…' }));
     else if (!before.length) s1.replaceChildren(h1, el('p', { class:'ho-empty', text:'처리방법을 고를 과매입 건이 없어요.' }));
-    else s1.replaceChildren(h1, el('div', { class:'ov-rows' }, ...before.map(t => {
-      return el('div', { class:'ov-r1' + (t.id === ovUi.editId ? ' sel' : ''), tabindex:'0', title:'눌러서 고치기',
-          onclick: () => ovStartEdit(t), onkeydown: e => { if (e.key === 'Enter' && e.target === e.currentTarget){ e.preventDefault(); ovStartEdit(t); } } },
+    else s1.replaceChildren(h1, el('div', { class:'ov-rows' }, ...before.flatMap(t => {
+      const on = ovUi.inl?.id === t.id;
+      const row = el('div', { class:'ov-r1' + (on ? ' sel' : ''), title:'상품명 · 수량을 두 번 누르면 바로 수정', ondblclick: e => ovQuick(e, t) },
         el('div', { class:'ov-rn' }, el('span', { class:'nm', text: t.name }),
           el('span', { class:'mt' }, ovMeta(t) + ' · ', ...ovMailBits(t), t.comm ? ' · ' + t.comm : '')),
         el('span', { class:'ov-rq mono', text: retNum(t.qty) + '개' }),
-        el('div', { class:'ov-pick' },
+        el('div', { class:'ov-pick' }, xeBtn(on, () => ovToggleInl(t)),
           el('button', { type:'button', class:'m-vr', text:'가상반출', onclick: e => { e.stopPropagation(); ovPatch(t, { method:'vr' }, '가상반출로 넘겼어요.'); } }),
           el('button', { type:'button', class:'m-ded', text:'차감매입', onclick: e => { e.stopPropagation(); ovPatch(t, { method:'ded' }, '차감매입으로 넘겼어요.'); } })));
+      return on ? [row, ovInlPanel(t)] : [row];
     })));
     const h3 = ovStage(3, '과매입 처리 완료', done.length, '최근 완료 순 · 잘못 눌렀으면 되돌리기');
     if (!ovItems) { s3.replaceChildren(h3); return; }
     if (!done.length){ s3.replaceChildren(h3, el('p', { class:'ho-empty', text:'완료한 과매입 건이 없어요.' })); return; }
     const td = (cls, txt, ...kids) => el('td', { class: cls }, ...(txt != null ? [String(txt)] : []), ...kids);
     const shown = done.slice(0, ovUi.doneAll ? done.length : 20);
-    const body = shown.map(t => el('tr', { tabindex:'0', title:'눌러서 고치기', class: t.id === ovUi.editId ? 'sel' : '',
-        onclick: () => ovStartEdit(t), onkeydown: e => { if (e.key === 'Enter'){ e.preventDefault(); ovStartEdit(t); } } },
+    const body = shown.flatMap(t => { const on = ovUi.inl?.id === t.id; const tr = el('tr', { title:'외부 SKU · 상품명 · 수량 · 업체명을 두 번 누르면 바로 수정', class: on ? 'sel' : '',
+        ondblclick: e => ovQuick(e, t) },
       td('ov-c-sku mono', t.sku || '-'), td('ov-c-nm', t.name), td('ov-c-q mono', retNum(t.qty)), td('ov-c-v', t.vendor), td('ov-c-who', t.who || '-'),
       td('ov-c-m', null, t.method ? el('span', { class:'ov-chip m-' + t.method, text: ovMethod(t.method) }) : el('span', { class:'no', text:'-' })),
       td('ov-c-d mono', retMD(t.doneAt)),
       td('ov-c-meta', [t.who, retMD(t.doneAt) + ' 완료'].filter(Boolean).join(' · ')),
-      td('ov-c-act', null, el('button', { type:'button', class:'ret-btn ghost sm', text:'↩ 되돌리기', onclick: e => { e.stopPropagation(); ovSetStatus(t, 'wait'); } }))));
+      td('ov-c-act nowrap', null, xeBtn(on, () => ovToggleInl(t)), ' ', el('button', { type:'button', class:'ret-btn ghost sm', text:'↩ 되돌리기', onclick: e => { e.stopPropagation(); ovSetStatus(t, 'wait'); } })));
+      return on ? [tr, el('tr', { class:'xe-row' }, el('td', { colspan:'9' }, ovInlPanel(t)))] : [tr]; });
     s3.replaceChildren(h3, el('div', { class:'ov-wrap' },
       el('table', { class:'ov-t done' }, el('thead', {}, el('tr', {}, ...['외부 SKU ID', '상품명', '수량', '업체명', '처리자', '처리방법', '완료일', ''].map(h => el('th', { class: h === '수량' ? 'r' : '', text: h })), el('th', { class:'ov-c-meta' }))), el('tbody', {}, ...body))),
       ...(done.length > 20 ? [el('button', { type:'button', class:'ret-btn ghost sm ov-moreall', text: ovUi.doneAll ? '최근 20건만 보기' : `완료 ${done.length}건 모두 보기`, onclick: () => { ovUi.doneAll = !ovUi.doneAll; ovRenderList(); } })] : []));
@@ -2865,16 +2886,160 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
     if (!list.length){ box.replaceChildren(head, top, el('p', { class:'ho-empty', text: ovItems ? `${k === 'etc' ? 'XY이동 · 재진열' : ovMethod(k)} 대기 건이 없어요.` : '불러오는 중…' })); return; }
     const gs = [...groups.values()].map(({ name: v, ts }) => el('div', { class:'ov-g' },
       el('div', { class:'ov-gh' }, el('span', { class:'ov-gn', text: v }), el('span', { class:'ov-gc', text: `${ts.length}건 · ${retNum(ts.reduce((s, t) => s + (+t.qty || 0), 0))}개` })),
-      ...ts.map(t => { const n = ovDays(t.date); return el('div', { class:'ov-r' + (t.id === ovUi.editId ? ' sel' : ''), tabindex:'0', title:'눌러서 고치기',
-          onclick: () => ovStartEdit(t), onkeydown: e => { if (e.key === 'Enter' && e.target === e.currentTarget){ e.preventDefault(); ovStartEdit(t); } } },
+      ...ts.flatMap(t => { const n = ovDays(t.date), on = ovUi.inl?.id === t.id; const row = el('div', { class:'ov-r' + (on ? ' sel' : ''), title:'상품명 · 수량을 두 번 누르면 바로 수정',
+          ondblclick: e => ovQuick(e, t) },
         el('div', { class:'ov-rn' }, el('span', { class:'nm', text: t.name }),
           el('span', { class:'mt mono', text: [k === 'etc' ? ovMethod(t.method) : '', t.barcode || t.sku, t.who, t.comm].filter(Boolean).join(' · ') })),
         el('span', { class:'ov-rq mono', text: retNum(t.qty) + '개' }),
         el('span', { class:'ov-rd mono' + (n >= 7 ? ' hi' : ''), text: n + '일째' }),
-        el('span', { class:'ov-acts' },
+        el('span', { class:'ov-acts' }, xeBtn(on, () => ovToggleInl(t)),
           el('button', { type:'button', class:'ov-back', title:'① 처리 전으로 되돌리기', 'aria-label':'처리 전으로 되돌리기', text:'↩', onclick: e => { e.stopPropagation(); ovPatch(t, { method:'' }, '① 처리 전으로 되돌렸어요.'); } }),
-          el('button', { type:'button', class:'ov-done', text:'✓ 완료', onclick: e => { e.stopPropagation(); ovSetStatus(t, 'done'); } }))); })));
+          el('button', { type:'button', class:'ov-done', text:'✓ 완료', onclick: e => { e.stopPropagation(); ovSetStatus(t, 'done'); } })));
+        return on ? [row, ovInlPanel(t)] : [row]; })));
     box.replaceChildren(head, top, el('div', { class:'ov-gs' }, ...gs));
+  }
+
+  // ---------- 공통: ✎ 수정 → 그 줄 아래 수정 칸 · 칸을 두 번 누르면 바로 수정 ----------
+  function qEdit(host, cur, o, save, cancel){
+    if (!host || host.classList.contains('ie')) return;
+    window.getSelection?.().removeAllRanges();
+    const inp = el('input', { class:'qe-in', type: o.type || 'text', inputmode: o.im, maxlength: o.max || 150, autocomplete:'off', 'aria-label': o.label });
+    inp.value = cur == null ? '' : String(cur);
+    let done = false;
+    const fin = ok => { if (done) return; done = true; const v = inp.value.trim(); if (ok && v !== String(cur ?? '').trim()) save(v); else cancel(); };
+    inp.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter'){ e.preventDefault(); fin(true); } else if (e.key === 'Escape'){ e.preventDefault(); fin(false); } };
+    inp.onblur = () => fin(true);
+    inp.onclick = e => e.stopPropagation();
+    host.classList.add('ie'); host.replaceChildren(inp);
+    inp.focus(); if (inp.type === 'text') inp.select();
+  }
+  function edPanel(o){
+    const f = ([k, label, op = {}]) => {
+      let n;
+      if (op.opts){ n = el('select', { 'aria-label': label }, ...op.opts.map(([v, l]) => el('option', { value: v, text: l }))); n.value = o.d[k] ?? ''; n.onchange = () => { o.d[k] = n.value; }; }
+      else { n = el('input', { class: op.mono ? 'mono' : '', type: op.type || 'text', inputmode: op.im, list: op.list, maxlength: op.max || 150, autocomplete:'off', 'aria-label': label }); n.value = o.d[k] ?? ''; n.oninput = () => { o.d[k] = n.value; }; }
+      return el('div', { style: op.span ? `grid-column:span ${op.span}` : null }, el('label', { text: label + (op.req ? ' *' : '') }), n);
+    };
+    const p = el('div', { class:'ob-ed xe' },
+      el('h4', {}, '✎ ' + o.title + ' 고치는 중', el('small', { text:'Enter 저장 · Esc 취소' })),
+      el('div', { class:'eg', style:`grid-template-columns:repeat(${o.cols || 4},minmax(0,1fr))` }, ...o.fields.map(f)),
+      el('div', { class:'ebtn' },
+        o.onDelete ? el('button', { type:'button', class:'ret-btn ghost sm ov-danger', text: o.armed ? '한 번 더 누르면 삭제' : '삭제', onclick: o.onDelete }) : null,
+        el('span', { class:'emsg' + (o.err ? ' err' : ''), text: o.busy ? '저장 중…' : o.msg || '' }),
+        el('button', { type:'button', class:'ret-btn ghost sm', text:'취소', onclick: o.onCancel }),
+        el('button', { type:'button', class:'ret-btn solid sm', text:'저장', disabled: o.busy, onclick: o.onSave })));
+    p.onkeydown = e => { e.stopPropagation(); if (e.key === 'Escape'){ e.preventDefault(); o.onCancel(); } else if (e.key === 'Enter' && e.target.matches('input')){ e.preventDefault(); o.onSave(); } };
+    p.onclick = e => e.stopPropagation();
+    p.ondblclick = e => e.stopPropagation();
+    return p;
+  }
+  const xeDirty = x => !!x && JSON.stringify(x.d) !== x.orig;
+  const xeBtn = (on, onclick) => el('button', { type:'button', class:'xe-btn' + (on ? ' on' : ''), title:'이 건 고치기', text:'✎ 수정', onclick: e => { e.stopPropagation(); onclick(); } });
+
+  // ---- 회송: 줄 아래 수정 칸 ----
+  function retToggleInl(t, where){
+    const x = retUi.inl;
+    if (x && x.id === t.id && x.where === where){ if (xeDirty(x)) return toast('고친 내용을 저장하거나 취소해 주세요.'); retUi.inl = null; return retRerender(); }
+    if (x && xeDirty(x)){ toast('고치던 건을 먼저 저장하거나 취소해 주세요.'); return document.querySelector('.xe')?.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+    const d = Object.fromEntries(RET_FIELDS.map(k => [k, k === 'qty' ? String(t.qty ?? '') : String(t[k] ?? '')]));
+    retUi.inl = { id: t.id, where, d, orig: JSON.stringify(d), busy:false, msg:'', err:false, arm:0 };
+    if (where === 'list'){ const k = (retUi.group === 'date' ? 'date:' + (t.date || '') : 'vendor:' + t.vendor); retUi.open.add(k); }
+    retRerender();
+    setTimeout(() => document.querySelector('.xe')?.scrollIntoView({ behavior:'smooth', block:'nearest' }), 30);
+  }
+  function retRerender(){ retRenderToday(); retRenderList(); }
+  function retInlPanel(t){
+    const x = retUi.inl;
+    return edPanel({ title: retShortName(t.name) || '회송 건', d: x.d, cols: 4, busy: x.busy, msg: x.msg, err: x.err, armed: x.arm && Date.now() - x.arm < 4000,
+      fields: [['date', '하차일', { type:'date', mono:true }], ['vendor', '업체명', { req:true, list:'ret-vendors', max:80 }], ['temp', '온도', { opts: [['', '-'], ...RET_TEMPS] }], ['qty', '수량', { req:true, mono:true, im:'decimal', max:10 }],
+        ['name', '상품명', { req:true, span:2 }], ['reason', '회송사유', { req:true, list:'ret-reasons', max:80, span:2 }],
+        ['po', '발주 / IPR 번호', { mono:true, max:40 }], ['sku', 'SKU ID', { mono:true, max:40 }], ['barcode', '바코드', { mono:true, max:40 }], ['note', '비고', { max:300 }]],
+      onCancel: () => { retUi.inl = null; retRerender(); },
+      onSave: () => retSaveInl(t),
+      onDelete: () => {
+        if (!x.arm || Date.now() - x.arm > 4000){ x.arm = Date.now(); retRerender(); setTimeout(() => { if (retUi.inl === x && x.arm && Date.now() - x.arm >= 4000){ x.arm = 0; retRerender(); } }, 4100); return; }
+        retUi.inl = null; retDelete(t);
+      } });
+  }
+  async function retSaveInl(t){
+    const x = retUi.inl; if (!x || x.busy) return;
+    const d = Object.fromEntries(Object.entries(x.d).map(([k, v]) => [k, String(v ?? '').trim()]));
+    const miss = [['vendor','업체명'],['name','상품명'],['reason','회송사유'],['qty','수량']].filter(([k]) => !d[k]);
+    const bad = m => { x.msg = m; x.err = true; retRerender(); };
+    if (miss.length) return bad(miss.map(m => m[1]).join(', ') + '을(를) 적어 주세요.');
+    if (isNaN(+d.qty.replace(/,/g, ''))) return bad('수량은 숫자로 적어 주세요.');
+    const payload = { ...d, qty: d.qty.replace(/,/g, ''), date: d.date || todayIso };
+    x.busy = true; x.msg = ''; x.err = false; retRerender();
+    try {
+      const { item } = await api('PATCH', '/api/returns?id=' + encodeURIComponent(t.id), payload);
+      const i = retItems.findIndex(v => v.id === item.id); if (i > -1) retItems[i] = item;
+      retUi.inl = null; setSync('', '저장됨'); toast('수정했어요.'); retRerender();
+    } catch(e){ x.busy = false; if (e instanceof Locked){ retRerender(); return showLock(e.message); } bad(e.message); }
+  }
+  // 회송: 칸을 두 번 눌러 바로 고치기 (상품명 · 수량 · 비고)
+  function retQuick(e, t){
+    const host = e.target.closest('.ret-nm, .ret-q, .ret-note, td.q-name, td.q-qty'); if (!host) return;
+    const k = host.matches('.ret-q, td.q-qty') ? 'qty' : host.matches('.ret-note') ? 'note' : 'name';
+    qEdit(host, t[k], { im: k === 'qty' ? 'decimal' : undefined, max: k === 'note' ? 300 : 150, label: k },
+      async v => {
+        if (k !== 'note' && !v){ toast((k === 'qty' ? '수량' : '상품명') + '은 비울 수 없어요.'); return retRerender(); }
+        if (k === 'qty' && isNaN(+v.replace(/,/g, ''))){ toast('수량은 숫자로 적어 주세요.'); return retRerender(); }
+        try { const { item } = await api('PATCH', '/api/returns?id=' + encodeURIComponent(t.id), { [k]: k === 'qty' ? v.replace(/,/g, '') : v });
+          const i = retItems.findIndex(x => x.id === item.id); if (i > -1) retItems[i] = item; setSync('', '저장됨'); toast('고쳤어요.'); }
+        catch(err){ if (err instanceof Locked) return showLock(err.message); toast(err.message); }
+        retRerender();
+      }, retRerender);
+  }
+
+  // ---- 과매입: 줄 아래 수정 칸 ----
+  function ovToggleInl(t){
+    const x = ovUi.inl;
+    if (x && x.id === t.id){ if (xeDirty(x)) return toast('고친 내용을 저장하거나 취소해 주세요.'); ovUi.inl = null; return ovRerender(); }
+    if (x && xeDirty(x)){ toast('고치던 건을 먼저 저장하거나 취소해 주세요.'); return document.querySelector('.xe')?.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+    const d = Object.fromEntries(OV_FIELDS.map(k => [k, String(t[k] ?? '')]));
+    ovUi.inl = { id: t.id, d, orig: JSON.stringify(d), busy:false, msg:'', err:false, arm:0 };
+    ovRerender();
+    setTimeout(() => document.querySelector('.xe')?.scrollIntoView({ behavior:'smooth', block:'nearest' }), 30);
+  }
+  function ovRerender(){ ovRenderList(); ovRenderView(); }
+  function ovInlPanel(t){
+    const x = ovUi.inl;
+    return edPanel({ title: t.name || '과매입 건', d: x.d, cols: 4, busy: x.busy, msg: x.msg, err: x.err, armed: x.arm && Date.now() - x.arm < 4000,
+      fields: [['sku', '외부 SKU ID', { mono:true, max:40 }], ['barcode', '바코드', { mono:true, max:40 }], ['qty', '수량', { req:true, mono:true, im:'decimal', max:10 }], ['date', '생성일자', { type:'date', mono:true }],
+        ['name', '상품명', { req:true, span:2 }], ['vendor', '업체명', { req:true, max:80, span:2 }],
+        ['who', '처리자', { opts: [['', '-'], ...OV_WHO.map(w => [w, w])] }], ['mail', '메일 발송일', { type:'date', mono:true }], ['comm', '비고', { max:200, span:2 }]],
+      onCancel: () => { ovUi.inl = null; ovRerender(); },
+      onSave: () => ovSaveInl(t),
+      onDelete: async () => {
+        if (!x.arm || Date.now() - x.arm > 4000){ x.arm = Date.now(); ovRerender(); setTimeout(() => { if (ovUi.inl === x && x.arm && Date.now() - x.arm >= 4000){ x.arm = 0; ovRerender(); } }, 4100); return; }
+        const keep = ovItems; ovUi.inl = null; ovItems = ovItems.filter(v => v.id !== t.id); ovRerender(); istCounts();
+        try { await api('DELETE', '/api/overs?id=' + encodeURIComponent(t.id)); ovRev = -2; toast('삭제했어요.'); }
+        catch(e){ ovItems = keep; ovRerender(); if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+      } });
+  }
+  async function ovSaveInl(t){
+    const x = ovUi.inl; if (!x || x.busy) return;
+    const d = Object.fromEntries(Object.entries(x.d).map(([k, v]) => [k, String(v ?? '').trim()]));
+    const q = Number(d.qty.replace(/,/g, ''));
+    const miss = [!d.name && '상품명', !(q > 0) && '수량', !d.vendor && '업체명'].filter(Boolean);
+    if (miss.length){ x.msg = '필수 칸을 채워 주세요: ' + miss.join(' · '); x.err = true; return ovRerender(); }
+    x.busy = true; x.msg = ''; x.err = false; ovRerender();
+    try {
+      const r = await api('PATCH', '/api/overs?id=' + encodeURIComponent(t.id), { ...d, qty: q, date: d.date || ovToday });
+      Object.assign(t, r.item); ovUi.inl = null; ovRev = -2; toast('고쳤어요.'); ovRerender(); istCounts();
+    } catch(e){ x.busy = false; if (e instanceof Locked){ ovRerender(); return showLock(e.message); } x.msg = e.message; x.err = true; ovRerender(); }
+  }
+  // 과매입: 칸을 두 번 눌러 바로 고치기 (상품명 · 수량 · 업체명 · 외부 SKU)
+  function ovQuick(e, t){
+    const host = e.target.closest('.ov-rn .nm, .ov-rq, td.ov-c-nm, td.ov-c-q, td.ov-c-v, td.ov-c-sku'); if (!host) return;
+    const k = host.matches('.ov-rq, td.ov-c-q') ? 'qty' : host.matches('td.ov-c-v') ? 'vendor' : host.matches('td.ov-c-sku') ? 'sku' : 'name';
+    qEdit(host, k === 'qty' ? retNum(t.qty) : t[k], { im: k === 'qty' ? 'decimal' : undefined, max: 150, label: k },
+      v => {
+        let val = v;
+        if (k === 'qty'){ val = Number(v.replace(/,/g, '')); if (!(val > 0)){ toast('수량은 0보다 큰 숫자로 적어 주세요.'); return ovRerender(); } }
+        else if (k !== 'sku' && !v){ toast((k === 'name' ? '상품명' : '업체명') + '은 비울 수 없어요.'); return ovRerender(); }
+        ovPatch(t, { [k]: val }, '고쳤어요.');
+      }, ovRerender);
   }
 
   // ---------- IST 반출 ----------
