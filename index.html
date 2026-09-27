@@ -2857,8 +2857,8 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   }
 
   // ---------- IST 반출 ----------
-  const OB_STAGES = ['', '생성', '포장', '택배접수', '반출완료'];
-  const OB_NEXT = ['', '포장 시작 →', '택배 접수 →', '반출 완료 ✓', ''];
+  const OB_STAGES = ['', '포장대기', '포장완료', '택배접수 완료', '반출완료'];
+  const OB_NEXT = ['', '포장 완료 →', '택배 접수 완료 →', '반출 완료 ✓', ''];
   const OB_FIELDS = ['grp', 'ext', 'cdate', 'due', 'vendor', 'addr', 'phone', 'name', 'barcode', 'qty', 'box', 'tote', 'note'];
   const OB_KEEP = ['grp', 'ext', 'cdate', 'due', 'vendor', 'addr', 'phone'];   // 같은 그룹 상품을 이어 넣을 때 남겨 두는 칸
   let obItems = null, obRev = -1, obLoading = false, obBuilt = false, obToday = todayIso, obDelArm = 0;
@@ -3067,7 +3067,7 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
       gs = s === 4 ? gs.sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || '')) : gs.sort(byDue);
       const total = gs.length;
       if (s === 4 && !obUi.doneAll) gs = gs.slice(0, 20);
-      const help = ['', '포장을 시작하면 ②로 · 줄을 누르면 고치기', '업체 소통 체크 → 택배 접수로', '업체 소통 체크 → 반출 완료로', '최근 완료 순 · 잘못 넘겼으면 ↩'][s];
+      const help = ['', '포장이 끝나면 ②로 · 줄을 누르면 고치기', '업체 소통 체크 → 택배 접수 완료로', '업체 소통 체크 → 반출 완료로', '최근 완료 순 · 잘못 넘겼으면 ↩'][s];
       const head = el('div', { class:'ov-stage s' + s }, el('span', { class:'ov-no', text: s }), el('h3', { text: OB_STAGES[s] }), el('b', { class:'ov-cnt', text: total }), el('p', { class:'ret-help', text: help }));
       const sec = el('section', { class:'ret-sec ob-sec s' + s });
       if (!obItems){ sec.append(head, el('p', { class:'ret-help', text:'불러오는 중…' })); return sec; }
@@ -3094,7 +3094,7 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
             td('c-note', t.note || ''));
           if (first){
             const acts = el('div', { class:'ob-acts' },
-              s === 2 || s === 3 ? el('button', { type:'button', class:'ob-prt', title:'박스에 붙일 라벨 인쇄 (박스 수만큼)', onclick: e => { e.stopPropagation(); obPrintLabel(g); } }, '\u{1F5A8} 라벨') : null,
+              s < 4 ? el('button', { type:'button', class:'ob-prt', title:'박스에 붙일 라벨 인쇄 (박스 수만큼)', onclick: e => { e.stopPropagation(); obPrintLabel(g); } }, '\u{1F5A8} 라벨') : null,
               comKey ? el('button', { type:'button', class:'ob-com' + (g[comKey] ? ' on' : ''), title:'업체 소통 완료 (' + OB_STAGES[s] + ')',
                 onclick: e => { e.stopPropagation(); obPut(g, { [comKey]: !g[comKey] }, g[comKey] ? '' : '업체 소통 완료로 표시했어요.'); } }, (g[comKey] ? '✓' : '□') + ' 소통') : null,
               s > 1 ? el('button', { type:'button', class:'ob-back', title:'이전 단계로', 'aria-label':'이전 단계로', text:'↩', onclick: e => { e.stopPropagation(); obPut(g, { stage: s - 1 }, OB_STAGES[s - 1] + ' 단계로 되돌렸어요.'); } }) : null,
