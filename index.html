@@ -3094,7 +3094,7 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
             td('c-note', t.note || ''));
           if (first){
             const acts = el('div', { class:'ob-acts' },
-              s < 4 ? el('button', { type:'button', class:'ob-prt', title:'박스에 붙일 라벨 인쇄 (박스 수만큼)', onclick: e => { e.stopPropagation(); obPrintLabel(g); } }, '\u{1F5A8} 라벨') : null,
+              s < 4 ? el('button', { type:'button', class:'ob-prt', title:'박스 라벨 인쇄 (박스 수만큼)', 'aria-label':'박스 라벨 인쇄', onclick: e => { e.stopPropagation(); obPrintLabel(g); } }, '\u{1F5A8}') : null,
               comKey ? el('button', { type:'button', class:'ob-com' + (g[comKey] ? ' on' : ''), title:'업체 소통 완료 (' + OB_STAGES[s] + ')',
                 onclick: e => { e.stopPropagation(); obPut(g, { [comKey]: !g[comKey] }, g[comKey] ? '' : '업체 소통 완료로 표시했어요.'); } }, (g[comKey] ? '✓' : '□') + ' 소통') : null,
               s > 1 ? el('button', { type:'button', class:'ob-back', title:'이전 단계로', 'aria-label':'이전 단계로', text:'↩', onclick: e => { e.stopPropagation(); obPut(g, { stage: s - 1 }, OB_STAGES[s - 1] + ' 단계로 되돌렸어요.'); } }) : null,
