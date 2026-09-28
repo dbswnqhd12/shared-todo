@@ -4,6 +4,7 @@
 //                                  여러 건 한꺼번에: { items: [ … ] } (최대 500건)
 //   PATCH  /api/outs?id=ID        → 수정 (바꿀 칸만) · stage 1~4 · com2 · com3
 //   PUT    /api/outs              → 여러 건 한꺼번에 바꾸기 { ids:[…], stage?, com2?, com3? } (같은 그룹 한 번에)
+//                                  또는 그룹 저장 한 번에: { items:[{ id, …바꿀 칸 }], del:[id…], add:[{ … }] }
 //   DELETE /api/outs?id=ID        → 삭제
 // 단계: 1 생성 → 2 포장 → 3 택배접수 → 4 반출완료 (4로 가면 완료일 doneAt이 오늘로 들어가요)
 import { K, redis, pipeline, parseHash, body, guard, fail, newId, kstToday, isDate, UserError } from '../lib/store.js';
@@ -40,6 +41,16 @@ function clean(input, base) {
   return out;
 }
 
+// 새 반출 건 하나 만들기 (POST 여러 건 · PUT add 공용)
+function makeItem(x, i, now, today, seen) {
+  let nid; do nid = newId(); while (seen.has(nid)); seen.add(nid);
+  const base = { cdate: today, due: '', com2: false, com3: false };
+  const it = clean({ ...base, ...x }, { id: nid, stage: 1, createdAt: new Date(now + i).toISOString() });
+  setStage(it, x.stage || 1, today);
+  if (it.stage === 4 && isDate(String(x.doneAt || ''))) it.doneAt = x.doneAt;
+  return it;
+}
+
 function setStage(item, stage, today) {
   const s = Math.max(1, Math.min(4, Math.round(+stage) || 1));
   if (s === 4) { if (!(item.stage === 4 && item.doneAt)) item.doneAt = today; }
@@ -70,15 +81,9 @@ export default async function handler(req, res) {
         if (!b.items.length || b.items.length > 500) throw new UserError('한 번에 1~500건까지 올릴 수 있어요.');
         if (count + b.items.length > MAX_ITEMS) throw new UserError('저장할 수 있는 반출 건 수를 넘었어요.');
         const seen = new Set();
-        const items = b.items.map((x, i) => {
-          let nid; do nid = newId(); while (seen.has(nid)); seen.add(nid);
-          const it = clean({ ...base, ...x }, { id: nid, stage: 1, createdAt: new Date(now + i).toISOString() });
-          setStage(it, x.stage || 1, today);
-          if (it.stage === 4 && isDate(String(x.doneAt || ''))) it.doneAt = x.doneAt;
-          return it;
-        });
+        const items = b.items.map((x, i) => makeItem(x, i, now, today, seen));
         await pipeline([['HSET', KEY, ...items.flatMap(it => [it.id, JSON.stringify(it)])], ['INCR', K.rev]]);
-        return res.status(201).json({ count: items.length });
+        return res.status(201).json({ count: items.length, items });
       }
       if (count >= MAX_ITEMS) throw new UserError('저장할 수 있는 반출 건 수를 넘었어요. 오래된 완료 건을 지워 주세요.');
       const item = clean({ ...base, ...b }, { id: newId(), stage: 1, createdAt: new Date(now).toISOString() });
@@ -101,6 +106,31 @@ export default async function handler(req, res) {
 
     if (req.method === 'PUT') {
       const b = body(req);
+      // 그룹 저장을 요청 한 번으로: 고치기 · 지우기 · 새로 넣기를 한꺼번에
+      if (Array.isArray(b.items) || Array.isArray(b.del) || Array.isArray(b.add)) {
+        const patches = (Array.isArray(b.items) ? b.items : []).filter(x => x && x.id).slice(0, 200);
+        const del = [...new Set((Array.isArray(b.del) ? b.del : []).map(String))].slice(0, 200);
+        const add = (Array.isArray(b.add) ? b.add : []).slice(0, 200);
+        const ids = patches.map(x => String(x.id));
+        const reads = [['HLEN', KEY]]; if (ids.length) reads.push(['HMGET', KEY, ...ids]);
+        const [count, raws = []] = await pipeline(reads);
+        if (add.length && count + add.length > MAX_ITEMS) throw new UserError('저장할 수 있는 반출 건 수를 넘었어요.');
+        const cmds = [], items = [];
+        patches.forEach((x, i) => {
+          const raw = raws[i]; if (!raw) return;
+          const patch = {};
+          for (const k of [...Object.keys(TEXT), ...DATES, 'qty', 'box', 'com2', 'com3']) if (k in x) patch[k] = x[k];
+          let item = clean(patch, JSON.parse(raw));
+          if ('stage' in x) item = setStage(item, x.stage, today);
+          items.push(item); cmds.push(['HSET', KEY, item.id, JSON.stringify(item)]);
+        });
+        const now = Date.now(), seen = new Set();
+        const added = add.map((x, i) => makeItem(x, i, now, today, seen));
+        for (const it of added) cmds.push(['HSET', KEY, it.id, JSON.stringify(it)]);
+        if (del.length) cmds.push(['HDEL', KEY, ...del]);
+        if (cmds.length) await pipeline([...cmds, ['INCR', K.rev]]);
+        return res.status(200).json({ items, added, deleted: del });
+      }
       const ids = Array.isArray(b.ids) ? [...new Set(b.ids.map(String))].slice(0, 200) : [];
       if (!ids.length) throw new UserError('바꿀 반출 건을 골라 주세요.');
       const raws = await redis('HMGET', KEY, ...ids);
