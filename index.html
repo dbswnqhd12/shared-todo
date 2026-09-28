@@ -2158,6 +2158,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     retLoading = true;
     try {
       const d = await request('GET', '/api/returns');
+      if (pending) return;   // 저장 중이면 화면에 먼저 반영한 걸 덮어쓰지 않아요 (다음 확인 때 다시 불러와요)
       retItems = d.items || []; retRev = d.rev;
       if (!retBusy()) renderReturns();
     } catch(e) {
@@ -2400,6 +2401,24 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     const payload = {};
     for (const k of RET_FIELDS) payload[k] = k === 'qty' ? String(retForm.qty).replace(/,/g, '') : String(retForm[k] || '').trim();
     if (!payload.date) payload.date = todayIso;
+    if (!retUi.editId){
+      // 화면에 먼저 넣고, 저장은 뒤에서 (실패하면 되돌리고 입력칸도 복구)
+      const temp = { ...payload, qty: payload.qty === '' ? '' : Number(payload.qty), id:'temp-' + Date.now(), status:'wait', createdAt:new Date().toISOString() };
+      const keepForm = { ...retForm };
+      retItems = [...(retItems || []), temp];
+      for (const k of ['name','sku','barcode','reason','qty','note']) retForm[k] = '';   // 하차일 · 업체 · 발주번호 · 온도는 남겨요
+      retFillForm(); $('#ret-name').focus(); retRerender();
+      try {
+        const { item } = await api('POST', '/api/returns', payload);
+        const i = retItems.findIndex(t => t.id === temp.id); if (i > -1) retItems[i] = item;
+        setSync('', '저장됨'); retRerender();
+      } catch(e) {
+        retItems = retItems.filter(t => t.id !== temp.id); Object.assign(retForm, keepForm); retFillForm(); retRerender();
+        if (e instanceof Locked) return showLock(e.message);
+        toast(e.message + ' (저장 안 됨)'); setSync('err', e.message);
+      }
+      return;
+    }
     const btn = $('#ret-submit'); btn.disabled = true;
     try {
       if (retUi.editId){
@@ -2440,22 +2459,29 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 
   async function retSetStatus(ids, status){
     if (!ids.length) return;
+    const prev = retItems.filter(t => ids.includes(t.id)).map(t => ({ ...t }));
+    for (const t of retItems) if (ids.includes(t.id)){ t.status = status; if (status === 'done'){ if (!t.doneAt) t.doneAt = todayIso; } else delete t.doneAt; }
+    for (const id of ids) retUi.sel.delete(id);
+    retRerender();
     try {
-      const { items } = await api('PUT', '/api/returns', { ids, status });
+      const { items } = await api('PUT', '/api/returns', { ids: ids.filter(id => !String(id).startsWith('temp-')), status });
       for (const it of items){ const i = retItems.findIndex(t => t.id === it.id); if (i > -1) retItems[i] = it; }
-      for (const id of ids) retUi.sel.delete(id);
-      setSync('', '저장됨'); retRenderToday(); retRenderList();
-    } catch(e) { if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+      setSync('', '저장됨'); retRerender();
+    } catch(e) {
+      for (const p of prev){ const i = retItems.findIndex(t => t.id === p.id); if (i > -1) retItems[i] = p; }
+      retRerender(); if (e instanceof Locked) return showLock(e.message); toast(e.message + ' (저장 안 됨)');
+    }
   }
 
   async function retDelete(t){
-    try {
-      await api('DELETE', '/api/returns?id=' + encodeURIComponent(t.id));
-      retItems = retItems.filter(x => x.id !== t.id); retUi.sel.delete(t.id);
-      if (retUi.editId === t.id) retEndEdit();
-      if (retUi.inl?.id === t.id) retUi.inl = null;
-      setSync('', '저장됨'); retRenderToday(); retRenderList();
-    } catch(e) { if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+    if (String(t.id).startsWith('temp-')) return toast('저장 중이에요. 잠시 후 다시 눌러 주세요.');
+    const keep = retItems;
+    retItems = retItems.filter(x => x.id !== t.id); retUi.sel.delete(t.id);
+    if (retUi.editId === t.id) retEndEdit();
+    if (retUi.inl?.id === t.id) retUi.inl = null;
+    retRerender();
+    try { await api('DELETE', '/api/returns?id=' + encodeURIComponent(t.id)); setSync('', '저장됨'); }
+    catch(e) { retItems = keep; retRerender(); if (e instanceof Locked) return showLock(e.message); toast(e.message + ' (삭제 안 됨)'); }
   }
 
   // 상태는 표시만 해요 (실수로 눌러 바뀌지 않게) — 바꾸려면 체크 후 아래 버튼으로
@@ -2662,6 +2688,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     ovLoading = true;
     try {
       const d = await request('GET', '/api/overs');
+      if (pending) return;
       ovItems = d.items || []; ovRev = d.rev; if (d.today) ovToday = d.today;
       if (!ovForm.date) ovForm.date = ovToday;
       const a = document.activeElement;
@@ -2980,12 +3007,16 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     if (!['vendor', 'name', 'barcode', 'sku', 'po'].some(k => d[k])) return bad('업체명 · 상품명 · 바코드 중 하나는 적어 주세요.');
     if (isNaN(+d.qty.replace(/,/g, ''))) return bad('수량은 숫자로 적어 주세요.');
     const payload = { ...d, qty: d.qty.replace(/,/g, ''), date: d.date || todayIso };
-    x.busy = true; x.msg = ''; x.err = false; retRerender();
+    if (String(t.id).startsWith('temp-')) return bad('저장 중이에요. 잠시 후 다시 눌러 주세요.');
+    // 화면 먼저 바꾸고 저장은 뒤에서 — 실패하면 되돌려요
+    const i = retItems.findIndex(v => v.id === t.id), prev = retItems[i];
+    if (i > -1) retItems[i] = { ...prev, ...payload, qty: payload.qty === '' ? '' : Number(payload.qty) };
+    retUi.inl = null; retRerender(); toast('수정했어요.');
     try {
       const { item } = await api('PATCH', '/api/returns?id=' + encodeURIComponent(t.id), payload);
-      const i = retItems.findIndex(v => v.id === item.id); if (i > -1) retItems[i] = item;
-      retUi.inl = null; setSync('', '저장됨'); toast('수정했어요.'); retRerender();
-    } catch(e){ x.busy = false; if (e instanceof Locked){ retRerender(); return showLock(e.message); } bad(e.message); }
+      const j = retItems.findIndex(v => v.id === item.id); if (j > -1) retItems[j] = item;
+      setSync('', '저장됨'); retRerender();
+    } catch(e){ const j = retItems.findIndex(v => v.id === t.id); if (j > -1) retItems[j] = prev; retRerender(); if (e instanceof Locked) return showLock(e.message); toast(e.message + ' (저장 안 됨)'); }
   }
   // 회송: 칸을 두 번 눌러 바로 고치기 (상품명 · 수량 · 비고)
   function retQuick(e, t){
@@ -2994,10 +3025,14 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     qEdit(host, t[k], { im: k === 'qty' ? 'decimal' : undefined, max: k === 'note' ? 300 : 150, label: k },
       async v => {
                 if (k === 'qty' && isNaN(+v.replace(/,/g, ''))){ toast('수량은 숫자로 적어 주세요.'); return retRerender(); }
-        try { const { item } = await api('PATCH', '/api/returns?id=' + encodeURIComponent(t.id), { [k]: k === 'qty' ? v.replace(/,/g, '') : v });
-          const i = retItems.findIndex(x => x.id === item.id); if (i > -1) retItems[i] = item; setSync('', '저장됨'); toast('고쳤어요.'); }
-        catch(err){ if (err instanceof Locked) return showLock(err.message); toast(err.message); }
+        if (String(t.id).startsWith('temp-')){ toast('저장 중이에요. 잠시 후 다시 눌러 주세요.'); return retRerender(); }
+        const val = k === 'qty' ? v.replace(/,/g, '') : v;
+        const i = retItems.findIndex(x => x.id === t.id), prev = retItems[i];
+        if (i > -1) retItems[i] = { ...prev, [k]: k === 'qty' ? (val === '' ? '' : Number(val)) : val };
         retRerender();
+        try { const { item } = await api('PATCH', '/api/returns?id=' + encodeURIComponent(t.id), { [k]: val });
+          const j = retItems.findIndex(x => x.id === item.id); if (j > -1) retItems[j] = item; setSync('', '저장됨'); retRerender(); }
+        catch(err){ const j = retItems.findIndex(x => x.id === t.id); if (j > -1) retItems[j] = prev; retRerender(); if (err instanceof Locked) return showLock(err.message); toast(err.message + ' (저장 안 됨)'); }
       }, retRerender);
   }
 
@@ -3033,11 +3068,11 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     const q = Number(d.qty.replace(/,/g, ''));
     const miss = [!d.name && '상품명', !(q > 0) && '수량', !d.vendor && '업체명'].filter(Boolean);
     if (miss.length){ x.msg = '필수 칸을 채워 주세요: ' + miss.join(' · '); x.err = true; return ovRerender(); }
-    x.busy = true; x.msg = ''; x.err = false; ovRerender();
-    try {
-      const r = await api('PATCH', '/api/overs?id=' + encodeURIComponent(t.id), { ...d, qty: q, date: d.date || ovToday });
-      Object.assign(t, r.item); ovUi.inl = null; ovRev = -2; toast('고쳤어요.'); ovRerender(); istCounts();
-    } catch(e){ x.busy = false; if (e instanceof Locked){ ovRerender(); return showLock(e.message); } x.msg = e.message; x.err = true; ovRerender(); }
+    if (String(t.id).startsWith('temp-')){ x.msg = '저장 중이에요. 잠시 후 다시 눌러 주세요.'; x.err = true; return ovRerender(); }
+    const payload = { ...d, qty: q, date: d.date || ovToday }, prev = { ...t };
+    Object.assign(t, payload); ovUi.inl = null; ovRerender(); istCounts(); toast('고쳤어요.');   // 화면 먼저
+    try { const r = await api('PATCH', '/api/overs?id=' + encodeURIComponent(t.id), payload); Object.assign(t, r.item); ovRev = -2; setSync('', '저장됨'); }
+    catch(e){ for (const k of Object.keys(t)) delete t[k]; Object.assign(t, prev); ovRerender(); istCounts(); if (e instanceof Locked) return showLock(e.message); toast(e.message + ' (저장 안 됨)'); }
   }
   // 과매입: 칸을 두 번 눌러 바로 고치기 (상품명 · 수량 · 업체명 · 외부 SKU)
   function ovQuick(e, t){
@@ -3069,6 +3104,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     obLoading = true;
     try {
       const d = await request('GET', '/api/outs');
+      if (pending) return;
       obItems = d.items || []; obRev = d.rev; if (d.today) obToday = d.today;
       if (!obForm.cdate) obForm.cdate = obToday;
       const a = document.activeElement;
@@ -3234,9 +3270,9 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     todo.forEach(x => { x[key] = v; });
     obRenderList();
     try {
-      const rs = await Promise.all(todo.map(x => api('PATCH', '/api/outs?id=' + encodeURIComponent(x.id), { [key]: v })));
-      rs.forEach(r => { const x = obItems.find(y => y.id === r.item?.id); if (x) Object.assign(x, r.item); });
-      obRev = -2; toast(todo.length > 1 ? `같은 그룹 ${todo.length}개 상품에 같이 고쳤어요.` : '고쳤어요.');
+      const r = await api('PUT', '/api/outs', { items: todo.map(x => ({ id: x.id, [key]: v })) });   // 그룹 전체도 요청 한 번
+      (r.items || []).forEach(it => { const x = obItems.find(y => y.id === it.id); if (x) Object.assign(x, it); });
+      obRev = -2; setSync('', '저장됨'); toast(todo.length > 1 ? `같은 그룹 ${todo.length}개 상품에 같이 고쳤어요.` : '고쳤어요.');
     } catch(e){ prev.forEach(([x, old]) => { x[key] = old; }); obRenderList(); if (e instanceof Locked) return showLock(e.message); toast(e.message); }
   }
 
@@ -3298,8 +3334,9 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     return tr;
   }
   async function obSaveGroup(){
-    const d = obUi.draft; if (!d || d.busy) return;
+    const d = obUi.draft; if (!d) return;
     const trim = v => String(v ?? '').replace(/\t/g, ' ').trim();
+    const num = v => v === '' ? '' : Number(String(v).replace(/,/g, ''));
     const C = Object.fromEntries(Object.entries(d.common).map(([k, v]) => [k, trim(v)]));
     const fail = m => { d.msg = m; d.msgErr = true; obRenderList(); };
     const live = d.rows.filter(r => !r.del && (r.id || OB_ROWF.some(k => trim(r[k]))));
@@ -3307,30 +3344,40 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       for (const k of ['qty', 'box']) if (trim(r[k]) && !Number.isFinite(Number(trim(r[k]).replace(/,/g, '')))) return fail((k === 'qty' ? '수량' : '박스') + '은 숫자로 적어 주세요.');
       if (!C.grp && !C.vendor && !trim(r.name)) return fail('반출그룹번호 · 업체명 · 상품명 중 하나는 적어 주세요.');
     }
-    const ops = [], news = [];
+    if (d.rows.some(r => String(r.id || '').startsWith('temp-'))) return fail('저장 중이에요. 잠시 후 다시 눌러 주세요.');
+    const patches = [], del = [], add = [];
     for (const r of d.rows){
-      if (r.id && r.del){ ops.push(() => api('DELETE', '/api/outs?id=' + encodeURIComponent(r.id))); continue; }
+      if (r.id && r.del){ del.push(r.id); continue; }
       const x = { ...C, ...Object.fromEntries(OB_ROWF.map(k => [k, trim(r[k])])) };
-      if (!r.id){ if (OB_ROWF.some(k => x[k])) news.push({ ...x, stage: d.stage, com2: d.com2, com3: d.com3 }); continue; }
+      if (!r.id){ if (OB_ROWF.some(k => x[k])) add.push({ ...x, stage: d.stage, com2: d.com2, com3: d.com3 }); continue; }
       const t = (obItems || []).find(v => v.id === r.id); if (!t) continue;
       const patch = {}; for (const [k, v] of Object.entries(x)) if (String(t[k] ?? '') !== String(v)) patch[k] = v;
-      if (Object.keys(patch).length) ops.push(() => api('PATCH', '/api/outs?id=' + encodeURIComponent(r.id), patch));
+      if (Object.keys(patch).length) patches.push({ id: r.id, ...patch });
     }
-    if (news.length) ops.push(() => api('POST', '/api/outs', { items: news }));
-    if (!ops.length){ obCloseGroup(); toast('바뀐 내용이 없어요.'); return; }
-    d.busy = true; d.msg = ''; d.msgErr = false; obRenderList();
-    try { await Promise.all(ops.map(f => f())); obUi.draft = null; toast('저장했어요.'); }
-    catch(e){ d.busy = false; if (e instanceof Locked){ obRenderList(); return showLock(e.message); } fail(e.message); }
-    obRev = -2; await loadOuts(); obRenderList(); istCounts();
+    if (!patches.length && !del.length && !add.length){ obCloseGroup(); toast('바뀐 내용이 없어요.'); return; }
+    // 화면 먼저 바꾸고, 저장은 요청 한 번으로 뒤에서 — 실패하면 통째로 되돌려요
+    const snap = (obItems || []).map(t => ({ ...t }));
+    for (const p of patches){ const t = obItems.find(v => v.id === p.id); if (t){ Object.assign(t, p); for (const k of ['qty', 'box']) if (k in p) t[k] = num(p[k]); } }
+    obItems = obItems.filter(t => !del.includes(t.id));
+    const now = Date.now();
+    const temps = add.map((x, i) => ({ ...x, qty: num(x.qty), box: num(x.box), id: `temp-${now}-${i}`, createdAt: new Date(now + i).toISOString() }));
+    obItems.push(...temps);
+    obUi.draft = null; obUi.delArm = 0; obRenderList(); istCounts(); toast('저장했어요.');
+    try {
+      const r = await api('PUT', '/api/outs', { items: patches, del, add });
+      for (const it of r.items || []){ const t = obItems.find(v => v.id === it.id); if (t) Object.assign(t, it); }
+      obItems = obItems.filter(t => !temps.includes(t)).concat(r.added || []);
+      obRev = -2; setSync('', '저장됨'); obRenderList(); istCounts();
+    } catch(e){ obItems = snap; obRenderList(); istCounts(); if (e instanceof Locked) return showLock(e.message); toast(e.message + ' (저장 안 됨)'); }
   }
   async function obDeleteGroup(){
     const d = obUi.draft; if (!d) return;
     if (!obUi.delArm || Date.now() - obUi.delArm > 4000){ obUi.delArm = Date.now(); obRenderList(); setTimeout(() => { if (obUi.delArm && Date.now() - obUi.delArm >= 4000){ obUi.delArm = 0; obRenderList(); } }, 4100); return; }
-    const ids = d.rows.map(r => r.id).filter(Boolean);
-    d.busy = true; obRenderList();
-    try { await Promise.all(ids.map(id => api('DELETE', '/api/outs?id=' + encodeURIComponent(id)))); obUi.draft = null; obUi.delArm = 0; toast('그룹을 삭제했어요.'); }
-    catch(e){ d.busy = false; obUi.delArm = 0; if (e instanceof Locked){ obRenderList(); return showLock(e.message); } d.msg = e.message; d.msgErr = true; }
-    obRev = -2; await loadOuts(); obRenderList(); istCounts();
+    const ids = d.rows.map(r => r.id).filter(id => id && !String(id).startsWith('temp-'));
+    const snap = obItems;
+    obItems = obItems.filter(t => !ids.includes(t.id)); obUi.draft = null; obUi.delArm = 0; obRenderList(); istCounts(); toast('그룹을 삭제했어요.');
+    try { await api('PUT', '/api/outs', { del: ids }); obRev = -2; setSync('', '저장됨'); }
+    catch(e){ obItems = snap; obRenderList(); istCounts(); if (e instanceof Locked) return showLock(e.message); toast(e.message + ' (삭제 안 됨)'); }
   }
 
   // 박스 라벨 인쇄: A4 한 장 = 박스 1개. 박스 칸 합계만큼 1/N, 2/N … 로 찍어요. 소비기한은 손으로 적는 빈칸.
