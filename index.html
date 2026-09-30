@@ -3870,14 +3870,14 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
     const now = new Date(Date.now() + 9 * 36e5).toISOString();
     const stamp = now.slice(5, 10) + ' ' + now.slice(11, 16);
     const qty = L.reduce((s, r) => s + (r.q || 0), 0);
-    const rows = L.map(r => { const d = ppDays(r.exp); return `<tr><td class="m">${E(r.loc)}</td><td>${E(ppShort(r.name))}</td><td class="m">${E(r.bc)}</td><td class="m r b">${E(retNum(r.q))}</td><td class="m b">${E(ppMD(r.exp))}</td><td class="dd r${ppLvl(d)}">${ppDD(d)}</td><td class="ck"><div></div></td></tr>`; }).join('');
+    const rows = L.map(r => { const d = ppDays(r.exp); return `<tr><td class="m">${E(r.loc)}</td><td>${E(ppShort(r.name))}</td><td class="m">${E(r.bc)}</td><td class="m r b">${E(retNum(r.q))}</td><td class="m b">${E(ppMD(r.exp))}</td><td class="dd r${ppLvl(d)}">${ppDD(d)}</td></tr>`; }).join('');
     const css = `@page{size:A4;margin:10mm}*{box-sizing:border-box}body{margin:0;color:#111;font-family:-apple-system,"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 h1{font-size:18pt;margin:0 0 1mm}.sub{font-size:9pt;color:#555;margin-bottom:3mm}table{width:100%;border-collapse:collapse;font-size:9.5pt}th{text-align:left;font-size:8.5pt;color:#555;border-bottom:.4mm solid #111;padding:1.2mm}
 td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-inside:avoid}thead{display:table-header-group}.m{font-family:ui-monospace,Menlo,Consolas,monospace;white-space:nowrap}.r{text-align:right}.b{font-weight:800}
-.dd{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:800;white-space:nowrap}.dd.over{color:#c0392b}.dd.warn{color:#b8661a}.ck{width:12mm}.ck div{width:5mm;height:5mm;border:.35mm solid #111;border-radius:1mm;margin:auto}`;
+.dd{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:800;white-space:nowrap}.dd.over{color:#c0392b}.dd.warn{color:#b8661a}`;
     const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>프리팩 ${E(ppCatName(cat))}</title><style>${css}</style></head><body>
 <h1>프리팩 · ${E(ppCatName(cat))}</h1><div class="sub">${L.length}건 · ${E(qty.toLocaleString('ko-KR'))}개 · 유통기한 빠른 순 · ${E(ppData.file || '')} · 인쇄 ${stamp}</div>
-<table><thead><tr><th>로케이션</th><th>상품명</th><th>상품바코드</th><th class="r">수량</th><th>유통기한</th><th class="r">D-day</th><th>확인</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+<table><thead><tr><th>로케이션</th><th>상품명</th><th>상품바코드</th><th class="r">수량</th><th>유통기한</th><th class="r">D-day</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
     document.getElementById('pp-print-frame')?.remove();
     const f = el('iframe', { id:'pp-print-frame', title:'프리팩 인쇄', 'aria-hidden':'true', style:'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden' });
     document.body.append(f);
