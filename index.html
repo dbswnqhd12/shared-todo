@@ -678,6 +678,21 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .pr-drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:28px 16px;border:2px dashed var(--line);border-radius:10px;background:var(--bg);cursor:pointer;text-align:center}
 .pr-drop b{font-size:15px;color:var(--accent)}.pr-drop span{font-size:13px}.pr-drop small{font-size:12px;color:var(--muted)}
 .pr-drop:hover,.pr-drop.drag,.ret-sec.drag{border-color:var(--accent);background:var(--accent-soft)}
+/* 프리팩 */
+.pp .ret-sec-head .pp-up{margin-left:auto}
+.pp-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.pp-card{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--paper);color:var(--ink);font:inherit;cursor:pointer}
+.pp-card b{font-size:13.5px}.pp-card .n{font-family:var(--mono);font-size:19px;font-weight:800}.pp-card small{font-size:11px;color:var(--muted);font-weight:500;margin-left:1px;font-family:var(--body)}
+.pp-card .dd{font-size:11.5px;color:var(--muted)}.pp-card .dd.over{color:var(--high);font-weight:700}.pp-card .dd.warn{color:var(--mid);font-weight:700}
+.pp-card.on{border:2px solid var(--accent);padding:9px 11px;background:var(--accent-soft)}.pp-card.empty{opacity:.55}.pp-card.etc b{color:var(--high)}
+.pp-sub{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}.pp-sub h4{margin:0;font-size:15px}.pp-sub h4 span{font-size:12.5px;font-weight:500;color:var(--muted)}.pp-tools{margin-left:auto;display:flex;gap:6px}
+.pp-scroll{overflow-x:auto}
+.pp-t{width:100%;border-collapse:collapse;font-size:13px}.pp-t th{text-align:left;font-size:11.5px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);padding:6px 8px;white-space:nowrap}
+.pp-t td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}.pp-t tbody tr:hover td{background:var(--bg)}
+.pp-t .mono{font-family:var(--mono);white-space:nowrap}.pp-t .mu{color:var(--muted)}.pp-t .ex{font-weight:800}.pp-t .r{text-align:right}.pp-t .q{font-weight:700}.pp-t .nm{min-width:220px}
+.pp-dd{display:inline-block;min-width:52px;text-align:center;font-family:var(--mono);font-size:11.5px;font-weight:800;border-radius:6px;padding:2px 6px;background:var(--bg);color:var(--muted);white-space:nowrap}
+.pp-dd.warn{background:var(--mid-soft);color:var(--mid)}.pp-dd.over{background:var(--high-soft);color:var(--high)}
+.pp-none{padding:10px 0}
 .pr-file{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;border:1px dashed var(--line);border-radius:8px;background:var(--bg)}
 .pr-fn{font-family:var(--mono);font-size:12.5px;font-weight:600;overflow-wrap:anywhere}.pr-file .ret-btn{margin-left:auto}
 .pr-filters{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
@@ -832,6 +847,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     <button type="button" data-v="list" aria-pressed="false">할 일 목록</button>
     <button type="button" data-v="ho" aria-pressed="false">인수인계</button>
     <button type="button" data-v="ist" aria-pressed="false">IST</button>
+    <button type="button" data-v="pp" aria-pressed="false">프리팩</button>
     <button type="button" data-v="prod" aria-pressed="false">생산성</button>
   </div>
 
@@ -845,6 +861,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   <section class="ret" id="over" hidden aria-label="IST 과매입"></section>
   <section class="ret" id="out" hidden aria-label="IST 반출"></section>
   <section class="ret" id="prod" hidden aria-label="STOW 개인 생산성"></section>
+  <section class="ret" id="pp" hidden aria-label="프리팩 유통기한"></section>
 
   <section class="cal" id="cal" aria-label="달력">
     <div class="cal-head">
@@ -995,6 +1012,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       if (ist && ovRev !== rev) loadOvers();
       if (ist && obRev !== rev) loadOuts();
       if (view === 'prod' && prRev !== rev) prLoad();
+      if (view === 'pp' && ppRev !== rev) ppLoad();
       setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
       if (e instanceof Locked) return showLock(teamKey ? e.message : '');
@@ -1014,6 +1032,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       if (ist && data.rev !== ovRev) loadOvers();
       if (ist && data.rev !== obRev) loadOuts();
       if (view === 'prod' && data.rev !== prRev) prLoad();
+      if (view === 'pp' && data.rev !== ppRev) ppLoad();
       if (data.rev !== rev) loadFull();
       else setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
@@ -1296,17 +1315,20 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     document.querySelectorAll('#istSub button').forEach(b => b.setAttribute('aria-pressed', b.dataset.s === view ? 'true' : 'false'));
     istCounts();
     const cal = view === 'cal';
-    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over', outView = view === 'out';
+    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over', outView = view === 'out', ppView = view === 'pp';
     $('#ho').hidden = !hoView;
     $('#ret').hidden = !retView;
     $('#prod').hidden = !prodView;
+    $('#pp').hidden = !ppView;
     $('#over').hidden = !overView;
     $('#out').hidden = !outView;
-    $('#app').classList.toggle('wide', prodView || outView);
-    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView || outView;
-    document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView || outView;
+    $('#app').classList.toggle('wide', prodView || outView || ppView);
+    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView || outView || ppView;
+    document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView || outView || ppView;
     if (prodView && !$('#prod').hasChildNodes()) renderProd();
     if (prodView && prRev < 0) prLoad();
+    if (ppView && !$('#pp').hasChildNodes() && ppData) renderPrepack();
+    if (ppView && ppRev < 0) ppLoad();
     if (hoView && !$('#ho').hasChildNodes()) renderHandover();
     if (retView && !retBuilt) renderReturns();
     if (overView && !ovBuilt) renderOvers();
@@ -3673,6 +3695,225 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
   const prRole = (emp, ct) => PR_MGR.has(prName(emp).trim()) ? 'mgr' : String(ct).toUpperCase() === 'TEMP' ? 'temp' : 'perm';
   const PR_ROLE = { mgr:'관리자', perm:'계약직', temp:'단기' };
   const prRoleTag = (emp, ct) => { const r = prRole(emp, ct); return el('span', { class:'pr-tag role-' + r, text: PR_ROLE[r] }); };
+  // ---- 프리팩: WMS 재고 엑셀 → 식빵 · 깻잎 · SR · Egg 로 나눠 유통기한 빠른 순 ----
+  const PP_CATS = [['bread', '식빵'], ['perilla', '깻잎'], ['sr', 'SR'], ['egg', 'Egg'], ['etc', '분류 안 됨']];
+  const ppCatName = k => (PP_CATS.find(c => c[0] === k) || ['', k])[1];
+  let ppData = null, ppRev = -1, ppLoading = false;
+  const ppUi = { cat: store.get('pp-cat', '') };
+  const ppTodayIso = () => new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10);
+  // 상품명으로 분류 (위에서부터 먼저 맞는 것)
+  function ppCat(name){
+    const n = String(name || '').replace(/ /g, ' ');
+    if (n.includes('식빵')) return 'bread';
+    if (n.includes('깻잎')) return 'perilla';
+    if (/\[\s*SR\s*\]/i.test(n)) return 'sr';
+    if (/\d+\s*구(?!이)/.test(n) || /(^|[^\d])(10|15)\s*P(?![a-z])/i.test(n)) return 'egg';
+    return 'etc';
+  }
+  // 엑셀 날짜 칸: 엑셀 날짜 숫자 · '2026-10-21' · '2026.10.21' 모두 → 'YYYY-MM-DD'
+  function ppDay(v){
+    const t = String(v ?? '').trim();
+    if (!t) return '';
+    if (/^\d+(\.\d+)?$/.test(t)){ const n = parseFloat(t); if (n < 20000 || n > 80000) return ''; return new Date(Math.round((Math.floor(n) - 25569) * 864e5)).toISOString().slice(0, 10); }
+    const m = t.match(/(\d{4})\s*[-./년]\s*(\d{1,2})\s*[-./월]\s*(\d{1,2})/);
+    return m ? `${m[1]}-${pad(+m[2])}-${pad(+m[3])}` : '';
+  }
+  const ppDays = iso => iso ? Math.round((Date.parse(iso) - Date.parse(ppTodayIso())) / 864e5) : null;
+  const ppMD = iso => { if (!iso) return '-'; const [y, m, d] = iso.split('-'); return (y === ppTodayIso().slice(0, 4) ? '' : y + '/') + (+m) + '/' + (+d); };
+  const ppDD = d => d == null ? '-' : d < 0 ? `D+${-d}` : d === 0 ? 'D-DAY' : `D-${d}`;
+  const ppLvl = d => d == null ? '' : d <= 7 ? ' over' : d <= 14 ? ' warn' : '';
+  const ppShort = s => String(s || '').replace(/^\s*\[로켓프레시\]\s*/, '').trim();
+  const ppSort = (a, b) => (a.exp || '9999').localeCompare(b.exp || '9999') || a.name.localeCompare(b.name, 'ko') || a.loc.localeCompare(b.loc);
+
+  function ppPrep(rows, file){
+    const norm = s => String(s || '').replace(/\s/g, '');
+    const hi = rows.findIndex(r => r && r.some(v => norm(v) === '상품명') && r.some(v => norm(v) === '유통기한'));
+    if (hi < 0) throw new Error("'상품명' · '유통기한' 열을 찾지 못했어요. WMS 재고(인벤토리) 엑셀인지 확인해 주세요.");
+    const H = rows[hi].map(norm);
+    const col = { loc: H.indexOf('로케이션'), name: H.indexOf('상품명'), q: H.indexOf('수량'), mfg: H.indexOf('제조일'), exp: H.indexOf('유통기한'),
+      sku: H.indexOf('SKUID'), bc: H.indexOf('상품바코드'), lpn: H.indexOf('LPN') };
+    const miss = [['loc', '로케이션'], ['q', '수량']].filter(([k]) => col[k] < 0).map(x => x[1]);
+    if (miss.length) throw new Error('엑셀에 이 열이 없어요: ' + miss.join(', '));
+    const g = (r, k) => col[k] >= 0 ? String(r[col[k]] ?? '').replace(/ /g, ' ').trim() : '';
+    const out = [];
+    for (const r of rows.slice(hi + 1)){
+      if (!r || !r.some(v => String(v ?? '').trim())) continue;
+      const name = g(r, 'name');
+      if (!name) continue;
+      const q = parseFloat(g(r, 'q').replace(/,/g, ''));
+      out.push({ c: ppCat(name), loc: g(r, 'loc'), name, q: isNaN(q) ? 0 : q, mfg: ppDay(r[col.mfg]), exp: ppDay(r[col.exp]),
+        sku: ppId(g(r, 'sku')), bc: ppId(g(r, 'bc')), lpn: ppId(g(r, 'lpn')) });
+    }
+    if (!out.length) throw new Error('엑셀에 상품 줄이 없어요.');
+    return { file, total: out.length, rows: out.sort(ppSort), at: 0 };
+  }
+  // 엑셀이 숫자로 저장한 번호(1.58824187E8 · 198644197.0)를 원래 글자로
+  const ppId = v => { const t = String(v || '').trim(); if (/^\d+(\.\d+)?(e\+?\d+)?$/i.test(t)){ const n = Number(t); if (Number.isSafeInteger(n)) return String(n); } return t; };
+  const ppEncode = D => ({ file: D.file, total: D.total, rows: D.rows.map(r => [r.c, r.loc, r.name, r.q, r.mfg, r.exp, r.sku, r.bc, r.lpn]) });
+  const ppDecode = S => ({ file: S.file || '', total: S.total || 0, at: S.at || 0,
+    rows: (S.rows || []).map(([c, loc, name, q, mfg, exp, sku, bc, lpn]) => ({ c, loc, name, q, mfg, exp, sku, bc, lpn })).sort(ppSort) });
+
+  async function ppLoad(){
+    if (ppLoading) return;
+    ppLoading = true;
+    try {
+      const d = await request('GET', '/api/prepack');
+      ppRev = d.rev;
+      if (d.snap && d.snap.at !== ppData?.at){ ppData = ppDecode(d.snap); if (view === 'pp') renderPrepack(); }
+      else if (!d.snap && view === 'pp' && !$('#pp').hasChildNodes()) renderPrepack();
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+    } finally { ppLoading = false; }
+  }
+  function ppPick(){
+    const inp = el('input', { type:'file', accept:'.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    inp.onchange = () => { if (inp.files[0]) ppImportFile(inp.files[0]); };
+    inp.click();
+  }
+  function ppDropZone(node){
+    node.ondragover = e => { e.preventDefault(); node.classList.add('drag'); };
+    node.ondragleave = e => { if (!node.contains(e.relatedTarget)) node.classList.remove('drag'); };
+    node.ondrop = e => { e.preventDefault(); node.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) ppImportFile(f); };
+  }
+  async function ppImportFile(file){
+    try {
+      toast('엑셀을 읽는 중이에요…');
+      ppData = ppPrep(await hoReadXlsx(file), file.name);
+      renderPrepack();
+    } catch(e) { return toast(e.message || '엑셀을 읽지 못했어요.'); }
+    try {
+      const r = await api('PUT', '/api/prepack', { snap: ppEncode(ppData) });
+      ppData.at = r.at; ppRev = r.rev; renderPrepack();
+      setSync('', '저장됨');
+      toast(`${ppData.total}건을 나눠서 팀 모두에게 공유했어요.`);
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+      setSync('err', '공유 저장을 못 했어요');
+      toast('분류는 됐지만 공유 저장을 못 했어요: ' + (e.message || ''));
+    }
+  }
+
+  function renderPrepack(){
+    const box = $('#pp');
+    const upBtn = () => el('button', { type:'button', class:'ret-btn sm ghost', onclick: ppPick, title:'새 WMS 재고 엑셀로 바꾸기' }, '⬆ 새 파일 올리기');
+    const when = ppData?.at ? new Date(ppData.at).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }) + ' 올림' : '';
+    const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'프리팩' }),
+      el('span', { class:'ret-help', text: ppData ? [ppData.file, when].filter(Boolean).join(' · ') : '식빵 · 깻잎 · SR · Egg 를 유통기한 빠른 순으로 보여줘요' }),
+      ppData ? el('span', { class:'pp-up' }, upBtn()) : null);
+    const sec = el('section', { class:'ret-sec pp' }, head);
+    ppDropZone(sec);
+    if (!ppData){
+      const drop = el('div', { class:'pr-drop', tabindex:'0', role:'button', 'aria-label':'엑셀 올리기', onclick: ppPick,
+        onkeydown: e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); ppPick(); } } },
+        el('b', { text:'WMS 재고 엑셀 올리기' }), el('span', { text:'엑셀 파일을 끌어다 놓거나 눌러서 고르세요' }),
+        el('small', { text:'분류한 결과는 팀 모두에게 보이고, 새 파일을 올리면 바뀌어요' }));
+      sec.append(drop);
+      box.replaceChildren(sec);
+      return;
+    }
+    const by = {}; for (const [k] of PP_CATS) by[k] = [];
+    for (const r of ppData.rows) (by[r.c] || by.etc).push(r);
+    const cats = PP_CATS.filter(([k]) => k !== 'etc' || by.etc.length);
+    let cur = ppUi.cat;
+    if (!cats.some(([k]) => k === cur) || (!by[cur].length && cats.some(([k]) => by[k].length))) cur = (cats.find(([k]) => by[k].length) || cats[0])[0];
+    const cards = el('div', { class:'pp-cards' }, ...cats.map(([k, label]) => {
+      const L = by[k], n = L.length;
+      const first = L.find(r => r.exp), d = first ? ppDays(first.exp) : null;
+      const qty = L.reduce((s, r) => s + (r.q || 0), 0);
+      return el('button', { type:'button', class:'pp-card' + (k === cur ? ' on' : '') + (n ? '' : ' empty') + (k === 'etc' ? ' etc' : ''), 'aria-pressed': k === cur ? 'true' : 'false',
+        onclick: () => { ppUi.cat = k; store.set('pp-cat', k); renderPrepack(); } },
+        el('b', { text: label }),
+        el('span', { class:'n' }, String(n), el('small', { text:'건' }), n ? ' · ' + qty.toLocaleString('ko-KR') : '', n ? el('small', { text:'개' }) : null),
+        el('span', { class:'dd' + (n ? ppLvl(d) : ''), text: !n ? '이번 파일에 없음' : first ? `가장 빠른 ${ppMD(first.exp)} · ${ppDD(d)}` : '유통기한 없음' }));
+    }));
+    const L = by[cur];
+    const tools = el('span', { class:'pp-tools' },
+      el('button', { type:'button', class:'ret-btn sm ghost', disabled: !L.length, title:'이 목록 인쇄', onclick: () => ppPrint(cur, L) }, '🖨 인쇄'),
+      el('button', { type:'button', class:'ret-btn sm ghost', disabled: !L.length, title:'이 목록을 엑셀로 받기', onclick: () => ppExport(cur, L) }, '⬇ 엑셀'));
+    const sub = el('div', { class:'pp-sub' }, el('h4', {}, ppCatName(cur), el('span', { text: ` · ${L.length}건 · 유통기한 빠른 순` + (cur === 'egg' ? ' · 10구·15구 함께' : '') })), tools);
+    let body;
+    if (!L.length) body = el('p', { class:'ret-help pp-none', text: cur === 'etc' ? '' : `이번 파일에는 ${ppCatName(cur)} 상품이 없어요.` });
+    else {
+      const th = (t, c) => el('th', { class: c || '', text: t });
+      body = el('div', { class:'pp-scroll' }, el('table', { class:'pp-t' },
+        el('thead', {}, el('tr', {}, th('D-day'), th('제조일'), th('유통기한'), th('상품명'), th('로케이션'), th('수량', 'r'))),
+        el('tbody', {}, ...L.map(r => { const d = ppDays(r.exp); return el('tr', {},
+          el('td', {}, el('span', { class:'pp-dd' + ppLvl(d), text: ppDD(d) })),
+          el('td', { class:'mono mu', text: ppMD(r.mfg) }),
+          el('td', { class:'mono ex', text: ppMD(r.exp) }),
+          el('td', { class:'nm', title: r.name, text: ppShort(r.name) }),
+          el('td', { class:'mono loc', text: r.loc || '-' }),
+          el('td', { class:'mono r q', text: retNum(r.q) })); }))));
+    }
+    sec.append(cards, sub, body);
+    if (by.etc.length && cur !== 'etc') sec.append(el('p', { class:'ret-help', text:`분류에 안 맞는 상품 ${by.etc.length}건은 '분류 안 됨' 카드에서 볼 수 있어요.` }));
+    box.replaceChildren(sec);
+  }
+
+  function ppPrint(cat, L){
+    const E = v => String(v ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+    const now = new Date(Date.now() + 9 * 36e5).toISOString();
+    const stamp = now.slice(5, 10) + ' ' + now.slice(11, 16);
+    const qty = L.reduce((s, r) => s + (r.q || 0), 0);
+    const rows = L.map(r => { const d = ppDays(r.exp); return `<tr><td class="dd${ppLvl(d)}">${ppDD(d)}</td><td class="m">${E(ppMD(r.mfg))}</td><td class="m b">${E(ppMD(r.exp))}</td><td>${E(ppShort(r.name))}</td><td class="m">${E(r.loc)}</td><td class="m r b">${E(retNum(r.q))}</td><td class="ck"><div></div></td></tr>`; }).join('');
+    const css = `@page{size:A4;margin:10mm}*{box-sizing:border-box}body{margin:0;color:#111;font-family:-apple-system,"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+h1{font-size:18pt;margin:0 0 1mm}.sub{font-size:9pt;color:#555;margin-bottom:3mm}table{width:100%;border-collapse:collapse;font-size:9.5pt}th{text-align:left;font-size:8.5pt;color:#555;border-bottom:.4mm solid #111;padding:1.2mm}
+td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-inside:avoid}thead{display:table-header-group}.m{font-family:ui-monospace,Menlo,Consolas,monospace;white-space:nowrap}.r{text-align:right}.b{font-weight:800}
+.dd{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:800;white-space:nowrap}.dd.over{color:#c0392b}.dd.warn{color:#b8661a}.ck{width:12mm}.ck div{width:5mm;height:5mm;border:.35mm solid #111;border-radius:1mm;margin:auto}`;
+    const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>프리팩 ${E(ppCatName(cat))}</title><style>${css}</style></head><body>
+<h1>프리팩 · ${E(ppCatName(cat))}</h1><div class="sub">${L.length}건 · ${E(qty.toLocaleString('ko-KR'))}개 · 유통기한 빠른 순 · ${E(ppData.file || '')} · 인쇄 ${stamp}</div>
+<table><thead><tr><th>D-day</th><th>제조일</th><th>유통기한</th><th>상품명</th><th>로케이션</th><th class="r">수량</th><th>확인</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+    document.getElementById('pp-print-frame')?.remove();
+    const f = el('iframe', { id:'pp-print-frame', title:'프리팩 인쇄', 'aria-hidden':'true', style:'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden' });
+    document.body.append(f);
+    const d = f.contentDocument; d.open(); d.write(html); d.close();
+    setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch { toast('인쇄 화면을 열지 못했어요.'); } }, 300);
+  }
+
+  // 아주 작은 .xlsx 만들기 (외부 라이브러리 없이, 압축 없는 zip)
+  function ppXlsx(sheet, rows, widths){
+    const X = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
+    const colName = i => { let s = ''; i++; while (i){ const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
+    const cell = (v, r, c, st) => { const ref = colName(c) + (r + 1), s = st ? ` s="${st}"` : '';
+      return typeof v === 'number' && isFinite(v) ? `<c r="${ref}"${s}><v>${v}</v></c>` : `<c r="${ref}" t="inlineStr"${s}><is><t xml:space="preserve">${X(v)}</t></is></c>`; };
+    const sheetXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>`
+      + `<cols>${widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>`
+      + rows.map((r, ri) => `<row r="${ri + 1}">${r.map((v, ci) => cell(v, ri, ci, ri === 0 ? 1 : 0)).join('')}</row>`).join('')
+      + `</sheetData><autoFilter ref="A1:${colName(rows[0].length - 1)}${rows.length}"/></worksheet>`;
+    const files = [
+      ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
+      ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+      ['xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${X(sheet)}" sheetId="1" r:id="rId1"/></sheets><definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">'${X(sheet)}'!$A$1:$${colName(rows[0].length - 1)}$${rows.length}</definedName></definedNames></workbook>`],
+      ['xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+      ['xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="10"/><name val="맑은 고딕"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="맑은 고딕"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F6F5C"/></patternFill></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="2"><xf fontId="0" fillId="0" borderId="0"/><xf fontId="1" fillId="2" borderId="0" applyFont="1" applyFill="1"/></cellXfs></styleSheet>'],
+      ['xl/worksheets/sheet1.xml', sheetXml],
+    ];
+    const enc = new TextEncoder();
+    const crcT = ppXlsx.t || (ppXlsx.t = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; }));
+    const crc = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = crcT[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+    const parts = [], central = []; let off = 0;
+    const u16 = n => [n & 255, (n >>> 8) & 255], u32 = n => [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255];
+    for (const [name, text] of files){
+      const nb = enc.encode(name), data = enc.encode(text), c = crc(data);
+      const common = [...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21), ...u32(c), ...u32(data.length), ...u32(data.length), ...u16(nb.length), ...u16(0)];
+      const local = new Uint8Array([...u32(0x04034b50), ...common]);
+      parts.push(local, nb, data);
+      central.push(new Uint8Array([...u32(0x02014b50), ...u16(20), ...common, ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(off)]), nb);
+      off += local.length + nb.length + data.length;
+    }
+    const cs = central.reduce((s, b) => s + b.length, 0);
+    const end = new Uint8Array([...u32(0x06054b50), ...u16(0), ...u16(0), ...u16(files.length), ...u16(files.length), ...u32(cs), ...u32(off), ...u16(0)]);
+    return new Blob([...parts, ...central, end], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+  function ppExport(cat, L){
+    const rows = [['D-day', '제조일', '유통기한', '상품명', '로케이션', '수량', 'SKU ID', '상품 바코드', 'LPN']];
+    for (const r of L) rows.push([ppDD(ppDays(r.exp)), r.mfg, r.exp, r.name, r.loc, r.q, r.sku, r.bc, r.lpn]);
+    const blob = ppXlsx(ppCatName(cat), rows, [8, 11, 11, 60, 18, 7, 12, 16, 15]);
+    const a = el('a', { href: URL.createObjectURL(blob), download: `프리팩_${ppCatName(cat).replace(/\s/g, '')}_${ppTodayIso().replace(/-/g, '')}.xlsx` });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  }
+
   let prData = null, prRev = -1, prLoading = false;
   const prUi = { shift:'all', type:'all', ct:'all', sel:'', sort:'q', ciScope:'ib' };
 
