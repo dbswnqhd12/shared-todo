@@ -686,7 +686,9 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .pp-card .dd{font-size:11.5px;color:var(--muted)}.pp-card .dd.over{color:var(--high);font-weight:700}.pp-card .dd.warn{color:var(--mid);font-weight:700}
 .pp-card.on{border:2px solid var(--accent);padding:9px 11px;background:var(--accent-soft)}.pp-card.empty{opacity:.55}.pp-card.etc b{color:var(--high)}
 .pp-sub{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}.pp-sub h4{margin:0;font-size:15px}.pp-sub h4 span{font-size:12.5px;font-weight:500;color:var(--muted)}.pp-tools{margin-left:auto;display:flex;gap:6px}
-.pp-scroll{overflow-x:auto}
+.pp-scroll{overflow:auto;max-height:min(62vh,600px);border:1px solid var(--line);border-radius:8px;overscroll-behavior:contain}
+.pp-scroll .pp-t thead th{position:sticky;top:0;z-index:1;background:var(--paper);box-shadow:inset 0 -1px 0 var(--line)}
+.pp-scroll .pp-t tbody tr:last-child td{border-bottom:0}
 .pp-t{width:100%;border-collapse:collapse;font-size:13px}.pp-t th{text-align:left;font-size:11.5px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);padding:6px 8px;white-space:nowrap}
 .pp-t td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}.pp-t tbody tr:hover td{background:var(--bg)}
 .pp-t .mono{font-family:var(--mono);white-space:nowrap}.pp-t .mu{color:var(--muted)}.pp-t .ex{font-weight:800}.pp-t .dd{width:1%;white-space:nowrap}.pp-t .r{text-align:right}.pp-t .q{font-weight:700}.pp-t .nm{min-width:220px}
