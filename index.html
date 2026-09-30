@@ -695,6 +695,15 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .pp-dd{display:inline-block;min-width:52px;text-align:center;font-family:var(--mono);font-size:11.5px;font-weight:800;border-radius:6px;padding:2px 6px;background:var(--bg);color:var(--muted);white-space:nowrap}
 .pp-dd.warn{background:var(--mid-soft);color:var(--mid)}.pp-dd.over{background:var(--high-soft);color:var(--high)}
 .pp-none{padding:10px 0}
+.pp-list{padding:0 8px 8px}
+.pp-hd{position:sticky;top:0;z-index:1;display:grid;grid-template-columns:128px 150px minmax(0,1fr) 130px 56px;gap:10px;padding:8px 10px 6px 15px;margin:0 -8px 2px;background:var(--paper);border-bottom:1px solid var(--line);font-size:11.5px;font-weight:600;color:var(--muted)}
+.pp-hd .r,.pp-rw .q{text-align:right}
+.pp-day{display:grid;grid-template-columns:128px minmax(0,1fr);gap:10px;margin-top:8px;padding:8px 10px;border-left:5px solid var(--c);border-radius:7px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 13%,var(--paper)),var(--paper) 55%)}
+.pp-dh{display:flex;flex-direction:column;align-items:flex-start;gap:4px}.pp-dh .dt{font-family:var(--mono);font-size:20px;font-weight:900;line-height:1.1;color:var(--c)}.pp-dh small{font-size:11.5px;color:var(--muted)}
+.pp-rw{display:grid;grid-template-columns:150px minmax(0,1fr) 130px 56px;gap:10px;align-items:baseline;padding:4px 0;font-size:13px;border-top:1px dashed color-mix(in srgb,var(--c) 22%,var(--line))}.pp-rw:first-child{border-top:0}
+.pp-rw .loc,.pp-rw .bc,.pp-rw .q{font-family:var(--mono);white-space:nowrap}.pp-rw .loc{font-weight:700;font-size:12.5px}.pp-rw .bc{color:var(--muted);font-size:12px}.pp-rw .q{font-size:13.5px}.pp-rw .nm{overflow-wrap:anywhere}
+@media (max-width:700px){.pp-hd{display:none}.pp-day{grid-template-columns:1fr;gap:4px}.pp-dh{flex-direction:row;align-items:center;gap:8px}.pp-dh .dt{font-size:17px}
+  .pp-rw{grid-template-columns:minmax(0,1fr) auto;gap:2px 10px}.pp-rw .nm{grid-column:1/-1;grid-row:2}.pp-rw .bc{grid-column:1;grid-row:3}.pp-rw .q{grid-column:2;grid-row:1}}
 .pr-file{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;border:1px dashed var(--line);border-radius:8px;background:var(--bg)}
 .pr-fn{font-family:var(--mono);font-size:12.5px;font-weight:600;overflow-wrap:anywhere}.pr-file .ret-btn{margin-left:auto}
 .pr-filters{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
@@ -3725,6 +3734,7 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
   const ppDD = d => d == null ? '-' : d < 0 ? `D+${-d}` : d === 0 ? 'D-DAY' : `D-${d}`;
   const ppLvl = d => d == null ? '' : d <= 7 ? ' over' : d <= 14 ? ' warn' : '';
   const ppShort = s => String(s || '').replace(/^\s*\[로켓프레시\]\s*/, '').trim();
+  const PP_PAL = ['#2d6cdf', '#1a8a5a', '#7b4fd6', '#0f8b9c', '#c2417a', '#8a6a16'];   // 날짜 묶음 색 (급한 정도는 D-day 배지로)
   const ppSort = (a, b) => (a.exp || '9999').localeCompare(b.exp || '9999') || a.name.localeCompare(b.name, 'ko') || a.loc.localeCompare(b.loc);
 
   function ppPrep(rows, file){
@@ -3836,16 +3846,20 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
     let body;
     if (!L.length) body = el('p', { class:'ret-help pp-none', text: cur === 'etc' ? '' : `이번 파일에는 ${ppCatName(cur)} 상품이 없어요.` });
     else {
-      const th = (t, c) => el('th', { class: c || '', text: t });
-      body = el('div', { class:'pp-scroll' }, el('table', { class:'pp-t' },
-        el('thead', {}, el('tr', {}, th('로케이션'), th('상품명'), th('상품바코드'), th('수량', 'r'), th('유통기한'), th('D-day', 'r'))),
-        el('tbody', {}, ...L.map(r => { const d = ppDays(r.exp); return el('tr', {},
-          el('td', { class:'mono loc', text: r.loc || '-' }),
-          el('td', { class:'nm', title: r.name, text: ppShort(r.name) }),
-          el('td', { class:'mono mu', text: r.bc || '-' }),
-          el('td', { class:'mono r q', text: retNum(r.q) }),
-          el('td', { class:'mono ex', text: ppMD(r.exp) }),
-          el('td', { class:'r dd' }, el('span', { class:'pp-dd' + ppLvl(d), text: ppDD(d) }))); }))));
+      // 같은 유통기한끼리 묶고, 날짜마다 색을 바꿔서 경계가 보이게
+      const groups = [];
+      for (const r of L){ const g = groups[groups.length - 1]; if (g && g.exp === r.exp) g.rows.push(r); else groups.push({ exp: r.exp, rows: [r] }); }
+      body = el('div', { class:'pp-scroll pp-list' },
+        el('div', { class:'pp-hd' }, el('span', { text:'유통기한' }), el('span', { text:'로케이션' }), el('span', { text:'상품명' }), el('span', { text:'상품바코드' }), el('span', { class:'r', text:'수량' })),
+        ...groups.map((g, i) => { const d = ppDays(g.exp), q = g.rows.reduce((s, r) => s + (r.q || 0), 0);
+          return el('div', { class:'pp-day', style:`--c:${PP_PAL[i % PP_PAL.length]}` },
+            el('div', { class:'pp-dh' }, el('b', { class:'dt', text: g.exp ? ppMD(g.exp) : '없음' }), el('span', { class:'pp-dd' + ppLvl(d), text: ppDD(d) }),
+              el('small', { text:`${g.rows.length}건 · ${q.toLocaleString('ko-KR')}개` })),
+            el('div', { class:'pp-dl' }, ...g.rows.map(r => el('div', { class:'pp-rw' },
+              el('span', { class:'loc', text: r.loc || '-' }),
+              el('span', { class:'nm', title: r.name, text: ppShort(r.name) }),
+              el('span', { class:'bc', text: r.bc || '-' }),
+              el('b', { class:'q', text: retNum(r.q) }))))); }));
     }
     sec.append(cards, sub, body);
     if (by.etc.length && cur !== 'etc') sec.append(el('p', { class:'ret-help', text:`분류에 안 맞는 상품 ${by.etc.length}건은 '분류 안 됨' 카드에서 볼 수 있어요.` }));
