@@ -100,6 +100,12 @@ export default async function handler(req, res) {
 
     if (req.method === 'DELETE') {
       if (!id) throw new UserError('id가 필요해요.');
+      // 붙어 있던 PDF도 저장소에서 지워요 (실패해도 건 삭제는 계속)
+      try {
+        const raw = await redis('HGET', KEY, id);
+        const urls = raw ? (JSON.parse(raw).files || []).map(f => f.u || f.p).filter(Boolean) : [];
+        if (urls.length) { const { del } = await import('@vercel/blob'); await del(urls); }
+      } catch { /* 무시 */ }
       await pipeline([['HDEL', KEY, id], ['INCR', K.rev]]);
       return res.status(200).json({ ok: true });
     }
