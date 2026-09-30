@@ -689,7 +689,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .pp-scroll{overflow-x:auto}
 .pp-t{width:100%;border-collapse:collapse;font-size:13px}.pp-t th{text-align:left;font-size:11.5px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);padding:6px 8px;white-space:nowrap}
 .pp-t td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}.pp-t tbody tr:hover td{background:var(--bg)}
-.pp-t .mono{font-family:var(--mono);white-space:nowrap}.pp-t .mu{color:var(--muted)}.pp-t .ex{font-weight:800}.pp-t .r{text-align:right}.pp-t .q{font-weight:700}.pp-t .nm{min-width:220px}
+.pp-t .mono{font-family:var(--mono);white-space:nowrap}.pp-t .mu{color:var(--muted)}.pp-t .ex{font-weight:800}.pp-t .ex .pp-dd{margin-left:8px}.pp-t .r{text-align:right}.pp-t .q{font-weight:700}.pp-t .nm{min-width:220px}
 .pp-dd{display:inline-block;min-width:52px;text-align:center;font-family:var(--mono);font-size:11.5px;font-weight:800;border-radius:6px;padding:2px 6px;background:var(--bg);color:var(--muted);white-space:nowrap}
 .pp-dd.warn{background:var(--mid-soft);color:var(--mid)}.pp-dd.over{background:var(--high-soft);color:var(--high)}
 .pp-none{padding:10px 0}
@@ -3836,14 +3836,13 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
     else {
       const th = (t, c) => el('th', { class: c || '', text: t });
       body = el('div', { class:'pp-scroll' }, el('table', { class:'pp-t' },
-        el('thead', {}, el('tr', {}, th('D-day'), th('제조일'), th('유통기한'), th('상품명'), th('로케이션'), th('수량', 'r'))),
+        el('thead', {}, el('tr', {}, th('로케이션'), th('상품명'), th('상품바코드'), th('수량', 'r'), th('유통기한'))),
         el('tbody', {}, ...L.map(r => { const d = ppDays(r.exp); return el('tr', {},
-          el('td', {}, el('span', { class:'pp-dd' + ppLvl(d), text: ppDD(d) })),
-          el('td', { class:'mono mu', text: ppMD(r.mfg) }),
-          el('td', { class:'mono ex', text: ppMD(r.exp) }),
-          el('td', { class:'nm', title: r.name, text: ppShort(r.name) }),
           el('td', { class:'mono loc', text: r.loc || '-' }),
-          el('td', { class:'mono r q', text: retNum(r.q) })); }))));
+          el('td', { class:'nm', title: r.name, text: ppShort(r.name) }),
+          el('td', { class:'mono mu', text: r.bc || '-' }),
+          el('td', { class:'mono r q', text: retNum(r.q) }),
+          el('td', { class:'mono ex' }, ppMD(r.exp), el('span', { class:'pp-dd' + ppLvl(d), text: ppDD(d) }))); }))));
     }
     sec.append(cards, sub, body);
     if (by.etc.length && cur !== 'etc') sec.append(el('p', { class:'ret-help', text:`분류에 안 맞는 상품 ${by.etc.length}건은 '분류 안 됨' 카드에서 볼 수 있어요.` }));
@@ -3855,14 +3854,14 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
     const now = new Date(Date.now() + 9 * 36e5).toISOString();
     const stamp = now.slice(5, 10) + ' ' + now.slice(11, 16);
     const qty = L.reduce((s, r) => s + (r.q || 0), 0);
-    const rows = L.map(r => { const d = ppDays(r.exp); return `<tr><td class="dd${ppLvl(d)}">${ppDD(d)}</td><td class="m">${E(ppMD(r.mfg))}</td><td class="m b">${E(ppMD(r.exp))}</td><td>${E(ppShort(r.name))}</td><td class="m">${E(r.loc)}</td><td class="m r b">${E(retNum(r.q))}</td><td class="ck"><div></div></td></tr>`; }).join('');
+    const rows = L.map(r => { const d = ppDays(r.exp); return `<tr><td class="m">${E(r.loc)}</td><td>${E(ppShort(r.name))}</td><td class="m">${E(r.bc)}</td><td class="m r b">${E(retNum(r.q))}</td><td class="m b">${E(ppMD(r.exp))} <span class="dd${ppLvl(d)}">${ppDD(d)}</span></td><td class="ck"><div></div></td></tr>`; }).join('');
     const css = `@page{size:A4;margin:10mm}*{box-sizing:border-box}body{margin:0;color:#111;font-family:-apple-system,"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 h1{font-size:18pt;margin:0 0 1mm}.sub{font-size:9pt;color:#555;margin-bottom:3mm}table{width:100%;border-collapse:collapse;font-size:9.5pt}th{text-align:left;font-size:8.5pt;color:#555;border-bottom:.4mm solid #111;padding:1.2mm}
 td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-inside:avoid}thead{display:table-header-group}.m{font-family:ui-monospace,Menlo,Consolas,monospace;white-space:nowrap}.r{text-align:right}.b{font-weight:800}
 .dd{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:800;white-space:nowrap}.dd.over{color:#c0392b}.dd.warn{color:#b8661a}.ck{width:12mm}.ck div{width:5mm;height:5mm;border:.35mm solid #111;border-radius:1mm;margin:auto}`;
     const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>프리팩 ${E(ppCatName(cat))}</title><style>${css}</style></head><body>
 <h1>프리팩 · ${E(ppCatName(cat))}</h1><div class="sub">${L.length}건 · ${E(qty.toLocaleString('ko-KR'))}개 · 유통기한 빠른 순 · ${E(ppData.file || '')} · 인쇄 ${stamp}</div>
-<table><thead><tr><th>D-day</th><th>제조일</th><th>유통기한</th><th>상품명</th><th>로케이션</th><th class="r">수량</th><th>확인</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+<table><thead><tr><th>로케이션</th><th>상품명</th><th>상품바코드</th><th class="r">수량</th><th>유통기한</th><th>확인</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
     document.getElementById('pp-print-frame')?.remove();
     const f = el('iframe', { id:'pp-print-frame', title:'프리팩 인쇄', 'aria-hidden':'true', style:'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden' });
     document.body.append(f);
@@ -3906,9 +3905,9 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     return new Blob([...parts, ...central, end], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   }
   function ppExport(cat, L){
-    const rows = [['D-day', '제조일', '유통기한', '상품명', '로케이션', '수량', 'SKU ID', '상품 바코드', 'LPN']];
-    for (const r of L) rows.push([ppDD(ppDays(r.exp)), r.mfg, r.exp, r.name, r.loc, r.q, r.sku, r.bc, r.lpn]);
-    const blob = ppXlsx(ppCatName(cat), rows, [8, 11, 11, 60, 18, 7, 12, 16, 15]);
+    const rows = [['로케이션', '상품명', '상품바코드', '수량', '유통기한', 'D-day', 'SKU ID', 'LPN']];
+    for (const r of L) rows.push([r.loc, r.name, r.bc, r.q, r.exp, ppDD(ppDays(r.exp)), r.sku, r.lpn]);
+    const blob = ppXlsx(ppCatName(cat), rows, [18, 60, 16, 7, 11, 8, 12, 15]);
     const a = el('a', { href: URL.createObjectURL(blob), download: `프리팩_${ppCatName(cat).replace(/\s/g, '')}_${ppTodayIso().replace(/-/g, '')}.xlsx` });
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
