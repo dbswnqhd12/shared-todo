@@ -656,6 +656,17 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .xe-btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:7px;padding:4px 9px;font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}
 .xe-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .ov-r1,.ov-r,.ov-t.done tbody tr{cursor:default}
+/* 과매입 PDF 첨부 */
+.ov-fchip{border:1px solid var(--line);border-radius:6px;padding:0 6px;font:inherit;font-family:var(--body);font-size:11px;font-weight:700;color:var(--muted);background:var(--paper);margin-right:6px;cursor:pointer;line-height:18px;vertical-align:1px;white-space:nowrap}
+.ov-fchip.has{color:var(--high);border-color:color-mix(in srgb,var(--high) 40%,var(--line));background:var(--high-soft)}
+.ov-files{margin-top:10px;border:1px dashed var(--line);border-radius:9px;padding:10px;background:var(--bg)}
+.ov-files h5{margin:0 0 8px;font-size:12px;color:var(--ink)}.ov-files h5 span{font-weight:500;color:var(--muted)}
+.ov-f{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:6px;font-size:12.5px;flex-wrap:wrap}
+.ov-f .ic{width:26px;height:30px;border-radius:4px;background:var(--high-soft);color:var(--high);font-size:9px;font-weight:900;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--high) 35%,var(--line));flex:none}
+.ov-f b{font-weight:700;min-width:0;overflow-wrap:anywhere;flex:1}.ov-f small{color:var(--muted);white-space:nowrap}
+.ov-f .a{border:1px solid var(--line);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:800;background:var(--paper);color:var(--ink);cursor:pointer}
+.ov-fdrop{display:block;width:100%;border:2px dashed color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:8px;padding:11px;text-align:center;font:inherit;font-size:12.5px;color:var(--accent);font-weight:700;background:var(--paper);cursor:pointer}
+.ov-fdrop small{display:block;color:var(--muted);font-weight:500;margin-top:2px}.ov-fdrop.on{background:var(--accent-soft)}.ov-fdrop:disabled{opacity:.7;cursor:progress}
 @media (max-width:760px){.xe .eg{grid-template-columns:1fr 1fr!important}.xe .eg>div{grid-column:auto!important}.ov-t tr.xe-row{display:block}}
 .ob-t .ob-cp{padding:1px 6px;font-size:10.5px}
 .ob-ln{display:block;font-size:12px;color:var(--ink);white-space:normal;line-height:1.35;overflow-wrap:anywhere;cursor:text;user-select:text;-webkit-user-select:text}
@@ -2758,7 +2769,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   let ovItems = null, ovRev = -1, ovLoading = false, ovBuilt = false, ovToday = todayIso, ovDelArm = 0;
   const ovLS = (k, d) => { try { return localStorage.getItem(k) || d; } catch { return d; } };
   const ovSetLS = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
-  const ovUi = { inl:null, view: ['ded', 'etc'].includes(ovLS('ov-view', 'vr')) ? ovLS('ov-view', 'vr') : 'vr', editId:null, auto:false, doneAll:false };
+  const ovUi = { inl:null, upl:null, view: ['ded', 'etc'].includes(ovLS('ov-view', 'vr')) ? ovLS('ov-view', 'vr') : 'vr', editId:null, auto:false, doneAll:false };
   const ovBlank = () => ({ sku:'', barcode:'', qty:'', name:'', vendor:'', comm:'', mail:'', date: ovForm?.date || ovToday, who: ovForm?.who || ovLS('ov-who', '') });
   let ovForm = null; ovForm = ovBlank();
   const ovDays = d => d ? Math.max(0, Math.round((Date.parse(ovToday) - Date.parse(d)) / 864e5)) : 0;
@@ -2962,7 +2973,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       const on = ovUi.inl?.id === t.id;
       const row = el('div', { class:'ov-r1' + (on ? ' sel' : ''), title:'상품명 · 수량을 두 번 누르면 바로 수정', ondblclick: e => ovQuick(e, t) },
         el('div', { class:'ov-rn' }, el('span', { class:'nm', text: t.name }),
-          el('span', { class:'mt' }, ovMeta(t) + ' · ', ...ovMailBits(t), t.comm ? ' · ' + t.comm : '')),
+          el('span', { class:'mt' }, ovFileChip(t), ovMeta(t) + ' · ', ...ovMailBits(t), t.comm ? ' · ' + t.comm : '')),
         el('span', { class:'ov-rq mono', text: retNum(t.qty) + '개' }),
         el('div', { class:'ov-pick' }, xeBtn(on, () => ovToggleInl(t)),
           el('button', { type:'button', class:'m-vr', text:'가상반출', onclick: e => { e.stopPropagation(); ovPatch(t, { method:'vr' }, '가상반출로 넘겼어요.'); } }),
@@ -2976,7 +2987,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     const shown = done.slice(0, ovUi.doneAll ? done.length : 20);
     const body = shown.flatMap(t => { const on = ovUi.inl?.id === t.id; const tr = el('tr', { title:'외부 SKU · 상품명 · 수량 · 업체명을 두 번 누르면 바로 수정', class: on ? 'sel' : '',
         ondblclick: e => ovQuick(e, t) },
-      td('ov-c-sku mono', t.sku || '-'), td('ov-c-nm', t.name), td('ov-c-q mono', retNum(t.qty)), td('ov-c-v', t.vendor), td('ov-c-who', t.who || '-'),
+      td('ov-c-sku mono', t.sku || '-'), td('ov-c-nm', null, ovFileChip(t), t.name), td('ov-c-q mono', retNum(t.qty)), td('ov-c-v', t.vendor), td('ov-c-who', t.who || '-'),
       td('ov-c-m', null, t.method ? el('span', { class:'ov-chip m-' + t.method, text: ovMethod(t.method) }) : el('span', { class:'no', text:'-' })),
       td('ov-c-d mono', retMD(t.doneAt)),
       td('ov-c-meta', [t.who, retMD(t.doneAt) + ' 완료'].filter(Boolean).join(' · ')),
@@ -3009,7 +3020,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       ...ts.flatMap(t => { const n = ovDays(t.date), on = ovUi.inl?.id === t.id; const row = el('div', { class:'ov-r' + (on ? ' sel' : ''), title:'상품명 · 수량을 두 번 누르면 바로 수정',
           ondblclick: e => ovQuick(e, t) },
         el('div', { class:'ov-rn' }, el('span', { class:'nm', text: t.name }),
-          el('span', { class:'mt mono', text: [k === 'etc' ? ovMethod(t.method) : '', t.barcode || t.sku, t.who, t.comm].filter(Boolean).join(' · ') })),
+          el('span', { class:'mt mono' }, ovFileChip(t), [k === 'etc' ? ovMethod(t.method) : '', t.barcode || t.sku, t.who, t.comm].filter(Boolean).join(' · '))),
         el('span', { class:'ov-rq mono', text: retNum(t.qty) + '개' }),
         el('span', { class:'ov-rd mono' + (n >= 7 ? ' hi' : ''), text: n + '일째' }),
         el('span', { class:'ov-acts' }, xeBtn(on, () => ovToggleInl(t)),
@@ -3043,6 +3054,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     const p = el('div', { class:'ob-ed xe' },
       el('h4', {}, '✎ ' + o.title + ' 고치는 중', el('small', { text:'Enter 저장 · Esc 취소' })),
       el('div', { class:'eg', style:`grid-template-columns:repeat(${o.cols || 4},minmax(0,1fr))` }, ...o.fields.map(f)),
+      o.extra || null,
       el('div', { class:'ebtn' },
         o.onDelete ? el('button', { type:'button', class:'ret-btn ghost sm ov-danger', text: o.armed ? '한 번 더 누르면 삭제' : '삭제', onclick: o.onDelete }) : null,
         el('span', { class:'emsg' + (o.err ? ' err' : ''), text: o.busy ? '저장 중…' : o.msg || '' }),
@@ -3130,7 +3142,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   function ovRerender(){ ovRenderList(); ovRenderView(); }
   function ovInlPanel(t){
     const x = ovUi.inl;
-    return edPanel({ title: t.name || '과매입 건', d: x.d, cols: 4, busy: x.busy, msg: x.msg, err: x.err, armed: x.arm && Date.now() - x.arm < 4000,
+    return edPanel({ title: t.name || '과매입 건', d: x.d, cols: 4, extra: ovFilesBox(t), busy: x.busy, msg: x.msg, err: x.err, armed: x.arm && Date.now() - x.arm < 4000,
       fields: [['sku', '외부 SKU ID', { mono:true, max:40 }], ['barcode', '바코드', { mono:true, max:40 }], ['qty', '수량', { req:true, mono:true, im:'decimal', max:10 }], ['date', '생성일자', { type:'date', mono:true }],
         ['name', '상품명', { req:true, span:2 }], ['vendor', '업체명', { req:true, max:80, span:2 }],
         ['who', '처리자', { opts: [['', '-'], ...OV_WHO.map(w => [w, w])] }], ['mail', '메일 발송일', { type:'date', mono:true }], ['comm', '비고', { max:200, span:2 }]],
@@ -3155,6 +3167,86 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     try { const r = await api('PATCH', '/api/overs?id=' + encodeURIComponent(t.id), payload); Object.assign(t, r.item); ovRev = -2; setSync('', '저장됨'); }
     catch(e){ for (const k of Object.keys(t)) delete t[k]; Object.assign(t, prev); ovRerender(); istCounts(); if (e instanceof Locked) return showLock(e.message); toast(e.message + ' (저장 안 됨)'); }
   }
+  // ---- 과매입 PDF 첨부 (비공개 저장소 · 팀 비밀번호로만 열려요) ----
+  const OV_PDF_MAX = 4 * 1024 * 1024;
+  const ovFileHeaders = extra => ({ ...(extra || {}), ...(teamKey ? { 'x-team-key': encodeURIComponent(teamKey) } : {}) });
+  const ovFileSize = n => n >= 1048576 ? (Math.round(n / 104857.6) / 10) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB';
+  function ovFileChip(t){
+    const n = (t.files || []).length;
+    return el('button', { type:'button', class:'ov-fchip' + (n ? ' has' : ''), title: n ? `첨부 PDF ${n}개` : 'PDF 첨부하기', text: n ? `📄 PDF ${n}` : '📎 첨부',
+      onclick: e => { e.stopPropagation(); if (ovUi.inl?.id !== t.id) ovToggleInl(t); setTimeout(() => document.querySelector('.ov-files')?.scrollIntoView({ behavior:'smooth', block:'nearest' }), 60); },
+      ondblclick: e => e.stopPropagation() });
+  }
+  function ovFilesBox(t){
+    const files = Array.isArray(t.files) ? t.files : [];
+    const up = ovUi.upl && ovUi.upl.id === t.id ? ovUi.upl : null;
+    const inp = el('input', { type:'file', accept:'application/pdf,.pdf', multiple:true, hidden:true });
+    inp.onchange = () => { const fs = [...inp.files]; inp.value = ''; ovUploadFiles(t, fs); };
+    const drop = el('button', { type:'button', class:'ov-fdrop', disabled: !!up, onclick: () => inp.click() },
+      up ? `올리는 중… (${up.done}/${up.total})` : '+ PDF 올리기 (여기로 끌어다 놓거나 눌러서 고르기)', el('small', { text:'한 파일 4MB까지 · 여러 개 가능' }));
+    drop.ondragover = e => { e.preventDefault(); drop.classList.add('on'); };
+    drop.ondragleave = () => drop.classList.remove('on');
+    drop.ondrop = e => { e.preventDefault(); drop.classList.remove('on'); ovUploadFiles(t, [...(e.dataTransfer?.files || [])]); };
+    const rows = files.map(f => el('div', { class:'ov-f' },
+      el('span', { class:'ic', text:'PDF' }), el('b', { text: f.n }),
+      el('small', { text: [ovFileSize(f.s || 0), f.at ? retMD(isoOf(new Date(f.at))) : '', f.who].filter(Boolean).join(' · ') }),
+      el('button', { type:'button', class:'a', text:'열기', onclick: () => ovOpenFile(t, f) }),
+      hoDel(`${f.n} 삭제`, () => ovDeleteFile(t, f))));
+    return el('div', { class:'ov-files' },
+      el('h5', {}, '📄 첨부 PDF', el('span', { text: files.length ? ` · ${files.length}개 · 열기를 누르면 새 창에서 열려요` : ' · 아직 없어요' })),
+      ...rows, drop, inp);
+  }
+  async function ovUploadFiles(t, list){
+    list = list.filter(Boolean); if (!list.length) return;
+    if (String(t.id).startsWith('temp-')) return toast('저장 중이에요. 잠시 후 다시 해 주세요.');
+    const isPdf = f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+    const bad = list.filter(f => !isPdf(f)), big = list.filter(f => isPdf(f) && f.size > OV_PDF_MAX);
+    if (bad.length) toast('PDF 파일만 올릴 수 있어요: ' + bad.map(f => f.name).join(', '));
+    else if (big.length) toast('4MB가 넘어서 못 올려요: ' + big.map(f => f.name).join(', '));
+    const ok = list.filter(f => isPdf(f) && f.size <= OV_PDF_MAX && f.size > 0);
+    if (!ok.length) return;
+    ovUi.upl = { id: t.id, done: 0, total: ok.length }; ovRerender();
+    let fails = 0;
+    for (const f of ok){
+      pending++; setSync('busy', 'PDF 올리는 중…');
+      try {
+        const q = `id=${encodeURIComponent(t.id)}&name=${encodeURIComponent(f.name)}&who=${encodeURIComponent(ovLS('ov-who', ''))}`;
+        const r = await fetch('/api/files?' + q, { method:'POST', headers: ovFileHeaders({ 'Content-Type':'application/pdf' }), body: f });
+        const d = await r.json().catch(() => ({}));
+        if (r.status === 401) throw new Locked(d.error || '팀 비밀번호를 입력하세요.');
+        if (!r.ok) throw new Error(d.error || '올리지 못했어요.');
+        if (d.item) t.files = d.item.files || [];
+        ovUi.upl.done++; ovRev = -2;
+      } catch(e){
+        if (e instanceof Locked){ pending--; ovUi.upl = null; ovRerender(); return showLock(e.message); }
+        fails++; toast(`${f.name}: ${e.message}`);
+      } finally { if (ovUi.upl) pending--; }
+      ovRerender();
+    }
+    ovUi.upl = null; ovRerender(); ovRenderList(); ovRenderView();
+    setSync(fails ? 'err' : '', fails ? '일부 파일을 올리지 못했어요' : '저장됨');
+    if (!fails) toast(ok.length > 1 ? `PDF ${ok.length}개를 올렸어요.` : 'PDF를 올렸어요.');
+  }
+  async function ovOpenFile(t, f){
+    const w = window.open('', '_blank');   // 버튼을 누른 순간 창을 열어 둬야 팝업이 안 막혀요
+    if (w){ try { w.document.title = f.n; w.document.body.innerHTML = '<p style="font-family:sans-serif;padding:24px;color:#555">PDF 여는 중…</p>'; } catch {} }
+    try {
+      const r = await fetch(`/api/files?id=${encodeURIComponent(t.id)}&p=${encodeURIComponent(f.p)}`, { headers: ovFileHeaders(), cache:'no-store' });
+      if (r.status === 401){ const d = await r.json().catch(() => ({})); throw new Locked(d.error || '팀 비밀번호를 입력하세요.'); }
+      if (!r.ok){ const d = await r.json().catch(() => ({})); throw new Error(d.error || '파일을 열지 못했어요.'); }
+      const url = URL.createObjectURL(new Blob([await r.blob()], { type:'application/pdf' }));
+      if (w && !w.closed) w.location.href = url;
+      else { const a = el('a', { href:url, download: f.n }); document.body.append(a); a.click(); a.remove(); }
+      setTimeout(() => URL.revokeObjectURL(url), 120000);
+    } catch(e){ if (w) w.close(); if (e instanceof Locked) return showLock(e.message); toast(e.message); }
+  }
+  async function ovDeleteFile(t, f){
+    const prev = t.files;
+    t.files = (t.files || []).filter(x => x.p !== f.p); ovRerender();
+    try { const r = await api('DELETE', `/api/files?id=${encodeURIComponent(t.id)}&p=${encodeURIComponent(f.p)}`); if (r.item) t.files = r.item.files || []; ovRev = -2; setSync('', '저장됨'); toast('PDF를 지웠어요.'); }
+    catch(e){ t.files = prev; ovRerender(); if (e instanceof Locked) return showLock(e.message); toast(e.message + ' (삭제 안 됨)'); }
+  }
+
   // 과매입: 칸을 두 번 눌러 바로 고치기 (상품명 · 수량 · 업체명 · 외부 SKU)
   function ovQuick(e, t){
     const host = e.target.closest('.ov-rn .nm, .ov-rq, td.ov-c-nm, td.ov-c-q, td.ov-c-v, td.ov-c-sku'); if (!host) return;
