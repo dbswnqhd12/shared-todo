@@ -711,7 +711,15 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .pp-none{padding:10px 0}
 /* 버퍼 */
 .bf-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.bf-st{border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--paper)}.bf-st small{font-size:12px;color:var(--muted)}.bf-st b{display:block;font-family:var(--mono);font-size:19px;font-weight:800;margin-top:2px}.bf-st.on{border:2px solid var(--accent);padding:8px 11px;background:var(--accent-soft)}
-.bf-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.bf-find{margin-left:auto;min-width:0;width:240px;max-width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 10px;font:inherit;font-size:13px;background:var(--paper);color:var(--ink)}
+.bf-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.bf-fw{margin-left:auto;display:flex;gap:6px;align-items:center;min-width:0;max-width:100%}.bf-fw .bf-find{margin-left:0}.bf-cam{white-space:nowrap;background:var(--accent);color:var(--paper);border-color:var(--accent);font-weight:700}
+.scan-hit{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-soft);color:var(--accent);border-radius:10px;padding:9px 12px;font-size:13.5px;font-weight:600}.scan-hit.miss{background:var(--high-soft);color:var(--high)}.scan-hit code{font-family:var(--mono);font-weight:700}.scan-hit .sp{flex:1}.scan-hit button{white-space:nowrap}
+.scan-ov{position:fixed;inset:0;z-index:1000;background:#000;color:#fff;overflow:hidden}.scan-ov video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scan-box{position:absolute;left:50%;top:40%;width:min(78vw,420px);height:min(34vw,180px);transform:translate(-50%,-50%);border:3px solid #fff;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.5)}.scan-box:after{content:"";position:absolute;left:8%;right:8%;top:50%;height:2px;background:#ff5a4a;box-shadow:0 0 8px #ff5a4a}
+.scan-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:max(14px,env(safe-area-inset-top)) 16px 14px;font-size:16px}
+.scan-x,.scan-chip{background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:20px;padding:7px 14px;font-size:14px}.scan-chip.on{background:#fff;color:#000}
+.scan-msg{position:absolute;left:16px;right:16px;top:calc(40% + min(17vw,90px) + 18px);text-align:center;font-size:15px;text-shadow:0 1px 3px #000}
+.scan-bot{position:absolute;left:0;right:0;bottom:0;padding:16px 16px max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;align-items:center}.scan-chips{display:flex;gap:10px}
+.scan-manual{display:flex;gap:8px;width:min(100%,420px)}.scan-manual input{flex:1;min-width:0;font-size:17px;padding:10px 12px;border-radius:10px;border:0}.bf-find{margin-left:auto;min-width:0;width:240px;max-width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 10px;font:inherit;font-size:13px;background:var(--paper);color:var(--ink)}
 .bf-list{padding:8px;max-height:min(66vh,680px)}.bf-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-items:start}
 .bf-g{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper)}.bf-g.dup{border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
 .bf-gh{display:flex;justify-content:space-between;gap:10px;background:var(--bg);padding:8px 12px}.bf-gn{min-width:0}.bf-gn .nm{font-weight:700;font-size:13.5px;overflow-wrap:anywhere}.bf-gn .bc{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px}
@@ -721,7 +729,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .bf-rw{font-size:13px;border-top:1px dashed var(--line)}.bf-rw .loc{font-family:var(--mono);font-weight:700;white-space:nowrap}.bf-rw .q{font-size:12px;color:var(--muted);white-space:nowrap}.bf-rw .q b{font-family:var(--mono);font-size:13.5px;color:var(--ink);margin-right:1px}
 .bf-rw .mf,.bf-rw .ex{font-family:var(--mono);white-space:nowrap}.bf-rw .mf{color:var(--muted)}.bf-rw .ex{font-weight:800}.bf-rw .pp-dd{min-width:0;font-size:10.5px;padding:1px 6px}
 @media (max-width:560px){.bf-rows{padding:2px 12px 8px}.bf-rh{display:none}.bf-rw{grid-template-columns:auto auto minmax(0,1fr);gap:3px 12px}.bf-rw .loc{grid-column:1/3}.bf-rw .q{grid-column:3;grid-row:1}.bf-rw .mf,.bf-rw .ex{grid-row:2;font-size:12px}.bf-rw .mf::before{content:'제조 ';font-family:var(--body);font-weight:500}.bf-rw .ex::before{content:'유통 ';font-family:var(--body);font-weight:500;color:var(--muted)}.bf-rw .ddc{grid-column:3;grid-row:2;text-align:right}}
-@media (max-width:760px){.bf-grid{grid-template-columns:1fr}.bf-sum{grid-template-columns:1fr 1fr}.bf-sum .bf-st:last-child{grid-column:1/-1}.bf-find{width:100%;margin-left:0;order:9}}
+@media (max-width:760px){.bf-grid{grid-template-columns:1fr}.bf-sum{grid-template-columns:1fr 1fr}.bf-sum .bf-st:last-child{grid-column:1/-1}.bf-find{width:100%;margin-left:0;order:9}.bf-fw{width:100%;margin-left:0;order:9}.bf-fw .bf-find{flex:1;width:auto;order:0}.bf-cam{padding:9px 14px;font-size:14px}}
 .pp-list{padding:0 8px 8px}
 .pp-hd{position:sticky;top:0;z-index:1;display:grid;grid-template-columns:128px 150px minmax(0,1fr) 130px 56px;gap:10px;padding:8px 10px 6px 15px;margin:0 -8px 2px;background:var(--paper);border-bottom:1px solid var(--line);font-size:11.5px;font-weight:600;color:var(--muted)}
 .pp-hd .r,.pp-rw .q{text-align:right}
@@ -4123,7 +4131,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
 
   // ---- 버퍼: 같은 바코드가 여러 줄(로케이션)에 나뉜 상품끼리 묶기 (유통기한은 달라도 같이) ----
   let bfData = null, bfRev = -1, bfLoading = false;
-  const bfUi = { mode: store.get('bf-mode', 'dup') === 'all' ? 'all' : 'dup', q: '' };
+  const bfUi = { mode: store.get('bf-mode', 'dup') === 'all' ? 'all' : 'dup', q: '', scan: '', hit: '' };
   // 'Box_[로켓프레시] 빙그레 …' → { tag:'Box', name:'빙그레 …' }
   const bfName = s => { let t = String(s || '').trim(), tag = ''; const m = t.match(/^(Box|Pack|Bundle)_/i); if (m){ tag = m[1]; t = t.slice(m[0].length); } return { tag, name: t.replace(/\[로켓프레시\]\s*/g, '').trim() }; };
   function bfGroups(){
@@ -4135,7 +4143,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
   }
   function bfVisible(G){
     const q = bfUi.q.trim().toLowerCase().replace(/\s+/g, '');
-    return G.filter(g => (bfUi.mode === 'all' || g.rows.length > 1) &&
+    return G.filter(g => (bfUi.mode === 'all' || g.rows.length > 1 || bfUi.scan) &&
       (!q || [g.bc, g.name, ...g.rows.map(r => r.loc)].some(v => String(v || '').toLowerCase().replace(/\s+/g, '').includes(q))));
   }
   async function bfLoad(){
@@ -4172,6 +4180,74 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
       toast('정리는 됐지만 공유 저장을 못 했어요: ' + (e.message || ''));
     }
   }
+  // ---------- 바코드 찍기 (폰 카메라) ----------
+  // 브라우저에 바코드 읽기 기능이 있으면 그걸 쓰고, 없으면(삼성인터넷 · 아이폰 등) 읽기 프로그램을 그때 불러와요
+  const BD_URL = 'https://cdn.jsdelivr.net/npm/barcode-detector@3.2.2/ponyfill/+esm';
+  const BD_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'code_93', 'itf', 'codabar', 'qr_code', 'data_matrix'];
+  let bdMaker = null;
+  function bdGet(){
+    if (!bdMaker) bdMaker = (async () => {
+      if ('BarcodeDetector' in window){
+        try { const ok = await window.BarcodeDetector.getSupportedFormats(); const f = BD_FORMATS.filter(x => ok.includes(x)); if (f.length) return new window.BarcodeDetector({ formats: f }); } catch {}
+      }
+      const m = await import(BD_URL);
+      return new m.BarcodeDetector({ formats: BD_FORMATS });
+    })().catch(e => { bdMaker = null; throw e; });
+    return bdMaker;
+  }
+  function scanOpen(onCode){
+    let stream = null, timer = 0, done = false, torch = false;
+    const video = el('video', { playsinline: true, autoplay: true }); video.muted = true;
+    const msg = el('div', { class:'scan-msg', text:'카메라를 켜는 중…' });
+    const mi = el('input', { type:'text', inputmode:'numeric', placeholder:'바코드 숫자 입력', autocomplete:'off', 'aria-label':'바코드 직접 입력' });
+    const manual = el('form', { class:'scan-manual', hidden: true, onsubmit: e => { e.preventDefault(); const v = mi.value.trim(); if (v) finish(v); } },
+      mi, el('button', { type:'submit', class:'ret-btn' }, '찾기'));
+    const showManual = t => { if (t) msg.textContent = t; manual.hidden = false; mi.focus(); };
+    const torchBtn = el('button', { type:'button', class:'scan-chip', hidden: true, onclick: async () => {
+      try { torch = !torch; await stream.getVideoTracks()[0].applyConstraints({ advanced: [{ torch }] }); torchBtn.classList.toggle('on', torch); } catch { torchBtn.hidden = true; } } }, '🔦 손전등');
+    const ov = el('div', { class:'scan-ov', role:'dialog', 'aria-label':'바코드 찍기' },
+      video, el('div', { class:'scan-box' }),
+      el('div', { class:'scan-top' }, el('b', { text:'바코드 찍기' }), el('button', { type:'button', class:'scan-x', onclick: () => close() }, '✕ 닫기')),
+      msg,
+      el('div', { class:'scan-bot' }, manual, el('div', { class:'scan-chips' }, torchBtn,
+        el('button', { type:'button', class:'scan-chip', onclick: () => { if (manual.hidden) showManual(); else manual.hidden = true; } }, '⌨ 직접 입력'))));
+    const onKey = e => { if (e.key === 'Escape') close(); };
+    function close(){ done = true; clearTimeout(timer); stream?.getTracks().forEach(t => t.stop()); ov.remove(); document.removeEventListener('keydown', onKey); }
+    function finish(code){ if (done) return; try { navigator.vibrate?.(60); } catch {} close(); onCode(code); }
+    document.body.append(ov); document.addEventListener('keydown', onKey);
+    (async () => {
+      if (!navigator.mediaDevices?.getUserMedia) return showManual('이 브라우저에서는 카메라를 쓸 수 없어요. 아래에 직접 입력하세요.');
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal:'environment' }, width: { ideal:1280 }, height: { ideal:720 } }, audio: false });
+      } catch(e) {
+        return showManual(e?.name === 'NotAllowedError' ? '카메라 사용이 막혀 있어요. 브라우저 설정에서 이 사이트의 카메라를 허용해 주세요.' : '카메라를 켜지 못했어요. 아래에 직접 입력하세요.');
+      }
+      if (done){ stream.getTracks().forEach(t => t.stop()); return; }
+      video.srcObject = stream; try { await video.play(); } catch {}
+      try { if (stream.getVideoTracks()[0].getCapabilities?.().torch) torchBtn.hidden = false; } catch {}
+      msg.textContent = '바코드 읽을 준비 중…';
+      let det;
+      try { det = await bdGet(); } catch { return showManual('바코드 읽기 프로그램을 못 불러왔어요. 아래에 직접 입력하세요.'); }
+      if (done) return;
+      msg.textContent = '바코드를 네모 안에 맞춰주세요';
+      const tick = async () => {
+        if (done) return;
+        try { if (video.readyState >= 2){ const r = await det.detect(video); const v = r.find(x => x.rawValue)?.rawValue; if (v) return finish(String(v).trim()); } } catch {}
+        timer = setTimeout(tick, 120);
+      };
+      tick();
+    })();
+  }
+  // 찍은 바코드를 Consolidation 목록에서 찾기 (앞자리 0 차이는 같은 걸로 봐요: UPC-A ↔ EAN-13)
+  function bfScan(){
+    scanOpen(code => {
+      const norm = s => String(s || '').replace(/\s+/g, '').replace(/^0+/, '');
+      const g = bfGroups().find(x => x.bc && norm(x.bc) === norm(code));
+      bfUi.scan = code; bfUi.hit = g ? g.bc : ''; bfUi.q = g ? g.bc : code;
+      renderBuffer();
+      $('#buf .scan-hit')?.scrollIntoView({ block:'start', behavior:'smooth' });
+    });
+  }
   function renderBuffer(){
     const box = $('#buf');
     const when = bfData?.at ? new Date(bfData.at).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }) + ' 올림' : '';
@@ -4195,11 +4271,11 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     const V = bfVisible(G);
     const search = el('input', { type:'search', class:'bf-find', placeholder:'바코드 · 상품명 · 로케이션 찾기', 'aria-label':'찾기', autocomplete:'off' });
     search.value = bfUi.q;
-    search.oninput = () => { bfUi.q = search.value; const pos = search.selectionStart; renderBuffer(); const s = $('#buf .bf-find'); if (s){ s.focus(); try { s.setSelectionRange(pos, pos); } catch {} } };
+    search.oninput = () => { bfUi.q = search.value; bfUi.scan = ''; bfUi.hit = ''; const pos = search.selectionStart; renderBuffer(); const s = $('#buf .bf-find'); if (s){ s.focus(); try { s.setSelectionRange(pos, pos); } catch {} } };
     const bar = el('div', { class:'bf-bar' },
       el('span', { class:'ov-tog', role:'group', 'aria-label':'보기' }, ...[['dup', '겹치는 것만'], ['all', '전체']].map(([v, l]) => el('button', { type:'button', 'aria-pressed': bfUi.mode === v ? 'true' : 'false',
         onclick: () => { bfUi.mode = v; store.set('bf-mode', v); renderBuffer(); } }, l))),
-      search,
+      el('div', { class:'bf-fw' }, search, el('button', { type:'button', class:'ret-btn sm bf-cam', title:'폰 카메라로 바코드 찍어서 찾기', onclick: bfScan }, '📷 찍기')),
       el('button', { type:'button', class:'ret-btn sm ghost', disabled: !V.length, title:'보이는 목록 인쇄', onclick: () => bfPrint(V) }, '🖨 인쇄'),
       el('button', { type:'button', class:'ret-btn sm ghost', disabled: !V.length, title:'보이는 목록을 엑셀로 받기', onclick: () => bfExport(V) }, '⬇ 엑셀'));
     const card = g => { const nm = bfName(g.name); return el('div', { class:'bf-g' + (g.rows.length > 1 ? ' dup' : '') },
@@ -4212,7 +4288,13 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
           el('span', { class:'ddc' }, r.exp ? el('span', { class:'pp-dd' + ppLvl(d), text: ppDD(d) }) : null)); }))); };
     const list = V.length ? el('div', { class:'pp-scroll bf-list' }, el('div', { class:'bf-grid' }, ...V.map(card)))
       : el('p', { class:'ret-help pp-none', text: bfUi.q ? '찾는 상품이 없어요.' : '같은 바코드가 여러 줄에 있는 상품이 없어요. 정리할 게 없네요!' });
-    sec.append(sum, bar, list);
+    const hitG = bfUi.scan && bfUi.hit ? V.find(g => g.bc === bfUi.hit) : null;
+    const clearScan = () => { bfUi.scan = ''; bfUi.hit = ''; bfUi.q = ''; renderBuffer(); };
+    const scanBox = bfUi.scan ? el('div', { class:'scan-hit' + (hitG ? '' : ' miss'), role:'status' }, el('span', { text:'📷' }),
+      el('span', { class:'sp' }, el('code', { text: bfUi.scan }), hitG ? ` · 찾았어요 · ${hitG.locs}곳에 ${retNum(hitG.q)}개` : ' · Consolidation 목록에 없는 상품이에요'),
+      el('button', { type:'button', class:'ret-btn sm', onclick: bfScan }, '다음 찍기'),
+      el('button', { type:'button', class:'ret-btn sm ghost', 'aria-label':'찾기 지우기', onclick: clearScan }, '✕')) : null;
+    sec.append(sum, bar, ...(scanBox ? [scanBox] : []), list);
     box.replaceChildren(sec);
   }
   function bfPrint(V){
