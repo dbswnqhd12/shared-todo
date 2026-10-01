@@ -3045,7 +3045,8 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     const vkey = v => String(v || '').replace(/㈜/g, '(주)').replace(/\s+/g, '');
     for (const t of [...list].sort((a, b) => (a.date || '').localeCompare(b.date || ''))){ const g = vkey(t.vendor); if (!groups.has(g)) groups.set(g, { name: t.vendor, ts: [] }); groups.get(g).ts.push(t); }
     const sumQ = list.reduce((s, t) => s + (+t.qty || 0), 0);
-    const top = el('div', { class:'ov-vtop' }, seg, el('span', { class:'ret-help', text: list.length ? `업체 ${groups.size}곳 · ${retNum(sumQ)}개 · 오래된 순` : '' }));
+    const top = el('div', { class:'ov-vtop' }, seg, el('span', { class:'ret-help', text: list.length ? `업체 ${groups.size}곳 · ${retNum(sumQ)}개 · 오래된 순` : '' }),
+      k === 'ded' && list.length ? el('button', { type:'button', class:'ret-btn sm ghost ov-print', title:'차감매입 대기 목록 인쇄', onclick: () => ovPrintDed([...groups.values()], sumQ) }, '🖨 인쇄') : null);
     const head = ovStage(2, '과매입 처리 대기', wait.length, '✓ 완료를 누르면 ③ 처리 완료로 · ↩는 ① 처리 전으로');
     if (!list.length){ box.replaceChildren(head, top, el('p', { class:'ho-empty', text: ovItems ? `${k === 'etc' ? 'XY이동 · 재진열' : ovMethod(k)} 대기 건이 없어요.` : '불러오는 중…' })); return; }
     const gs = [...groups.values()].map(({ name: v, ts }) => el('div', { class:'ov-g' },
@@ -3061,6 +3062,28 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
           el('button', { type:'button', class:'ov-done', text:'✓ 완료', onclick: e => { e.stopPropagation(); ovSetStatus(t, 'done'); } })));
         return on ? [row, ovInlPanel(t)] : [row]; })));
     box.replaceChildren(head, top, el('div', { class:'ov-gs' }, ...gs));
+  }
+
+  // 차감매입 대기 목록 인쇄 (업체별로 묶어서, A4)
+  function ovPrintDed(groups, sumQ){
+    const E = v => String(v ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+    const now = new Date(Date.now() + 9 * 36e5).toISOString();
+    const stamp = now.slice(5, 10) + ' ' + now.slice(11, 16);
+    const n = groups.reduce((s, g) => s + g.ts.length, 0);
+    const body = groups.map(g => `<tbody><tr class="gh"><td colspan="8">${E(g.name || '(업체 없음)')}<span>${g.ts.length}건 · ${E(retNum(g.ts.reduce((s, t) => s + (+t.qty || 0), 0)))}개</span></td></tr>`
+      + g.ts.map(t => `<tr><td class="m">${E(t.date ? retMD(t.date) : '-')}</td><td class="m">${E(t.sku || '')}</td><td class="m">${E(t.barcode || '')}</td><td>${E(t.name || '')}</td><td class="m r b">${E(retNum(t.qty))}</td><td>${E(t.who || '')}</td><td class="m">${E(t.mail ? retMD(t.mail) : '')}</td><td class="c">${E(t.comm || '')}</td></tr>`).join('') + '</tbody>').join('');
+    const css = `@page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{margin:0;color:#111;font-family:-apple-system,"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+h1{font-size:18pt;margin:0 0 1mm}.sub{font-size:9pt;color:#555;margin-bottom:3mm}table{width:100%;border-collapse:collapse;font-size:9.5pt}th{text-align:left;font-size:8.5pt;color:#555;border-bottom:.4mm solid #111;padding:1.2mm}
+td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-inside:avoid}thead{display:table-header-group}tbody{break-inside:avoid-page}.m{font-family:ui-monospace,Menlo,Consolas,monospace;white-space:nowrap}.r{text-align:right}.b{font-weight:800}.c{font-size:8.5pt;color:#333}
+tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm solid #111;padding-top:2mm}tr.gh span{float:right;font-weight:600;font-size:9pt;color:#444}`;
+    const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>차감매입 대기 목록</title><style>${css}</style></head><body>
+<h1>과매입 · 차감매입 대기</h1><div class="sub">업체 ${groups.length}곳 · ${n}건 · ${E(retNum(sumQ))}개 · 오래된 순 · 인쇄 ${stamp}</div>
+<table><thead><tr><th>생성일자</th><th>외부 SKU</th><th>바코드</th><th>상품명</th><th class="r">수량</th><th>처리자</th><th>메일 발송</th><th>비고</th></tr></thead>${body}</table></body></html>`;
+    document.getElementById('ov-print-frame')?.remove();
+    const f = el('iframe', { id:'ov-print-frame', title:'차감매입 인쇄', 'aria-hidden':'true', style:'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden' });
+    document.body.append(f);
+    const d = f.contentDocument; d.open(); d.write(html); d.close();
+    setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch { toast('인쇄 화면을 열지 못했어요.'); } }, 300);
   }
 
   // ---------- 공통: ✎ 수정 → 그 줄 아래 수정 칸 · 칸을 두 번 누르면 바로 수정 ----------
