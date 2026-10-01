@@ -887,7 +887,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   <section class="ret" id="out" hidden aria-label="IST 반출"></section>
   <section class="ret" id="prod" hidden aria-label="STOW 개인 생산성"></section>
   <section class="ret" id="pp" hidden aria-label="프리팩 유통기한"></section>
-  <section class="ret" id="buf" hidden aria-label="버퍼 정리"></section>
+  <section class="ret" id="buf" hidden aria-label="Consolidation"></section>
 
   <section class="cal" id="cal" aria-label="달력">
     <div class="cal-head">
@@ -4041,7 +4041,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
   function renderBuffer(){
     const box = $('#buf');
     const when = bfData?.at ? new Date(bfData.at).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }) + ' 올림' : '';
-    const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'버퍼 정리' }),
+    const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'Consolidation' }),
       el('span', { class:'ret-help', text: bfData ? [bfData.file, when].filter(Boolean).join(' · ') : '같은 바코드가 여러 로케이션에 나뉜 상품끼리 묶어서 보여줘요 (유통기한은 달라도 같이)' }),
       bfData ? el('span', { class:'pp-up' }, el('button', { type:'button', class:'ret-btn sm ghost', onclick: bfPick, title:'새 WMS 재고 엑셀로 바꾸기' }, '⬆ 새 파일 올리기')) : null);
     const sec = el('section', { class:'ret-sec pp bf' }, head);
@@ -4091,8 +4091,8 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
 h1{font-size:18pt;margin:0 0 1mm}.sub{font-size:9pt;color:#555;margin-bottom:3mm}table{width:100%;border-collapse:collapse;font-size:10pt}th{text-align:left;font-size:8.5pt;color:#555;border-bottom:.4mm solid #111;padding:1.2mm}
 td{padding:1.2mm 2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}thead{display:table-header-group}tbody{break-inside:avoid}.m{font-family:ui-monospace,Menlo,Consolas,monospace;white-space:nowrap}.r{text-align:right}.b{font-weight:800}.mu{color:#666;font-size:8.5pt}
 tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm solid #111;padding-top:2mm}tr.gh .bc{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:500;font-size:8.5pt;color:#555}tr.gh .gs{white-space:nowrap;font-size:9.5pt}`;
-    const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>버퍼 정리</title><style>${css}</style></head><body>
-<h1>버퍼 정리</h1><div class="sub">${V.length}종 · ${V.reduce((s, g) => s + g.rows.length, 0)}줄 · ${bfUi.mode === 'all' ? '전체' : '같은 바코드가 여러 줄인 상품만'}${bfUi.q ? ' · 찾기: ' + E(bfUi.q) : ''} · ${E(bfData.file || '')} · 인쇄 ${stamp}</div>
+    const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>Consolidation</title><style>${css}</style></head><body>
+<h1>Consolidation</h1><div class="sub">${V.length}종 · ${V.reduce((s, g) => s + g.rows.length, 0)}줄 · ${bfUi.mode === 'all' ? '전체' : '같은 바코드가 여러 줄인 상품만'}${bfUi.q ? ' · 찾기: ' + E(bfUi.q) : ''} · ${E(bfData.file || '')} · 인쇄 ${stamp}</div>
 <table><thead><tr><th>로케이션</th><th class="r">수량</th><th>제조일자</th><th>유통기한</th><th>LPN</th></tr></thead>${body}</table></body></html>`;
     document.getElementById('bf-print-frame')?.remove();
     const f = el('iframe', { id:'bf-print-frame', title:'버퍼 인쇄', 'aria-hidden':'true', style:'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden' });
