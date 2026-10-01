@@ -406,6 +406,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 button.ret-stat{cursor:pointer}button.ret-stat:hover{border-color:var(--accent)}.ret-stat small{font-size:11.5px;color:var(--muted)}.ret-stat b{font-family:var(--mono);font-size:19px;font-weight:800;line-height:1.25}.ret-stat span{font-size:11.5px;color:var(--muted)}
 .ret-stat.late{border-color:color-mix(in srgb,var(--high) 35%,var(--line));background:var(--high-soft)}.ret-stat.late b{color:var(--high)}.ret-stat.on{box-shadow:0 0 0 2px var(--accent)}
 #ret-form[hidden]{display:none!important}.ret-top-btns{margin-left:auto;display:flex;gap:8px;align-items:center}.ret-close{margin-left:auto}
+.ret-bar-slot{display:contents}.ret-group{content-visibility:auto;contain-intrinsic-size:auto 240px}
 .ret-bar.on{position:sticky;bottom:10px;z-index:3;background:var(--ink);color:var(--paper);border-radius:10px;padding:9px 12px;box-shadow:0 6px 18px rgba(0,0,0,.18)}.ret-bar.on .ret-help{color:var(--paper);font-weight:700}
 .ret-bar.on .ret-btn.ghost{background:transparent;color:var(--paper);border-color:color-mix(in srgb,var(--paper) 40%,transparent)}
 .ret-item:first-child{border-top:0}
@@ -2301,7 +2302,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   const RET_TEMPS = [['CH','냉장'],['AM','상온'],['FR','냉동']];
   const RET_REASONS = ['[회송] 과착', '[회송] 유통기한', '표기사항불량>표기사항오류', '품질불량>파손', '품질불량>변질'];
   const RET_FIELDS = ['date','vendor','po','temp','name','sku','barcode','reason','qty','note'];
-  let retItems = null, retRev = -1, retLoading = false, retBuilt = false;
+  let retItems = null, retRev = -1, retLoading = false, retBuilt = false, retSig = '';
   const retUi = { inl:null, status:'wait', vendor:'', q:'', sel:new Set(), editId:null, closed:new Set(), only:'', formOpen:false, group: (() => { try { return localStorage.getItem('ret-group') === 'date' ? 'date' : 'vendor'; } catch { return 'vendor'; } })() };
   const retForm = { date: todayIso, vendor:'', po:'', temp:'CH', name:'', sku:'', barcode:'', reason:'', qty:'', note:'' };
   const retTemp = t => (RET_TEMPS.find(x => x[0] === t) || [null, ''])[1];
@@ -2316,7 +2317,10 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     try {
       const d = await request('GET', '/api/returns');
       if (pending) return;   // 저장 중이면 화면에 먼저 반영한 걸 덮어쓰지 않아요 (다음 확인 때 다시 불러와요)
-      retItems = d.items || []; retRev = d.rev;
+      const sig = JSON.stringify(d.items || []);
+      retRev = d.rev;
+      if (sig === retSig && retItems) return;   // 다른 탭이 바뀐 것뿐이면 회송 화면은 다시 그리지 않아요
+      retSig = sig; retItems = d.items || [];
       if (!retBusy()) renderReturns();
     } catch(e) {
       if (e instanceof Locked) return showLock(e.message);
@@ -2752,7 +2756,17 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
         : (a, b) => (a.items[0].date || '').localeCompare(b.items[0].date || '') || a.key.localeCompare(b.key, 'ko'));
     const openAll = !!q;
     const allOpen = list.length > 0 && list.every(g => openAll || !retUi.closed.has(g.okey));
-    const toggleSel = (items, on) => { for (const t of items) on ? retUi.sel.add(t.id) : retUi.sel.delete(t.id); retRenderList(); };
+    // 체크는 화면 전체를 다시 그리지 않고 바뀐 줄 · 묶음 · 아래 막대만 고쳐요 (목록이 길어도 빠르게)
+    const toggleSel = (items, on) => {
+      for (const t of items) on ? retUi.sel.add(t.id) : retUi.sel.delete(t.id);
+      for (const t of items){ const r = body.querySelector(`.ret-item[data-id="${CSS.escape(String(t.id))}"]`); if (r){ r.classList.toggle('is-sel', on); const c = r.querySelector('.ret-cb input'); if (c) c.checked = on; } }
+      for (const g of list){
+        const ge = body.querySelector(`.ret-group[data-okey="${CSS.escape(g.okey)}"]`); if (!ge) continue;
+        const k = g.items.filter(t => retUi.sel.has(t.id)).length, gc = ge.querySelector('.ret-gh .ret-cb input');
+        ge.classList.toggle('has-sel', k > 0); if (gc){ gc.checked = k === g.items.length; gc.indeterminate = k > 0 && k < g.items.length; }
+      }
+      body.querySelector('#ret-bar-slot')?.replaceChildren(...barEl());
+    };
 
     const itemRow = t => {
       const cb = el('input', { type:'checkbox', 'aria-label':`${t.name} 선택`, onchange: e => toggleSel([t], e.target.checked) });
@@ -2761,7 +2775,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       const meta = [t.po ? '발주 ' + String(t.po).replace(/,\s*/g, ', ') : '', t.sku ? 'SKU ' + t.sku : '', t.status === 'done' && t.doneAt ? '완료 ' + retMD(t.doneAt) : ''].filter(Boolean);
       const isNew = retLocalDay(t.createdAt) === todayIso;
       const on = retUi.inl?.id === t.id && retUi.inl.where === 'list';
-      const row = el('div', { class:'ret-item' + (t.status === 'done' ? ' is-done' : '') + (cb.checked ? ' is-sel' : '') + (on ? ' editing' : ''), title:'상품명 · 수량 · 비고를 두 번 누르면 바로 수정', ondblclick: e => retQuick(e, t) },
+      const row = el('div', { 'data-id': t.id, class:'ret-item' + (t.status === 'done' ? ' is-done' : '') + (cb.checked ? ' is-sel' : '') + (on ? ' editing' : ''), title:'상품명 · 수량 · 비고를 두 번 누르면 바로 수정', ondblclick: e => retQuick(e, t) },
         el('label', { class:'ret-cb' }, cb),
         byDateMode ? null : el('span', { class:'ret-d' + (old >= 7 ? ' late' : ''), title: old ? `${old}일째 대기` : '', text: retMD(t.date) }),
         el('div', { class:'ret-main-txt' },
@@ -2790,7 +2804,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       const toggle = () => { retUi.closed.has(g.okey) ? retUi.closed.delete(g.okey) : retUi.closed.add(g.okey); retRenderList(); };
       const vN = new Set(g.items.map(t => t.vendor)).size;
       const ageText = byDateMode ? `업체 ${vN}곳` + (old ? ` · ${old}일째` : '') : (old ? `${retMD(g.items[0].date)}~ · ${old}일째` : retMD(g.items[0].date) + '~');
-      return el('div', { class:'ret-group' + (open ? ' open' : '') + (selN ? ' has-sel' : '') },
+      return el('div', { 'data-okey': g.okey, class:'ret-group' + (open ? ' open' : '') + (selN ? ' has-sel' : '') },
         el('div', { class:'ret-gh' },
           el('label', { class:'ret-cb' }, cb),
           el('button', { type:'button', class:'ret-gname', 'aria-expanded': open ? 'true' : 'false', onclick: toggle },
@@ -2806,6 +2820,18 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
         open ? el('div', { class:'ret-items' + (byDateMode ? ' by-date' : '') }, ...g.items.flatMap(itemRow)) : null);
     };
 
+    function barEl(){
+      const sel = rows.filter(t => retUi.sel.has(t.id));
+      if (!sel.length) return [];
+      const selQty = sel.reduce((s, t) => s + (+t.qty || 0), 0), selVendors = [...new Set(sel.map(t => t.vendor))];
+      return [el('div', { class:'ret-bar on' },
+        el('span', { class:'ret-help', text: `✓ ${sel.length}건 선택 · ${retNum(selQty)}개` + (selVendors.length > 1 ? ` · 업체 ${selVendors.length}곳 (업체마다 한 장씩 인쇄)` : selVendors[0] ? ` · ${selVendors[0]}` : '') }),
+        el('div', { class:'ret-bar-btns' },
+          el('button', { type:'button', class:'ret-btn solid', disabled: !sel.some(t => t.status !== 'done'), text:'✓ 선택한 건 완료', onclick: () => retSetStatus(sel.filter(t => t.status !== 'done').map(t => t.id), 'done') }),
+          retUi.status !== 'wait' ? el('button', { type:'button', class:'ret-btn ghost', disabled: !sel.some(t => t.status === 'done'), text:'대기로 되돌리기', onclick: () => retSetStatus(sel.filter(t => t.status === 'done').map(t => t.id), 'wait') }) : null,
+          el('button', { type:'button', class:'ret-btn ghost', text:'선택 해제', onclick: () => { retUi.sel.clear(); retRenderList(); } }),
+          el('button', { type:'button', class:'ret-btn solid', text:'🖨 확인서 인쇄', onclick: () => retPrint(sel) })))];
+    }
     body.replaceChildren(
       el('div', { class:'ret-tools' },
         el('div', { class:'ret-chips' },
@@ -2822,13 +2848,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
           onclick: () => { if (allOpen) list.forEach(g => retUi.closed.add(g.okey)); else list.forEach(g => retUi.closed.delete(g.okey)); retRenderList(); } }) : null),
       !rows.length ? el('p', { class:'ho-empty', text: retItems ? '해당하는 회송 건이 없어요.' : '불러오는 중…' }) :
         el('div', { class:'ret-groups' }, ...list.map(groupEl)),
-      ...(sel.length ? [el('div', { class:'ret-bar on' },
-        el('span', { class:'ret-help', text: `✓ ${sel.length}건 선택 · ${retNum(selQty)}개` + (selVendors.length > 1 ? ` · 업체 ${selVendors.length}곳 (업체마다 한 장씩 인쇄)` : selVendors[0] ? ` · ${selVendors[0]}` : '') }),
-        el('div', { class:'ret-bar-btns' },
-          el('button', { type:'button', class:'ret-btn solid', disabled: !sel.some(t => t.status !== 'done'), text:'✓ 선택한 건 완료', onclick: () => retSetStatus(sel.filter(t => t.status !== 'done').map(t => t.id), 'done') }),
-          retUi.status !== 'wait' ? el('button', { type:'button', class:'ret-btn ghost', disabled: !sel.some(t => t.status === 'done'), text:'대기로 되돌리기', onclick: () => retSetStatus(sel.filter(t => t.status === 'done').map(t => t.id), 'wait') }) : null,
-          el('button', { type:'button', class:'ret-btn ghost', text:'선택 해제', onclick: () => { retUi.sel.clear(); retRenderList(); } }),
-          el('button', { type:'button', class:'ret-btn solid', text:'🖨 확인서 인쇄', onclick: () => retPrint(sel) })))] : []));
+      el('div', { id:'ret-bar-slot', class:'ret-bar-slot' }, ...barEl()));
   }
 
   // ---- 회송 확인서 인쇄 (업체마다 A4 한 장) ----
