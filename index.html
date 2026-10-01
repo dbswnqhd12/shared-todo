@@ -157,6 +157,7 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .shift-add input{flex:1;min-width:0;font-size:13.5px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 8px}
 .shift-add button{border:0;background:var(--cs);color:var(--c);border-radius:6px;padding:6px 10px;font-size:13px;font-weight:600}
 .edit-note{font-size:12.5px;color:var(--muted);margin:-10px 0 0}
+.clr-all{display:block;margin:0 0 10px auto;font:inherit;font-size:13px;font-weight:700;color:var(--high);background:var(--paper);border:1px solid var(--high);border-radius:20px;padding:6px 14px;cursor:pointer}.clr-all.arm{background:var(--high);color:#fff}
 .ho{display:flex;flex-direction:column;gap:14px}
 .ho-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ho-date-label{font-size:14px;font-weight:600;color:var(--muted)}
@@ -1127,11 +1128,27 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     return span;
   }
 
+  let clearArm = false;   // [항목 전부 빼기] 두 번 눌러야 실행
   function renderShifts(){
     const box = $('#shifts');
     box.innerHTML = '';
     const {byShift, done} = dayChecklist(selDate);
     const anyEver = templates.length > 0;
+    const liveT = templates.filter(t => activeOn(t, todayIso) || t.start > todayIso);
+    if (!editMode) clearArm = false;
+    if (editMode && liveT.length){
+      const cb = document.createElement('button'); cb.type = 'button'; cb.className = 'clr-all' + (clearArm ? ' arm' : '');
+      cb.textContent = clearArm ? `정말 ${liveT.length}개 항목을 전부 뺄까요? 한 번 더 누르세요` : `항목 전부 빼기 (${liveT.length}개)`;
+      cb.onclick = () => {
+        if (!clearArm){ clearArm = true; render(); setTimeout(() => { if (clearArm){ clearArm = false; render(); } }, 5000); return; }
+        clearArm = false;
+        const ids = liveT.map(t => t.id);
+        mutate(
+          () => { templates = templates.filter(y => !(ids.includes(y.id) && y.start >= todayIso)); for (const y of templates) if (ids.includes(y.id)) y.end = todayIso; },
+          async () => { for (const id of ids) await api('DELETE', '/api/shifts?id=' + encodeURIComponent(id)); });
+      };
+      box.appendChild(cb);
+    }
     for (const s of SHIFTS){
       const list_ = editMode ? templates.filter(t => t.shift === s.key && activeOn(t, todayIso)).sort(orderT) : byShift[s.key];
       const isOpen = editMode || openShifts.has(s.key);
