@@ -6,6 +6,15 @@
 <meta name="color-scheme" content="light dark">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>GWJ3 IB</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" href="/icons/favicon-64.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#EEF2F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111816" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GWJ3 IB">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -711,6 +720,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .pp-none{padding:10px 0}
 /* 버퍼 */
 .bf-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.bf-st{border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--paper)}.bf-st small{font-size:12px;color:var(--muted)}.bf-st b{display:block;font-family:var(--mono);font-size:19px;font-weight:800;margin-top:2px}.bf-st.on{border:2px solid var(--accent);padding:8px 11px;background:var(--accent-soft)}
+.app-inst{margin-top:8px;font-weight:600;border-color:var(--accent);color:var(--accent)}
 .bf-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.bf-fw{margin-left:auto;display:flex;gap:6px;align-items:center;min-width:0;max-width:100%}.bf-fw .bf-find{margin-left:0}.bf-cam{white-space:nowrap;background:var(--accent);color:var(--paper);border-color:var(--accent);font-weight:700}
 .scan-hit{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-soft);color:var(--accent);border-radius:10px;padding:9px 12px;font-size:13.5px;font-weight:600}.scan-hit.miss{background:var(--high-soft);color:var(--high)}.scan-hit code{font-family:var(--mono);font-weight:700}.scan-hit .sp{flex:1}.scan-hit button{white-space:nowrap}
 .scan-ov{position:fixed;inset:0;z-index:1000;background:#000;color:#fff;overflow:hidden}.scan-ov video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -881,6 +891,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     <div>
       <div class="date" id="today"></div>
       <h1>GWJ3 IB</h1>
+      <button type="button" class="ghost app-inst" id="installBtn" hidden>📲 앱으로 설치</button>
     </div>
     <div class="progress" aria-live="polite">
       <span class="progress-num" id="progressNum">0 / 0 완료</span>
@@ -4712,6 +4723,18 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   setInterval(poll, POLL_MS);
   render();
   loadFull();
+
+  // ---------- 홈 화면 앱 설치 ----------
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+  let instEvt = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instEvt = e; $('#installBtn').hidden = false; });
+  window.addEventListener('appinstalled', () => { instEvt = null; $('#installBtn').hidden = true; toast('홈 화면에 GWJ3 IB 앱이 생겼어요.'); });
+  $('#installBtn').onclick = async () => {
+    if (!instEvt) return;
+    instEvt.prompt();
+    try { await instEvt.userChoice; } catch {}
+    instEvt = null; $('#installBtn').hidden = true;
+  };
 })();
 </script>
 </body>
