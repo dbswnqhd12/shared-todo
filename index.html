@@ -3630,30 +3630,49 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   }
 
   // 박스 라벨 인쇄: A4 한 장 = 박스 1개. 박스 칸 합계만큼 1/N, 2/N … 로 찍어요. 소비기한은 손으로 적는 빈칸.
+  // 바코드(Code 128) → SVG 막대 (영문 · 숫자 · 기호만)
+  const C128 = '212222 222122 222221 121223 121322 131222 122213 122312 132212 221213 221312 231212 112232 122132 122231 113222 123122 123221 223211 221132 221231 213212 223112 312131 311222 321122 321221 312212 322112 322211 212123 212321 232121 111323 131123 131321 112313 132113 132311 211313 231113 231311 112133 112331 132131 113123 113321 133121 313121 211331 231131 213113 213311 213131 311123 311321 331121 312113 312311 332111 314111 221411 431111 111224 111422 121124 121421 141122 141221 112214 112412 122114 122411 142112 142211 241211 221114 413111 241112 134111 111242 121142 121241 114212 124112 124211 411212 421112 421211 212141 214121 412121 111143 111341 131141 114113 114311 411113 411311 113141 114131 311141 411131 211412 211214 211232 2331112'.split(' ');
+  function code128Svg(text, h){
+    const s = String(text || '').trim();
+    if (!s || /[^\x20-\x7e]/.test(s)) return '';
+    const codes = [104, ...[...s].map(ch => ch.charCodeAt(0) - 32)];
+    codes.push(codes.slice(1).reduce((sum, c, i) => sum + c * (i + 1), 104) % 103, 106);
+    let x = 10, bars = '', dark = true;
+    for (const n of codes.map(c => C128[c]).join('')){ if (dark) bars += `<rect x="${x}" y="0" width="${n}" height="${h}"/>`; x += +n; dark = !dark; }
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${x + 10} ${h}" preserveAspectRatio="none">${bars}</svg>`;
+  }
+  // 반출 현황표 (A4 가로) — 상품마다 한 장 · 집품토트를 바코드로
   function obPrintLabel(g){
     const E = v => String(v ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
-    const n = Math.max(1, Math.min(50, Math.round(g.box) || 1));
-    const now = new Date(Date.now() + 9 * 36e5).toISOString();
-    const stamp = now.slice(5, 10) + ' ' + now.slice(11, 16);
-    const many = g.ts.length > 12, rowH = g.ts.length > 18 ? 7 : many ? 9 : 12;
-    const rows = g.ts.map(t => `<tr><td class="nm">${E(t.name || '-')}</td><td class="bc">${E(t.barcode || '')}</td><td class="q">${t.qty !== '' && t.qty != null ? E(retNum(t.qty)) : '-'}</td><td class="ex"><div></div></td></tr>`).join('');
-    const one = i => `<section class="lb"><div class="top"><div><div class="to">받는 곳</div><div class="vd">${E(g.vendor || '-')}</div></div><div class="bx"><div class="n">${i}/${n}</div><div class="l">BOX</div></div></div>
-<dl class="ids"><dt>반출그룹</dt><dd>${E(g.grp || '-')}</dd><dt>외부반출</dt><dd>${E(g.ext || '-')}</dd><dt>마감일</dt><dd>${E(g.due || '-')}</dd></dl>
-<table><thead><tr><th>상품명</th><th>바코드</th><th class="q">수량</th><th class="ex">소비기한 (수기)</th></tr></thead><tbody>${rows}</tbody></table>
-<div class="ad">${E(g.addr || '')}${g.addr && g.phone ? '<br>' : ''}<b>${E(g.phone || '')}</b></div>
-<div class="ft"><span>GWJ3 IB · IST 반출</span><span>인쇄 ${stamp}</span></div></section>`;
-    const css = `@page{size:A4;margin:10mm}*{box-sizing:border-box}html,body{margin:0;background:#fff;color:#111;font-family:-apple-system,"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.lb{height:276mm;border:.7mm solid #111;border-radius:3mm;padding:7mm;display:flex;flex-direction:column;gap:4mm;page-break-after:always;break-after:page;overflow:hidden}.lb:last-child{page-break-after:auto;break-after:auto}
-.top{display:flex;justify-content:space-between;align-items:flex-start;gap:5mm}.to{font-size:10pt;color:#555;font-weight:700}.vd{font-size:30pt;font-weight:900;line-height:1.15;word-break:keep-all;overflow-wrap:anywhere}
-.bx{border:.7mm solid #111;border-radius:2.5mm;text-align:center;padding:1.5mm 4mm;flex:none}.bx .n{font-size:30pt;font-weight:900;line-height:1;white-space:nowrap}.bx .l{font-size:9pt;font-weight:800}
-.ids{display:grid;grid-template-columns:auto 1fr;gap:1mm 5mm;margin:0;font-size:13pt;border-top:.4mm solid #111;border-bottom:.4mm solid #111;padding:3mm 0}.ids dt{color:#555;font-weight:700}.ids dd{margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:800}
-table{border-collapse:collapse;width:100%;font-size:${many ? 9.5 : 11.5}pt;table-layout:fixed}th{text-align:left;font-size:9pt;color:#555;border-bottom:.4mm solid #111;padding:1mm;white-space:nowrap}
-td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:middle}td.nm{overflow-wrap:anywhere;line-height:1.25}td.bc{font-family:ui-monospace,Menlo,Consolas,monospace;width:34mm}
-.q{width:15mm;text-align:right}td.q{font-weight:900;font-size:${many ? 11 : 14}pt}.ex{width:38mm;text-align:center}td.ex div{border:.35mm solid #111;border-radius:1mm;height:${Math.max(5, rowH - 3)}mm}
-.ad{margin-top:auto;font-size:12pt;line-height:1.4;border-top:.4mm solid #111;padding-top:3mm;overflow-wrap:anywhere}.ad b{font-family:ui-monospace,Menlo,Consolas,monospace}.ft{display:flex;justify-content:space-between;font-size:9pt;color:#555}`;
-    const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>반출 라벨 ${E(g.grp || g.vendor || '')}</title><style>${css}</style></head><body>${Array.from({ length: n }, (_, i) => one(i + 1)).join('')}</body></html>`;
+    const today = new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10);
+    const one = t => {
+      const nm = t.name || '-', nmSize = nm.length > 40 ? 15 : nm.length > 26 ? 18 : 22;
+      const bar = code128Svg(t.tote, 60);
+      const box = t.box !== '' && t.box != null && +t.box ? retNum(t.box) + '박스' : '';
+      return `<section class="pg"><div class="f">
+<div class="t">GWJ3 반출 현황표</div>
+<div class="l">처리자</div><div class="v"></div><div class="l">포장수량</div><div class="v">${E(box)}</div>
+<div class="l">상품명</div><div class="v s3 nm" style="font-size:${nmSize}pt">${E(nm)}</div>
+<div class="l">반출수량</div><div class="v">${t.qty !== '' && t.qty != null ? E(retNum(t.qty)) : ''}</div><div class="l">유통기한</div><div class="v"></div>
+<div class="l">반출방식</div><div class="v"></div><div class="l">포장일자</div><div class="v m">${E(today)}</div>
+<div class="l"></div><div class="v"></div><div class="l">업체명</div><div class="v vd">${E(g.vendor || '')}</div>
+<div class="hd c2">GC 바코드</div><div class="hd c2">주소</div>
+<div class="bc">${bar ? `<div class="bars">${bar}</div>` : ''}<div class="num">${E(t.tote || '')}</div></div>
+<div class="ad">${E(g.addr || '')}${g.addr && g.phone ? '<br>' : ''}${E(g.phone || '')}</div>
+</div></section>`;
+    };
+    const css = `@page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}html,body{margin:0;background:#fff;color:#111;font-family:"Malgun Gothic","Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pg{height:189mm;page-break-after:always;break-after:page;display:flex}.pg:last-child{page-break-after:auto;break-after:auto}
+.f{flex:1;border:.8mm solid #111;display:grid;grid-template-columns:22% 28% 17% 33%;grid-template-rows:25mm repeat(5,16mm) 12mm 1fr}
+.f>div{border-right:.25mm solid #333;border-bottom:.25mm solid #333;display:flex;align-items:center;justify-content:center;font-size:18pt;padding:0 3mm;text-align:center;overflow:hidden;overflow-wrap:anywhere;line-height:1.25}
+.f>div:nth-child(4n+1){}.t{grid-column:1/-1;font-size:40pt!important;border-bottom:.8mm solid #111!important}
+.l{font-weight:800}.v{font-weight:600}.m{font-family:ui-monospace,Menlo,Consolas,monospace}.s3{grid-column:2/5;justify-content:flex-start!important;text-align:left!important}.vd{font-size:16pt!important}
+.hd{border-top:.8mm solid #111;font-weight:800;font-size:16pt!important}.c2{grid-column:span 2}
+.bc{grid-column:1/3;flex-direction:column;gap:3mm}.bc .bars{width:80%;height:30mm}.bc .bars svg{width:100%;height:100%;display:block}.bc .num{font:800 18pt ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px}
+.ad{grid-column:3/5;font-size:15pt!important;font-weight:600;line-height:1.5!important}`;
+    const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>반출 현황표 ${E(g.vendor || '')}</title><style>${css}</style></head><body>${(g.ts.length ? g.ts : [{}]).map(one).join('')}</body></html>`;
     document.getElementById('ob-print-frame')?.remove();
-    const f = el('iframe', { id:'ob-print-frame', title:'라벨 인쇄', 'aria-hidden':'true', style:'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden' });
+    const f = el('iframe', { id:'ob-print-frame', title:'반출 현황표 인쇄', 'aria-hidden':'true', style:'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden' });
     document.body.append(f);
     const d = f.contentDocument; d.open(); d.write(html); d.close();
     setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch { toast('인쇄 화면을 열지 못했어요.'); } }, 300);
@@ -3715,7 +3734,7 @@ td{padding:0 1mm;height:${rowH}mm;border-bottom:.2mm dashed #999;vertical-align:
                   onclick: stop(() => obPut(g, { [comKey]: !g[comKey] }, g[comKey] ? '' : '업체 소통 완료로 표시했어요.')) }, el('i', { class:'bx', 'aria-hidden':'true' }), '소통 완료') : null,
                 el('button', { type:'button', class:'ob-ib ob-edit' + (editOn ? ' on' : ''), title:'이 그룹 고치기', 'aria-label':'이 그룹 고치기', text:'✎',
                   onclick: stop(() => { if (!editOn) return obOpenGroup(g); if (obDraftDirty(obUi.draft)) return toast('고친 내용을 저장하거나 취소해 주세요.'); obCloseGroup(); }) }),
-                s < 4 ? el('button', { type:'button', class:'ob-ib ob-prt', title:'박스 라벨 인쇄 (박스 수만큼)', 'aria-label':'박스 라벨 인쇄', text:'\u{1F5A8}', onclick: stop(() => obPrintLabel(g)) }) : null,
+                s < 4 ? el('button', { type:'button', class:'ob-ib ob-prt', title:'반출 현황표 인쇄 (상품마다 한 장)', 'aria-label':'반출 현황표 인쇄', text:'\u{1F5A8}', onclick: stop(() => obPrintLabel(g)) }) : null,
                 s > 1 ? el('button', { type:'button', class:'ob-ib ob-back', title:'이전 단계로', 'aria-label':'이전 단계로', text:'↩', onclick: stop(() => obPut(g, { stage: s - 1 }, OB_STAGES[s - 1] + ' 단계로 되돌렸어요.')) }) : null));
             const c = el('td', { class:'c-act', rowspan: String(g.ts.length) }, acts);
             c.onclick = e => e.stopPropagation();
