@@ -3932,18 +3932,33 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
   function ppXlsx(sheet, rows, widths){
     const X = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c])).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
     const colName = i => { let s = ''; i++; while (i){ const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
-    const cell = (v, r, c, st) => { const ref = colName(c) + (r + 1), s = st ? ` s="${st}"` : '';
+    // 칸 값은 그냥 값이거나 { v, s:{ b, color, fill, align, border, top, num } } (음영 · 굵게 · 테두리)
+    const fonts = [], fills = ['<fill><patternFill patternType="none"/></fill>', '<fill><patternFill patternType="gray125"/></fill>'], borders = ['<border/>'], xfs = [];
+    const idx = (arr, x) => { let i = arr.indexOf(x); if (i < 0){ arr.push(x); i = arr.length - 1; } return i; };
+    const line = (st, c) => `style="${st}"><color rgb="FF${c}"/>`;
+    const sty = o => {
+      o = o || {};
+      const f = idx(fonts, `<font>${o.b ? '<b/>' : ''}<sz val="10"/>${o.color ? `<color rgb="FF${o.color}"/>` : ''}<name val="맑은 고딕"/></font>`);
+      const fi = o.fill ? idx(fills, `<fill><patternFill patternType="solid"><fgColor rgb="FF${o.fill}"/></patternFill></fill>`) : 0;
+      const bo = o.border ? idx(borders, `<border><left ${line('thin', 'D4D4D4')}</left><right ${line('thin', 'D4D4D4')}</right><top ${o.top ? line('medium', '6B8F84') : line('thin', 'D4D4D4')}</top><bottom ${line('thin', 'D4D4D4')}</bottom><diagonal/></border>`) : 0;
+      const al = o.align ? `<alignment horizontal="${o.align}" vertical="center"/>` : '';
+      return idx(xfs, `<xf numFmtId="${o.num ? 3 : 0}" fontId="${f}" fillId="${fi}" borderId="${bo}" applyFont="1"${fi ? ' applyFill="1"' : ''}${bo ? ' applyBorder="1"' : ''}${o.num ? ' applyNumberFormat="1"' : ''}${al ? ` applyAlignment="1">${al}</xf>` : '/>'}`);
+    };
+    sty(null);
+    const HEAD = { b:1, color:'FFFFFF', fill:'1F6F5C', align:'center', border:1 };
+    const cell = (v, r, c, st) => { if (v && typeof v === 'object'){ st = sty(v.s); v = v.v; } else if (r === 0) st = sty(HEAD); else st = 0;
+      const ref = colName(c) + (r + 1), s = st ? ` s="${st}"` : '';
       return typeof v === 'number' && isFinite(v) ? `<c r="${ref}"${s}><v>${v}</v></c>` : `<c r="${ref}" t="inlineStr"${s}><is><t xml:space="preserve">${X(v)}</t></is></c>`; };
     const sheetXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>`
       + `<cols>${widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>`
-      + rows.map((r, ri) => `<row r="${ri + 1}">${r.map((v, ci) => cell(v, ri, ci, ri === 0 ? 1 : 0)).join('')}</row>`).join('')
+      + rows.map((r, ri) => `<row r="${ri + 1}"${ri === 0 ? ' ht="20" customHeight="1"' : ''}>${r.map((v, ci) => cell(v, ri, ci)).join('')}</row>`).join('')
       + `</sheetData><autoFilter ref="A1:${colName(rows[0].length - 1)}${rows.length}"/></worksheet>`;
     const files = [
       ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
       ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
       ['xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${X(sheet)}" sheetId="1" r:id="rId1"/></sheets><definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">'${X(sheet)}'!$A$1:$${colName(rows[0].length - 1)}$${rows.length}</definedName></definedNames></workbook>`],
       ['xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
-      ['xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="10"/><name val="맑은 고딕"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="맑은 고딕"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F6F5C"/></patternFill></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="2"><xf fontId="0" fillId="0" borderId="0"/><xf fontId="1" fillId="2" borderId="0" applyFont="1" applyFill="1"/></cellXfs></styleSheet>'],
+      ['xl/styles.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="${fonts.length}">${fonts.join('')}</fonts><fills count="${fills.length}">${fills.join('')}</fills><borders count="${borders.length}">${borders.join('')}</borders><cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="${xfs.length}">${xfs.join('')}</cellXfs></styleSheet>`],
       ['xl/worksheets/sheet1.xml', sheetXml],
     ];
     const enc = new TextEncoder();
@@ -4086,9 +4101,16 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch { toast('인쇄 화면을 열지 못했어요.'); } }, 300);
   }
   function bfExport(V){
-    const rows = [['묶음', '상품 바코드', '상품명', '로케이션', '수량', '제조일자', '유통기한', '곳 수', '묶음 합계', 'SKU ID', 'LPN']];
-    V.forEach((g, i) => { for (const r of g.rows) rows.push([i + 1, g.bc, g.name, r.loc, r.q, r.mfg, r.exp, g.locs, g.q, r.sku, r.lpn]); });
-    const blob = ppXlsx('버퍼', rows, [6, 16, 52, 18, 7, 11, 11, 6, 9, 12, 15]);
+    // 상품(묶음)마다 흰색 · 연초록을 번갈아 칠하고, 상품이 바뀌는 곳에 진한 선
+    const rows = [['묶음', '상품 바코드', '상품명', '로케이션', '수량', '제조일자', '유통기한', 'D-day', '곳 수', '묶음 합계', 'SKU ID', 'LPN']];
+    V.forEach((g, i) => g.rows.forEach((r, j) => {
+      const base = { border:1, fill: i % 2 ? 'EAF3EF' : '', top: i > 0 && j === 0 };
+      const C = (v, o) => ({ v, s: { ...base, ...o } }), d = ppDays(r.exp);
+      rows.push([C(i + 1, { align:'center' }), C(g.bc), C(g.name), C(r.loc, { b:1 }), C(r.q, { b:1, num:1 }), C(r.mfg, { align:'center' }), C(r.exp, { b:1, align:'center' }),
+        C(r.exp ? ppDD(d) : '', { align:'center', ...(d != null && d <= 14 ? { b:1, color: d <= 7 ? 'C0392B' : 'B8661A' } : {}) }),
+        C(g.locs, { align:'center' }), C(g.q, { num:1 }), C(r.sku), C(r.lpn)]);
+    }));
+    const blob = ppXlsx('버퍼', rows, [6, 16, 50, 17, 8, 12, 12, 8, 6, 10, 12, 15]);
     const a = el('a', { href: URL.createObjectURL(blob), download: `버퍼_${ppTodayIso().replace(/-/g, '')}.xlsx` });
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
