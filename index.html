@@ -2418,7 +2418,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       for (const [k, re] of RET_HEAD){
         if (!re.test(t)) continue;
         let sc = 2;
-        if (k === 'qty') sc = /회송수량|회송.*수량|수량.*회송/.test(t) ? 5 : /입고|발주|주문|요청|정상|잔여|가용|재고|총|박스/.test(t) ? 1 : 2;
+        if (k === 'qty') sc = /회송수량|회송.*수량|수량.*회송/.test(t) ? 5 : /보고|입고|발주|주문|요청|정상|잔여|가용|재고|총|박스|검수/.test(t) ? 1 : 2;
         if (k === 'reason'){ if (/종료|완료|취소|상태|일시|날짜|시간/.test(t)) continue; sc = /회송사유/.test(t) ? 5 : 2; }
         if (k === 'date' && /종료|완료/.test(t)) sc = 1;
         cand.push([i, k, sc]);
@@ -2432,12 +2432,15 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     const all = (i, re) => { const v = col(i); return v.length && v.every(x => re.test(x)); };
     const map = Array(n).fill(''), used = new Set();
     const put = (i, k) => { if (!map[i] && !used.has(k)){ map[i] = k; used.add(k); } };
+    const nums = [];
     for (let i = 0; i < n; i++){
       if (all(i, /^(\d{4}[-./]\d{1,2}[-./]\d{1,2}|\d{1,2}[/.]\d{1,2})/)) put(i, 'date');
       else if (all(i, /^(chill|ambient|frozen|냉장|상온|냉동|실온|CH|AM|FR)/i)) put(i, 'temp');
       else if (all(i, /^(\d{12,14}|PL\d{6,}|R\d{9,})$/i)) put(i, 'barcode');
-      else if (all(i, /^\d{1,3}(,\d{3})*$|^\d{1,5}$/)) put(i, 'qty');
+      else if (all(i, /^\d{1,3}(,\d{3})*$|^\d{1,5}$/)) nums.push(i);
     }
+    // 수량 칸이 여러 개면 (보고수량 → 회송수량 순서) 뒤쪽 칸을 회송수량으로 봐요
+    if (nums.length) put(nums[nums.length - 1], 'qty');
     for (let i = 0; i < n; i++) if (!map[i] && all(i, /^\d{6,10}(\s*,\s*\d{6,10})*$/)) { put(i, used.has('po') ? 'sku' : 'po'); }
     for (let i = 0; i < n; i++) if (!map[i] && col(i).some(x => /로켓|\d+\s*(g|kg|ml|l|개|입|구)\b/i.test(x))) put(i, 'name');
     const statusOnly = i => col(i).every(x => /^회송\s*(종료|완료|대기|진행|요청|확정|중)?$/.test(x));   // '회송종료' 같은 상태 칸은 사유가 아니에요
