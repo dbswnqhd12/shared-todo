@@ -392,11 +392,22 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ret-view button[aria-pressed="true"]{background:var(--accent);color:#fff}
 .ret-vn.mono{font-family:var(--mono)}
 .ret-vtag{font-weight:700;margin-right:6px;font-size:12.5px}
-.ret-items.by-date .ret-item{grid-template-columns:22px minmax(0,1fr) 40px 44px 50px auto}
+.ret-items.by-date .ret-item{grid-template-columns:22px minmax(0,1fr) 118px minmax(80px,150px) 44px 50px auto}
 .ret-cb{display:flex;align-items:center;justify-content:center;width:22px;flex:none;cursor:pointer}
 .ret-cb input{width:17px;height:17px;accent-color:var(--accent);margin:0}
 .ret-items{border-top:1px solid var(--line)}
-.ret-item{display:grid;grid-template-columns:22px 40px minmax(0,1fr) 40px 44px 50px auto;align-items:center;gap:10px;padding:7px 10px 7px 10px;border-top:1px dashed var(--line);font-size:13px}
+.ret-item{display:grid;grid-template-columns:22px 40px minmax(0,1fr) 118px minmax(80px,150px) 44px 50px auto;align-items:center;gap:10px;padding:7px 10px 7px 10px;border-top:1px dashed var(--line);font-size:13px}
+.ret-br{display:contents}.ret-bc{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ret-rs{font-size:12.5px;color:#8A5F10;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ret-item.is-done .ret-rs{color:inherit}
+.ret-new{display:inline-block;font-size:10px;font-weight:800;background:var(--accent);color:#fff;border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px}
+.ret-ok,.ret-undo{border:1px solid var(--accent);background:var(--paper);color:var(--accent);border-radius:6px;padding:3px 9px;font-size:12px;font-weight:800;white-space:nowrap;margin-right:2px}.ret-undo{border-color:var(--line);color:var(--muted)}.ret-ok:hover{background:var(--accent);color:#fff}
+.ret-gdone{border-color:var(--accent);color:var(--accent);background:var(--paper)}
+.ret-top{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;flex-direction:row!important}
+.ret-stat{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;border:1px solid var(--line);border-radius:10px;padding:7px 14px;min-width:112px;background:var(--paper);font:inherit;color:var(--ink);text-align:left}
+button.ret-stat{cursor:pointer}button.ret-stat:hover{border-color:var(--accent)}.ret-stat small{font-size:11.5px;color:var(--muted)}.ret-stat b{font-family:var(--mono);font-size:19px;font-weight:800;line-height:1.25}.ret-stat span{font-size:11.5px;color:var(--muted)}
+.ret-stat.late{border-color:color-mix(in srgb,var(--high) 35%,var(--line));background:var(--high-soft)}.ret-stat.late b{color:var(--high)}.ret-stat.on{box-shadow:0 0 0 2px var(--accent)}
+#ret-form[hidden]{display:none!important}.ret-top-btns{margin-left:auto;display:flex;gap:8px;align-items:center}.ret-close{margin-left:auto}
+.ret-bar.on{position:sticky;bottom:10px;z-index:3;background:var(--ink);color:var(--paper);border-radius:10px;padding:9px 12px;box-shadow:0 6px 18px rgba(0,0,0,.18)}.ret-bar.on .ret-help{color:var(--paper);font-weight:700}
+.ret-bar.on .ret-btn.ghost{background:transparent;color:var(--paper);border-color:color-mix(in srgb,var(--paper) 40%,transparent)}
 .ret-item:first-child{border-top:0}
 .ret-item.is-done{color:var(--muted)}
 .ret-item.is-sel{background:var(--accent-soft)}
@@ -447,12 +458,13 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
   .ret-gcount,.ret-gold{min-width:0;text-align:left}
   .ret-gcount{margin-left:32px}
   .ret-gprint{margin-left:auto}
-  .ret-item{grid-template-columns:22px minmax(0,1fr) auto auto;gap:4px 8px;grid-template-areas:"cb txt q st" "cb d tp ops"}
-  .ret-item .ret-cb{grid-area:cb}.ret-item .ret-main-txt{grid-area:txt}.ret-item .ret-q{grid-area:q}.ret-item .ret-stc{grid-area:st}
-  .ret-item .ret-d{grid-area:d;text-align:left}.ret-item .ret-tp{grid-area:tp}.ret-item .ret-ops{grid-area:ops;justify-content:flex-end}
+  .ret-item{grid-template-columns:22px auto minmax(0,1fr) auto;gap:4px 8px;grid-template-areas:"cb txt txt q" "cb br br br" "cb d tp ops"}
+  .ret-item .ret-cb{grid-area:cb}.ret-item .ret-main-txt{grid-area:txt}.ret-item .ret-q{grid-area:q}.ret-item .ret-br{grid-area:br;display:flex;flex-wrap:wrap;gap:2px 10px;min-width:0}.ret-item .ret-rs{white-space:normal}
+  .ret-item .ret-d{grid-area:d;text-align:left}.ret-item .ret-tp{grid-area:tp;text-align:left}.ret-item .ret-ops{grid-area:ops;justify-content:flex-end}
+  .ret-top-btns{margin-left:0;width:100%}.ret-top-btns .ret-btn{flex:1}.ret-stat{flex:1 1 40%;min-width:0}
   .ret-nm{white-space:normal}
   .ret-meta .po{display:none}
-  .ret-items.by-date .ret-item{grid-template-columns:22px minmax(0,1fr) auto auto}
+  .ret-items.by-date .ret-item{grid-template-columns:22px auto minmax(0,1fr) auto;grid-template-areas:"cb txt txt q" "cb br br br" "cb tp tp ops"}
   .ret-tools .ret-help{margin-left:0}
 }
 /* 회송 확인서 — 업체마다 A4 한 장. 길면 인쇄 직전에 줄여서 한 장에 맞춰요 */
@@ -1351,7 +1363,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     $('#buf').hidden = !bfView;
     $('#over').hidden = !overView;
     $('#out').hidden = !outView;
-    $('#app').classList.toggle('wide', prodView || outView || ppView || bfView);
+    $('#app').classList.toggle('wide', prodView || outView || ppView || bfView || retView);
     for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView || outView || ppView || bfView;
     document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView || outView || ppView || bfView;
     if (prodView && !$('#prod').hasChildNodes()) renderProd();
@@ -2290,7 +2302,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   const RET_REASONS = ['[회송] 과착', '[회송] 유통기한', '표기사항불량>표기사항오류', '품질불량>파손', '품질불량>변질'];
   const RET_FIELDS = ['date','vendor','po','temp','name','sku','barcode','reason','qty','note'];
   let retItems = null, retRev = -1, retLoading = false, retBuilt = false;
-  const retUi = { inl:null, status:'wait', vendor:'', q:'', sel:new Set(), editId:null, open:new Set(), group: (() => { try { return localStorage.getItem('ret-group') === 'date' ? 'date' : 'vendor'; } catch { return 'vendor'; } })() };
+  const retUi = { inl:null, status:'wait', vendor:'', q:'', sel:new Set(), editId:null, closed:new Set(), only:'', formOpen:false, group: (() => { try { return localStorage.getItem('ret-group') === 'date' ? 'date' : 'vendor'; } catch { return 'vendor'; } })() };
   const retForm = { date: todayIso, vendor:'', po:'', temp:'CH', name:'', sku:'', barcode:'', reason:'', qty:'', note:'' };
   const retTemp = t => (RET_TEMPS.find(x => x[0] === t) || [null, ''])[1];
   const retMD = d => d ? `${+d.slice(5, 7)}/${+d.slice(8, 10)}` : '';
@@ -2346,7 +2358,8 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
         el('p', { class:'ret-help ret-single', text:'빈 칸이 있어도 추가돼요 · Tab으로 다음 칸' }),
         el('div', { class:'ret-mode', id:'ret-mode', role:'group', 'aria-label':'입력 방식' },
           el('button', { type:'button', 'data-m':'single', text:'한 건씩', onclick: () => retSetMode('single') }),
-          el('button', { type:'button', 'data-m':'paste', text:'여러 건 붙여넣기', onclick: () => retSetMode('paste') }))),
+          el('button', { type:'button', 'data-m':'paste', text:'여러 건 붙여넣기', onclick: () => retSetMode('paste') })),
+        el('button', { type:'button', class:'ret-btn ghost sm ret-close', text:'닫기 ✕', title:'입력 칸 접기', onclick: () => retOpenForm(false) })),
       el('div', { class:'ret-paste' },
         el('textarea', { id:'ret-paste-in', class:'ret-in ret-paste-in', rows:'3', placeholder: RET_PASTE_PH, 'aria-label':'복사한 표 붙여넣기',
           onpaste: e => { const t = e.clipboardData && e.clipboardData.getData('text'); if (t){ e.preventDefault(); retPasteText(t); } },
@@ -2361,15 +2374,41 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       el('div', { class:'ret-acts ret-single' }, el('span', { class:'ret-help', id:'ret-form-msg', text:'엔터 = 추가' }), cancel, submit),
       el('datalist', { id:'ret-vendors' }), el('datalist', { id:'ret-reasons' }));
     form.onsubmit = e => { e.preventDefault(); if (retUi.mode !== 'paste') retSubmit(); };
-    box.append(form,
-      el('section', { class:'ret-sec', id:'ret-today' }),
+    box.append(el('section', { class:'ret-sec ret-top', id:'ret-top' }), form,
       el('section', { class:'ret-sec', id:'ret-list' },
         el('div', { class:'ret-sec-head' }, el('h3', { text:'회송 목록' }), el('p', { class:'ret-help', text:'업체를 골라 회송 확인서를 인쇄해요' })),
         el('input', { class:'ret-in ret-search', id:'ret-q', type:'search', placeholder:'업체명 · 상품명 · 바코드 · 발주번호 검색', 'aria-label':'회송 목록 검색',
           oninput: e => { retUi.q = e.target.value.trim(); retRenderList(); } }),
         el('div', { id:'ret-list-body' })));
     let m = 'single'; try { m = localStorage.getItem('ret-mode') === 'paste' ? 'paste' : 'single'; } catch {}
-    retUi.mode = m; setTimeout(() => retSetMode(m), 0);
+    retUi.mode = m; setTimeout(() => { retSetMode(m, true); retOpenForm(false); }, 0);
+  }
+  // 입력 칸은 평소에 접어 두고, 위의 버튼을 누를 때만 열어요
+  function retOpenForm(open, mode){
+    retUi.formOpen = open;
+    const f = $('#ret-form'); if (!f) return;
+    f.hidden = !open;
+    if (open){ if (mode) retSetMode(mode); else if (retUi.mode !== 'paste') setTimeout(() => $('#ret-vendor')?.focus(), 0); f.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+    else if (retUi.editId) retEndEdit();
+    retRenderTop();
+  }
+  // 맨 위 요약 · 입력 버튼
+  function retRenderTop(){
+    const sec = $('#ret-top'); if (!sec) return;
+    const all = retItems || [], wait = all.filter(t => t.status !== 'done');
+    const late = wait.filter(t => retOldDays(t) >= 7), today = all.filter(t => retLocalDay(t.createdAt) === todayIso);
+    const qty = wait.reduce((s, t) => s + (+t.qty || 0), 0);
+    const stat = (label, val, sub, cls, onclick) => el(onclick ? 'button' : 'div', { type: onclick ? 'button' : null, class:'ret-stat' + (cls ? ' ' + cls : ''), onclick },
+      el('small', { text: label }), el('b', { text: val }), sub ? el('span', { text: sub }) : null);
+    const pick = only => () => { retUi.only = retUi.only === only ? '' : only; if (only === 'today') retUi.status = 'all'; else if (only === 'late') retUi.status = 'wait'; retUi.sel.clear(); retRenderList(); };
+    sec.replaceChildren(
+      stat('회송 대기', `${wait.length}건`, `${retNum(qty)}개`, '', () => { retUi.only = ''; retUi.status = 'wait'; retRenderList(); }),
+      stat('7일 넘게 대기', `${late.length}건`, '', late.length ? 'late' + (retUi.only === 'late' ? ' on' : '') : '', late.length ? pick('late') : null),
+      stat('업체', `${new Set(wait.map(t => t.vendor || '')).size}곳`, ''),
+      stat('오늘 입력', `${today.length}건`, '', retUi.only === 'today' ? 'on' : '', pick('today')),
+      el('div', { class:'ret-top-btns' },
+        el('button', { type:'button', class:'ret-btn' + (retUi.formOpen && retUi.mode === 'paste' ? ' solid' : ''), onclick: () => retUi.formOpen && retUi.mode === 'paste' ? retOpenForm(false) : retOpenForm(true, 'paste') }, '📋 여러 건 붙여넣기'),
+        el('button', { type:'button', class:'ret-btn solid ret-add', onclick: () => retUi.formOpen && retUi.mode !== 'paste' ? retOpenForm(false) : retOpenForm(true, 'single') }, retUi.formOpen && retUi.mode !== 'paste' ? '입력 닫기' : '+ 회송 입력')));
   }
 
   function retFillForm(){
@@ -2550,13 +2589,14 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       toast(e.message); if (btn) btn.disabled = false;
     }
   }
-  function retSetMode(m){
+  function retSetMode(m, quiet){
     retUi.mode = m; try { localStorage.setItem('ret-mode', m); } catch {}
+    if (!quiet) retRenderTop();
     const paste = m === 'paste';
     $('#ret-form').classList.toggle('paste', paste);
     document.querySelectorAll('#ret-mode button').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === m ? 'true' : 'false'));
     $('#ret-form-title').textContent = paste ? '회송 건 붙여넣기' : (retUi.editId ? '회송 건 수정' : '회송 건 입력');
-    if (paste) setTimeout(() => $('#ret-paste-in').focus(), 0);
+    if (paste && !quiet) setTimeout(() => $('#ret-paste-in').focus(), 0);
   }
 
   async function retSubmit(){
@@ -2608,6 +2648,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 
   function retStartEdit(t){
     if (retUi.mode === 'paste') retSetMode('single');
+    if (!retUi.formOpen) retOpenForm(true);
     retUi.editId = t.id;
     for (const k of RET_FIELDS) retForm[k] = k === 'qty' ? retNum(t.qty) : (t[k] ?? '');
     if (t.po || t.sku || t.barcode || t.note) $('#ret-more').open = true;
@@ -2656,7 +2697,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 
   // ---- 오늘 입력한 회송 ----
   function retRenderToday(){
-    const sec = $('#ret-today');
+    const sec = $('#ret-today'); if (!sec) return;   // '오늘 입력'은 이제 목록 필터로 봐요
     const list = (retItems || []).filter(t => retLocalDay(t.createdAt) === todayIso).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
     const qty = list.reduce((s, t) => s + (+t.qty || 0), 0);
     sec.replaceChildren(
@@ -2685,7 +2726,9 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     const body = $('#ret-list-body');
     if (!body) return;
     const all = retItems || [];
-    const byStatus = all.filter(t => retUi.status === 'all' || (retUi.status === 'done' ? t.status === 'done' : t.status !== 'done'));
+    retRenderTop();
+    const byStatus = all.filter(t => (retUi.status === 'all' || (retUi.status === 'done' ? t.status === 'done' : t.status !== 'done'))
+      && (retUi.only !== 'today' || retLocalDay(t.createdAt) === todayIso) && (retUi.only !== 'late' || retOldDays(t) >= 7));
     const q = retUi.q.toLowerCase();
     const hit = t => !q || [t.vendor, t.name, t.barcode, t.po, t.sku, t.reason].some(v => String(v || '').toLowerCase().includes(q));
     const rows = byStatus.filter(hit);
@@ -2708,31 +2751,35 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       .sort(byDateMode ? (a, b) => b.key.localeCompare(a.key)
         : (a, b) => (a.items[0].date || '').localeCompare(b.items[0].date || '') || a.key.localeCompare(b.key, 'ko'));
     const openAll = !!q;
-    const allOpen = list.length > 0 && list.every(g => openAll || retUi.open.has(g.okey));
+    const allOpen = list.length > 0 && list.every(g => openAll || !retUi.closed.has(g.okey));
     const toggleSel = (items, on) => { for (const t of items) on ? retUi.sel.add(t.id) : retUi.sel.delete(t.id); retRenderList(); };
 
     const itemRow = t => {
       const cb = el('input', { type:'checkbox', 'aria-label':`${t.name} 선택`, onchange: e => toggleSel([t], e.target.checked) });
       cb.checked = retUi.sel.has(t.id);
       const old = retOldDays(t);
-      const meta = [retShortReason(t.reason), t.barcode, t.po ? '발주 ' + String(t.po).replace(/,\s*/g, ', ') : '', t.status === 'done' && t.doneAt ? '완료 ' + retMD(t.doneAt) : ''].filter(Boolean);
+      const meta = [t.po ? '발주 ' + String(t.po).replace(/,\s*/g, ', ') : '', t.sku ? 'SKU ' + t.sku : '', t.status === 'done' && t.doneAt ? '완료 ' + retMD(t.doneAt) : ''].filter(Boolean);
+      const isNew = retLocalDay(t.createdAt) === todayIso;
       const on = retUi.inl?.id === t.id && retUi.inl.where === 'list';
       const row = el('div', { class:'ret-item' + (t.status === 'done' ? ' is-done' : '') + (cb.checked ? ' is-sel' : '') + (on ? ' editing' : ''), title:'상품명 · 수량 · 비고를 두 번 누르면 바로 수정', ondblclick: e => retQuick(e, t) },
         el('label', { class:'ret-cb' }, cb),
         byDateMode ? null : el('span', { class:'ret-d' + (old >= 7 ? ' late' : ''), title: old ? `${old}일째 대기` : '', text: retMD(t.date) }),
         el('div', { class:'ret-main-txt' },
-          el('div', { class:'ret-nm', title: t.name }, byDateMode ? el('b', { class:'ret-vtag', text: t.vendor }) : null, retShortName(t.name)),
-          el('div', { class:'ret-meta', title: t.reason }, ...meta.map((m, i) => el('span', { class: i === 0 ? 'rs' : 'mono' + (m.startsWith('발주 ') ? ' po' : ''), text: m }))),
+          el('div', { class:'ret-nm', title: t.name }, byDateMode ? el('b', { class:'ret-vtag', text: t.vendor }) : null, retShortName(t.name) || '-', isNew ? el('span', { class:'ret-new', text:'오늘' }) : null),
+          meta.length ? el('div', { class:'ret-meta' }, ...meta.map(m => el('span', { class:'mono' + (m.startsWith('발주 ') ? ' po' : ''), text: m }))) : null,
           t.note ? el('div', { class:'ret-note', text: t.note }) : null),
+        el('span', { class:'ret-br' }, el('span', { class:'ret-bc mono', text: t.barcode || '' }), el('span', { class:'ret-rs', title: t.reason, text: retShortReason(t.reason) })),
         el('span', { class:'ret-tp' }, retTempTag(t)),
         el('span', { class:'ret-q', text: t.qty === '' ? '-' : retNum(t.qty) }),
-        el('span', { class:'ret-stc' }, retStatusBtn(t)),
-        el('span', { class:'ret-ops' }, xeBtn(on, () => retToggleInl(t, 'list')), hoDel('회송 건 삭제', () => retDelete(t))));
+        el('span', { class:'ret-ops' },
+          t.status === 'done' ? el('button', { type:'button', class:'ret-undo', title:'대기로 되돌리기', text:'↩ 대기', onclick: () => retSetStatus([t.id], 'wait') })
+            : el('button', { type:'button', class:'ret-ok', title:'이 건 회송 완료', text:'✓ 완료', onclick: () => retSetStatus([t.id], 'done') }),
+          xeBtn(on, () => retToggleInl(t, 'list')), hoDel('회송 건 삭제', () => retDelete(t))));
       return on ? [row, retInlPanel(t)] : [row];
     };
 
     const groupEl = g => {
-      const open = openAll || retUi.open.has(g.okey);
+      const open = openAll || !retUi.closed.has(g.okey);
       const n = g.items.length, qty = g.items.reduce((s, t) => s + (+t.qty || 0), 0);
       const selN = g.items.filter(t => retUi.sel.has(t.id)).length;
       const label = byDateMode ? (g.key ? `${retMD(g.key)} (${'일월화수목금토'[new Date(g.key + 'T00:00').getDay()]})` : '하차일 없음') : g.key;
@@ -2740,7 +2787,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       cb.checked = selN === n; cb.indeterminate = selN > 0 && selN < n;
       const old = Math.max(0, ...g.items.map(retOldDays));
       const temps = RET_TEMPS.filter(([k]) => g.items.some(t => t.temp === k)).map(([k]) => retTempTag({ temp: k }));
-      const toggle = () => { retUi.open.has(g.okey) ? retUi.open.delete(g.okey) : retUi.open.add(g.okey); retRenderList(); };
+      const toggle = () => { retUi.closed.has(g.okey) ? retUi.closed.delete(g.okey) : retUi.closed.add(g.okey); retRenderList(); };
       const vN = new Set(g.items.map(t => t.vendor)).size;
       const ageText = byDateMode ? `업체 ${vN}곳` + (old ? ` · ${old}일째` : '') : (old ? `${retMD(g.items[0].date)}~ · ${old}일째` : retMD(g.items[0].date) + '~');
       return el('div', { class:'ret-group' + (open ? ' open' : '') + (selN ? ' has-sel' : '') },
@@ -2753,7 +2800,9 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
           byDateMode ? el('span', { class:'ret-gold' }, `업체 ${vN}곳`, old ? el('span', { class: old >= 7 ? 'late' : '', text: ` · ${old}일째` }) : null)
             : el('span', { class:'ret-gold' + (old >= 7 ? ' late' : ''), text: ageText }),
           el('button', { type:'button', class:'ret-btn ghost sm ret-gprint', title: byDateMode ? '이 날짜 회송 확인서 인쇄 — 업체마다 한 장 (체크한 건이 있으면 그 건만)' : '이 업체 회송 확인서 인쇄 (체크한 건이 있으면 그 건만)',
-            text:'🖨 인쇄', onclick: () => retPrint(selN ? g.items.filter(t => retUi.sel.has(t.id)) : g.items) })),
+            text:'🖨 확인서', onclick: () => retPrint(selN ? g.items.filter(t => retUi.sel.has(t.id)) : g.items) }),
+          g.items.some(t => t.status !== 'done') ? el('button', { type:'button', class:'ret-btn sm ret-gdone', title: byDateMode ? '이 날짜 대기 건 모두 완료' : '이 업체 대기 건 모두 완료',
+            text: byDateMode ? '✓ 날짜 전체 완료' : '✓ 업체 전체 완료', onclick: () => retSetStatus(g.items.filter(t => t.status !== 'done').map(t => t.id), 'done') }) : null),
         open ? el('div', { class:'ret-items' + (byDateMode ? ' by-date' : '') }, ...g.items.flatMap(itemRow)) : null);
     };
 
@@ -2762,21 +2811,24 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
         el('div', { class:'ret-chips' },
           chip(retUi.status === 'wait', '대기', waitN, () => { retUi.status = 'wait'; retUi.sel.clear(); retRenderList(); }),
           chip(retUi.status === 'done', '완료', undefined, () => { retUi.status = 'done'; retUi.sel.clear(); retRenderList(); }),
-          chip(retUi.status === 'all', '전체', undefined, () => { retUi.status = 'all'; retUi.sel.clear(); retRenderList(); })),
+          chip(retUi.status === 'all', '전체', undefined, () => { retUi.status = 'all'; retUi.sel.clear(); retRenderList(); }),
+          chip(retUi.only === 'today', '● 오늘 입력', all.filter(t => retLocalDay(t.createdAt) === todayIso).length, () => { retUi.only = retUi.only === 'today' ? '' : 'today'; if (retUi.only) retUi.status = 'all'; retUi.sel.clear(); retRenderList(); }),
+          all.some(t => retOldDays(t) >= 7) ? chip(retUi.only === 'late', '7일 넘음', all.filter(t => retOldDays(t) >= 7).length, () => { retUi.only = retUi.only === 'late' ? '' : 'late'; if (retUi.only) retUi.status = 'wait'; retUi.sel.clear(); retRenderList(); }) : null),
         el('div', { class:'ret-view', role:'group', 'aria-label':'묶어 보기' },
           ...[['vendor','업체별'],['date','날짜별']].map(([k, l]) => el('button', { type:'button', 'aria-pressed': retUi.group === k ? 'true' : 'false', text: l,
             onclick: () => { retUi.group = k; try { localStorage.setItem('ret-group', k); } catch {} retRenderList(); } }))),
         list.length ? el('span', { class:'ret-help', text: `${byDateMode ? '날짜' : '업체'} ${list.length}${byDateMode ? '일' : '곳'} · ${rows.length}건` }) : null,
         list.length && !openAll ? el('button', { type:'button', class:'ret-btn ghost sm', text: allOpen ? '모두 접기' : '모두 펼치기',
-          onclick: () => { if (allOpen) list.forEach(g => retUi.open.delete(g.okey)); else list.forEach(g => retUi.open.add(g.okey)); retRenderList(); } }) : null),
+          onclick: () => { if (allOpen) list.forEach(g => retUi.closed.add(g.okey)); else list.forEach(g => retUi.closed.delete(g.okey)); retRenderList(); } }) : null),
       !rows.length ? el('p', { class:'ho-empty', text: retItems ? '해당하는 회송 건이 없어요.' : '불러오는 중…' }) :
         el('div', { class:'ret-groups' }, ...list.map(groupEl)),
-      rows.length ? el('div', { class:'ret-bar' },
-        el('span', { class:'ret-help', text: sel.length ? `${sel.length}건 선택 · UNIT ${retNum(selQty)}` + (selVendors.length > 1 ? ` · 업체 ${selVendors.length}곳 (업체마다 한 장씩 인쇄)` : '') : (byDateMode ? '날짜를' : '업체 이름을') + ' 누르면 펼쳐져요 · 체크한 건을 한꺼번에 처리할 수 있어요' }),
+      ...(sel.length ? [el('div', { class:'ret-bar on' },
+        el('span', { class:'ret-help', text: `✓ ${sel.length}건 선택 · ${retNum(selQty)}개` + (selVendors.length > 1 ? ` · 업체 ${selVendors.length}곳 (업체마다 한 장씩 인쇄)` : selVendors[0] ? ` · ${selVendors[0]}` : '') }),
         el('div', { class:'ret-bar-btns' },
-          el('button', { type:'button', class:'ret-btn ghost', disabled: !sel.some(t => t.status !== 'done'), text:'선택한 건 완료 처리', onclick: () => retSetStatus(sel.filter(t => t.status !== 'done').map(t => t.id), 'done') }),
+          el('button', { type:'button', class:'ret-btn solid', disabled: !sel.some(t => t.status !== 'done'), text:'✓ 선택한 건 완료', onclick: () => retSetStatus(sel.filter(t => t.status !== 'done').map(t => t.id), 'done') }),
           retUi.status !== 'wait' ? el('button', { type:'button', class:'ret-btn ghost', disabled: !sel.some(t => t.status === 'done'), text:'대기로 되돌리기', onclick: () => retSetStatus(sel.filter(t => t.status === 'done').map(t => t.id), 'wait') }) : null,
-          el('button', { type:'button', class:'ret-btn solid', disabled: !sel.length, text:'🖨 선택한 건 인쇄', onclick: () => retPrint(sel) }))) : null);
+          el('button', { type:'button', class:'ret-btn ghost', text:'선택 해제', onclick: () => { retUi.sel.clear(); retRenderList(); } }),
+          el('button', { type:'button', class:'ret-btn solid', text:'🖨 확인서 인쇄', onclick: () => retPrint(sel) })))] : []));
   }
 
   // ---- 회송 확인서 인쇄 (업체마다 A4 한 장) ----
