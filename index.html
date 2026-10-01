@@ -845,7 +845,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .rp-items td.c{text-align:center}.rp-items td.r{text-align:right}
 .rp-items th,.rp-items td.c,.rp-items td.r{white-space:nowrap}
 .rp-sum td{font-weight:700}
-.rp-sign{display:flex;justify-content:space-between;margin-top:14mm;font-size:10.5pt}
+.rp-sign{display:flex;justify-content:flex-end;margin-top:14mm;font-size:10.5pt}
 .rp-sign div{border-top:1px solid #333;padding-top:2mm;width:44%;text-align:center}
 .rp-foot{text-align:right;color:#666;font-size:8pt;margin-top:6mm}
 @media print{
@@ -2900,7 +2900,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
             el('td', { class:'c', text: i + 1 }), el('td', { class:'c', text: retMD(t.date) }), el('td', { text: t.po || '' }), el('td', { text: t.sku || '' }), el('td', { text: t.barcode || '' }),
             el('td', { text: t.name }), el('td', { text: t.reason }), el('td', { class:'c', text: retTemp(t.temp) }), el('td', { class:'r', text: retNum(t.qty) }))),
             el('tr', { class:'rp-sum' }, el('td', { colspan:'8', class:'r', text:'합계' }), el('td', { class:'r', text: retNum(qty) })))),
-        el('div', { class:'rp-sign' }, el('div', { text:'인계자 (GWJ3)　　　　　　(서명)' }), el('div', { text:'인수자 (업체)　　　　　　(서명)' })),
+        el('div', { class:'rp-sign' }, el('div', { text:'인수자 (업체)　　　　　　(서명)' })),
         el('p', { class:'rp-foot', text: `GWJ3 IB · 출력 ${stamp}` })));
     }));
     document.querySelectorAll('#ret-print').forEach(n => n.remove());
