@@ -703,8 +703,9 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .bf-gh{display:flex;justify-content:space-between;gap:10px;background:var(--bg);padding:8px 12px}.bf-gn{min-width:0}.bf-gn .nm{font-weight:700;font-size:13.5px;overflow-wrap:anywhere}.bf-gn .bc{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px}
 .bf-tag{display:inline-block;font-size:10.5px;font-weight:800;border-radius:4px;padding:0 5px;margin-right:5px;background:var(--accent-soft);color:var(--accent);vertical-align:1px}
 .bf-cnt{white-space:nowrap;font-size:12.5px;color:var(--muted)}.bf-cnt b{color:var(--ink);font-family:var(--mono);font-size:15px}
-.bf-rows{padding:2px 12px 8px}.bf-rh,.bf-rw{display:grid;grid-template-columns:minmax(0,1fr) 64px 118px;gap:10px;align-items:center;padding:4px 0}.bf-rh{font-size:11px;color:var(--muted)}.bf-rh .r,.bf-rw .q{text-align:right}
-.bf-rw{font-size:13px;border-top:1px dashed var(--line)}.bf-rw .loc{font-family:var(--mono);font-weight:700;white-space:nowrap}.bf-rw .q{font-family:var(--mono)}.bf-rw .ex{font-family:var(--mono);color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}.bf-rw .pp-dd{min-width:0;font-size:10.5px;padding:1px 5px}
+.bf-rows{padding:2px 12px 8px}.bf-rh,.bf-rw{display:grid;grid-template-columns:minmax(0,1fr) 56px 54px 118px;gap:10px;align-items:center;padding:4px 0}.bf-rh{font-size:11px;color:var(--muted)}.bf-rh .r,.bf-rw .q{text-align:right}
+.bf-rw{font-size:13px;border-top:1px dashed var(--line)}.bf-rw .loc{font-family:var(--mono);font-weight:700;white-space:nowrap}.bf-rw .q{font-family:var(--mono)}.bf-rw .mf{font-family:var(--mono);color:var(--muted);white-space:nowrap}.bf-rw .ex{font-family:var(--mono);color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}.bf-rw .pp-dd{min-width:0;font-size:10.5px;padding:1px 5px}
+@media (max-width:560px){.bf-rh{display:none}.bf-rw{grid-template-columns:minmax(0,1fr) auto;gap:3px 10px}.bf-rw .q{grid-column:2;grid-row:1}.bf-rw .mf,.bf-rw .ex{grid-row:2;font-size:12px}.bf-rw .mf::before{content:'제조 '}.bf-rw .ex::before{content:'유통'}.bf-rw .ex{justify-content:flex-end}}
 @media (max-width:760px){.bf-grid{grid-template-columns:1fr}.bf-sum{grid-template-columns:1fr 1fr}.bf-sum .bf-st:last-child{grid-column:1/-1}.bf-find{width:100%;margin-left:0;order:9}}
 .pp-list{padding:0 8px 8px}
 .pp-hd{position:sticky;top:0;z-index:1;display:grid;grid-template-columns:128px 150px minmax(0,1fr) 130px 56px;gap:10px;padding:8px 10px 6px 15px;margin:0 -8px 2px;background:var(--paper);border-bottom:1px solid var(--line);font-size:11.5px;font-weight:600;color:var(--muted)}
@@ -4055,8 +4056,8 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
       el('div', { class:'bf-gh' }, el('div', { class:'bf-gn' }, el('div', { class:'nm', title: g.name }, nm.tag ? el('span', { class:'bf-tag', text: nm.tag }) : null, nm.name),
         el('div', { class:'bc', text: g.bc || '바코드 없음' })),
         el('div', { class:'bf-cnt' }, el('b', { text: String(g.locs) }), '곳', g.rows.length !== g.locs ? ` (${g.rows.length}줄)` : '', ' · ', el('b', { text: retNum(g.q) }), '개')),
-      el('div', { class:'bf-rows' }, el('div', { class:'bf-rh' }, el('span', { text:'로케이션' }), el('span', { class:'r', text:'수량' }), el('span', { text:'유통기한' })),
-        ...g.rows.map(r => { const d = ppDays(r.exp); return el('div', { class:'bf-rw' }, el('span', { class:'loc', text: r.loc || '-' }), el('b', { class:'q', text: retNum(r.q) }),
+      el('div', { class:'bf-rows' }, el('div', { class:'bf-rh' }, el('span', { text:'로케이션' }), el('span', { class:'r', text:'수량' }), el('span', { text:'제조일자' }), el('span', { text:'유통기한' })),
+        ...g.rows.map(r => { const d = ppDays(r.exp); return el('div', { class:'bf-rw' }, el('span', { class:'loc', text: r.loc || '-' }), el('b', { class:'q', text: retNum(r.q) }), el('span', { class:'mf', text: ppMD(r.mfg) }),
           el('span', { class:'ex' }, ppMD(r.exp), r.exp ? el('span', { class:'pp-dd' + ppLvl(d), text: ppDD(d) }) : null)); }))); };
     const list = V.length ? el('div', { class:'pp-scroll bf-list' }, el('div', { class:'bf-grid' }, ...V.map(card)))
       : el('p', { class:'ret-help pp-none', text: bfUi.q ? '찾는 상품이 없어요.' : '같은 바코드가 여러 줄에 있는 상품이 없어요. 정리할 게 없네요!' });
@@ -4067,15 +4068,15 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     const E = v => String(v ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
     const now = new Date(Date.now() + 9 * 36e5).toISOString();
     const stamp = now.slice(5, 10) + ' ' + now.slice(11, 16);
-    const body = V.map(g => `<tbody><tr class="gh"><td colspan="3">${E(bfName(g.name).tag ? bfName(g.name).tag + ' · ' : '')}${E(bfName(g.name).name)}<div class="bc">${E(g.bc)}</div></td><td class="r gs">${g.locs}곳 · ${E(retNum(g.q))}개</td></tr>`
-      + g.rows.map(r => `<tr><td class="m b">${E(r.loc)}</td><td class="m r b">${E(retNum(r.q))}</td><td class="m">${E(ppMD(r.exp))}</td><td class="m mu">${E(r.lpn || '')}</td></tr>`).join('') + '</tbody>').join('');
+    const body = V.map(g => `<tbody><tr class="gh"><td colspan="4">${E(bfName(g.name).tag ? bfName(g.name).tag + ' · ' : '')}${E(bfName(g.name).name)}<div class="bc">${E(g.bc)}</div></td><td class="r gs">${g.locs}곳 · ${E(retNum(g.q))}개</td></tr>`
+      + g.rows.map(r => `<tr><td class="m b">${E(r.loc)}</td><td class="m r b">${E(retNum(r.q))}</td><td class="m">${E(ppMD(r.mfg))}</td><td class="m b">${E(ppMD(r.exp))}</td><td class="m mu">${E(r.lpn || '')}</td></tr>`).join('') + '</tbody>').join('');
     const css = `@page{size:A4;margin:10mm}*{box-sizing:border-box}body{margin:0;color:#111;font-family:-apple-system,"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 h1{font-size:18pt;margin:0 0 1mm}.sub{font-size:9pt;color:#555;margin-bottom:3mm}table{width:100%;border-collapse:collapse;font-size:10pt}th{text-align:left;font-size:8.5pt;color:#555;border-bottom:.4mm solid #111;padding:1.2mm}
 td{padding:1.2mm 2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}thead{display:table-header-group}tbody{break-inside:avoid}.m{font-family:ui-monospace,Menlo,Consolas,monospace;white-space:nowrap}.r{text-align:right}.b{font-weight:800}.mu{color:#666;font-size:8.5pt}
 tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm solid #111;padding-top:2mm}tr.gh .bc{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:500;font-size:8.5pt;color:#555}tr.gh .gs{white-space:nowrap;font-size:9.5pt}`;
     const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>버퍼존 정리</title><style>${css}</style></head><body>
 <h1>버퍼존 정리</h1><div class="sub">${V.length}종 · ${V.reduce((s, g) => s + g.rows.length, 0)}줄 · ${bfUi.mode === 'all' ? '전체' : '같은 바코드가 여러 줄인 상품만'}${bfUi.q ? ' · 찾기: ' + E(bfUi.q) : ''} · ${E(bfData.file || '')} · 인쇄 ${stamp}</div>
-<table><thead><tr><th>로케이션</th><th class="r">수량</th><th>유통기한</th><th>LPN</th></tr></thead>${body}</table></body></html>`;
+<table><thead><tr><th>로케이션</th><th class="r">수량</th><th>제조일자</th><th>유통기한</th><th>LPN</th></tr></thead>${body}</table></body></html>`;
     document.getElementById('bf-print-frame')?.remove();
     const f = el('iframe', { id:'bf-print-frame', title:'버퍼존 인쇄', 'aria-hidden':'true', style:'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden' });
     document.body.append(f);
@@ -4083,9 +4084,9 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch { toast('인쇄 화면을 열지 못했어요.'); } }, 300);
   }
   function bfExport(V){
-    const rows = [['묶음', '상품 바코드', '상품명', '로케이션', '수량', '유통기한', '곳 수', '묶음 합계', 'SKU ID', 'LPN']];
-    V.forEach((g, i) => { for (const r of g.rows) rows.push([i + 1, g.bc, g.name, r.loc, r.q, r.exp, g.locs, g.q, r.sku, r.lpn]); });
-    const blob = ppXlsx('버퍼존', rows, [6, 16, 52, 18, 7, 11, 6, 9, 12, 15]);
+    const rows = [['묶음', '상품 바코드', '상품명', '로케이션', '수량', '제조일자', '유통기한', '곳 수', '묶음 합계', 'SKU ID', 'LPN']];
+    V.forEach((g, i) => { for (const r of g.rows) rows.push([i + 1, g.bc, g.name, r.loc, r.q, r.mfg, r.exp, g.locs, g.q, r.sku, r.lpn]); });
+    const blob = ppXlsx('버퍼존', rows, [6, 16, 52, 18, 7, 11, 11, 6, 9, 12, 15]);
     const a = el('a', { href: URL.createObjectURL(blob), download: `버퍼존_${ppTodayIso().replace(/-/g, '')}.xlsx` });
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
