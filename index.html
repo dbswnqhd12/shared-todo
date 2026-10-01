@@ -720,6 +720,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .pp-none{padding:10px 0}
 /* 버퍼 */
 .bf-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.bf-st{border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--paper)}.bf-st small{font-size:12px;color:var(--muted)}.bf-st b{display:block;font-family:var(--mono);font-size:19px;font-weight:800;margin-top:2px}.bf-st.on{border:2px solid var(--accent);padding:8px 11px;background:var(--accent-soft)}
+.offbar{position:sticky;top:8px;z-index:60;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;background:var(--mid-soft);color:var(--mid);border:1px solid var(--mid);border-radius:10px;padding:8px 12px;font-size:13.5px;line-height:1.45}.offbar span{font-weight:500}
 .app-inst{margin-top:8px;font-weight:600;border-color:var(--accent);color:var(--accent)}
 .bf-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.bf-fw{margin-left:auto;display:flex;gap:6px;align-items:center;min-width:0;max-width:100%}.bf-fw .bf-find{margin-left:0}.bf-cam{white-space:nowrap;background:var(--accent);color:var(--paper);border-color:var(--accent);font-weight:700}
 .scan-hit{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-soft);color:var(--accent);border-radius:10px;padding:9px 12px;font-size:13.5px;font-weight:600}.scan-hit.miss{background:var(--high-soft);color:var(--high)}.scan-hit code{font-family:var(--mono);font-weight:700}.scan-hit .sp{flex:1}.scan-hit button{white-space:nowrap}
@@ -887,6 +888,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 </section>
 
 <div class="wrap" id="app">
+  <div class="offbar" id="offBar" hidden role="status"><b>📴 인터넷 연결 없음</b><span></span></div>
   <header>
     <div>
       <div class="date" id="today"></div>
@@ -1022,7 +1024,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 
   $('#today').textContent = now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
 
-  function setSync(state, text){ $('#sync').className = 'sync' + (state ? ' ' + state : ''); $('#syncText').textContent = text; }
+  function setSync(state, text){ if (offAt && !state){ state = 'err'; text = '오프라인 · 받아둔 내용을 보는 중'; } $('#sync').className = 'sync' + (state ? ' ' + state : ''); $('#syncText').textContent = text; }
   let toastTimer;
   function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 4000); }
 
@@ -1034,14 +1036,57 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     $('#lockPw').focus();
   }
 
+  // ---------- 오프라인 보기 ----------
+  // 서버에서 받은 내용을 폰에 저장해 뒀다가, 인터넷이 끊기면 그걸 보여줘요 (수정 · 저장은 연결돼야 가능)
+  const OFF_CACHE = 'gwj3-data-v1';
+  let offAt = 0, offWarmed = false;
+  const hasCaches = () => typeof caches !== 'undefined';
+  async function offPut(url, data){ if (!hasCaches()) return; try { const c = await caches.open(OFF_CACHE); await c.put(url, new Response(JSON.stringify({ at: Date.now(), data }), { headers: { 'content-type':'application/json' } })); } catch {} }
+  async function offGet(url){ if (!hasCaches()) return null; try { const c = await caches.open(OFF_CACHE); const r = await c.match(url); return r ? await r.json() : null; } catch { return null; } }
+  function offClear(){ if (hasCaches()) caches.delete(OFF_CACHE).catch(() => {}); }
+  function setOffline(at){
+    offAt = at || 0;
+    const b = $('#offBar'); if (!b) return;
+    b.hidden = !offAt;
+    if (offAt) b.querySelector('span').textContent = offAt > 0
+      ? `${new Date(offAt).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' })}에 받아둔 내용을 보여주고 있어요 · 수정은 연결되면 할 수 있어요`
+      : '이 화면은 받아둔 내용이 없어요. 연결되면 다시 열어주세요.';
+    if (offAt) setSync('', '');
+  }
+  // 온라인일 때 모든 탭 내용을 한 번 받아둬요 (1시간에 한 번까지)
+  async function offWarm(){
+    if (!teamKey || !navigator.onLine || !hasCaches()) return;
+    const last = Number(store.get('off-warm', 0)) || 0;
+    if (Date.now() - last < 3600e3) return;
+    store.set('off-warm', String(Date.now()));
+    for (const u of ['/api/returns', '/api/overs', '/api/outs', '/api/handover', '/api/prepack', '/api/prepack?kind=buffer', '/api/prod']){
+      try { await request('GET', u); } catch {}
+    }
+    // 바코드 읽기 프로그램도 미리 받아둬요 (폰에 읽기 기능이 없는 경우만)
+    if (!('BarcodeDetector' in window) && !store.get('bd-warm', '')){
+      try { const d = await bdGet(); const c = document.createElement('canvas'); c.width = c.height = 8; await d.detect(c); store.set('bd-warm', '1'); } catch {}
+    }
+  }
+  window.addEventListener('online', () => { setTimeout(() => loadFull(), 500); });
   async function request(method, url, body){
     const headers = {};
     if (body) headers['Content-Type'] = 'application/json';
     if (teamKey) headers['x-team-key'] = encodeURIComponent(teamKey);
     if (editKey && url.startsWith('/api/shifts')) headers['x-edit-key'] = encodeURIComponent(editKey);
-    const r = await fetch(url, {method, headers, body: body ? JSON.stringify(body) : undefined, cache:'no-store'});
+    const cacheable = method === 'GET' && !!teamKey && !url.includes('verify=');
+    let r;
+    try { r = await fetch(url, {method, headers, body: body ? JSON.stringify(body) : undefined, cache:'no-store'}); }
+    catch(netErr) {
+      // 인터넷이 끊기면: 보기(GET)는 마지막으로 받아둔 내용으로, 저장은 막아요
+      const hit = cacheable ? await offGet(url) : null;
+      setOffline(hit ? hit.at : (offAt || -1));
+      if (hit) return hit.data;
+      throw new Error(method === 'GET' ? '인터넷에 연결되어 있지 않고, 이 화면은 받아둔 내용이 없어요.' : '인터넷에 연결되어 있지 않아요. 연결되면 다시 해주세요.');
+    }
+    if (offAt) setOffline(0);
     const data = await r.json().catch(() => ({}));
-    if (r.status === 401) throw new Locked(data.error || '팀 비밀번호를 입력하세요.');
+    if (r.status === 401){ offClear(); throw new Locked(data.error || '팀 비밀번호를 입력하세요.'); }
+    if (cacheable && r.ok) offPut(url, data);
     if (data.editLocked) throw new EditLocked(data.error || '편집 비밀번호를 입력하세요.');
     if (!r.ok) throw new Error(data.error || '서버에 연결하지 못했어요.');
     return data;
@@ -1074,6 +1119,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       if (view === 'pp' && ppRev !== rev) ppLoad();
       if (view === 'buf' && bfRev !== rev) bfLoad();
       setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
+      if (!offWarmed && !offAt){ offWarmed = true; setTimeout(offWarm, 5000); }
     } catch(e) {
       if (e instanceof Locked) return showLock(teamKey ? e.message : '');
       setSync('err', e.message);
