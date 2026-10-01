@@ -406,7 +406,7 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 button.ret-stat{cursor:pointer}button.ret-stat:hover{border-color:var(--accent)}.ret-stat small{font-size:11.5px;color:var(--muted)}.ret-stat b{font-family:var(--mono);font-size:19px;font-weight:800;line-height:1.25}.ret-stat span{font-size:11.5px;color:var(--muted)}
 .ret-stat.late{border-color:color-mix(in srgb,var(--high) 35%,var(--line));background:var(--high-soft)}.ret-stat.late b{color:var(--high)}.ret-stat.on{box-shadow:0 0 0 2px var(--accent)}
 #ret-form[hidden]{display:none!important}.ret-top-btns{margin-left:auto;display:flex;gap:8px;align-items:center}.ret-close{margin-left:auto}
-.ret-bar-slot{display:contents}.ret-group{content-visibility:auto;contain-intrinsic-size:auto 240px}
+.ret-bar-slot{display:contents}.ret-all{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:20px;padding:4px 12px 4px 9px;font-size:13px;font-weight:700;cursor:pointer;background:var(--paper)}.ret-all input{width:16px;height:16px;accent-color:var(--accent);margin:0}.ret-group{content-visibility:auto;contain-intrinsic-size:auto 240px}
 .ret-bar.on{position:sticky;bottom:10px;z-index:3;background:var(--ink);color:var(--paper);border-radius:10px;padding:9px 12px;box-shadow:0 6px 18px rgba(0,0,0,.18)}.ret-bar.on .ret-help{color:var(--paper);font-weight:700}
 .ret-bar.on .ret-btn.ghost{background:transparent;color:var(--paper);border-color:color-mix(in srgb,var(--paper) 40%,transparent)}
 .ret-item:first-child{border-top:0}
@@ -2766,7 +2766,12 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
         ge.classList.toggle('has-sel', k > 0); if (gc){ gc.checked = k === g.items.length; gc.indeterminate = k > 0 && k < g.items.length; }
       }
       body.querySelector('#ret-bar-slot')?.replaceChildren(...barEl());
+      syncAll();
     };
+    // 지금 보이는 건 전체 선택
+    const allCb = el('input', { type:'checkbox', 'aria-label':'보이는 건 전체 선택', onchange: e => toggleSel(rows, e.target.checked) });
+    const syncAll = () => { const k = rows.filter(t => retUi.sel.has(t.id)).length; allCb.checked = rows.length > 0 && k === rows.length; allCb.indeterminate = k > 0 && k < rows.length; };
+    syncAll();
 
     const itemRow = t => {
       const cb = el('input', { type:'checkbox', 'aria-label':`${t.name} 선택`, onchange: e => toggleSel([t], e.target.checked) });
@@ -2834,6 +2839,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     }
     body.replaceChildren(
       el('div', { class:'ret-tools' },
+        rows.length ? el('label', { class:'ret-all', title:'지금 보이는 건 전체 선택 · 해제' }, allCb, el('span', { text:`전체 선택` })) : null,
         el('div', { class:'ret-chips' },
           chip(retUi.status === 'wait', '대기', waitN, () => { retUi.status = 'wait'; retUi.sel.clear(); retRenderList(); }),
           chip(retUi.status === 'done', '완료', undefined, () => { retUi.status = 'done'; retUi.sel.clear(); retRenderList(); }),
