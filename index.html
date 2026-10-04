@@ -51,7 +51,7 @@
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding:0 16px}
 .wrap.wide{max-width:1080px}
-.wrap{max-width:760px;margin:0 auto;padding-block:40px 64px;display:flex;flex-direction:column;gap:20px}
+.wrap{max-width:1080px;margin:0 auto;padding-block:40px 64px;display:flex;flex-direction:column;gap:20px}
 header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
 h1{font-family:"Big Shoulders Display",var(--display);font-weight:800;font-size:clamp(34px,7vw,46px);letter-spacing:.02em;line-height:1.05;margin:0;text-wrap:balance}
 h2,h3{margin:0}
@@ -68,7 +68,7 @@ input,select{font:inherit}
 .ghost{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:5px 12px;font-size:13px}
 .ghost:hover{border-color:var(--accent)}
 .ghost[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
-.sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:4px}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);border:1px solid var(--line);background:var(--paper);border-radius:20px;padding:4px 11px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--accent)}
 .sync.err i{background:var(--high)}
 .sync.busy i{background:var(--mid)}
@@ -92,7 +92,33 @@ select,input[type=date]{font-size:13px;color:var(--ink);background:var(--bg);bor
 .tabs,.seg{display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:3px}
 .tabs button,.seg button{border:0;background:transparent;color:var(--muted);padding:5px 12px;border-radius:5px;font-size:13px}
 .tabs button[aria-pressed=true],.seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent);font-weight:600}
-.seg{align-self:flex-start}
+.seg{align-self:flex-start;position:sticky;top:0;z-index:40;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+.seg-ic{display:none}.sl-short{display:none}
+@media (min-width:761px){#offBar{position:relative;top:0}}
+.shift-none{margin:0;font-size:13px;color:var(--muted);background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:10px 14px}
+@media (max-width:760px){
+  #app{padding-top:18px;padding-bottom:96px;gap:14px}
+  header{flex-wrap:nowrap;align-items:center}
+  header h1{font-size:30px}
+  header .sync{font-size:11.5px;padding:3px 9px;flex:none}
+  .seg{position:fixed!important;left:0;right:0;bottom:0;top:auto;z-index:95;display:grid!important;grid-auto-flow:column;grid-auto-columns:1fr;gap:0;max-width:none!important;overflow:visible!important;border:0;border-top:1px solid var(--line);border-radius:0;background:var(--paper);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+  .seg button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0!important;font-size:11px!important;background:none!important;color:var(--muted);min-width:0;white-space:nowrap;border-radius:10px}
+  .seg button[hidden]{display:none}
+  .seg-ic{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .seg button[aria-pressed=true]{color:var(--accent);font-weight:700}
+  .seg button[aria-pressed=true] .seg-ic{background:var(--accent-soft);border-radius:12px;padding:3px 12px;box-sizing:content-box;stroke-width:2.1}
+  .sl-full{display:none}.sl-short{display:inline}
+  #toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  #app .ret-bar.on{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .m-hide{display:none}
+  .ret-top{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px!important}
+  .ret-top .ret-stat{padding:6px 4px;align-items:center;text-align:center;min-width:0}
+  .ret-top .ret-stat b{font-size:16px}.ret-top .ret-stat small{font-size:10.5px;white-space:nowrap}.ret-top .ret-stat span{display:none}
+  .ret-top .ret-top-btns{grid-column:1/-1}
+  .ret-gh{display:grid!important;grid-template-columns:auto auto minmax(0,1fr) auto auto;grid-template-areas:"cb nm nm pr dn" "cb ct ag ag ag";column-gap:8px;row-gap:0}
+  .ret-gh .ret-cb{grid-area:cb}.ret-gh .ret-gname{grid-area:nm;flex-basis:auto}.ret-gh .ret-gprint{grid-area:pr}.ret-gh .ret-gdone{grid-area:dn}
+  .ret-gh .ret-gtemps{display:none}.ret-gh .ret-gcount{grid-area:ct;font-size:12px;color:var(--muted);padding-left:20px}.ret-gh .ret-gold{grid-area:ag;font-size:12px}
+}
 .seg button{padding:6px 16px;font-size:14px}
 .toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .link{border:0;background:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px;padding:4px}
@@ -895,19 +921,20 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       <h1>GWJ3 IB</h1>
       <button type="button" class="ghost app-inst" id="installBtn" hidden>📲 앱으로 설치</button>
     </div>
-    <div class="progress" aria-live="polite">
+    <div class="progress" hidden>
       <span class="progress-num" id="progressNum">0 / 0 완료</span>
       <div class="bar"><i id="barFill" style="width:0"></i></div>
     </div>
+    <span class="sync" id="sync" aria-live="polite"><i></i><span id="syncText">불러오는 중…</span></span>
   </header>
 
   <div class="seg" role="group" aria-label="화면">
-    <button type="button" data-v="cal" aria-pressed="true">달력</button>
-    <button type="button" data-v="ho" aria-pressed="false">인수인계</button>
-    <button type="button" data-v="ist" aria-pressed="false">IST</button>
-    <button type="button" data-v="pp" aria-pressed="false">프리팩</button>
-    <button type="button" data-v="buf" aria-pressed="false">Consolidation</button>
-    <button type="button" data-v="prod" aria-pressed="false">생산성</button>
+    <button type="button" data-v="cal" aria-pressed="true"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>달력</span></button>
+    <button type="button" data-v="ho" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10l3 3v13H4V4z"/><path d="M8 11h8M8 15h6"/></svg><span>인수인계</span></button>
+    <button type="button" data-v="ist" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-5 9 5v9l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v9"/></svg><span>IST</span></button>
+    <button type="button" data-v="pp" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14l-1 11H6z"/><path d="M9 9a3 3 0 0 1 6 0"/></svg><span>프리팩</span></button>
+    <button type="button" data-v="buf" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7M17.5 14v7"/></svg><span class="sl-full">Consolidation</span><span class="sl-short">Consol.</span></button>
+    <button type="button" data-v="prod" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>생산성</span></button>
   </div>
 
   <section class="ho" id="ho" hidden aria-label="시프트 교대 인수인계"></section>
@@ -978,7 +1005,6 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   </div>
 
   <ul class="todos" id="list"></ul>
-  <p class="hint">할 일 글자를 더블클릭하면 수정할 수 있어요 · 이 링크로 들어온 모든 사람이 같은 내용을 봐요<br><span class="sync" id="sync"><i></i><span id="syncText">불러오는 중…</span></span></p>
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
@@ -1024,7 +1050,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 
   $('#today').textContent = now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
 
-  function setSync(state, text){ if (offAt && !state){ state = 'err'; text = '오프라인 · 받아둔 내용을 보는 중'; } $('#sync').className = 'sync' + (state ? ' ' + state : ''); $('#syncText').textContent = text; }
+  function setSync(state, text){ if (offAt && !state){ state = 'err'; text = '오프라인 · 받아둔 내용'; } text = String(text || '').replace(/(\d{1,2}:\d{2}):\d{2}/, '$1'); $('#sync').className = 'sync' + (state ? ' ' + state : ''); $('#syncText').textContent = text; }
   let toastTimer;
   function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 4000); }
 
@@ -1197,7 +1223,8 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   function renderShifts(){
     const box = $('#shifts');
     box.innerHTML = '';
-    const {byShift, done} = dayChecklist(selDate);
+    const {byShift, done, total} = dayChecklist(selDate);
+    if (!editMode && !total){ box.append(el('p', { class:'shift-none', text: templates.length ? '이날은 체크리스트 항목이 없어요.' : '체크리스트 항목이 없어요 · 오른쪽 위 [체크리스트 편집]에서 추가할 수 있어요' })); return; }
     const anyEver = templates.length > 0;
     const liveT = templates.filter(t => activeOn(t, todayIso) || t.start > todayIso);
     if (!editMode) clearArm = false;
@@ -2901,9 +2928,9 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
           byDateMode ? el('span', { class:'ret-gold' }, `업체 ${vN}곳`, old ? el('span', { class: old >= 7 ? 'late' : '', text: ` · ${old}일째` }) : null)
             : el('span', { class:'ret-gold' + (old >= 7 ? ' late' : ''), text: ageText }),
           el('button', { type:'button', class:'ret-btn ghost sm ret-gprint', title: byDateMode ? '이 날짜 회송 확인서 인쇄 — 업체마다 한 장 (체크한 건이 있으면 그 건만)' : '이 업체 회송 확인서 인쇄 (체크한 건이 있으면 그 건만)',
-            text:'🖨 확인서', onclick: () => retPrint(selN ? g.items.filter(t => retUi.sel.has(t.id)) : g.items) }),
+            onclick: () => retPrint(selN ? g.items.filter(t => retUi.sel.has(t.id)) : g.items) }, '🖨', el('span', { class:'m-hide', text:' 확인서' })),
           g.items.some(t => t.status !== 'done') ? el('button', { type:'button', class:'ret-btn sm ret-gdone', title: byDateMode ? '이 날짜 대기 건 모두 완료' : '이 업체 대기 건 모두 완료',
-            text: byDateMode ? '✓ 날짜 전체 완료' : '✓ 업체 전체 완료', onclick: () => retSetStatus(g.items.filter(t => t.status !== 'done').map(t => t.id), 'done') }) : null),
+            onclick: () => retSetStatus(g.items.filter(t => t.status !== 'done').map(t => t.id), 'done') }, '✓ ', el('span', { class:'m-hide', text: byDateMode ? '날짜 ' : '업체 ' }), '전체 완료') : null),
         open ? el('div', { class:'ret-items' + (byDateMode ? ' by-date' : '') }, ...g.items.flatMap(itemRow)) : null);
     };
 
