@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>WMS 재고 받기 · GWJ3 IB</title>
+<style>
+body{margin:0;background:#EEF2F1;color:#18231F;font:15px/1.6 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+main{max-width:640px;margin:0 auto;padding:32px 16px}
+h1{font-size:24px;margin:0 0 4px}.sub{color:#5E6B66;margin:0 0 24px}
+.card{background:#fff;border:1px solid #D5DEDB;border-radius:10px;padding:18px 20px;margin-bottom:16px}
+.bm{display:inline-block;background:#1F6F5C;color:#fff;font-weight:700;padding:10px 18px;border-radius:8px;text-decoration:none;cursor:grab}
+ol{padding-left:20px;margin:8px 0}li{margin:4px 0}code{background:#EEF2F1;padding:1px 5px;border-radius:4px}
+textarea{width:100%;box-sizing:border-box;height:90px;font:12px monospace;border:1px solid #D5DEDB;border-radius:6px}
+button{background:#fff;border:1px solid #1F6F5C;color:#1F6F5C;border-radius:6px;padding:6px 12px;font:inherit;cursor:pointer}
+</style></head><body><main>
+<h1>WMS 재고 받기</h1><p class="sub">즐겨찾기 하나로 WMS 재고 조회 결과를 CSV로 받아요. 설치는 필요 없어요.</p>
+<div class="card"><b>1. 아래 초록 버튼을 즐겨찾기 바로 끌어다 놓기</b>
+<p><a class="bm" id="bm" href="#" onclick="alert('누르지 말고 즐겨찾기 바로 끌어다 놓아 주세요.');return false">GWJ3 재고 받기</a></p>
+<p style="color:#5E6B66;margin:0">즐겨찾기 바가 안 보이면 <code>Ctrl + Shift + B</code> 를 누르세요.</p></div>
+<div class="card"><b>2. 사용하기</b><ol>
+<li>WMS(inventory.coupang.com)에 로그인한 화면을 엽니다</li>
+<li>즐겨찾기 바의 <b>GWJ3 재고 받기</b>를 누르면 오른쪽 위에 작은 창이 떠요</li>
+<li><b>지금 받기</b>: 조건에 맞는 재고를 모든 페이지 받아 CSV로 저장해요</li>
+<li><b>응답 구조 복사</b>: 실제 값 없이 형식만 복사해요. Claude에게 보내주세요</li></ol></div>
+<div class="card"><b>끌어다 놓기가 안 될 때</b><ol>
+<li>아래 <b>코드 복사</b>를 누릅니다</li>
+<li>즐겨찾기 바 빈 곳 오른쪽 클릭 → <b>페이지 추가</b></li>
+<li>이름은 <code>GWJ3 재고 받기</code>, URL 칸에 붙여넣고 저장</li></ol>
+<textarea id="code" readonly></textarea><p><button id="cp">코드 복사</button> <span id="msg"></span></p></div>
+</main><script>
+const CODE = "(()=>{if(\"inventory.coupang.com\"!==location.hostname)return void alert(\"WMS(inventory.coupang.com) 화면에서 눌러주세요.\");const t=document.getElementById(\"gwj3-sync\");if(t)return void t.remove();const e=t=>new Promise(e=>setTimeout(e,t)),n=document.createElement(\"div\");n.id=\"gwj3-sync\",n.style.cssText=\"position:fixed;top:16px;right:16px;z-index:2147483647;width:280px;background:#fff;color:#222;border:1px solid #ccc;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);padding:12px;font:13px/1.4 sans-serif\",n.innerHTML='<b style=\"font-size:14px\">GWJ3 WMS 재고 받기<\/b><span id=\"g-x\" style=\"float:right;cursor:pointer\">✕<\/span>'+[\"zone:존\",\"locationBarcode:로케이션 바코드\",\"skuId:SKU ID\"].map(t=>{const[e,n]=t.split(\":\");return`<label style=\"display:block;margin-top:6px;color:#555\">${n} (비우면 전체)<input id=\"g-${e}\" style=\"width:100%;box-sizing:border-box;padding:4px;border:1px solid #ccc;border-radius:4px\"><\/label>`}).join(\"\")+'<label style=\"display:block;margin-top:6px\"><input type=\"checkbox\" id=\"g-avail\" checked> 가용 재고만<\/label><button id=\"g-sync\" style=\"width:100%;margin-top:8px;padding:7px;background:#1a73e8;color:#fff;border:0;border-radius:4px;cursor:pointer\">지금 받기 (CSV)<\/button><button id=\"g-struct\" style=\"width:100%;margin-top:6px;padding:7px;background:#eee;border:0;border-radius:4px;cursor:pointer\">응답 구조 복사<\/button><div id=\"g-st\" style=\"margin-top:8px;white-space:pre-wrap\"><\/div>',document.body.appendChild(n);const r=t=>n.querySelector(\"#g-\"+t),o=t=>{r(\"st\").textContent=t};r(\"x\").onclick=()=>n.remove();const a=()=>({searched:\"true\",locationType:\"\",zone:r(\"zone\").value.trim(),fromLocation:\"\",toLocation:\"\",locationBarcode:r(\"locationBarcode\").value.trim(),skuId:r(\"skuId\").value.trim(),externalSkuId:\"\",skuBarcode:\"\",lpnId:\"\",inventoryId:\"\",saleableChangeType:\"\",availableInventory:r(\"avail\").checked?\"true\":\"false\"});async function c(t,e,n){const r=new URLSearchParams({...t,page:String(e),pageSize:String(n)}),o=await fetch(\"/async/inventory/search?\"+r,{credentials:\"include\",headers:{\"X-Requested-With\":\"XMLHttpRequest\",Accept:\"application/json, text/html, */*\"}});if(401===o.status||403===o.status)throw new Error(\"로그인이 풀린 것 같아요. 다시 로그인해 주세요.\");if(!o.ok)throw new Error(\"WMS 응답 오류: HTTP \"+o.status);const a=await o.text();try{return{json:JSON.parse(a)}}catch{return{html:a}}}function i(t){let e=null;return function t(n,r){r>6||null===n||\"object\"!=typeof n||(Array.isArray(n)?(n.length&&\"object\"==typeof n[0]&&(!e||n.length>e.length)&&(e=n),n.forEach(e=>t(e,r+1))):Object.values(n).forEach(e=>t(e,r+1)))}(t,0),e||[]}function l(t){const e=(new DOMParser).parseFromString(t,\"text/html\").querySelector(\"table\");if(!e)return null;const n=[...e.querySelectorAll(\"thead th, tr:first-child th\")].map(t=>t.textContent.trim());return[...e.querySelectorAll(\"tbody tr\")].map(t=>{const e={};return[...t.querySelectorAll(\"td\")].forEach((t,r)=>{e[n[r]||\"col\"+(r+1)]=t.textContent.trim()}),e})}function s(t,e=0){if(null===t)return null;if(Array.isArray(t))return t.length?[s(t[0],e+1),`...(${t.length}개)`]:[];if(\"object\"==typeof t){if(e>6)return\"{...}\";const n={};for(const[r,o]of Object.entries(t))n[r]=s(o,e+1);return n}return typeof t}function u(t,e=\"\",n={}){for(const[r,o]of Object.entries(t)){const t=e?e+\".\"+r:r;o&&\"object\"==typeof o&&!Array.isArray(o)?u(o,t,n):n[t]=Array.isArray(o)?JSON.stringify(o):o}return n}function d(t){const e=t.map(t=>u(t)),n=[...new Set(e.flatMap(t=>Object.keys(t)))];return[n.join(\",\"),...e.map(t=>n.map(e=>(t=>{const e=null==t?\"\":String(t);return/[\",\\n\\r]/.test(e)?'\"'+e.replace(/\"/g,'\"\"')+'\"':e})(t[e])).join(\",\"))].join(\"\\r\\n\")}const p=t=>{r(\"sync\").disabled=r(\"struct\").disabled=t};r(\"struct\").onclick=async()=>{p(!0),o(\"응답 구조를 읽는 중...\");try{const t=await c(a(),0,2),e=t.json?JSON.stringify(s(t.json),null,2):\"HTML 응답입니다. 앞부분:\\n\"+t.html.replace(/\\s+/g,\" \").slice(0,1500);o(await async function(t){try{return await navigator.clipboard.writeText(t),!0}catch{const e=document.createElement(\"textarea\");e.value=t,n.appendChild(e),e.select();const r=document.execCommand(\"copy\");return e.remove(),r}}(e)?\"복사됐어요. Claude 대화창에 붙여넣어 주세요.\\n(실제 값은 지우고 형식만 담았어요)\":\"복사가 막혔어요. 아래 내용을 찍어서 보내주세요.\\n\\n\"+e.slice(0,800))}catch(t){o(\"⚠ \"+t.message)}finally{p(!1)}},r(\"sync\").onclick=async()=>{p(!0),o(\"받아오는 중...\");try{const t=a(),r=[];let s=null;for(let n=0;n<300;n++){const a=await c(t,n,100);let u;if(a.json){u=i(a.json);const t=a.json;s=s??t.totalPages??t.data?.totalPages??t.page?.totalPages??null}else if(u=l(a.html),null===u)throw new Error('응답에서 표를 찾지 못했어요. \"응답 구조 복사\"로 보내주세요.');if(r.push(...u),o(`받아오는 중... ${r.length}건`),!u.length||null!==s&&n+1>=s||null===s&&u.length<100)break;await e(300)}if(!r.length)return void o(\"조건에 맞는 데이터가 없어요.\");const u=document.createElement(\"a\");u.href=URL.createObjectURL(new Blob([\"\\ufeff\"+d(r)],{type:\"text/csv;charset=utf-8\"})),u.download=\"wms-inventory-\"+(new Date).toLocaleString(\"sv-SE\").replace(/[: ]/g,\"-\").slice(0,16)+\".csv\",n.appendChild(u),u.click(),u.remove(),o(`완료: ${r.length}건을 CSV로 저장했어요.`)}catch(t){o(\"⚠ \"+t.message)}finally{p(!1)}}})();";
+const url = 'javascript:' + encodeURIComponent(CODE);
+document.getElementById('bm').href = url;
+document.getElementById('code').value = url;
+document.getElementById('cp').onclick = async () => {
+  const t = document.getElementById('code'); t.select();
+  try { await navigator.clipboard.writeText(t.value); } catch { document.execCommand('copy'); }
+  document.getElementById('msg').textContent = '복사됐어요';
+};
+</script></body></html>

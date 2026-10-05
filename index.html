@@ -67,6 +67,9 @@ input,select{font:inherit}
 .btn:hover{filter:brightness(1.08)}
 .ghost{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:5px 12px;font-size:13px}
 .ghost:hover{border-color:var(--accent)}
+.ext-dl{display:inline-block;margin-top:8px;text-decoration:none}
+.app-inst:not([hidden]) + .ext-dl{margin-left:6px}
+@media (max-width:760px){.ext-dl{display:none}}
 .ghost[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
 .sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);border:1px solid var(--line);background:var(--paper);border-radius:20px;padding:4px 11px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--accent)}
@@ -920,6 +923,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       <div class="date" id="today"></div>
       <h1>GWJ3 IB</h1>
       <button type="button" class="ghost app-inst" id="installBtn" hidden>📲 앱으로 설치</button>
+      <a class="ghost ext-dl" href="/wms.html" target="_blank" rel="noopener" title="WMS 재고를 CSV로 받는 즐겨찾기 버튼 만들기">📥 WMS 재고 받기</a>
     </div>
     <div class="progress" hidden>
       <span class="progress-num" id="progressNum">0 / 0 완료</span>

@@ -29,7 +29,8 @@ self.addEventListener('fetch', e => {
     e.respondWith((async () => {
       try {
         const r = await fetch(req);
-        if (r.ok && url.origin === self.location.origin && !url.pathname.startsWith('/api/')){
+        // 화면(HTML)만 받아둬요. zip 같은 다운로드 파일이 '/' 자리에 저장되지 않게 해요
+        if (r.ok && url.origin === self.location.origin && !url.pathname.startsWith('/api/') && (r.headers.get('content-type') || '').includes('text/html')){
           const c = await caches.open(SHELL); c.put('/', r.clone()).catch(() => {});
         }
         return r;
