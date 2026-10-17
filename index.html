@@ -9,15 +9,15 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" href="/icons/favicon-64.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="theme-color" content="#EEF2F1" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#111816" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#E8EDEB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1412" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="GWJ3 IB">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
 :root{
   --bg:#EEF2F1; --paper:#FFFFFF; --ink:#18231F; --muted:#5E6B66; --line:#D5DDDA;
@@ -903,6 +903,105 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   html,body{background:#fff !important}
   #ret-print{display:block !important;position:static !important;width:auto !important}
 }
+
+/* ===== Taste layer: 한 가지 글꼴 · 선 대신 면 · 그림자 없음 · 버튼은 둥글게 (인쇄물에는 적용 안 함) ===== */
+:root{
+  --bg:#E8EDEB; --paper:#FFFFFF; --ink:#141D1A; --muted:#55625D; --line:#D3DBD8;
+  --tone:color-mix(in srgb,var(--ink) 6%,transparent); --tone-2:color-mix(in srgb,var(--ink) 10%,transparent);
+  --display:var(--body); --mono:var(--body);
+  --r-card:18px; --ease:cubic-bezier(.2,.7,.2,1);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#0E1412; --paper:#17201D; --ink:#E8EFEC; --muted:#9AA8A2; --line:#2A3632; }
+}
+:root[data-theme="dark"]{ --bg:#0E1412; --paper:#17201D; --ink:#E8EFEC; --muted:#9AA8A2; --line:#2A3632; }
+@media screen{
+  body{font-variant-numeric:tabular-nums;font-size:15.5px;-webkit-font-smoothing:antialiased}
+  .wrap{gap:24px;padding-block:48px 80px}
+
+  /* 머리: 이름을 크게, 날짜는 평범한 글씨로 */
+  header{align-items:flex-end;row-gap:14px}
+  h1{font-family:var(--body);font-weight:700;font-size:clamp(44px,9vw,84px);letter-spacing:-.045em;line-height:.92;margin:6px 0 14px}
+  .date{font-family:var(--body);font-size:14px;letter-spacing:0;color:var(--muted)}
+  .sync{border:0;background:var(--tone);padding:6px 13px;font-size:12.5px}
+  .progress-num{font-family:var(--body)}
+
+  /* 버튼: 채움 하나, 끝은 둥글게, 누르면 살짝 눌림 */
+  button,.ghost,.btn,a.ghost{transition:background-color .18s var(--ease),color .18s var(--ease),transform .12s var(--ease),filter .18s}
+  button:active:not(:disabled),a.ghost:active{transform:scale(.97)}
+  .btn{border-radius:999px;padding:9px 20px}
+  .btn:hover{filter:none;background:color-mix(in srgb,var(--accent) 86%,var(--ink))}
+  .ghost{border:0;background:var(--tone);border-radius:999px;padding:7px 15px;font-weight:500}
+  .ghost:hover{border-color:transparent;background:var(--tone-2)}
+  header .ghost{background:var(--paper)}
+  header .ghost:hover{background:var(--accent-soft);color:var(--accent)}
+
+  /* 화면 전환 탭: 선 없는 막대, 고른 탭은 진하게 채움 */
+  .tabs,.seg{border:0;background:var(--tone);border-radius:999px;padding:4px;gap:2px}
+  .seg{box-shadow:none;background:color-mix(in srgb,var(--paper) 70%,var(--bg))}
+  .tabs button,.seg button{border-radius:999px}
+  .tabs button:hover,.seg button:hover{color:var(--ink)}
+  .tabs button[aria-pressed=true],.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+
+  /* 면: 테두리 대신 바탕색 차이로 구분 */
+  .cal,.shift,form.add,ul.todos,.lock,.edit-lock,.ho-sec,.ret-sec,.ret-groups,.ret-stat,.ret-view,.ret-all,.ret-mode,.ret-map,
+  .ov-g,.ov-today,.ov-f,.ob-grp,.ob-items,.pp-card,.pp-scroll,.bf-st,.bf-g,.pr-kpi,.pr-tt,.pr-ct,.pr-chips{border-color:transparent!important;border-radius:var(--r-card)}
+  .ret-stat,.bf-st,.pr-kpi{background:var(--tone)}
+  .ret-stat.late{background:var(--high-soft)}
+  .ret-stat.on{box-shadow:none;background:var(--accent-soft)}
+  .cal{padding:20px}
+  .shift-toggle{padding:16px 20px}
+  .ho-sec,.ret-sec{padding:20px}
+
+  /* 입력칸: 선 대신 옅은 면 */
+  select,input[type=date],.lock input,.edit-lock input,.shift-add input,.ho-date,.ho-in,.ret-in,.bf-find,.ob-ed input,.ob-ed select{border-color:transparent!important;background:var(--tone);border-radius:12px}
+  .ho-table .ho-num,.ho-table textarea{background:transparent}
+  .chip,.ho-chip,.ret-chip,.ov-fchip,.ov-tog,.ov-more,.ov-back,.ob-cp,.ob-chips button,.ob-acts button,.ov-pick button,.ret-seg3 button,.xe-btn,.cal-nav button,.ho-imp-file{border-color:transparent!important;background:var(--tone);border-radius:999px}
+  .cal-nav button:hover,.ret-chip:hover,.ov-fchip:hover,.ob-chips button:hover{background:var(--tone-2)}
+
+  /* 글자 크기: 큰 것과 작은 것만 */
+  .cal-title{font-family:var(--body);font-weight:700;font-size:28px;letter-spacing:-.03em}
+  .dayhead h2{font-size:28px;letter-spacing:-.03em;font-weight:700}
+  .dayhead .sub{font-size:14px}
+  .section-label{font-size:20px;font-weight:700;letter-spacing:-.02em;margin:18px 0 -6px}
+  .shift-toggle .shift-name{font-size:17px;font-weight:700}
+  .lock{padding:32px;gap:16px}
+  .lock h2{font-family:var(--body);font-size:40px;font-weight:700;letter-spacing:-.04em}
+
+  /* 강조 버튼들도 같은 모양으로: 선 없이 채움, 둥근 끝 */
+  .ho-shot,.ret-btn,.ret-ok,.ret-undo,.ov-done{border-color:transparent!important;border-radius:999px}
+  .ret-ok,.ret-undo,.ov-done{background:var(--accent-soft)}
+  /* 인수인계 표: 가로줄만 얇게, 챔버 경계만 살짝, 합계는 굵은 윗줄 */
+  .ho-table th,.ho-table td{border:0;border-bottom:1px solid color-mix(in srgb,var(--ink) 9%,transparent)}
+  .ho-table thead th{background:transparent;color:var(--ink);font-weight:700;font-size:14px;padding:10px 4px 8px}
+  .ho-table thead tr:last-child th,.ho-table thead th[rowspan]{border-bottom:2px solid var(--ink)}
+  .ho-table .ho-gm th{color:var(--muted);font-weight:500;font-size:12px}
+  .ho-table tbody th{background:var(--paper);font-weight:600;padding:6px 14px 6px 4px}
+  .ho-table .ch-alt{background-image:linear-gradient(color-mix(in srgb,var(--ink) 3.5%,transparent),color-mix(in srgb,var(--ink) 3.5%,transparent))}
+  .ho-table tbody th.ch-alt{background-image:none}
+  .ho-table .ch-first{border-left:1px solid color-mix(in srgb,var(--ink) 14%,transparent)}
+  .ho-num{font-size:15px;font-weight:500;padding:9px 2px;border-radius:8px}
+  .ho-num:hover{background:var(--tone)}
+  .ho-total th,.ho-total td{border-top:2px solid var(--ink);border-bottom:0}
+  .ho-total td{background:transparent;color:var(--ink);font-weight:700;font-size:15px;padding:9px 2px}
+  .ho-car-skip{background:transparent;color:var(--muted)}
+  .ho-cellnote:hover{background:var(--tone)}
+  /* 화면이 바뀔 때 부드럽게 올라오기 */
+  @media (prefers-reduced-motion: no-preference){
+    .wrap > section:not([hidden]),.wrap > nav:not([hidden]),.shifts > .shift{animation:taste-rise .42s var(--ease) both}
+    .shifts > .shift:nth-child(2){animation-delay:.06s} .shifts > .shift:nth-child(3){animation-delay:.12s} .shifts > .shift:nth-child(4){animation-delay:.18s}
+  }
+  @keyframes taste-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+}
+@media screen and (max-width:760px){
+  .wrap{padding-block:24px 96px}
+  h1{font-size:clamp(40px,13vw,56px);margin:4px 0 8px}
+  .seg{border-radius:0;background:var(--paper);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+  .seg button[aria-pressed=true]{background:none!important;color:var(--ink)}
+  .seg button[aria-pressed=true] .seg-ic{background:var(--ink);color:var(--paper);stroke:var(--paper)}
+  .cal{padding:12px}
+  .cal-title,.dayhead h2{font-size:24px}
+}
 </style>
 </head>
 <body>
@@ -917,13 +1016,13 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 </section>
 
 <div class="wrap" id="app">
-  <div class="offbar" id="offBar" hidden role="status"><b>📴 인터넷 연결 없음</b><span></span></div>
+  <div class="offbar" id="offBar" hidden role="status"><b>인터넷 연결 없음</b><span></span></div>
   <header>
     <div>
       <div class="date" id="today"></div>
       <h1>GWJ3 IB</h1>
-      <button type="button" class="ghost app-inst" id="installBtn" hidden>📲 앱으로 설치</button>
-      <a class="ghost ext-dl" href="/wms.html" target="_blank" rel="noopener" title="WMS 재고를 CSV로 받는 즐겨찾기 버튼 만들기">📥 WMS 재고 받기</a>
+      <button type="button" class="ghost app-inst" id="installBtn" hidden>앱으로 설치</button>
+      <a class="ghost ext-dl" href="/wms.html" target="_blank" rel="noopener" title="WMS 재고를 CSV로 받는 즐겨찾기 버튼 만들기">WMS 재고 받기</a>
     </div>
     <div class="progress" hidden>
       <span class="progress-num" id="progressNum">0 / 0 완료</span>
