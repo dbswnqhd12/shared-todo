@@ -1015,14 +1015,14 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .mp-row > *{flex:1 1 auto;min-width:0;max-width:100%}
 .mp-row > .mp-ch.empty{flex:0 1 150px;min-height:0}
 .mp-chs{display:flex;flex-direction:column;gap:12px;min-width:0}
-.mp{--mp-w:32px}
+.mp{--mp-w:30px}
 .mp-aisle2{display:flex;flex-direction:column;gap:4px;padding:6px 0}
 .mp-an2{display:flex;align-items:baseline;gap:8px}.mp-an2 b{font-size:13px}.mp-an2 small{font-size:11.5px;color:var(--muted)}
 .mp-pair{display:flex;flex-direction:column;gap:3px;width:max-content}
 .mp-rack{display:grid;gap:3px;width:max-content}
 .mp-walk{height:10px;width:100%;border-radius:4px;background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--ink) 14%,transparent) 0 8px,transparent 8px 14px);background-size:auto 2px;background-repeat:repeat-x;background-position:center}
-.mp-cell.slot{background:transparent;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 12%,transparent);cursor:default;min-width:0;width:var(--mp-w);padding:3px 0}
-.mp-rack .mp-cell{min-width:0;width:var(--mp-w);padding:3px 4px 4px}
+.mp-cell.slot{cursor:default;min-width:0;width:var(--mp-w);padding:0}
+.mp-rack .mp-cell{min-width:0;width:var(--mp-w);padding:0}
 .mp-ch{background:var(--tone);border-radius:14px;padding:12px;min-width:0;display:flex;flex-direction:column;gap:8px}
 .mp-ch.frozen{background:color-mix(in srgb,var(--sat) 12%,transparent)}
 .mp-ch.empty{opacity:.55;justify-content:center;min-height:80px}
@@ -1031,18 +1031,16 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .mp-aisle{display:flex;gap:8px;align-items:flex-start}
 .mp-an{flex:0 0 84px;font-size:11.5px;color:var(--muted);padding-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mp-cells{display:flex;flex-wrap:wrap;gap:3px;min-width:0}
-.mp-cell{min-width:28px;height:32px;padding:3px 4px;border:0;border-radius:6px;font-size:10.5px;line-height:1;color:var(--ink);cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center}
-.mp-cell{background:var(--paper)}
-.mp-bars{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5px;width:100%;height:14px}
-.mp-bars i{border-radius:2px;background:color-mix(in srgb,var(--ink) 8%,transparent)}
-.mp-bars i.ok,.mp-key.ok{background:var(--accent)}
-.mp-bars i.warn,.mp-key.warn{background:var(--mid)}
-.mp-bars i.over,.mp-key.over{background:var(--high)}
-.mp-bars b{position:absolute;right:-3px;top:-9px;font-size:8.5px;color:var(--high)}
-.mp-key{display:inline-block;width:10px;height:10px;border-radius:2px}.mp-key-bars{display:inline-flex;width:28px;padding:3px;border-radius:5px;background:var(--tone)}.mp-legend .mp-key-bars .mp-bars{display:grid;gap:1.5px;align-items:stretch;width:22px;height:12px}
-.mp-cell.slot .mp-no{opacity:.4}.mp-cell.slot .mp-bars i{background:transparent}
+.mp-cell{min-width:28px;height:26px;padding:0 4px;border:0;border-radius:6px;font-size:11px;line-height:26px;color:#3a2a10;cursor:pointer;display:inline-block;text-align:center;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+/* SKU 종수 색: 화면 모드와 상관없이 같은 색 (흰색 → 빨강) */
+.mp-cell.s0,.mp-key.s0{background:#fff;color:#8a8f8d}
+.mp-cell.s1,.mp-key.s1{background:#FCEFB4}
+.mp-cell.s2,.mp-key.s2{background:#F7C948}
+.mp-cell.s3,.mp-key.s3{background:#F08A3C;color:#fff}
+.mp-cell.s4,.mp-key.s4{background:#D64545;color:#fff}
+.mp-key{display:inline-block;width:14px;height:14px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
 .mp-cell.dim{opacity:.22}
-.mp-cell.hit{box-shadow:0 0 0 2px var(--high);font-weight:700}
+.mp-cell.hit{box-shadow:0 0 0 2px var(--ink);font-weight:700}
 .mp-cell.sel{outline:2px solid var(--ink);outline-offset:1px;font-weight:700}
 .mp-legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
 .mp-legend span{display:inline-flex;align-items:center;gap:6px}.mp-legend i.mp-cell{min-width:0;width:28px;height:20px;padding:3px;justify-content:center;cursor:default}.mp-legend b{color:var(--ink);font-size:12px}
@@ -4275,24 +4273,13 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     }
     mpTree = { ch, cells };
   }
-  // 한 칸에 SKU는 0~4개 → 칸을 4자리로 나눠 SKU 하나당 한 자리를 채워요
-  // 자리 색 = 그 SKU의 가장 빠른 유통기한 (빨강 7일 이내 · 노랑 14일 이내 · 초록 그 밖) · 급한 것부터 왼쪽
-  const MP_SLOTS = 4;
-  function mpSkus(cell){
-    if (cell.sk) return cell.sk;
-    const m = new Map();
-    for (const r of cell.rows){ const k = r.sku || r.bc || r.name, d = ppDays(r.exp); if (!m.has(k) || (d != null && (m.get(k) == null || d < m.get(k)))) m.set(k, d); }
-    return (cell.sk = [...m.values()].map(d => d == null ? 'ok' : d <= 7 ? 'over' : d <= 14 ? 'warn' : 'ok').sort((a, b) => ['over', 'warn', 'ok'].indexOf(a) - ['over', 'warn', 'ok'].indexOf(b)));
-  }
-  const mpBars = L => el('span', { class:'mp-bars', 'aria-hidden':'true' },
-    ...Array.from({ length: MP_SLOTS }, (_, i) => el('i', { class: L[i] || '' })),
-    L.length > MP_SLOTS ? el('b', { text: '+' + (L.length - MP_SLOTS) }) : null);
+  // 한 칸에 SKU는 0~4종 → 칸 색 자체로 보여줘요 (0 흰색 · 1 연노랑 · 2 노랑 · 3 주황 · 4 이상 빨강)
+  const mpSkus = cell => cell.sk ?? (cell.sk = new Set(cell.rows.map(r => r.sku || r.bc || r.name)).size);
   function mpCell(cell, hits){
-    const L = mpSkus(cell);
-    const cls = 'mp-cell' + (hits ? (hits.has(cell.id) ? ' hit' : ' dim') : '') + (mpUi.sel === cell.id ? ' sel' : '');
-    return el('button', { type:'button', class: cls, title: `${cell.aisle}-${cell.bay} · SKU ${L.length}개`, 'data-id': cell.id,
-      onclick: () => { mpUi.sel = mpUi.sel === cell.id ? '' : cell.id; renderMap(); if (mpUi.sel && matchMedia('(min-width:761px)').matches) $('#map .mp-detail')?.scrollIntoView({ block:'nearest', behavior:'smooth' }); } },
-      el('span', { class:'mp-no', text: cell.bay || '·' }), mpBars(L));
+    const k = mpSkus(cell);
+    const cls = 'mp-cell s' + Math.min(k, 4) + (hits ? (hits.has(cell.id) ? ' hit' : ' dim') : '') + (mpUi.sel === cell.id ? ' sel' : '');
+    return el('button', { type:'button', class: cls, title: `${cell.aisle}-${cell.bay} · SKU ${k}종`, 'data-id': cell.id,
+      onclick: () => { mpUi.sel = mpUi.sel === cell.id ? '' : cell.id; renderMap(); if (mpUi.sel && matchMedia('(min-width:761px)').matches) $('#map .mp-detail')?.scrollIntoView({ block:'nearest', behavior:'smooth' }); } }, cell.bay || '·');
   }
   // 통로 하나: 칸 번호가 숫자면 위(홀수) · 가운데 통로 · 아래(짝수)로, 같은 존의 통로끼리 칸 위치를 맞춰요
   function mpAisle(C, an, A, hits){
@@ -4302,7 +4289,7 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     const c0 = Math.floor((R[0] - 1) / 2), cols = Math.floor((R[1] - 1) / 2) - c0 + 1;
     const side = odd => el('div', { class:'mp-rack', style:`grid-template-columns:repeat(${cols},var(--mp-w))` },
       ...Array.from({ length: cols }, (_, i) => { const b = 2 * (c0 + i) + (odd ? 1 : 2), cell = A.get(String(b));
-        return cell ? mpCell(cell, hits) : el('span', { class:'mp-cell slot', title: `${an}-${b} · SKU 0개` }, el('span', { class:'mp-no', text: String(b) }), mpBars([])); }));
+        return cell ? mpCell(cell, hits) : el('span', { class:'mp-cell s0 slot', title: `${an}-${b} · SKU 0종` }, String(b)); }));
     return el('div', { class:'mp-aisle2' }, el('div', { class:'mp-an2' }, el('b', { text: name }), el('small', { text: (name === an ? '' : an + ' · ') + cells.length + '칸' })),
       el('div', { class:'mp-pair' }, side(true), el('div', { class:'mp-walk' }), side(false)));
   }
@@ -4356,8 +4343,8 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     };
     const plan = el('div', { class:'mp-plan' }, ...layoutRows.map(row => el('div', { class:'mp-row' }, ...row.map(chamberBox))));
     const legend = el('div', { class:'mp-legend' },
-      el('span', {}, el('i', { class:'mp-key-bars' }, mpBars(['over', 'ok', 'ok'])), '칸 하나에 SKU 4자리 · 채운 자리 = SKU 수'),
-      el('span', {}, el('i', { class:'mp-key over' }), '유통기한 7일 이내'), el('span', {}, el('i', { class:'mp-key warn' }), '14일 이내'), el('span', {}, el('i', { class:'mp-key ok' }), '그 밖'),
+      el('b', { text:'SKU 종수' }),
+      ...[0, 1, 2, 3, 4].map(k => el('span', {}, el('i', { class:'mp-key s' + k }), k + '종')),
       el('small', { text:'통로마다 위는 홀수 칸, 아래는 짝수 칸 (임시 배치)' }));
 
     // 고른 칸의 상품 / 찾은 결과
