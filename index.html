@@ -1004,6 +1004,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 }
 /* ===== 평면도 ===== */
 .mp .ret-sec-head .pp-up{margin-left:auto}
+.mp-drop{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:4px 10px;padding:14px 16px}
 .mp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .mp-fl{width:min(100%,300px)}
 .mp-find{margin-left:0;width:300px}
@@ -1637,7 +1638,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     if (ppView && ppRev < 0) ppLoad();
     if (bfView && !$('#buf').hasChildNodes() && bfData) renderBuffer();
     if (bfView && bfRev < 0) bfLoad();
-    if (mapView && !$('#map').hasChildNodes() && mpData) renderMap();
+    if (mapView && !$('#map').hasChildNodes()) renderMap();
     if (mapView && mpRev < 0) mpLoad();
     if (hoView && !$('#ho').hasChildNodes()) renderHandover();
     if (retView && !retBuilt) renderReturns();
@@ -4128,6 +4129,11 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   const MP_LAYOUT = {
     rows: [['1C', '2C', '3C'], ['5C', '6C', '7C']],   // 화면에 놓는 순서 (줄마다)
     frozen: new Set(['5C', '6C', '7C']),
+    // 재고가 없어도 항상 그려 두는 통로 (챔버 층 → 로케이션 앞부분 · 통로 번호 · 칸 번호 범위)
+    // 재고 파일에 여기 없는 통로가 나오면 그것도 같이 그려요
+    aisles: {
+      '2C M': { code: '22N', nums: [3, 4, 5], bays: [3, 44] },   // 재고리스트(10/18)에서 확인
+    },
   };
   const MP_TOTE = new Set(['11F', '21F', '31F']);
   let mpData = null, mpRev = -1, mpLoading = false;
@@ -4142,7 +4148,7 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     const c = L[0];
     const bay = /^\d+$/.test(s[2] || '') ? String(+s[2]) : (s[2] || '');
     const m = (s[1] || '').toUpperCase().match(/^(\d)(\d)([A-Z]*)(\d+)$/);
-    if (m) return { ch: m[1] + 'C', fl: /[123]/.test(m[1]) ? (m[2] === '2' ? 'M' : 'G') : '', aisle: s[1], aname: String(+m[4]) + '번 통로', bay, lv: s.slice(3).join('-') };
+    if (m) return { ch: m[1] + 'C', fl: /[123]/.test(m[1]) ? (m[2] === '2' ? 'M' : 'G') : '', aisle: s[1].toUpperCase(), aname: String(+m[4]) + '번 통로', bay, lv: s.slice(3).join('-') };
     return { ch: c + 'C', fl: /[123]/.test(c) ? (L[1] === '2' ? 'M' : 'G') : '', aisle: s.slice(0, 2).join('-'), bay, lv: s.slice(3).join('-') };
   }
 
@@ -4243,7 +4249,12 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   let mpTree = null;
   function mpIndex(){
     const ch = new Map(), cells = new Map();
-    for (const r of mpData.rows){
+    for (const [ck, L] of Object.entries(MP_LAYOUT.aisles)){
+      const [c, fl = ''] = ck.split(' '), C = { key: ck, ch: c, fl, aisles: new Map(), n: 0, range: [...L.bays], names: {} };
+      for (const n of L.nums){ C.aisles.set(L.code + n, new Map()); C.names[L.code + n] = n + '번 통로'; }
+      ch.set(ck, C);
+    }
+    for (const r of mpData?.rows || []){
       const p = mpParse(r.loc);
       const ck = p.ch + (p.fl ? ' ' + p.fl : '');
       if (!ch.has(ck)) ch.set(ck, { key: ck, ch: p.ch, fl: p.fl, aisles: new Map(), n: 0 });
@@ -4272,7 +4283,7 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     const c0 = Math.floor((R[0] - 1) / 2), cols = Math.floor((R[1] - 1) / 2) - c0 + 1;
     const side = odd => el('div', { class:'mp-rack', style:`grid-template-columns:repeat(${cols},var(--mp-w))` },
       ...Array.from({ length: cols }, (_, i) => { const b = 2 * (c0 + i) + (odd ? 1 : 2), cell = A.get(String(b));
-        return cell ? mpCell(cell, hits) : el('span', { class:'mp-cell slot', title: `${an}-${b} · 이 파일에 없음` }); }));
+        return cell ? mpCell(cell, hits) : el('span', { class:'mp-cell slot', title: `${an}-${b} · 재고 없음` }); }));
     return el('div', { class:'mp-aisle2' }, el('div', { class:'mp-an2' }, el('b', { text: name }), el('small', { text: (name === an ? '' : an + ' · ') + cells.length + '칸' })),
       el('div', { class:'mp-pair' }, side(true), el('div', { class:'mp-walk' }), side(false)));
   }
@@ -4288,17 +4299,13 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     sec.ondragover = e => { e.preventDefault(); sec.classList.add('drag'); };
     sec.ondragleave = e => { if (!sec.contains(e.relatedTarget)) sec.classList.remove('drag'); };
     sec.ondrop = e => { e.preventDefault(); sec.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) mpImportFile(f); };
-    if (!mpData){
-      sec.append(el('div', { class:'pr-drop', tabindex:'0', role:'button', 'aria-label':'재고 파일 올리기', onclick: mpPick,
-        onkeydown: e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); mpPick(); } } },
-        el('b', { text:'WMS 재고 엑셀 올리기' }), el('span', { text:'센터 전체 재고 엑셀(또는 WMS 재고 받기 CSV)을 끌어다 놓거나 눌러서 고르세요' }),
-        el('small', { text:'올린 재고는 팀 모두에게 보이고, 새 파일을 올리면 바뀌어요' })));
-      box.replaceChildren(sec);
-      return;
-    }
+    // 재고가 없어도 평면도는 그려 두고, 위에 올리기 칸만 작게 보여줘요
+    if (!mpData) sec.append(el('div', { class:'pr-drop mp-drop', tabindex:'0', role:'button', 'aria-label':'재고 파일 올리기', onclick: mpPick,
+      onkeydown: e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); mpPick(); } } },
+      el('b', { text:'WMS 재고 엑셀 올리기' }), el('span', { text:'올리면 칸마다 어떤 상품이 있는지 채워져요 · 끌어다 놓거나 눌러서 고르세요' })));
     if (!mpTree) mpIndex();
     const q = mpUi.q.trim().toLowerCase().replace(/\s+/g, '');
-    const hits = q ? new Set(mpData.rows.filter(r => mpMatch(r, q)).map(r => r._cell)) : null;
+    const hits = q ? new Set((mpData?.rows || []).filter(r => mpMatch(r, q)).map(r => r._cell)) : null;
 
     // 도구줄: 층 고르기 + 찾기
     const flBtn = (k, label) => el('button', { type:'button', 'aria-pressed': mpUi.fl === k ? 'true' : 'false', onclick: () => { mpUi.fl = k; store.set('mp-fl', k); renderMap(); } }, label);
@@ -4331,7 +4338,7 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     const plan = el('div', { class:'mp-plan' }, ...layoutRows.map(row => el('div', { class:'mp-row' }, ...row.map(chamberBox))));
     const legend = el('div', { class:'mp-legend' },
       el('span', {}, el('i', { class:'mp-cell l1' }), '1~2건'), el('span', {}, el('i', { class:'mp-cell l2' }), '3~5건'), el('span', {}, el('i', { class:'mp-cell l3' }), '6건 이상'),
-      el('span', {}, el('i', { class:'mp-cell slot' }), '이 파일에 없는 칸'),
+      el('span', {}, el('i', { class:'mp-cell slot' }), '재고 없는 칸'),
       el('small', { text:'통로마다 위는 홀수 칸, 아래는 짝수 칸 (임시 배치)' }));
 
     // 고른 칸의 상품 / 찾은 결과
@@ -4347,7 +4354,7 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
           el('button', { type:'button', class:'ret-btn sm ghost', onclick: () => { mpUi.sel = ''; renderMap(); } }, '닫기')),
         el('div', { class:'mp-list' }, ...L.map(rowLine)));
     } else if (q && hits.size){
-      const L = mpData.rows.filter(r => mpMatch(r, q)).sort((a, b) => mpNat(a.loc, b.loc));
+      const L = (mpData?.rows || []).filter(r => mpMatch(r, q)).sort((a, b) => mpNat(a.loc, b.loc));
       detail = el('div', { class:'mp-detail' },
         el('div', { class:'pp-sub' }, el('h4', {}, '찾은 곳', el('span', { text: ` · ${L.length}건` + (L.length > 200 ? ' (앞 200건)' : '') })),
           el('button', { type:'button', class:'ret-btn sm ghost', onclick: () => { mpUi.q = ''; renderMap(); } }, '닫기')),
