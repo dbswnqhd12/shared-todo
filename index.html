@@ -4118,10 +4118,12 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   }
 
   // ---------- 평면도: WMS 재고 엑셀(또는 CSV)로 센터 어느 칸에 어떤 상품이 있는지 ----------
-  // 지금 배치는 임시예요. 로케이션 코드(예: 140-22N4-12-1)를 '-'로 나눠서
-  //   첫 글자 = 챔버, 둘째 글자 2 = M(1.5층) · 그 밖 = G (1C~3C만)
-  //   첫째 = 존, 둘째 = 통로, 셋째 = 칸 번호, 넷째부터 = 단
-  //   재고리스트(10/18)를 보면 한 통로에 홀수 칸과 짝수 칸이 따로 모여 있어서, 통로 양쪽 랙으로 보고 위(홀수) · 아래(짝수)로 그려요
+  // 로케이션 코드 140-22N4-12-1 읽는 법 (주봉 님 확인, 10/18)
+  //   140 = 센터 번호 (무시)
+  //   22N4 = 챔버 2 · 층 2(M, 1.5층; 1이면 G) · N = PLT존 (무시) · 4 = 통로 번호
+  //   12 = 칸 번호 (한 통로의 홀수 칸과 짝수 칸이 서로 마주 봐요 → 위(홀수) · 아래(짝수)로 그려요)
+  //   1 = 단
+  // 이 모양이 아닌 코드는 예전처럼 첫 글자를 챔버로 봐요. 챔버 위치는 아직 임시예요.
   // 실제 도면을 받으면 MP_LAYOUT과 mpParse만 고치면 돼요.
   const MP_LAYOUT = {
     rows: [['1C', '2C', '3C'], ['5C', '6C', '7C']],   // 화면에 놓는 순서 (줄마다)
@@ -4129,7 +4131,7 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   };
   const MP_TOTE = new Set(['11F', '21F', '31F']);
   let mpData = null, mpRev = -1, mpLoading = false;
-  const mpUi = { fl: store.get('mp-fl', 'G'), q: '', sel: '' };
+  const mpUi = { fl: store.get('mp-fl', 'all'), q: '', sel: '' };
   const mpNat = (a, b) => String(a).localeCompare(String(b), 'ko', { numeric: true });
 
   function mpParse(loc){
@@ -4139,6 +4141,8 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     if (!/^\d/.test(L)) return { ch:'기타', fl:'', aisle: s[0] || '-', bay: s.slice(1, 2).join(''), lv: s.slice(2).join('-') };
     const c = L[0];
     const bay = /^\d+$/.test(s[2] || '') ? String(+s[2]) : (s[2] || '');
+    const m = (s[1] || '').toUpperCase().match(/^(\d)(\d)([A-Z]*)(\d+)$/);
+    if (m) return { ch: m[1] + 'C', fl: /[123]/.test(m[1]) ? (m[2] === '2' ? 'M' : 'G') : '', aisle: s[1], aname: String(+m[4]) + '번 통로', bay, lv: s.slice(3).join('-') };
     return { ch: c + 'C', fl: /[123]/.test(c) ? (L[1] === '2' ? 'M' : 'G') : '', aisle: s.slice(0, 2).join('-'), bay, lv: s.slice(3).join('-') };
   }
 
@@ -4247,7 +4251,8 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
       if (!C.aisles.has(p.aisle)) C.aisles.set(p.aisle, new Map());
       const A = C.aisles.get(p.aisle), id = p.aisle + '|' + p.bay;
       if (!A.has(p.bay)){ const cell = { id, ck, aisle: p.aisle, bay: p.bay, rows: [] }; A.set(p.bay, cell); cells.set(id, cell); }
-      if (/^\d+$/.test(p.bay)){ const z = p.aisle.split('-')[0], R = C.range || (C.range = {}), b = +p.bay; R[z] = R[z] ? [Math.min(R[z][0], b), Math.max(R[z][1], b)] : [b, b]; }
+      if (/^\d+$/.test(p.bay)){ const b = +p.bay; C.range = C.range ? [Math.min(C.range[0], b), Math.max(C.range[1], b)] : [b, b]; }
+      if (p.aname) (C.names || (C.names = {}))[p.aisle] = p.aname;
       A.get(p.bay).rows.push(r); C.n++;
       r._cell = id; r._lv = p.lv;
     }
@@ -4261,15 +4266,14 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   }
   // 통로 하나: 칸 번호가 숫자면 위(홀수) · 가운데 통로 · 아래(짝수)로, 같은 존의 통로끼리 칸 위치를 맞춰요
   function mpAisle(C, an, A, hits){
-    const [zone, name] = [an.split('-')[0], an.split('-').slice(1).join('-') || an];
-    const R = C.range?.[zone], cells = [...A.values()];
+    const name = C.names?.[an] || an, R = C.range, cells = [...A.values()];
     if (!R || !cells.every(c => /^\d+$/.test(c.bay)))
       return el('div', { class:'mp-aisle' }, el('span', { class:'mp-an', text: an }), el('div', { class:'mp-cells' }, ...cells.sort((a, b) => mpNat(a.bay, b.bay)).map(c => mpCell(c, hits))));
     const c0 = Math.floor((R[0] - 1) / 2), cols = Math.floor((R[1] - 1) / 2) - c0 + 1;
     const side = odd => el('div', { class:'mp-rack', style:`grid-template-columns:repeat(${cols},var(--mp-w))` },
       ...Array.from({ length: cols }, (_, i) => { const b = 2 * (c0 + i) + (odd ? 1 : 2), cell = A.get(String(b));
         return cell ? mpCell(cell, hits) : el('span', { class:'mp-cell slot', title: `${an}-${b} · 이 파일에 없음` }); }));
-    return el('div', { class:'mp-aisle2' }, el('div', { class:'mp-an2' }, el('b', { text: name }), el('small', { text: zone + ' · ' + cells.length + '칸' })),
+    return el('div', { class:'mp-aisle2' }, el('div', { class:'mp-an2' }, el('b', { text: name }), el('small', { text: (name === an ? '' : an + ' · ') + cells.length + '칸' })),
       el('div', { class:'mp-pair' }, side(true), el('div', { class:'mp-walk' }), side(false)));
   }
   const mpMatch = (r, q) => [r.name, r.bc, r.sku, r.loc].some(v => String(v || '').toLowerCase().replace(/\s+/g, '').includes(q));
