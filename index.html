@@ -4275,15 +4275,9 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     }
     mpTree = { ch, cells };
   }
-  // 한 칸에 SKU는 0~4개 → 칸을 4자리로 나눠 SKU 하나당 한 자리를 채워요
-  // 자리 색 = 그 SKU의 가장 빠른 유통기한 (빨강 7일 이내 · 노랑 14일 이내 · 초록 그 밖) · 급한 것부터 왼쪽
+  // 한 칸에 SKU는 0~4종 → 칸을 4자리로 나눠 SKU 하나당 한 자리를 채워요
   const MP_SLOTS = 4;
-  function mpSkus(cell){
-    if (cell.sk) return cell.sk;
-    const m = new Map();
-    for (const r of cell.rows){ const k = r.sku || r.bc || r.name, d = ppDays(r.exp); if (!m.has(k) || (d != null && (m.get(k) == null || d < m.get(k)))) m.set(k, d); }
-    return (cell.sk = [...m.values()].map(d => d == null ? 'ok' : d <= 7 ? 'over' : d <= 14 ? 'warn' : 'ok').sort((a, b) => ['over', 'warn', 'ok'].indexOf(a) - ['over', 'warn', 'ok'].indexOf(b)));
-  }
+  const mpSkus = cell => cell.sk ?? (cell.sk = [...new Set(cell.rows.map(r => r.sku || r.bc || r.name))].map(() => 'ok'));
   const mpBars = L => el('span', { class:'mp-bars', 'aria-hidden':'true' },
     ...Array.from({ length: MP_SLOTS }, (_, i) => el('i', { class: L[i] || '' })),
     L.length > MP_SLOTS ? el('b', { text: '+' + (L.length - MP_SLOTS) }) : null);
@@ -4356,8 +4350,7 @@ tr.gh td{background:#eef1f0;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     };
     const plan = el('div', { class:'mp-plan' }, ...layoutRows.map(row => el('div', { class:'mp-row' }, ...row.map(chamberBox))));
     const legend = el('div', { class:'mp-legend' },
-      el('span', {}, el('i', { class:'mp-key-bars' }, mpBars(['over', 'ok', 'ok'])), '칸 하나에 SKU 4자리 · 채운 자리 = SKU 수'),
-      el('span', {}, el('i', { class:'mp-key over' }), '유통기한 7일 이내'), el('span', {}, el('i', { class:'mp-key warn' }), '14일 이내'), el('span', {}, el('i', { class:'mp-key ok' }), '그 밖'),
+      el('span', {}, el('i', { class:'mp-key-bars' }, mpBars(['ok', 'ok', 'ok'])), '칸 하나에 SKU 4자리 · 채운 자리 = SKU 종수'),
       el('small', { text:'통로마다 위는 홀수 칸, 아래는 짝수 칸 (임시 배치)' }));
 
     // 고른 칸의 상품 / 찾은 결과
