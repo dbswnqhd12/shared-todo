@@ -1038,6 +1038,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     <button type="button" data-v="pp" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14l-1 11H6z"/><path d="M9 9a3 3 0 0 1 6 0"/></svg><span>프리팩</span></button>
     <button type="button" data-v="buf" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7M17.5 14v7"/></svg><span class="sl-full">Consolidation</span><span class="sl-short">Consol.</span></button>
     <button type="button" data-v="prod" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>생산성</span></button>
+    <button type="button" data-v="rpt" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 17v-3M12 17v-6M15 17v-4"/></svg><span class="sl-full">Productivity Report</span><span class="sl-short">Report</span></button>
   </div>
 
   <section class="ho" id="ho" hidden aria-label="시프트 교대 인수인계"></section>
@@ -1050,6 +1051,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   <section class="ret" id="over" hidden aria-label="IST 과매입"></section>
   <section class="ret" id="out" hidden aria-label="IST 반출"></section>
   <section class="ret" id="prod" hidden aria-label="STOW 개인 생산성"></section>
+  <section class="ret" id="rpt" hidden aria-label="Productivity Report"><div class="ret-sec-head"><h3>Productivity Report</h3><p class="ret-help">리포트 양식을 받으면 이 자리에 만들어요</p></div></section>
   <section class="ret" id="pp" hidden aria-label="프리팩 유통기한"></section>
   <section class="ret" id="buf" hidden aria-label="Consolidation"></section>
 
@@ -1568,17 +1570,18 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     document.querySelectorAll('#istSub button').forEach(b => b.setAttribute('aria-pressed', b.dataset.s === view ? 'true' : 'false'));
     istCounts();
     const cal = view === 'cal';
-    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over', outView = view === 'out', ppView = view === 'pp', bfView = view === 'buf';
+    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over', outView = view === 'out', ppView = view === 'pp', bfView = view === 'buf', rptView = view === 'rpt';
     $('#ho').hidden = !hoView;
     $('#ret').hidden = !retView;
     $('#prod').hidden = !prodView;
     $('#pp').hidden = !ppView;
     $('#buf').hidden = !bfView;
+    $('#rpt').hidden = !rptView;
     $('#over').hidden = !overView;
     $('#out').hidden = !outView;
-    $('#app').classList.toggle('wide', prodView || outView || ppView || bfView || retView);
-    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView || outView || ppView || bfView;
-    document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView || outView || ppView || bfView;
+    $('#app').classList.toggle('wide', rptView || prodView || outView || ppView || bfView || retView);
+    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView || outView || ppView || bfView || rptView;
+    document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView || outView || ppView || bfView || rptView;
     if (prodView && !$('#prod').hasChildNodes()) renderProd();
     if (prodView && prRev < 0) prLoad();
     if (ppView && !$('#pp').hasChildNodes() && ppData) renderPrepack();
