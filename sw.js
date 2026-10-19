@@ -13,8 +13,8 @@ self.addEventListener('activate', e => e.waitUntil((async () => {
 })()));
 
 const OFFLINE = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GWJ3 IB</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#EEF2F1;color:#18231F;font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;text-align:center;padding:24px}
-b{font-size:22px}p{color:#5E6B66}button{margin-top:12px;background:#1F6F5C;color:#fff;border:0;border-radius:10px;padding:12px 22px;font-size:16px;font-weight:700}</style></head>
+<title>GWJ3 IB</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#EEF1F5;color:#18202C;font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;text-align:center;padding:24px}
+b{font-size:22px}p{color:#5E6776}button{margin-top:12px;background:#2557A7;color:#fff;border:0;border-radius:10px;padding:12px 22px;font-size:16px;font-weight:700}</style></head>
 <body><div><b>인터넷에 연결되어 있지 않아요</b><p>와이파이나 데이터 연결을 확인한 뒤 다시 열어주세요.</p><button onclick="location.reload()">다시 시도</button></div></body></html>`;
 
 const keepable = url => (url.origin === self.location.origin && (url.pathname.startsWith('/icons/') || url.pathname === '/manifest.webmanifest'))
