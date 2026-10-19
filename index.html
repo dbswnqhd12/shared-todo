@@ -1002,45 +1002,47 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   .cal{padding:12px}
   .cal-title,.dayhead h2{font-size:24px}
 }
-/* Productivity Report · 엑셀 시트 모양 (테마와 상관없이 엑셀 색 그대로) */
+/* Productivity Report · 엑셀 시트 배치 (항목 순서는 양식 그대로, 색 · 글꼴은 사이트에 맞춤) */
 .xs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px 6px}
-.xs{background:#fff;color:#000;font:11px/1.25 Arial,'IBM Plex Sans KR',sans-serif;font-variant-numeric:tabular-nums;padding:14px 16px 18px;border:1px solid #D9D9D9;border-radius:6px;width:max-content;min-width:100%;box-sizing:border-box}
-.xs-title{display:flex;align-items:baseline;gap:56px;margin:2px 0 14px 70px}
-.xs-title>b{font-size:19px}
-.xs-title span{font-weight:700;font-size:13px;display:flex;gap:18px}
-.xs-top{margin-bottom:12px}
-.xs-t{border-collapse:collapse}
-.xs-t th,.xs-t td{border:1px solid #BFBFBF;padding:2px 6px;height:18px;text-align:right;white-space:nowrap;font-weight:400;background:#fff}
-.xs-t .xs-hd{background:#595959;color:#fff;font-weight:700;text-align:center;border-color:#A6A6A6}
-.xs-t .xs-cap{background:none;border:none;font-weight:700;text-align:center;color:#000}
-.xs-t .xs-u{text-decoration:underline}
+.xs{color:var(--ink);font-size:12px;line-height:1.3;font-variant-numeric:tabular-nums;width:max-content;min-width:100%}
+.xs-title{display:flex;align-items:baseline;gap:14px;margin:0 0 14px}
+.xs-title>b{font-size:16px;font-weight:700}
+.xs-title span{display:flex;gap:6px;color:var(--muted)}.xs-title span b{color:var(--ink)}
+.xs-top{margin-bottom:16px}
+.xs-t{border-collapse:separate;border-spacing:0}
+.xs-t th,.xs-t td{border-bottom:1px solid color-mix(in srgb,var(--line) 75%,transparent);padding:4px 8px;height:20px;text-align:right;white-space:nowrap;font-weight:400}
+.xs-t .xs-hd{background:var(--tone);color:var(--ink);font-weight:600;text-align:center;border-bottom-color:var(--paper);border-right:1px solid var(--paper)}
+.xs-t th.xs-hd[scope=row],.xs-t td.xs-hd{text-align:left}
+.xs-t .xs-cap{border:none;font-weight:600;color:var(--muted);text-align:center}
+.xs-t .xs-u{text-decoration:none}
 .xs-t .xs-b{font-weight:700}
-.xs-t .xs-day{background:#FFF2CC}.xs-t .xs-swing{background:#FCE4D6}.xs-t .xs-night{background:#D9E1F2}
-.xs-t .xs-tot,.xs-t .xs-gray{background:#F2F2F2}
-.xs-t .xs-yel{background:#FFFF00;color:#000;font-weight:700;text-align:center}
+.xs-t .xs-day{background:var(--day-soft)}.xs-t .xs-swing{background:var(--eve-soft)}.xs-t .xs-night{background:var(--night-soft)}
+.xs-t .xs-tot{background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
+.xs-t .xs-gray{color:var(--muted)}
+.xs-t .xs-yel{background:var(--accent);color:#fff;font-weight:700;text-align:center}
 .xs-t td.xs-yel{text-align:right}
-.xs-t .xs-yel2{background:#FFF2CC}
-.xs-t .xs-grn{background:#A9D08E}
-.xs-t .xs-red{background:#FF0000}
-.xs-t .xs-peach,.xs-t .xs-row-peach td{background:#FCE4D6}
-.xs-t .xs-redlab{background:#F85656;color:#fff;font-weight:700;text-align:center;border-color:#A6A6A6}
-.xs-t .xs-grp{white-space:pre-line;vertical-align:middle;min-width:64px}
-.xs-t .xs-neg{color:#FF0000}
-.xs-hc td{min-width:44px}.xs-vol td{min-width:58px}.xs-tar td,.xs-tar th{min-width:70px}
-.xs-big td{min-width:38px}.xs-big th.xs-hd{min-width:38px}
-.xs-htp{display:flex;justify-content:space-between;gap:10px}.xs-htp small{background:#595959;color:#fff;font-weight:700;padding:0 4px;margin:-2px 0 -2px -6px}
-.xs-in{all:unset;box-sizing:border-box;width:4.5em;text-align:right;font:inherit;color:inherit;cursor:text}
+.xs-t .xs-yel2{background:color-mix(in srgb,var(--mid-soft) 70%,transparent)}
+.xs-t .xs-grn{background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
+.xs-t .xs-red{background:var(--high-soft)}
+.xs-t .xs-peach,.xs-t .xs-row-peach td{background:color-mix(in srgb,var(--eve-soft) 75%,transparent)}
+.xs-t .xs-redlab{background:var(--high-soft);color:var(--high);font-weight:600;text-align:left;border-bottom-color:var(--paper)}
+.xs-t .xs-grp{white-space:pre-line;vertical-align:middle;text-align:center!important;min-width:72px;font-size:11px}
+.xs-t .xs-neg{color:var(--high)}
+.xs-hc td{min-width:44px}.xs-vol td{min-width:58px}.xs-tar td,.xs-tar th{min-width:76px}
+.xs-big td{min-width:40px}.xs-big thead th.xs-hd{min-width:40px;text-align:right}.xs-big thead th.xs-hd:first-child{text-align:left}
+.xs-htp{display:flex;justify-content:space-between;gap:10px}.xs-htp small{color:var(--muted);font-weight:600}
+.xs-in{all:unset;box-sizing:border-box;width:4.5em;text-align:right;font:inherit;color:inherit;cursor:text;border-bottom:1px dashed color-mix(in srgb,var(--ink) 25%,transparent)}
 .xs-big .xs-in{width:3.2em}
-.xs-in:focus{outline:2px solid #217346;outline-offset:1px;background:#fff}
+.xs-in:focus{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
 .xs-in::-webkit-inner-spin-button,.xs-in::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-.xs-charts{display:flex;gap:10px;margin:4px 0 14px}
-.xs-chart{border:1px solid #D9D9D9;padding:6px 8px 4px;width:380px;box-sizing:border-box;text-align:center}
-.xs-chart>b{font-size:13px;color:#595959}
+.xs-charts{display:flex;gap:10px;margin:0 0 16px}
+.xs-chart{background:var(--tone);border-radius:12px;padding:8px 10px 6px;flex:1 1 300px;max-width:440px;box-sizing:border-box}
+.xs-chart>b{font-size:12.5px;font-weight:600}
 .xs-svg{display:block;width:100%;height:auto}
-.xs-svg .xs-grid{stroke:#E5E5E5;stroke-width:1}
-.xs-svg .xs-ax{font-size:7px;fill:#595959}
-.xs-legend{display:flex;justify-content:center;gap:10px;font-size:9px;color:#595959}
-.xs-legend i{display:inline-block;width:8px;height:8px;margin-right:3px;vertical-align:-1px}
+.xs-svg .xs-grid{stroke:color-mix(in srgb,var(--ink) 9%,transparent);stroke-width:1}
+.xs-svg .xs-ax{font-size:7px;fill:var(--muted)}
+.xs-legend{display:flex;gap:10px;font-size:10px;color:var(--muted)}
+.xs-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 /* Productivity Report */
 #rpt{gap:14px}
 .rp-head{gap:12px}
@@ -5393,8 +5395,8 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     RP_H.forEach((h, i) => { if (i % 3 === 0) add('text', { x:L + cw * (i + .5), y:H - 5, class:'xs-ax', 'text-anchor':'middle' }).textContent = xsHour(h); });
     const bars = series.filter(s => s.type === 'bar');
     bars.forEach((s, k) => s.v.forEach((v, i) => { const bw = cw * .7 / bars.length, x = L + cw * i + cw * .15 + bw * k, y0 = y(0), y1 = y(v);
-      add('rect', { x, y: Math.min(y0, y1), width: bw, height: Math.max(.5, Math.abs(y0 - y1)), fill: s.color }); }));
-    series.filter(s => s.type !== 'bar').forEach(s => add('polyline', { points: s.v.map((v, i) => `${L + cw * (i + .5)},${y(v)}`).join(' '), fill:'none', stroke: s.color, 'stroke-width': 1.6 }));
+      add('rect', { x, y: Math.min(y0, y1), width: bw, height: Math.max(.5, Math.abs(y0 - y1)), rx: .6, style:`fill:${s.color}` }); }));
+    series.filter(s => s.type !== 'bar').forEach(s => add('polyline', { points: s.v.map((v, i) => `${L + cw * (i + .5)},${y(v)}`).join(' '), style:`fill:none;stroke:${s.color};stroke-width:1.6` }));
     return el('div', { class:'xs-chart' }, el('b', { text: title }), svg,
       el('div', { class:'xs-legend' }, ...series.map(s => el('span', {}, el('i', { style:`background:${s.color}` }), s.name))));
   }
@@ -5428,9 +5430,9 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     // ③ 차트
     const unlTot = RP_H.map((_, i) => C.unl.direct[i] + C.unl.xd[i] + C.unl.rc[i] + C.unl.rm[i]);
     const charts = el('div', { class:'xs-charts' },
-      xsChart('Unload', [{ name:'Unloaded Direct', v:C.unl.direct, color:'#4472C4' }, { name:'XD', v:C.unl.xd, color:'#ED7D31' }, { name:'RC', v:C.unl.rc, color:'#A5A5A5' }, { name:'Total', v:unlTot, color:'#FFC000' }]),
-      xsChart('Stow', [{ name:'Stow Tar.', v:C.stowTar, color:'#4472C4', type:'bar' }, { name:'Stow Act. Total', v:C.stowTot, color:'#ED7D31', type:'bar' }]),
-      xsChart('HTP', [{ name:'HTP Tar.', v:RP_H.map(() => P.tar.htp), color:'#4472C4', type:'bar' }, { name:'HTP Act.', v:C.htpAct.map(v => v || 0), color:'#ED7D31' }]));
+      xsChart('Unload', [{ name:'Unloaded Direct', v:C.unl.direct, color:'var(--accent)' }, { name:'XD', v:C.unl.xd, color:'var(--eve)' }, { name:'RC', v:C.unl.rc, color:'var(--vio)' }, { name:'Total', v:unlTot, color:'var(--mid)' }]),
+      xsChart('Stow', [{ name:'Stow Tar.', v:C.stowTar, color:'var(--ch-line)', type:'bar' }, { name:'Stow Act. Total', v:C.stowTot, color:'var(--accent)', type:'bar' }]),
+      xsChart('HTP', [{ name:'HTP Tar.', v:RP_H.map(() => P.tar.htp), color:'var(--ch-line)', type:'bar' }, { name:'HTP Act.', v:C.htpAct.map(v => v || 0), color:'var(--accent)' }]));
     // ④ 목표 줄
     const tarIn = (k, label, c) => xc(xsInput(P.tar[k], (p, v) => p.tar[k] = v, label), { c:'xs-b ' + (c || '') });
     const tarT = el('table', { class:'xs-t xs-tar' },
@@ -5472,10 +5474,9 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     const bigT = el('table', { class:'xs-t xs-big' },
       el('thead', {}, xtr(xc('Time', { h:1, c:'xs-hd', cs:2 }), xc('TOTAL', { h:1, c:'xs-hd' }), ...RP_H.map(h => xc(xsHour(h), { h:1, c:'xs-hd', scope:'col' })))),
       el('tbody', {}, ...body));
-    const head = el('div', { class:'xs-title' }, el('b', { text:'GWJ3 IB Daily Production Status' }), el('span', {}, 'Date', el('b', { text: rp.date.replace(/-/g, '/') })));
     return el('section', { class:'ret-sec xs-sec' },
-      el('p', { class:'ret-help', text:'팀 엑셀 양식(Production Status 시트) 그대로예요. 흰 칸 안의 숫자를 눌러 바로 고칠 수 있어요. 옆으로 밀어서 보세요.' }),
-      el('div', { class:'xs-wrap' }, el('div', { class:'xs' }, head,
+      el('p', { class:'ret-help', text:'팀 엑셀 양식(Production Status 시트)과 같은 순서예요. 밑줄 친 숫자는 눌러서 바로 고칠 수 있어요.' }),
+      el('div', { class:'xs-wrap' }, el('div', { class:'xs' },
         el('div', { class:'xs-top' }, hcT), el('div', { class:'xs-top' }, volT), charts, el('div', { class:'xs-top' }, tarT), bigT)));
   }
 
