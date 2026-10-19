@@ -1002,10 +1002,13 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   .cal{padding:12px}
   .cal-title,.dayhead h2{font-size:24px}
 }
-/* 상위 메뉴: IB 운영 / Productivity Report */
-.mode{display:flex;gap:22px;border-bottom:1px solid color-mix(in srgb,var(--muted) 25%,transparent);margin:0 0 18px}
-.mode button{border:0;background:none;padding:10px 0 9px;margin-bottom:-1px;font:inherit;font-size:15px;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer}
-.mode button[aria-pressed=true]{color:var(--ink);font-weight:700;border-bottom-color:var(--accent)}
+/* 상위 메뉴: IB 운영 / Productivity Report — 맨 위 남색 바 (테마와 상관없이 같은 색) */
+#app.wrap{padding-top:0}
+.mode{display:flex;align-items:center;gap:4px;margin:0 0 6px;padding:10px 0;background:#141B26;box-shadow:0 0 0 100vmax #141B26;clip-path:inset(0 -100vmax)}
+.mode::before{content:"GWJ3";margin-right:auto;font-weight:800;font-size:16px;letter-spacing:.04em;color:#fff}
+.mode button{border:0;background:none;padding:7px 14px;border-radius:999px;font:inherit;font-size:14px;color:rgba(255,255,255,.65);cursor:pointer}
+.mode button:hover{color:#fff}
+.mode button[aria-pressed=true]{background:#fff;color:#141B26;font-weight:700}
 #app:not(.mode-rpt) #rpt{display:none!important}
 #app.mode-rpt>:not(header,#modeNav,#rpt,.offbar){display:none!important}
 </style>
