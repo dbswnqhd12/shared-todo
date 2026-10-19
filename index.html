@@ -1002,6 +1002,66 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   .cal{padding:12px}
   .cal-title,.dayhead h2{font-size:24px}
 }
+/* ===== 평면도 ===== */
+.mp .ret-sec-head .pp-up{margin-left:auto}
+.mp-drop{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:4px 10px;padding:14px 16px}
+.mp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mp-fl{width:min(100%,300px)}
+.mp-find{margin-left:0;width:300px}
+.mp-body{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+@media (min-width:1100px){.mp-body.has-detail{grid-template-columns:minmax(0,1fr) 380px}.mp-detail{position:sticky;top:64px;max-height:calc(100vh - 90px)}}
+.mp-plan{display:flex;flex-direction:column;gap:12px;overflow-x:auto;padding-bottom:4px}
+.mp-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.mp-row > *{flex:1 1 auto;min-width:0;max-width:100%}
+.mp-row > .mp-ch.empty{flex:0 1 150px;min-height:0}
+.mp-chs{display:flex;flex-direction:column;gap:12px;min-width:0}
+.mp{--mp-w:32px}
+.mp-aisle2{display:flex;flex-direction:column;gap:4px;padding:6px 0}
+.mp-an2{display:flex;align-items:baseline;gap:8px}.mp-an2 b{font-size:13px}.mp-an2 small{font-size:11.5px;color:var(--muted)}
+.mp-pair{display:flex;flex-direction:column;gap:3px;width:max-content}
+.mp-rack{display:grid;gap:3px;width:max-content}
+.mp-walk{height:10px;width:100%;border-radius:4px;background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--ink) 14%,transparent) 0 8px,transparent 8px 14px);background-size:auto 2px;background-repeat:repeat-x;background-position:center}
+.mp-cell.slot{background:transparent;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 12%,transparent);cursor:default;min-width:0;width:var(--mp-w);padding:3px 0}
+.mp-rack .mp-cell{min-width:0;width:var(--mp-w);padding:3px 4px 4px}
+.mp-ch{background:var(--tone);border-radius:14px;padding:12px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.mp-ch.frozen{background:color-mix(in srgb,var(--sat) 12%,transparent)}
+.mp-ch.empty{opacity:.55;justify-content:center;min-height:80px}
+.mp-ch-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.mp-ch-h b{font-size:16px}.mp-ch-h small{font-size:12px;color:var(--muted)}
+.mp-aisles{display:flex;flex-direction:column;gap:5px;max-height:460px;overflow:auto;padding-bottom:4px}
+.mp-aisle{display:flex;gap:8px;align-items:flex-start}
+.mp-an{flex:0 0 84px;font-size:11.5px;color:var(--muted);padding-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mp-cells{display:flex;flex-wrap:wrap;gap:3px;min-width:0}
+.mp-cell{min-width:28px;height:32px;padding:3px 4px;border:0;border-radius:6px;font-size:10.5px;line-height:1;color:var(--ink);cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center}
+.mp-cell{background:var(--paper)}
+.mp-bars{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5px;width:100%;height:14px}
+.mp-bars i{border-radius:2px;background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.mp-bars i.ok,.mp-key.ok{background:var(--accent)}
+.mp-bars i.warn,.mp-key.warn{background:var(--mid)}
+.mp-bars i.over,.mp-key.over{background:var(--high)}
+.mp-bars b{position:absolute;right:-3px;top:-9px;font-size:8.5px;color:var(--high)}
+.mp-key{display:inline-block;width:10px;height:10px;border-radius:2px}.mp-key-bars{display:inline-flex;width:28px;padding:3px;border-radius:5px;background:var(--tone)}.mp-legend .mp-key-bars .mp-bars{display:grid;gap:1.5px;align-items:stretch;width:22px;height:12px}
+.mp-cell.slot .mp-no{opacity:.4}.mp-cell.slot .mp-bars i{background:transparent}
+.mp-cell.dim{opacity:.22}
+.mp-cell.hit{box-shadow:0 0 0 2px var(--high);font-weight:700}
+.mp-cell.sel{outline:2px solid var(--ink);outline-offset:1px;font-weight:700}
+.mp-legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.mp-legend span{display:inline-flex;align-items:center;gap:6px}.mp-legend i.mp-cell{min-width:0;width:28px;height:20px;padding:3px;justify-content:center;cursor:default}.mp-legend b{color:var(--ink);font-size:12px}
+.mp-detail{background:var(--tone);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0;overflow:hidden}
+.mp-list{display:flex;flex-direction:column;overflow:auto;min-height:0}
+.mp-rw{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:10px;row-gap:2px;padding:8px 4px;border-bottom:1px solid color-mix(in srgb,var(--ink) 8%,transparent);font-size:13px;align-items:center}
+.mp-rw .loc{font-size:12px;color:var(--muted);white-space:nowrap}.mp-rw .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mp-rw .q{text-align:right}
+.mp-sub{grid-column:2/4;display:flex;gap:6px;flex-wrap:wrap;align-items:center}.mp-sub:empty{display:none}
+.mp-rw .pp-dd{min-width:0;font-size:10.5px;padding:1px 6px}
+.mp-split{border:0;border-radius:999px;background:var(--high-soft);color:var(--high);font-size:11px;font-weight:600;padding:2px 8px;cursor:pointer}
+.mp-gr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;row-gap:3px;padding:9px 4px;border-bottom:1px solid color-mix(in srgb,var(--ink) 8%,transparent);font-size:13px;cursor:pointer}
+.mp-gr:hover{background:var(--tone)}.mp-gr .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mp-gr .q{color:var(--high)}
+.mp-gr .loc{grid-column:1/3;font-size:11.5px;color:var(--muted)}
+.bf-map{margin-left:8px}
+.mp-rw.go{cursor:pointer}.mp-rw.go:hover{background:var(--tone)}
+@media (max-width:760px){.mp-find{width:100%}.mp-fl{width:100%}.mp{--mp-w:32px}.mp-an{flex-basis:64px}.mp-aisles{max-height:none}
+  .mp-detail{position:fixed;left:8px;right:8px;bottom:calc(72px + env(safe-area-inset-bottom,0px));max-height:52vh;z-index:90;background:var(--paper);box-shadow:0 -6px 24px rgba(0,0,0,.18)}
+  .mp-body.has-detail .mp-main{padding-bottom:52vh}
+  .wrap > #map{animation:none!important}}  /* 움직임 효과가 남아 있으면 아래 고정 창이 제자리에 안 붙어요 */
 </style>
 </head>
 <body>
@@ -1037,6 +1097,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     <button type="button" data-v="ist" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-5 9 5v9l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v9"/></svg><span>IST</span></button>
     <button type="button" data-v="pp" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14l-1 11H6z"/><path d="M9 9a3 3 0 0 1 6 0"/></svg><span>프리팩</span></button>
     <button type="button" data-v="buf" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7M17.5 14v7"/></svg><span class="sl-full">Consolidation</span><span class="sl-short">Consol.</span></button>
+    <button type="button" data-v="map" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>평면도</span></button>
     <button type="button" data-v="prod" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>생산성</span></button>
   </div>
 
@@ -1052,6 +1113,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   <section class="ret" id="prod" hidden aria-label="STOW 개인 생산성"></section>
   <section class="ret" id="pp" hidden aria-label="프리팩 유통기한"></section>
   <section class="ret" id="buf" hidden aria-label="Consolidation"></section>
+  <section class="ret" id="map" hidden aria-label="센터 평면도"></section>
 
   <section class="cal" id="cal" aria-label="달력">
     <div class="cal-head">
@@ -1247,6 +1309,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       if (view === 'prod' && prRev !== rev) prLoad();
       if (view === 'pp' && ppRev !== rev) ppLoad();
       if (view === 'buf' && bfRev !== rev) bfLoad();
+      if (view === 'map' && mpRev !== rev) mpLoad();
       setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
       if (!offWarmed && !offAt){ offWarmed = true; setTimeout(offWarm, 5000); }
     } catch(e) {
@@ -1269,6 +1332,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       if (view === 'prod' && data.rev !== prRev) prLoad();
       if (view === 'pp' && data.rev !== ppRev) ppLoad();
       if (view === 'buf' && data.rev !== bfRev) bfLoad();
+      if (view === 'map' && data.rev !== mpRev) mpLoad();
       if (data.rev !== rev) loadFull();
       else setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
@@ -1568,23 +1632,26 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     document.querySelectorAll('#istSub button').forEach(b => b.setAttribute('aria-pressed', b.dataset.s === view ? 'true' : 'false'));
     istCounts();
     const cal = view === 'cal';
-    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over', outView = view === 'out', ppView = view === 'pp', bfView = view === 'buf';
+    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over', outView = view === 'out', ppView = view === 'pp', bfView = view === 'buf', mapView = view === 'map';
     $('#ho').hidden = !hoView;
     $('#ret').hidden = !retView;
     $('#prod').hidden = !prodView;
     $('#pp').hidden = !ppView;
     $('#buf').hidden = !bfView;
+    $('#map').hidden = !mapView;
     $('#over').hidden = !overView;
     $('#out').hidden = !outView;
-    $('#app').classList.toggle('wide', prodView || outView || ppView || bfView || retView);
-    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView || outView || ppView || bfView;
-    document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView || outView || ppView || bfView;
+    $('#app').classList.toggle('wide', prodView || outView || ppView || bfView || retView || mapView);
+    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView || outView || ppView || bfView || mapView;
+    document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView || outView || ppView || bfView || mapView;
     if (prodView && !$('#prod').hasChildNodes()) renderProd();
     if (prodView && prRev < 0) prLoad();
     if (ppView && !$('#pp').hasChildNodes() && ppData) renderPrepack();
     if (ppView && ppRev < 0) ppLoad();
     if (bfView && !$('#buf').hasChildNodes() && bfData) renderBuffer();
     if (bfView && bfRev < 0) bfLoad();
+    if (mapView && !$('#map').hasChildNodes()) renderMap();
+    if (mapView && mpRev < 0) mpLoad();
     if (hoView && !$('#ho').hasChildNodes()) renderHandover();
     if (retView && !retBuilt) renderReturns();
     if (overView && !ovBuilt) renderOvers();
@@ -4063,6 +4130,303 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     box.replaceChildren(...sections);
   }
 
+  // ---------- 평면도: WMS 재고 엑셀(또는 CSV)로 센터 어느 칸에 어떤 상품이 있는지 ----------
+  // 로케이션 코드 140-22N4-12-1 읽는 법 (주봉 님 확인, 10/18)
+  //   140 = 센터 번호 (무시)
+  //   22N4 = 챔버 2 · 층 2(M, 1.5층; 1이면 G) · N = PLT존 (무시) · 4 = 통로 번호
+  //   12 = 칸 번호 (한 통로의 홀수 칸과 짝수 칸이 서로 마주 봐요 → 위(홀수) · 아래(짝수)로 그려요)
+  //   1 = 단
+  // 이 모양이 아닌 코드는 예전처럼 첫 글자를 챔버로 봐요. 챔버 위치는 아직 임시예요.
+  // 실제 도면을 받으면 MP_LAYOUT과 mpParse만 고치면 돼요.
+  const MP_LAYOUT = {
+    rows: [['1C', '2C', '3C'], ['5C', '6C', '7C']],   // 화면에 놓는 순서 (줄마다)
+    frozen: new Set(['5C', '6C', '7C']),
+    // 재고가 없어도 항상 그려 두는 통로 (챔버 층 → 로케이션 앞부분 · 통로 번호 · 칸 번호 범위)
+    // 재고 파일에 여기 없는 통로가 나오면 그것도 같이 그려요
+    aisles: {
+      '2C M': { code: '22N', nums: [3, 4, 5], bays: [3, 44] },   // 재고리스트(10/18)에서 확인
+    },
+  };
+  const MP_TOTE = new Set(['11F', '21F', '31F']);
+  let mpData = null, mpRev = -1, mpLoading = false;
+  const mpUi = { fl: store.get('mp-fl', 'all'), q: '', sel: '', split: false, grp: '' };
+  const mpKey = r => r.bc || ('#' + r.name);   // Consolidation과 같은 묶음 기준 (바코드)
+  const mpNat = (a, b) => String(a).localeCompare(String(b), 'ko', { numeric: true });
+
+  function mpParse(loc){
+    const O = String(loc || '').trim(), L = O.toUpperCase();
+    if (MP_TOTE.has(L)) return { ch:'프리팩', fl:'', aisle:L, bay:'', lv:'' };
+    const s = O.split('-');
+    if (!/^\d/.test(L)) return { ch:'기타', fl:'', aisle: s[0] || '-', bay: s.slice(1, 2).join(''), lv: s.slice(2).join('-') };
+    const c = L[0];
+    const bay = /^\d+$/.test(s[2] || '') ? String(+s[2]) : (s[2] || '');
+    const m = (s[1] || '').toUpperCase().match(/^(\d)(\d)([A-Z]*)(\d+)$/);
+    if (m) return { ch: m[1] + 'C', fl: /[123]/.test(m[1]) ? (m[2] === '2' ? 'M' : 'G') : '', aisle: s[1].toUpperCase(), aname: String(+m[4]) + '번 통로', bay, lv: s.slice(3).join('-') };
+    return { ch: c + 'C', fl: /[123]/.test(c) ? (L[1] === '2' ? 'M' : 'G') : '', aisle: s.slice(0, 2).join('-'), bay, lv: s.slice(3).join('-') };
+  }
+
+  // 머리줄 이름이 WMS 엑셀(한글)이든 즐겨찾기 CSV(영문 키)이든 찾아요
+  const MP_COLS = {
+    loc: ['로케이션', '로케이션바코드', 'location', 'locationbarcode', 'locationcode', 'locationname'],
+    name: ['상품명', 'skuname', 'productname', 'itemname'],
+    q: ['수량', '가용수량', 'quantity', 'qty', 'availablequantity', 'availableqty', 'onhandquantity'],
+    exp: ['유통기한', 'expirationdate', 'expirydate', 'expiredate', 'expdate', 'bestbefore'],
+    bc: ['상품바코드', '바코드', 'skubarcode', 'barcode'],
+    sku: ['skuid'],
+  };
+  function mpPrep(rows, file){
+    const norm = v => String(v ?? '').toLowerCase().replace(/[\s._\-]/g, '');
+    const findCol = (H, keys) => { for (const k of keys){ const i = H.indexOf(k); if (i >= 0) return i; } for (const k of keys){ const i = H.findIndex(h => h.endsWith(k)); if (i >= 0) return i; } return -1; };
+    const hi = rows.slice(0, 30).findIndex(r => r && findCol(r.map(norm), MP_COLS.loc) >= 0 && findCol(r.map(norm), MP_COLS.name) >= 0);
+    if (hi < 0) throw new Error("'로케이션' · '상품명' 열을 찾지 못했어요. WMS 재고(인벤토리) 엑셀인지 확인해 주세요.");
+    const H = rows[hi].map(norm), col = {};
+    for (const k in MP_COLS) col[k] = findCol(H, MP_COLS[k]);
+    const g = (r, k) => col[k] >= 0 ? String(r[col[k]] ?? '').replace(/ /g, ' ').trim() : '';
+    const out = [];
+    for (const r of rows.slice(hi + 1)){
+      if (!r) continue;
+      const loc = g(r, 'loc'), name = g(r, 'name');
+      if (!loc || !name) continue;
+      const q = parseFloat(g(r, 'q').replace(/,/g, ''));
+      out.push({ loc, name, q: col.q < 0 ? 1 : isNaN(q) ? 0 : q, exp: col.exp >= 0 ? ppDay(r[col.exp]) : '', bc: ppId(g(r, 'bc')), sku: ppId(g(r, 'sku')) });
+    }
+    if (!out.length) throw new Error('엑셀에 로케이션이 적힌 상품 줄이 없어요.');
+    return { file, total: out.length, rows: out, at: 0 };
+  }
+  function mpCsv(text){
+    const rows = []; let row = [], cur = '', q = false;
+    text = text.replace(/^﻿/, '');
+    for (let i = 0; i < text.length; i++){
+      const ch = text[i];
+      if (q){ if (ch === '"'){ if (text[i + 1] === '"'){ cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === ','){ row.push(cur); cur = ''; }
+      else if (ch === '\n' || ch === '\r'){ if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+      else cur += ch;
+    }
+    if (cur || row.length){ row.push(cur); rows.push(row); }
+    return rows;
+  }
+  function mpEncode(D){
+    const idx = new Map(), items = [];
+    const rows = D.rows.map(r => {
+      const k = r.name + '\u0001' + r.bc + '\u0001' + r.sku;
+      if (!idx.has(k)){ idx.set(k, items.length); items.push([r.name, r.bc, r.sku]); }
+      return [r.loc, idx.get(k), r.q, r.exp];
+    });
+    return { file: D.file, total: D.total, items, rows };
+  }
+  const mpDecode = S => ({ file: S.file || '', total: S.total || 0, at: S.at || 0,
+    rows: (S.rows || []).map(([loc, i, q, exp]) => { const it = S.items[i] || ['', '', '']; return { loc, name: it[0], bc: it[1], sku: it[2], q, exp }; }) });
+
+  async function mpLoad(){
+    if (mpLoading) return;
+    mpLoading = true;
+    try {
+      const d = await request('GET', '/api/prepack?kind=map' + (mpData?.at ? '&have=' + mpData.at : ''));
+      mpRev = d.rev;
+      if (d.same) return;
+      if (d.snap && d.snap.at !== mpData?.at){ mpData = mpDecode(d.snap); mpIndex(); if (view === 'map') renderMap(); }
+      else if (!d.snap && view === 'map' && !$('#map').hasChildNodes()) renderMap();
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+    } finally { mpLoading = false; }
+  }
+  function mpPick(){
+    const inp = el('input', { type:'file', accept:'.xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    inp.onchange = () => { if (inp.files[0]) mpImportFile(inp.files[0]); };
+    inp.click();
+  }
+  // 재고 파일 하나로 평면도와 Consolidation을 같이 채워요 (어느 탭에서 올려도)
+  async function mpImportFile(file){
+    let rows;
+    try {
+      toast('파일을 읽는 중이에요…');
+      const csv = /\.csv$/i.test(file.name) || file.type === 'text/csv';
+      rows = csv ? mpCsv(await file.text()) : await hoReadXlsx(file);
+      mpData = mpPrep(rows, file.name);
+      mpUi.sel = ''; mpUi.grp = ''; mpIndex(); renderMap();
+    } catch(e) { return toast(e.message || '파일을 읽지 못했어요.'); }
+    if (!(await mpShare())) return;
+    try { bfData = ppPrep(rows, file.name); } catch { return toast(`${mpData.total}줄을 평면도에 올렸어요. (Consolidation에 필요한 열이 없어서 거기는 그대로예요)`); }
+    if (await bfShare()) toast(`${mpData.total}줄을 평면도와 Consolidation에 같이 올렸어요.`);
+  }
+  async function mpShare(){
+    const snap = mpEncode(mpData);
+    if (JSON.stringify(snap).length > 4e6 || snap.rows.length > 40000){ toast('파일이 커서 평면도는 팀 공유는 못 하고, 이 화면에서만 보여요.'); return false; }
+    try {
+      const r = await api('PUT', '/api/prepack?kind=map', { snap });
+      mpData.at = r.at; mpRev = r.rev; if (view === 'map') renderMap();
+      setSync('', '저장됨');
+      return true;
+    } catch(e) {
+      if (e instanceof Locked){ showLock(e.message); return false; }
+      setSync('err', '공유 저장을 못 했어요');
+      toast('평면도는 그렸지만 공유 저장을 못 했어요: ' + (e.message || ''));
+      return false;
+    }
+  }
+
+  // 챔버 → 통로 → 칸 으로 묶어두기
+  let mpTree = null;
+  function mpIndex(){
+    const ch = new Map(), cells = new Map();
+    for (const [ck, L] of Object.entries(MP_LAYOUT.aisles)){
+      const [c, fl = ''] = ck.split(' '), C = { key: ck, ch: c, fl, aisles: new Map(), n: 0, range: [...L.bays], names: {} };
+      for (const n of L.nums){ C.aisles.set(L.code + n, new Map()); C.names[L.code + n] = n + '번 통로'; }
+      ch.set(ck, C);
+    }
+    for (const r of mpData?.rows || []){
+      const p = mpParse(r.loc);
+      const ck = p.ch + (p.fl ? ' ' + p.fl : '');
+      if (!ch.has(ck)) ch.set(ck, { key: ck, ch: p.ch, fl: p.fl, aisles: new Map(), n: 0 });
+      const C = ch.get(ck);
+      if (!C.aisles.has(p.aisle)) C.aisles.set(p.aisle, new Map());
+      const A = C.aisles.get(p.aisle), id = p.aisle + '|' + p.bay;
+      if (!A.has(p.bay)){ const cell = { id, ck, aisle: p.aisle, bay: p.bay, rows: [] }; A.set(p.bay, cell); cells.set(id, cell); }
+      if (/^\d+$/.test(p.bay)){ const b = +p.bay; C.range = C.range ? [Math.min(C.range[0], b), Math.max(C.range[1], b)] : [b, b]; }
+      if (p.aname) (C.names || (C.names = {}))[p.aisle] = p.aname;
+      A.get(p.bay).rows.push(r); C.n++;
+      r._cell = id; r._lv = p.lv;
+    }
+    // 같은 바코드가 여러 칸에 나뉜 상품 (Consolidation 대상)
+    const grp = new Map();
+    for (const r of mpData?.rows || []){ const k = mpKey(r); if (!grp.has(k)) grp.set(k, { key: k, name: r.name, bc: r.bc, cells: new Set(), rows: [] }); const g = grp.get(k); g.cells.add(r._cell); g.rows.push(r); }
+    const split = [...grp.values()].filter(g => g.cells.size > 1).sort((a, b) => b.cells.size - a.cells.size || a.name.localeCompare(b.name, 'ko'));
+    mpTree = { ch, cells, grp, split };
+  }
+  // 한 칸에 SKU는 0~4종 → 칸을 4자리로 나눠 SKU 하나당 한 자리를 채워요
+  const MP_SLOTS = 4;
+  const mpSkus = cell => cell.sk ?? (cell.sk = [...new Set(cell.rows.map(r => r.sku || r.bc || r.name))].map(() => 'ok'));
+  const mpBars = L => el('span', { class:'mp-bars', 'aria-hidden':'true' },
+    ...Array.from({ length: MP_SLOTS }, (_, i) => el('i', { class: L[i] || '' })),
+    L.length > MP_SLOTS ? el('b', { text: '+' + (L.length - MP_SLOTS) }) : null);
+  function mpCell(cell, hits){
+    const L = mpSkus(cell);
+    const cls = 'mp-cell' + (hits ? (hits.has(cell.id) ? ' hit' : ' dim') : '') + (mpUi.sel === cell.id ? ' sel' : '');
+    return el('button', { type:'button', class: cls, title: `${cell.aisle}-${cell.bay} · SKU ${L.length}개`, 'data-id': cell.id,
+      onclick: () => { mpUi.sel = mpUi.sel === cell.id ? '' : cell.id; renderMap(); if (mpUi.sel && matchMedia('(min-width:761px)').matches) $('#map .mp-detail')?.scrollIntoView({ block:'nearest', behavior:'smooth' }); } },
+      el('span', { class:'mp-no', text: cell.bay || '·' }), mpBars(L));
+  }
+  // 통로 하나: 칸 번호가 숫자면 위(홀수) · 가운데 통로 · 아래(짝수)로, 같은 존의 통로끼리 칸 위치를 맞춰요
+  function mpAisle(C, an, A, hits){
+    const name = C.names?.[an] || an, R = C.range, cells = [...A.values()];
+    if (!R || !cells.every(c => /^\d+$/.test(c.bay)))
+      return el('div', { class:'mp-aisle' }, el('span', { class:'mp-an', text: an }), el('div', { class:'mp-cells' }, ...cells.sort((a, b) => mpNat(a.bay, b.bay)).map(c => mpCell(c, hits))));
+    const c0 = Math.floor((R[0] - 1) / 2), cols = Math.floor((R[1] - 1) / 2) - c0 + 1;
+    const side = odd => el('div', { class:'mp-rack', style:`grid-template-columns:repeat(${cols},var(--mp-w))` },
+      ...Array.from({ length: cols }, (_, i) => { const b = 2 * (c0 + i) + (odd ? 1 : 2), cell = A.get(String(b));
+        return cell ? mpCell(cell, hits) : el('span', { class:'mp-cell slot', title: `${an}-${b} · SKU 0개` }, el('span', { class:'mp-no', text: String(b) }), mpBars([])); }));
+    return el('div', { class:'mp-aisle2' }, el('div', { class:'mp-an2' }, el('b', { text: name }), el('small', { text: (name === an ? '' : an + ' · ') + cells.length + '칸' })),
+      el('div', { class:'mp-pair' }, side(true), el('div', { class:'mp-walk' }), side(false)));
+  }
+  const mpMatch = (r, q) => [r.name, r.bc, r.sku, r.loc].some(v => String(v || '').toLowerCase().replace(/\s+/g, '').includes(q));
+
+  function renderMap(){
+    const box = $('#map');
+    const when = mpData?.at ? new Date(mpData.at).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }) + ' 올림' : '';
+    const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'센터 평면도' }),
+      el('span', { class:'ret-help', text: mpData ? [mpData.file, when].filter(Boolean).join(' · ') : '칸마다 어떤 상품이 있는지 보여줘요' }),
+      mpData ? el('span', { class:'pp-up' }, el('button', { type:'button', class:'ret-btn sm ghost', onclick: mpPick, title:'새 WMS 재고 파일로 바꾸기' }, '새 파일 올리기')) : null);
+    const sec = el('section', { class:'ret-sec mp' }, head);
+    sec.ondragover = e => { e.preventDefault(); sec.classList.add('drag'); };
+    sec.ondragleave = e => { if (!sec.contains(e.relatedTarget)) sec.classList.remove('drag'); };
+    sec.ondrop = e => { e.preventDefault(); sec.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) mpImportFile(f); };
+    // 재고가 없어도 평면도는 그려 두고, 위에 올리기 칸만 작게 보여줘요
+    if (!mpData) sec.append(el('div', { class:'pr-drop mp-drop', tabindex:'0', role:'button', 'aria-label':'재고 파일 올리기', onclick: mpPick,
+      onkeydown: e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); mpPick(); } } },
+      el('b', { text:'WMS 재고 엑셀 올리기' }), el('span', { text:'올리면 칸마다 어떤 상품이 있는지 채워져요 · 끌어다 놓거나 눌러서 고르세요' })));
+    if (!mpTree) mpIndex();
+    const q = mpUi.q.trim().toLowerCase().replace(/\s+/g, '');
+    const G = mpUi.grp && mpTree.grp.get(mpUi.grp);
+    if (mpUi.grp && !G) mpUi.grp = '';
+    const hits = G ? G.cells : q ? new Set((mpData?.rows || []).filter(r => mpMatch(r, q)).map(r => r._cell))
+      : mpUi.split ? new Set(mpTree.split.flatMap(g => [...g.cells])) : null;
+
+    // 도구줄: 층 고르기 + 찾기
+    const flBtn = (k, label) => el('button', { type:'button', 'aria-pressed': mpUi.fl === k ? 'true' : 'false', onclick: () => { mpUi.fl = k; store.set('mp-fl', k); renderMap(); } }, label);
+    const find = el('input', { type:'search', class:'bf-find mp-find', placeholder:'상품명 · 바코드 · SKU · 로케이션 찾기', value: mpUi.q, 'aria-label':'평면도에서 찾기' });
+    find.oninput = () => { mpUi.q = find.value; clearTimeout(mpFindT); mpFindT = setTimeout(() => { renderMap(); const f = $('#map .mp-find'); if (f){ f.focus(); f.setSelectionRange(f.value.length, f.value.length); } }, 250); };
+    const bar = el('div', { class:'mp-bar' },
+      el('div', { class:'ret-seg3 mp-fl', role:'group', 'aria-label':'층' }, flBtn('G', 'G 1층'), flBtn('M', 'M 1.5층'), flBtn('all', '전체')),
+      find,
+      mpData ? el('button', { type:'button', class:'ret-btn sm' + (mpUi.split ? ' solid' : ' ghost'), 'aria-pressed': mpUi.split ? 'true' : 'false', title:'같은 바코드가 여러 칸에 나뉜 상품 (Consolidation)',
+        onclick: () => { mpUi.split = !mpUi.split; mpUi.grp = ''; mpUi.sel = ''; renderMap(); } }, `나뉜 상품 ${mpTree.split.length}종`) : null,
+      q && !G ? el('span', { class:'ret-help', text: hits.size ? `${hits.size}칸에 있어요` : '찾는 상품이 없어요' }) : null);
+
+    // 챔버 배치
+    const shown = ck => { const C = mpTree.ch.get(ck); return !C.fl || mpUi.fl === 'all' || C.fl === mpUi.fl; };
+    const keysOf = name => [...mpTree.ch.keys()].filter(k => mpTree.ch.get(k).ch === name && shown(k)).sort();
+    const placed = new Set(MP_LAYOUT.rows.flat());
+    const extra = [...new Set([...mpTree.ch.values()].map(C => C.ch))].filter(c => !placed.has(c)).sort(mpNat);
+    const layoutRows = [...MP_LAYOUT.rows, ...(extra.length ? [extra] : [])];
+    const chamberBox = name => {
+      const ks = keysOf(name);
+      const frozen = MP_LAYOUT.frozen.has(name);
+      if (!ks.length) return el('div', { class:'mp-ch empty' + (frozen ? ' frozen' : '') }, el('div', { class:'mp-ch-h' }, el('b', { text: name }), el('small', { text: frozen ? '냉동 · 재고 없음' : '재고 없음' })));
+      return el('div', { class:'mp-chs' }, ...ks.map(ck => {
+        const C = mpTree.ch.get(ck);
+        const aisles = [...C.aisles.entries()].sort((a, b) => mpNat(a[0], b[0]));
+        const nCells = aisles.reduce((s, [, A]) => s + A.size, 0);
+        return el('div', { class:'mp-ch' + (frozen ? ' frozen' : '') },
+          el('div', { class:'mp-ch-h' }, el('b', { text: ck }), el('small', { text: `${frozen ? '냉동 · ' : ''}${aisles.length}줄 · ${nCells}칸 · ${C.n}건` })),
+          el('div', { class:'mp-aisles' }, ...aisles.map(([an, A]) => mpAisle(C, an, A, hits))));
+      }));
+    };
+    const plan = el('div', { class:'mp-plan' }, ...layoutRows.map(row => el('div', { class:'mp-row' }, ...row.map(chamberBox))));
+    const legend = el('div', { class:'mp-legend' },
+      el('span', {}, el('i', { class:'mp-key-bars' }, mpBars(['ok', 'ok', 'ok'])), '칸 하나에 SKU 4자리 · 채운 자리 = SKU 종수'),
+      el('small', { text:'통로마다 위는 홀수 칸, 아래는 짝수 칸 (임시 배치)' }));
+
+    // 고른 칸의 상품 / 찾은 결과
+    let detail = null;
+    const cell = mpUi.sel && mpTree.cells.get(mpUi.sel);
+    const openGrp = k => { mpUi.grp = k; mpUi.sel = ''; renderMap(); const g = mpTree.grp.get(k); const c = g && [...g.cells][0]; if (c) document.querySelector(`#map .mp-cell[data-id="${CSS.escape(c)}"]`)?.scrollIntoView({ block:'center', inline:'nearest', behavior:'smooth' }); };
+    const rowLine = r => { const d = ppDays(r.exp), g = mpTree.grp.get(mpKey(r)), more = g && g.cells.size > 1 && !G ? g.cells.size - 1 : 0;
+      return el('div', { class:'mp-rw' },
+        el('span', { class:'loc', text: r.loc }), el('span', { class:'nm', title: r.name, text: ppShort(r.name) }),
+        el('b', { class:'q', text: retNum(r.q) }),
+        el('span', { class:'mp-sub' }, r.exp ? el('span', { class:'pp-dd' + ppLvl(d), text: ppMD(r.exp) + ' · ' + ppDD(d) }) : null,
+          more ? el('button', { type:'button', class:'mp-split', title:'이 상품이 있는 칸을 평면도에 표시', onclick: e => { e.stopPropagation(); openGrp(g.key); } }, `다른 칸 ${more}곳에도 있음`) : null)); };
+    const closeBtn = fn => el('button', { type:'button', class:'ret-btn sm ghost', onclick: () => { fn(); renderMap(); } }, '닫기');
+    const goCell = (n, r) => { n.classList.add('go'); n.onclick = () => { mpUi.sel = r._cell; renderMap(); document.querySelector(`#map .mp-cell[data-id="${CSS.escape(r._cell)}"]`)?.scrollIntoView({ block:'center', inline:'nearest', behavior:'smooth' }); }; return n; };
+    if (cell){
+      const L = [...cell.rows].sort((a, b) => mpNat(a.loc, b.loc) || ppSort(a, b));
+      detail = el('div', { class:'mp-detail' },
+        el('div', { class:'pp-sub' }, el('h4', {}, `${cell.aisle}-${cell.bay}`, el('span', { text: ` · ${cell.ck} · ${L.length}건 · ${L.reduce((s, r) => s + (r.q || 0), 0).toLocaleString('ko-KR')}개` })),
+          closeBtn(() => { mpUi.sel = ''; })),
+        el('div', { class:'mp-list' }, ...L.map(rowLine)));
+    } else if (G){
+      const L = [...G.rows].sort((a, b) => (a.exp || '9999').localeCompare(b.exp || '9999') || mpNat(a.loc, b.loc));
+      const nm = bfName(G.name);
+      detail = el('div', { class:'mp-detail' },
+        el('div', { class:'pp-sub' }, el('h4', {}, nm.name, el('span', { text: ` · ${G.cells.size}칸 · ${L.reduce((s, r) => s + (r.q || 0), 0).toLocaleString('ko-KR')}개` })),
+          closeBtn(() => { mpUi.grp = ''; })),
+        el('p', { class:'ret-help', text: (G.bc || '바코드 없음') + ' · 유통기한 빠른 순 · 누르면 그 칸으로 가요' }),
+        el('div', { class:'mp-list' }, ...L.map(r => goCell(rowLine(r), r))));
+    } else if (mpUi.split && !q){
+      const S = mpTree.split;
+      detail = el('div', { class:'mp-detail' },
+        el('div', { class:'pp-sub' }, el('h4', {}, '나뉜 상품', el('span', { text: ` · ${S.length}종 · 합치면 ${S.reduce((s, g) => s + g.cells.size - 1, 0)}칸이 비어요` })),
+          closeBtn(() => { mpUi.split = false; })),
+        S.length ? el('div', { class:'mp-list' }, ...S.map(g => { const nm = bfName(g.name);
+          return el('div', { class:'mp-gr go', role:'button', tabindex:'0', onclick: () => openGrp(g.key), onkeydown: e => { if (e.key === 'Enter') openGrp(g.key); } },
+            el('span', { class:'nm', title: g.name }, nm.tag ? el('span', { class:'bf-tag', text: nm.tag }) : null, nm.name),
+            el('b', { class:'q', text: `${g.cells.size}칸` }),
+            el('span', { class:'loc', text: [...g.cells].map(c => c.replace('|', '-')).sort(mpNat).join(' · ') })); }))
+          : el('p', { class:'ret-help', text:'여러 칸에 나뉜 상품이 없어요.' }));
+    } else if (q && hits.size){
+      const L = (mpData?.rows || []).filter(r => mpMatch(r, q)).sort((a, b) => mpNat(a.loc, b.loc));
+      detail = el('div', { class:'mp-detail' },
+        el('div', { class:'pp-sub' }, el('h4', {}, '찾은 곳', el('span', { text: ` · ${L.length}건` + (L.length > 200 ? ' (앞 200건)' : '') })),
+          closeBtn(() => { mpUi.q = ''; })),
+        el('div', { class:'mp-list' }, ...L.slice(0, 200).map(r => goCell(rowLine(r), r))));
+    }
+    sec.append(bar, el('div', { class:'mp-body' + (detail ? ' has-detail' : '') }, el('div', { class:'mp-main' }, plan, legend), detail));
+    box.replaceChildren(sec);
+  }
+  let mpFindT = 0;
+
   // ---------- 생산성 (STOW 개인 UPH) ----------
   // WMS 작업자 이력(worker_history) 엑셀을 이 브라우저에서만 읽어요. 서버에는 아무것도 저장하지 않아요.
   const PR_TOTE = new Set(['11F', '21F', '31F']);        // 토트 재고이동 (챔버는 '프리팩')
@@ -4351,20 +4715,29 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     inp.click();
   }
   async function bfImportFile(file){
+    let rows;
     try {
       toast('엑셀을 읽는 중이에요…');
-      bfData = ppPrep(await hoReadXlsx(file), file.name);
+      rows = await hoReadXlsx(file);
+      bfData = ppPrep(rows, file.name);
       renderBuffer();
     } catch(e) { return toast(e.message || '엑셀을 읽지 못했어요.'); }
+    if (!(await bfShare())) return;
+    // 같은 파일로 평면도도 채워요
+    try { mpData = mpPrep(rows, file.name); mpUi.sel = ''; mpUi.grp = ''; mpIndex(); } catch { return toast(`${bfData.total}줄을 바코드로 묶어서 팀 모두에게 공유했어요.`); }
+    if (await mpShare()) toast(`${bfData.total}줄을 Consolidation과 평면도에 같이 올렸어요.`);
+  }
+  async function bfShare(){
     try {
       const r = await api('PUT', '/api/prepack?kind=buffer', { snap: ppEncode({ ...bfData, rows: bfData.rows.map(x => ({ ...x, c:'etc' })) }) });
-      bfData.at = r.at; bfRev = r.rev; renderBuffer();
+      bfData.at = r.at; bfRev = r.rev; if (view === 'buf') renderBuffer();
       setSync('', '저장됨');
-      toast(`${bfData.total}줄을 바코드로 묶어서 팀 모두에게 공유했어요.`);
+      return true;
     } catch(e) {
-      if (e instanceof Locked) return showLock(e.message);
+      if (e instanceof Locked){ showLock(e.message); return false; }
       setSync('err', '공유 저장을 못 했어요');
       toast('정리는 됐지만 공유 저장을 못 했어요: ' + (e.message || ''));
+      return false;
     }
   }
   // ---------- 바코드 찍기 (폰 카메라) ----------
@@ -4468,7 +4841,8 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     const card = g => { const nm = bfName(g.name); return el('div', { class:'bf-g' + (g.rows.length > 1 ? ' dup' : '') },
       el('div', { class:'bf-gh' }, el('div', { class:'bf-gn' }, el('div', { class:'nm', title: g.name }, nm.tag ? el('span', { class:'bf-tag', text: nm.tag }) : null, nm.name),
         el('div', { class:'bc', text: g.bc || '바코드 없음' })),
-        el('div', { class:'bf-cnt' }, el('b', { text: String(g.locs) }), '곳', g.rows.length !== g.locs ? ` (${g.rows.length}줄)` : '', ' · ', el('b', { text: retNum(g.q) }), '개')),
+        el('div', { class:'bf-cnt' }, el('b', { text: String(g.locs) }), '곳', g.rows.length !== g.locs ? ` (${g.rows.length}줄)` : '', ' · ', el('b', { text: retNum(g.q) }), '개',
+          el('button', { type:'button', class:'ret-btn sm ghost bf-map', title:'이 상품이 있는 칸을 평면도에서 보기', onclick: () => bfToMap(g) }, '평면도'))),
       el('div', { class:'bf-rows' }, el('div', { class:'bf-rh' }, el('span', { text:'로케이션' }), el('span', { class:'r', text:'수량' }), el('span', { text:'제조일자' }), el('span', { text:'유통기한' }), el('span')),
         ...g.rows.map(r => { const d = ppDays(r.exp); return el('div', { class:'bf-rw' }, el('span', { class:'loc', text: r.loc || '-' }), el('span', { class:'q' }, el('b', { text: retNum(r.q) }), '개'),
           el('span', { class:'mf', text: ppMD(r.mfg) }), el('b', { class:'ex', text: ppMD(r.exp) }),
@@ -4483,6 +4857,17 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
       el('button', { type:'button', class:'ret-btn sm ghost', 'aria-label':'찾기 지우기', onclick: clearScan }, '✕')) : null;
     sec.append(sum, bar, ...(scanBox ? [scanBox] : []), list);
     box.replaceChildren(sec);
+  }
+  // Consolidation 묶음 → 평면도에서 그 상품이 있는 칸 표시
+  function bfToMap(g){
+    const k = g.bc || ('#' + g.name);
+    if (!mpTree) { if (!mpData) return toast('평면도에 재고가 아직 없어요. 재고 파일을 다시 올리면 같이 채워져요.'); mpIndex(); }
+    if (!mpTree.grp.has(k)) return toast('평면도 재고에는 이 상품이 없어요. 같은 파일을 다시 올리면 맞춰져요.');
+    view = 'map'; store.set('todo-view2', view);
+    mpUi.grp = k; mpUi.sel = ''; mpUi.q = '';
+    render(); renderMap(); window.scrollTo({ top: 0 });
+    const c = [...mpTree.grp.get(k).cells][0];
+    setTimeout(() => document.querySelector(`#map .mp-cell[data-id="${CSS.escape(c)}"]`)?.scrollIntoView({ block:'center', inline:'nearest', behavior:'smooth' }), 50);
   }
   function bfPrint(V){
     const E = v => String(v ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
