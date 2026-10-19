@@ -50,7 +50,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding:0 16px}
-.wrap.wide{max-width:1080px}
+.wrap.wide,.wrap.mode-rpt{max-width:1080px}
 .wrap{max-width:1080px;margin:0 auto;padding-block:40px 64px;display:flex;flex-direction:column;gap:20px}
 header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
 h1{font-family:"Big Shoulders Display",var(--display);font-weight:800;font-size:clamp(34px,7vw,46px);letter-spacing:.02em;line-height:1.05;margin:0;text-wrap:balance}
@@ -1002,6 +1002,12 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   .cal{padding:12px}
   .cal-title,.dayhead h2{font-size:24px}
 }
+/* 상위 메뉴: IB 운영 / Productivity Report */
+.mode{display:flex;gap:22px;border-bottom:1px solid color-mix(in srgb,var(--muted) 25%,transparent);margin:0 0 18px}
+.mode button{border:0;background:none;padding:10px 0 9px;margin-bottom:-1px;font:inherit;font-size:15px;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer}
+.mode button[aria-pressed=true]{color:var(--ink);font-weight:700;border-bottom-color:var(--accent)}
+#app:not(.mode-rpt) #rpt{display:none!important}
+#app.mode-rpt>:not(header,#modeNav,#rpt,.offbar){display:none!important}
 </style>
 </head>
 <body>
@@ -1016,6 +1022,10 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 </section>
 
 <div class="wrap" id="app">
+  <nav class="mode" id="modeNav" aria-label="메뉴">
+    <button type="button" data-m="ib" aria-pressed="true">IB 운영</button>
+    <button type="button" data-m="rpt" aria-pressed="false">Productivity Report</button>
+  </nav>
   <div class="offbar" id="offBar" hidden role="status"><b>인터넷 연결 없음</b><span></span></div>
   <header>
     <div>
@@ -1038,7 +1048,6 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     <button type="button" data-v="pp" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14l-1 11H6z"/><path d="M9 9a3 3 0 0 1 6 0"/></svg><span>프리팩</span></button>
     <button type="button" data-v="buf" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7M17.5 14v7"/></svg><span class="sl-full">Consolidation</span><span class="sl-short">Consol.</span></button>
     <button type="button" data-v="prod" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>생산성</span></button>
-    <button type="button" data-v="rpt" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 17v-3M12 17v-6M15 17v-4"/></svg><span class="sl-full">Productivity Report</span><span class="sl-short">Report</span></button>
   </div>
 
   <section class="ho" id="ho" hidden aria-label="시프트 교대 인수인계"></section>
@@ -1051,7 +1060,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   <section class="ret" id="over" hidden aria-label="IST 과매입"></section>
   <section class="ret" id="out" hidden aria-label="IST 반출"></section>
   <section class="ret" id="prod" hidden aria-label="STOW 개인 생산성"></section>
-  <section class="ret" id="rpt" hidden aria-label="Productivity Report"><div class="ret-sec-head"><h3>Productivity Report</h3><p class="ret-help">리포트 양식을 받으면 이 자리에 만들어요</p></div></section>
+  <section class="ret" id="rpt" aria-label="Productivity Report"><div class="ret-sec-head"><h3>Productivity Report</h3><p class="ret-help">리포트 양식을 받으면 이 자리에 만들어요</p></div></section>
   <section class="ret" id="pp" hidden aria-label="프리팩 유통기한"></section>
   <section class="ret" id="buf" hidden aria-label="Consolidation"></section>
 
@@ -1570,18 +1579,17 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     document.querySelectorAll('#istSub button').forEach(b => b.setAttribute('aria-pressed', b.dataset.s === view ? 'true' : 'false'));
     istCounts();
     const cal = view === 'cal';
-    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over', outView = view === 'out', ppView = view === 'pp', bfView = view === 'buf', rptView = view === 'rpt';
+    const hoView = view === 'ho', retView = view === 'ret', prodView = view === 'prod', overView = view === 'over', outView = view === 'out', ppView = view === 'pp', bfView = view === 'buf';
     $('#ho').hidden = !hoView;
     $('#ret').hidden = !retView;
     $('#prod').hidden = !prodView;
     $('#pp').hidden = !ppView;
     $('#buf').hidden = !bfView;
-    $('#rpt').hidden = !rptView;
     $('#over').hidden = !overView;
     $('#out').hidden = !outView;
-    $('#app').classList.toggle('wide', rptView || prodView || outView || ppView || bfView || retView);
-    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView || outView || ppView || bfView || rptView;
-    document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView || outView || ppView || bfView || rptView;
+    $('#app').classList.toggle('wide', prodView || outView || ppView || bfView || retView);
+    for (const id of ['#addForm', '#list']) $(id).hidden = hoView || retView || prodView || overView || outView || ppView || bfView;
+    document.querySelector('.toolbar').hidden = hoView || retView || prodView || overView || outView || ppView || bfView;
     if (prodView && !$('#prod').hasChildNodes()) renderProd();
     if (prodView && prRev < 0) prLoad();
     if (ppView && !$('#pp').hasChildNodes() && ppData) renderPrepack();
@@ -4830,6 +4838,12 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     $('#newText').focus();
   });
 
+  // 상위 메뉴 (IB 운영 / Productivity Report) — 마지막에 본 쪽을 기억
+  let mode = store.get('app-mode', 'ib') === 'rpt' ? 'rpt' : 'ib';
+  const setMode = m => { mode = m; store.set('app-mode', m);
+    $('#app').classList.toggle('mode-rpt', m === 'rpt'); document.querySelectorAll('#modeNav button').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === m)); if (m === 'ib') render(); };
+  document.querySelectorAll('#modeNav button').forEach(b => b.onclick = () => setMode(b.dataset.m));
+  setMode(mode);
   document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { filter = b.dataset.f; store.set('todo-filter', filter); render(); });
   document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
     view = b.dataset.v === 'ist' ? (['over', 'out'].includes(store.get('ist-sub', 'ret')) ? store.get('ist-sub', 'ret') : 'ret') : b.dataset.v; store.set('todo-view2', view);
