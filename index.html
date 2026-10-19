@@ -1002,6 +1002,38 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   .cal{padding:12px}
   .cal-title,.dayhead h2{font-size:24px}
 }
+/* Productivity Report */
+#rpt{gap:14px}
+.rp-head{gap:12px}
+.rp-head input[type=date]{font:inherit;font-size:14px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.rp-dates{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
+.rp-chip{border:0;background:var(--tone,var(--bg));color:var(--ink);border-radius:999px;padding:4px 10px;font-size:12.5px}
+.rp-ups{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rp-up{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border:1.5px dashed var(--line);border-radius:12px;cursor:pointer;min-width:0}
+.rp-up b{font-size:14px}.rp-up span{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rp-up small{font-size:11.5px;color:var(--accent)}
+.rp-up.ok{border-style:solid;border-color:color-mix(in srgb,var(--accent) 40%,var(--line));background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
+.rp-up.drag,.rp-up:hover{border-color:var(--accent)}
+.rp-tabs{flex-wrap:wrap}
+.rp-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.rp-kpi{background:var(--paper);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.rp-kpi span{font-size:12.5px;color:var(--muted)}.rp-kpi b{font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}.rp-kpi small{font-size:12px;color:var(--muted)}
+.rp-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+.rp-table{border-collapse:separate;border-spacing:0;font-size:12.5px;font-variant-numeric:tabular-nums;min-width:100%}
+.rp-table th,.rp-table td{padding:5px 8px;text-align:right;white-space:nowrap;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.rp-table thead th{font-weight:600;color:var(--muted);background:var(--paper);position:sticky;top:0;z-index:1}
+.rp-table .rp-l{text-align:left;position:sticky;left:0;background:var(--paper);z-index:2;font-weight:600;min-width:120px}
+.rp-table tbody th.rp-l small{display:block;font-size:10.5px;font-weight:600;color:var(--accent);letter-spacing:.02em}
+.rp-table td.rp-sum{font-weight:700;background:color-mix(in srgb,var(--accent-soft) 40%,transparent)}
+.rp-table tr.rp-tot th,.rp-table tr.rp-tot td{font-weight:700;border-bottom-color:var(--line)}
+.rp-table tr.rp-htp td{color:var(--accent);font-weight:600}
+.rp-table td.neg{color:var(--high)}.rp-table td.pos{color:#2E7D4F}
+.rp-hc th:not(.rp-l),.rp-vol th:not(.rp-l){text-align:right}
+.rp-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 12px}
+.rp-field{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted)}
+.rp-field input,.rp-in input{font:inherit;font-size:14px;color:var(--ink);padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);width:100%;min-width:0;text-align:right;font-variant-numeric:tabular-nums}
+.rp-in td{padding:3px 4px}.rp-in input{width:76px}.rp-hour.rp-in input{width:58px;font-size:13px;padding:5px 6px}
+.rp-note{padding:0 2px}
+@media (max-width:640px){.rp-ups{grid-template-columns:1fr}.rp-kpi b{font-size:20px}}
 /* 상위 메뉴: IB 운영 / Productivity Report — 맨 위 남색 바 (테마와 상관없이 같은 색) */
 #app.wrap{padding-top:0}
 .mode{display:flex;align-items:center;gap:4px;margin:0 0 6px;padding:10px 0;background:#141B26;box-shadow:0 0 0 100vmax #141B26;clip-path:inset(0 -100vmax)}
@@ -1063,7 +1095,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   <section class="ret" id="over" hidden aria-label="IST 과매입"></section>
   <section class="ret" id="out" hidden aria-label="IST 반출"></section>
   <section class="ret" id="prod" hidden aria-label="STOW 개인 생산성"></section>
-  <section class="ret" id="rpt" aria-label="Productivity Report"><div class="ret-sec-head"><h3>Productivity Report</h3><p class="ret-help">리포트 양식을 받으면 이 자리에 만들어요</p></div></section>
+  <section class="ret" id="rpt" aria-label="Productivity Report"></section>
   <section class="ret" id="pp" hidden aria-label="프리팩 유통기한"></section>
   <section class="ret" id="buf" hidden aria-label="Consolidation"></section>
 
@@ -1261,6 +1293,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       if (view === 'prod' && prRev !== rev) prLoad();
       if (view === 'pp' && ppRev !== rev) ppLoad();
       if (view === 'buf' && bfRev !== rev) bfLoad();
+      if (mode === 'rpt' && rp.rev !== rev && !rpBusy()) rpLoad();
       setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
       if (!offWarmed && !offAt){ offWarmed = true; setTimeout(offWarm, 5000); }
     } catch(e) {
@@ -1283,6 +1316,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       if (view === 'prod' && data.rev !== prRev) prLoad();
       if (view === 'pp' && data.rev !== ppRev) ppLoad();
       if (view === 'buf' && data.rev !== bfRev) bfLoad();
+      if (mode === 'rpt' && data.rev !== rp.rev && !rpBusy()) rpLoad();
       if (data.rev !== rev) loadFull();
       else setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
     } catch(e) {
@@ -4841,10 +4875,622 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     $('#newText').focus();
   });
 
+  // ---------- Productivity Report (IB Daily Production Status) ----------
+  // 팀 리포트 엑셀(Production Status · WASH Report)의 계산을 그대로 옮겼어요.
+  // 시간 칸은 엑셀처럼 8~31시 (24~31 = 다음날 0~7시) 24칸이에요.
+  const RP_H = Array.from({ length:24 }, (_, i) => i + 8);
+  const RP_SHIFTS = [['day', 'Day', 'Day 1 (08:00 ~ 17:00)', 8, 16], ['swing', 'Swing', 'Swing 1 (17:00 ~ 02:00)', 17, 20],
+    ['sn', 'Swing+Night', '', 21, 25], ['night', 'Night', 'Over Night1 (21:00 ~ 06:00)', 26, 31]];
+  // 존 → 온도 (ManPower 시트 AR:AS)
+  const RP_TEMP = (() => {
+    const m = {}, add = (t, s) => s.split(' ').forEach(z => m[z] = t);
+    add('AMBIENT', '11B 11N 11NA 11Z 11F 12R 12RA WM WM2 WM3');
+    add('RM', '11K 11P 12K 12T 12Z 13Z 14Z 31K');
+    add('CHILLED', '21M 21N 21NA 21R 21RA 21S 21Z 21F 22R 22N 22S 22Z 2R 31A 31L 31N 31NA 31R 31RA 31Z 31F 32R 32RA 32S XX');
+    add('FROZEN', '51M 51N 51P 51R 51S 61N 61R 61S 61SA 71M 71N 71R 71RA 71Z 71ZM');
+    return m;
+  })();
+  const RP_ZONES = '11B 11K 11N 11NA 11P 11Z 12K 12R 12RA 12T 12Z 13Z 21M 21N 21NA 21R 21RA 21S 21Z 31A 31K 31L 31N 31NA 31R 31RA 31Z 32R 32RA 32S 51M 51N 51P 51R 51S 61N 61R 61S 61SA 71M 71N 71R 71RA 71Z XX'.split(' ');
+  // 시간대별 MH 가중치 (Process 시트 PART HOUR CODE → HOUR): 식사 · 휴게 시간을 빼요
+  const RP_W = {
+    'ADMIN OFFICE-DAY':'8:0 9:1 10:1 11:0.5 12:1 13:1 14:1 15:1 16:1 17:1 18:1 19:1 20:1 21:1 22:1',
+    'ADMIN OFFICE-NIGHT':'8:0 9:0 10:0 11:0 12:0 13:0 14:0 15:0 16:0 17:0 18:0 19:0 20:0 21:0 22:0',
+    'RECRUITING_SUPPORT-DAY':'7:0 8:1 9:1 10:1 11:0 12:1 13:1 14:1 15:1 16:1 17:1 18:1 19:1 20:1 21:1 22:1',
+    'RECRUITING_SUPPORT-NIGHT':'7:0 8:0 9:0 10:0 11:0 12:0 13:0 14:0 15:0 16:0 17:0 18:0 19:1 20:1 21:1 22:0.33 23:1 24:1 25:1 26:0.67 27:1 28:1 29:1',
+    'FACILITY_SERVICES-DAY':'8:0 9:1 10:1 11:0.5 12:0.83 13:1 14:1 15:0.67 16:1 17:1 18:1 19:1 20:1 21:1 22:1',
+    'FACILITY_SERVICES-NIGHT':'18:0 19:1 20:1 21:1 22:0.33 23:1 24:1 25:1 26:0 27:1 28:1',
+    'HUB-DAY':'7:0 8:0 9:1 10:1 11:0.5 12:0.83 13:1 14:1 15:0.67 16:1 17:1 18:1 19:1 20:1 21:1 22:1',
+    'HUB-NIGHT':'8:0 9:0 10:0 11:0 12:0 13:0 14:0 15:0 16:0 17:0 18:0 19:1 20:1 21:1 22:0.33 23:1 24:1 25:1 26:0.67 27:1 28:1 29:1 30:1 31:1',
+    'ICQA-DAY':'7:0 8:0 9:1 10:1 11:1 12:0.17 13:1 14:1 15:0.83 16:1 17:1 18:1 19:1 20:1 21:1 22:1',
+    'ICQA-NIGHT':'8:0 9:0 10:0 11:0 12:0 13:0 14:0 15:0 16:0 17:0 18:1 19:1 20:1 21:1 22:0.33 23:1 24:1 25:1 26:0.67 27:1 28:1 29:1 30:1 31:1',
+    'INBOUND-DAY':'7:0 8:1 9:1 10:1 11:0.5 12:0.5 13:1 14:1 15:1 16:1 17:1 18:1 19:0 20:1 21:1 22:1',
+    'INBOUND-NIGHT':'7:0 8:0 9:0 10:0 11:0 12:0 13:0 14:0 15:0 16:0 17:1 18:1 19:0 20:1 21:1 22:1 23:1 24:1 25:1 26:0 27:1 28:1 29:1 30:1 31:1 32:1',
+    'OFFICE-DAY':'7:0 8:0 9:0 10:0 11:0 12:0 13:0 14:0 15:0 16:0 17:0 18:0 19:0 20:0 21:0 22:0 23:0 24:0 25:0 26:0 27:0 28:0 29:0 30:0',
+    'OFFICE-NIGHT':'8:0 9:0 10:0 11:0 12:0 13:0 14:0 15:0 16:0 17:0 18:0 19:0 20:0 21:0 22:0 23:0 24:0 25:0 26:0 27:0 28:0 29:0 30:0 31:0',
+    'OUTBOUND-DAY':'2:0 3:0 4:0 5:0 6:0 7:0 8:0 9:1 10:1 11:0.5 12:0.83 13:1 14:1 15:0.67 16:1 17:1 18:1 19:1 20:1 21:1 22:1',
+    'OUTBOUND-NIGHT':'8:0 9:0 10:0 11:0 12:0 13:0 14:0 15:0 16:0 17:0 18:1 19:1 20:1 21:1 22:0.33 23:1 24:1 25:1 26:1 27:1 28:1 29:1',
+    'OUTBOUND-OVER NIGHT':'20:1 21:1 22:1 23:1 24:1 25:1 26:0.67 27:1 28:1 29:1 30:1 31:1',
+    'INBOUND-OVER NIGHT':'18:1 19:1 20:1 21:1 22:1 23:1 24:1 25:1 26:0 27:1 28:1 29:1 30:1 31:1 32:1 33:1 34:1 35:1 36:1 37:1',
+    'HR-DAY':'8:1 9:1 10:1 11:1 12:1 13:1 14:1 15:1 16:1',
+    'QC-OVER NIGHT':'20:1 21:1 22:1 23:1 24:1 25:1 26:1 27:1 28:1 29:1 30:1',
+    'QC-DAY':'8:1 9:1 10:1 11:1 12:1 13:1 14:1 15:1 16:1 17:1',
+    'QC-NIGHT':'17:1 18:1 19:1 20:1 21:1 22:1 23:1 24:1 25:1 26:1',
+    'ICQA-OVER NIGHT':'21:1 22:1 24:1 27:1 28:1 29:1 30:1',
+    'FACILITY-NIGHT':'17:1 18:1 19:1 20:1 21:1 22:1 23:1 24:1 25:1',
+    'FACILITY-OVER NIGHT':'21:1 22:1 23:1 24:1 25:1 26:1 27:1 28:1 29:1 30:1',
+    'WACHER-NIGHT':'17:1 18:1 19:1 20:1',
+    'WATCHER-DAY':'7:0 8:1 9:1 10:1 11:1 12:1 13:1 14:1 15:1 16:1',
+    'WACHER-OVER NIGHT':'21:1 22:1 23:1 24:1 25:1 26:1 27:1 28:1 29:1 30:1',
+    'WATCHER-OVER NIGHT':'20:1 21:1 22:1 23:1 24:1 25:1 26:1',
+    'WACHER-DAY':'9:1 10:1 11:1 12:1 13:1 14:1 15:1 16:1 17:1',
+    'FACILITY-DAY':'8:1 9:1 10:1 11:0.5 12:0.5 13:1 14:1 15:1 16:1 17:1',
+    'OTHER-DAY':'8:1 9:1 10:1 11:0.5 12:0.5 13:1 14:1 15:1 16:1',
+    'OTHER-OVER NIGHT':'21:1 22:1 23:1 24:1 25:1 26:0 27:1 28:1 29:1 30:1',
+  };
+  // 공정 → 업무유형 (Process 시트 D:E), 사용자 업무유형 → LMS (K:L)
+  const RP_PW = {"UNLOAD(UNLOAD)": "INBOUND", "UNLOAD(TRUCK_UNLOADER)": "INBOUND", "UNLOAD(DOCK_MASTER)": "INBOUND", "UNLOAD(UNLOAD_WS)": "INBOUND", "UNLOAD(FORKLIFTER)": "INBOUND", "UNLOAD(INSPECTOR)": "INBOUND", "UNLOAD(SORTER)": "INBOUND", "RECEIVE(RECEIVE)": "INBOUND", "RECEIVE(RECEIVE_WS)": "INBOUND", "RECEIVE(RECEIVE_PS)": "INBOUND", "RECEIVE(TRANSFER_IN_RECEIVE)": "INBOUND", "RECEIVE(RECEIVE_FORKLIFTER)": "INBOUND", "RECEIVE(RECEIVE_CAPTAIN)": "INBOUND", "STOW(STOW)": "INBOUND", "STOW(STOW_WS)": "INBOUND", "STOW(REPLENISHER)": "INBOUND", "STOW(STOW_PS)": "INBOUND", "STOW(RELOCATOR)": "INBOUND", "STOW(STOW_CONSOLIDATION)": "INBOUND", "STOW(REPLEN_SUPPORT)": "INBOUND", "STOW(REPLEN_CONSOLIDATION)": "INBOUND", "STOW(STOW_FORKLIFTER)": "INBOUND", "STOW(STOW_CAPTAIN)": "INBOUND", "IN_NON_VALUE(IB_TRAINER)": "INBOUND", "IN_NON_VALUE(INVENTORY_TRANSFER)": "INBOUND", "IN_NON_VALUE(IB_TEAM_CAPTAIN)": "INBOUND", "TRANSFER(TRANSFER_CART_PICK)": "INBOUND", "TRANSFER(TRANSFER_CART_LOAD)": "INBOUND", "TRANSFER(TRANSFER_CART_UNLOAD)": "INBOUND", "PICK(PICKING)": "OUTBOUND", "PICK(PICK_TOTE_WS)": "OUTBOUND", "PICK(HOT_PICKER)": "OUTBOUND", "PICK(PUT_BACKER)": "OUTBOUND", "PICK(PICK_OPERATION_PS)": "OUTBOUND", "PICK(PICK_CAPTAIN)": "OUTBOUND", "REBIN(REBIN)": "OUTBOUND", "REBIN(REBIN_TOTE_WS)": "OUTBOUND", "REBIN(REBATCH_WS)": "OUTBOUND", "REBIN(REJECT_PS)": "OUTBOUND", "REBIN(INVOICE_PS)": "OUTBOUND", "REBIN(LINE_WS)": "OUTBOUND", "REBIN(REBIN_CAPTAIN)": "OUTBOUND", "PACK(PACKING)": "OUTBOUND", "PACK(PACK_WS)": "OUTBOUND", "PACK(PACK_OPERATION_PS)": "OUTBOUND", "PACK(DEFECT_PS)": "OUTBOUND", "PACK(PACK_CAPTAIN)": "OUTBOUND", "PACK(PACK_SUPPORT)": "OUTBOUND", "OB_NON_VALUE(OB_TEAM_CAPTAIN)": "OUTBOUND", "OB_NON_VALUE(OB_TRAINER)": "OUTBOUND", "HUB_IND(UNLOADING)": "HUB", "HUB_IND(LOADING_PALLETS_FLOOR)": "HUB", "HUB_IND(FORKLIFT_OPERATOR)": "HUB", "HUB_IND(LOADING_PALLETS TO TRUCK)": "HUB", "HUB_IND(CAPTAINS)": "HUB", "HUB_IND(HUB_PROJECTS)": "HUB", "HUB_IND(MANUAL_HUB SORTING)": "HUB", "HUB_IND(PB_OPERATION)": "HUB", "ICQA(INVENTORY_SRC)": "ICQA", "ICQA(INVENTORY_SBC)": "ICQA", "ICQA(INVENTORY_CC)": "ICQA", "ICQA(IRDR)": "ICQA", "ICQA(CS_ANDON)": "ICQA", "ICQA(REACTIVATION)": "ICQA", "ICQA(REMOVAL)": "ICQA", "ICQA(PICK_PS)": "ICQA", "ICQA(IST)": "ICQA", "ICQA(VENDOR_CLAIM)": "ICQA", "ICQA(FORKLIFTER_ICQA)": "ICQA", "PROJECT(PROJECT_WORKER)": "OTHER", "PROJECT(PROJECT CAPEX)": "OTHER", "ADMIN(ADMIN_5S)": "OTHER", "IB_SUPPORT(IB_TEAM_CAPTAIN)": "INBOUND", "IB_SUPPORT(IB_TRAINER)": "INBOUND", "OB_SUPPORT(OB_TEAM_CAPTAIN)": "OUTBOUND", "IND_QC(QC_INSPECTOR)": "QC", "INSPECT(INSPECT_WORK_FIRST)": "QC", "IND_QC(QC_PATROL)": "QC", "INSPECT(INSPECT_WORK_RESOLVE)": "QC", "ADMIN(ONBOARDING_ORIENTATION)": "OTHER", "STOW(STOW_TRAINING)": "INBOUND", "UNLOAD(IB DOCK_TRAINING)": "INBOUND", "RECEIVE(RECEIVE TRAINING)": "INBOUND", "CONSOLIDATION(CONSOLIDATION_PICK)": "INBOUND", "CONSOLIDATION(CONSOLIDATION_STOW)": "INBOUND", "IB_SUPPORT(IB_TRAINING)": "INBOUND", "PROJECT(PROJECT_CONSTRUCTION)": "OTHER", "RECEIVE(RECEIVE_PREPACK)": "INBOUND", "ADMIN(SAFETY_TRAINER)": "INBOUND", "WATCHER(WATCHER_WORKER)": "Watcher", "ICQA(ICQA_CAPTAIN)": "ICQA", "IB_SUPPORT(STOW_RETRAINING)": "INBOUND", "IND_QC(QC_INSPECT_WORK_FIRST)": "QC", "IND_QC(QC_CAPTAIN_PATROL)": "QC", "ICQA(PACK_AUDIT)": "ICQA", "ADMIN(LEAD_TRAINER)": "OTHER", "ICQA(ICQA TRAINING)": "OTHER", "ICQA(WHOLESALE)": "ICQA", "IND_QC(QC_RE-ENTRY)": "QC", "IND_QC(QC_CAPTAIN_INSPECT)": "QC", "COVID-19 MANAGE(COVID-19 IMPROVEMENTS)": "OTHER", "FACILITY_SERVICE(SIGNALMAN)": "OTHER", "FACILITY_SERVICE(P-BOX)": "OTHER", "FACILITY_SERVICE(WINTER_APPAREL)": "OTHER", "ADMIN(LEGAL_TRAINING)": "INBOUND", "IND_QC(QC_CAPTAIN_ANDON)": "QC", "IND_QC(QC_INSPECT_TRAINING)": "QC", "IND_QC(QC_CAPTAIN_OPERATIONS_AUDIT)": "QC", "ADMIN(LEARNING_MEETING)": "OUTBOUND", "ICQA(WHOLESALE_SKU_CONVERSION)": "ICQA", "RECEIVE(RECEIVE_SHRINK PACKAGING)": "INBOUND"};
+  const RP_LMS = {"INBOUND": "INBOUND", "OUTBOUND": "OUTBOUND", "ICQA": "ICQA", "QC": "QC", "HUB": "HUB", "17": "Wacher", "19": "Facility", "FACILITY_SERVICES": "Facility", "RECRUITING_SUPPORT": "HR", "28": "WELCOME DAY", "22": "OTHER"};
+  const rpW = (() => { const m = {}; for (const [k, s] of Object.entries(RP_W)) for (const p of s.split(' ')){ const [h, v] = p.split(':'); m[k + '-' + h] = +v; } return m; })();
+  // WASH Report 53~138행: MH 코드 (사용자 업무유형-업무유형-공정). 같은 코드가 두 번 있는 행도 엑셀 그대로 따로 더해요.
+  const RP_MHROW = {
+    53:'INBOUND-INBOUND-UNLOAD(SORTER)', 54:'INBOUND-INBOUND-UNLOAD(SORTER)', 55:'28-INBOUND-UNLOAD(SORTER)', 56:'OUTBOUND-INBOUND-UNLOAD(SORTER)',
+    57:'INBOUND-INBOUND-RECEIVE(RECEIVE_PREPACK)', 58:'28-INBOUND-RECEIVE(RECEIVE_PREPACK)', 59:'OUTBOUND-INBOUND-RECEIVE(RECEIVE_PREPACK)',
+    60:'INBOUND-INBOUND-RECEIVE(RECEIVE_PREPACK)', 61:'28-INBOUND-RECEIVE(RECEIVE_PREPACK)', 62:'OUTBOUND-INBOUND-RECEIVE(RECEIVE_PREPACK)',
+    63:'INBOUND-INBOUND-RECEIVE(Receive_Shrink Packaging)', 64:'22-INBOUND-RECEIVE(Receive_Shrink Packaging)', 65:'INBOUND-INBOUND-RECEIVE(RECEIVE)',
+    66:'INBOUND-INBOUND-RECEIVE(RECEIVE_WS)', 67:'INBOUND-INBOUND-RECEIVE(RECEIVE_WS)', 68:'INBOUND-INBOUND-RECEIVE(TRANSFER_IN_RECEIVE)',
+    69:'OUTBOUND-INBOUND-RECEIVE(RECEIVE_FORKLIFTER)', 70:'INBOUND-INBOUND-RECEIVE(Receive Training)', 71:'INBOUND-INBOUND-RECEIVE(RECEIVE_PS)',
+    72:'INBOUND-INBOUND-TRANSFER(TRANSFER_CART_UNLOAD)', 73:'INBOUND-INBOUND-UNLOAD(Dock_Master)', 74:'',   // 74행은 엑셀에 수식이 없어 늘 0
+    75:'INBOUND-INBOUND-STOW(Pick_Consolidation)', 76:'OUTBOUND-INBOUND-UNLOAD(FORKLIFTER)', 77:'INBOUND-INBOUND-UNLOAD(INSPECTOR)',
+    78:'INBOUND-INBOUND-UNLOAD(UNLOAD)', 79:'INBOUND-INBOUND-UNLOAD(Truck_Unloader)', 80:'INBOUND-INBOUND-UNLOAD(UNLOAD_WS)',
+    81:'INBOUND-INBOUND-TRANSFER(TRANSFER_CART_LOAD)', 82:'OUTBOUND-INBOUND-UNLOAD(UNLOAD_WS)', 83:'INBOUND-INBOUND-IB_Support(STOW_RETRAINING)',
+    84:'INBOUND-INBOUND-IB_Support(IB_TEAM_CAPTAIN)', 85:'INBOUND-INBOUND-IB_Support(IB_TRAINER)', 86:'INBOUND-INBOUND-STOW(Stow_Consolidation)',
+    87:'INBOUND-INBOUND-STOW(REPLENISHER)', 88:'INBOUND-INBOUND-STOW(RELOCATOR)', 89:'INBOUND-INBOUND-STOW(STOW_FORKLIFTER)',
+    90:'INBOUND-INBOUND-STOW(STOW)', 91:'INBOUND-INBOUND-STOW(STOW_PS)', 92:'INBOUND-INBOUND-STOW(STOW_WS)', 93:'INBOUND-INBOUND-STOW(Stow_Training)',
+    94:'28-INBOUND-STOW(RELOCATOR)', 95:'28-INBOUND-STOW(STOW)', 96:'ICQA-INBOUND-STOW(STOW)', 97:'OUTBOUND-INBOUND-STOW(Stow_Training)',
+    98:'OUTBOUND-INBOUND-CONSOLIDATION(CONSOLIDATION_STOW)', 99:'OUTBOUND-INBOUND-STOW(RELOCATOR)', 100:'OUTBOUND-INBOUND-TRANSFER(TRANSFER_CART_UNLOAD)',
+    101:'OUTBOUND-INBOUND-STOW(STOW)', 102:'22-inbound-STOW(STOW_WS)', 103:'28-inbound-STOW(STOW)', 104:'22-INBOUND-STOW(STOW)',
+    105:'22-INBOUND-STOW(Stow_Training)', 106:'22-INBOUND-TRANSFER(TRANSFER_CART_UNLOAD)', 107:'22-INBOUND-STOW(RELOCATOR)',
+    108:'22-INBOUND-IB_Support(IB_TRAINER)', 109:'INBOUND-OTHER-FACILITY_SERVICE(Frozen worker Rest)',
+    123:'FACILITY_SERVICES-OTHER-FACILITY_SERVICE(SIGNALMAN)', 124:'22-OTHER-FACILITY_SERVICE(P-Box)', 125:'FACILITY_SERVICES-OTHER-Admin(ONBOARDING_ORIENTATION)',
+    126:'FACILITY_SERVICES-OTHER-PROJECT(PROJECT_WORKER)', 127:'FACILITY_SERVICES-INBOUND-RECEIVE(RECEIVE_PREPACK)', 128:'FACILITY_SERVICES-INBOUND-UNLOAD(FORKLIFTER)',
+    129:'FACILITY_SERVICES-INBOUND-STOW(STOW)', 130:'FACILITY_SERVICES-INBOUND-STOW(RELOCATOR)', 131:'FACILITY_SERVICES-INBOUND-STOW(Stow_Training)',
+    132:'INBOUND-OTHER-FACILITY_SERVICE(SIGNALMAN)', 133:'INBOUND-OTHER-FACILITY_SERVICE(P-Box)', 134:'INBOUND-OTHER-Admin(Admin_5S)',
+    135:'INBOUND-OTHER-Admin(ONBOARDING_ORIENTATION)', 136:'INBOUND-OTHER-Admin(SAFETY_TRAINER)', 137:'INBOUND-OTHER-PROJECT(PROJECT_WORKER)',
+    138:'INBOUND-OTHER-Admin(LEGAL_TRAINING)',
+  };
+  // 53~67행 일부는 층(Floor)까지 맞춰 더해요. 53~56행은 엑셀 기준 칸이 비어 있어 늘 0이에요.
+  const RP_MHFLOOR = { 53:'', 54:'', 55:'', 56:'', 57:'1.5F', 58:'1.5F', 59:'1.5F', 60:'1F', 61:'1F', 62:'1F', 63:'1F', 64:'1F', 66:'1F', 67:'1.5F' };
+  // Production Status 60~72행 (세부 공정 투입 MH) = WASH Report 행 합
+  const rpRange = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+  const RP_MP = [
+    ['captain', 'Captain', [84]], ['unload', 'Unload', [72, 78, 81]], ['receive', 'Receive', [65]],
+    ['stow', 'Stow', [90, 101, 95, 102, 129, 103]], ['ps', 'PS', [91, 71]], ['replen', 'Replenishment', [87]],
+    ['consol', 'Consolidation', [75, 86]], ['ws', 'WS', [92, 80, 66, 82, 104]], ['prepack', 'Pre-Pack', [...rpRange(53, 64), 66, 67]],
+    ['reloc', 'RELOCATOR', [88, 94, 99, 107, 130]], ['fork', 'Forklift', [76, 69]], ['pbox', 'P-Box', [74]], ['train', '신규공정교육', [97, 93]],
+  ];
+  // 74~84행: 세부 HC In/Out (법정교육 · 신호수 · P-Box는 MH에서, 나머지는 직접 입력)
+  const RP_DETAIL = [
+    ['safety', '신규자안전교육', null], ['legal', '법정교육', [138]], ['signal', '신호수', [132]], ['pbox2', 'P-Box', [124, 133]],
+    ['late', '지각', null], ['early', '조퇴', null], ['half', '반차', null], ['sbc', 'SBC', null], ['ib2ob', 'IB → OB 지원', null], ['exp', '공정체험', null],
+  ];
+  // performance 시트: 사람별 공정 묶음
+  const RP_PERF = [
+    ['SPT', ['IB_Support(IB_TEAM_CAPTAIN)', 'IB_Support(IB_TRAINER)', 'IB_Support(STOW_RETRAINING)']],
+    ['Unload', ['TRANSFER(TRANSFER_CART_UNLOAD)', 'UNLOAD(UNLOAD)', 'UNLOAD(FORKLIFTER)', 'UNLOAD(SORTER)']],
+    ['Rec.', ['RECEIVE(RECEIVE)', 'RECEIVE(Receive Training)', 'RECEIVE(RECEIVE_WS)']],
+    ['STOW', ['STOW(STOW)', 'STOW(Stow_Training)', 'STOW(STOW_WS)', 'STOW(RELOCATOR)']],
+    ['Con.', ['CONSOLIDATION(CONSOLIDATION_STOW)', 'CONSOLIDATION(CONSOLIDATION_PICK)']],
+  ];
+  const RP_PERF_PROC = new Map(RP_PERF.flatMap(([g, ps], gi) => ps.map(p => [p.toUpperCase(), gi])));
+  const RP_RM_CENTERS = ['GOY1', 'DON1', 'INC16', 'XRC02', 'GON2'];   // WASH AD4:AD12 (로켓마트 이관)
+
+  const rpU = s => String(s ?? '').trim().toUpperCase();
+  const rpZ = () => new Array(24).fill(0);
+  const rpAdd = (bag, k, i, v) => { (bag[k] ||= rpZ())[i] += v; };
+  const rpR = n => Math.round(n * 1000) / 1000;
+  const rpSum = a => (a || []).reduce((s, v) => s + (+v || 0), 0);
+  const rpDiv = (a, b) => (b ? a / b : null);
+
+  // 날짜 · 시간 칸 읽기 (엑셀 숫자 또는 글자)
+  function rpDateTime(v){
+    if (v === '' || v == null) return null;
+    const n = Number(v);
+    if (!isNaN(n) && String(v).indexOf('-') < 0 && String(v).indexOf(':') < 0){
+      const ms = Math.round((n - 25569) * 86400e3), d = new Date(ms);
+      return { date: d.toISOString().slice(0, 10), hour: d.getUTCHours() };
+    }
+    const m = String(v).match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})(?:\D+(\d{1,2}):(\d{2}))?/);
+    if (!m) return null;
+    return { date: `${m[1]}-${pad(+m[2])}-${pad(+m[3])}`, hour: m[4] == null ? null : +m[4] };
+  }
+
+  // worker_history 엑셀 → 리포트 계산에 필요한 합계만 (ManPower 시트 계산 그대로)
+  function rpPrepWh(rows, fileName){
+    const hi = rows.findIndex(r => r && r.includes('Employee') && r.some(v => /^Process/.test(v || '')));
+    if (hi < 0) throw new Error("'Employee' · 'Process(Task)' 열을 찾지 못했어요. WMS 작업자 이력(worker_history) 엑셀인지 확인해 주세요.");
+    const H = rows[hi].map(v => String(v || '').trim());
+    const c = (...names) => { for (const n of names){ const i = H.indexOf(n); if (i >= 0) return i; } return -1; };
+    const col = { date:c('Work Date'), emp:c('Employee'), hs:c('HTP Start'), he:c('HTP End'), wt:c('Work Type'), proc:c('Process(Task)'),
+      qty:c('Unit Qty'), loc:c('Location'), floor:c('Floor'), pr:c('Pick/Receive Type'), it:c('Inbound Type'), ct:c('Contract Type'),
+      shift:c('Shift'), uwt:c('User Work Type'), hour:c('HourOfWorkDate', 'HourOrWorkDate') };
+    const miss = Object.entries(col).filter(([k, i]) => i < 0 && !['date', 'floor', 'it', 'ct'].includes(k)).map(([k]) => k);
+    if (miss.length) throw new Error('엑셀에 필요한 열이 없어요: ' + miss.join(', '));
+    const g = (r, k) => col[k] < 0 ? '' : (r[col[k]] ?? '');
+    const mh = {}, mhf = {}, pq = {}, ut = {}, ep = {}, tq = {}, tm = {}, zone = {}, sep = {}, flr = {}, ppl = new Map(), dates = {};
+    let n = 0;
+    for (const r of rows.slice(hi + 1)){
+      if (!r || !g(r, 'emp')) continue;
+      n++;
+      const hour = Math.floor(+g(r, 'hour'));
+      const i = hour - 8;
+      const proc = rpU(g(r, 'proc')), wt = rpU(g(r, 'wt')), uwt = rpU(g(r, 'uwt')), shiftRaw = String(g(r, 'shift')).trim();
+      const q = +g(r, 'qty') || 0, temp = RP_TEMP[rpU(g(r, 'loc'))] || '';
+      const wd = rpDateTime(g(r, 'date')); if (wd) dates[wd.date] = (dates[wd.date] || 0) + 1;
+      // MH = (HTP End - HTP Start) × 시간대 가중치 (ManPower AO열)
+      const a = prSec(g(r, 'hs')); let b = prSec(g(r, 'he'));
+      if (b === 0) b = 86400;
+      const sc = /^O/i.test(shiftRaw) ? 'OVER NIGHT' : /^D/i.test(shiftRaw) ? 'DAY' : 'NIGHT';
+      const ai = !wt ? uwt : (RP_PW[proc] || '');
+      const lms = RP_LMS[uwt] || '';
+      const w = ai ? rpW[(rpU(ai) === 'OTHER' ? rpU(lms) : rpU(ai)) + '-' + sc + '-' + hour] : undefined;
+      const m = a != null && b != null && w != null ? (b - a) / 3600 * w : 0;
+      const sh = RP_SHIFTS.find(s => s[2] && s[2] === shiftRaw)?.[0] || '';
+      if (i >= 0 && i < 24){
+        if (lms && m){
+          rpAdd(mh, uwt + '-' + wt + '-' + proc, i, m);
+          const fl = rpU(g(r, 'floor')); if (fl) rpAdd(mhf, uwt + '-' + wt + '-' + proc + '|' + fl, i, m);
+        }
+        if (q) rpAdd(pq, proc, i, q);
+        const it = rpU(g(r, 'it'));
+        if (q && it && temp) rpAdd(ut, it + '|' + temp, i, q);
+        if (proc === 'STOW(STOW)'){
+          const prt = rpU(g(r, 'pr'));
+          if (q && prt) rpAdd(ep, prt, i, q);
+          if (temp){ if (q) rpAdd(tq, temp, i, q); if (m) rpAdd(tm, temp, i, m); }
+        }
+      }
+      if (proc === 'STOW(STOW)' && q){
+        if (sh){
+          const z = rpU(g(r, 'loc')); ((zone[sh] ||= {})[z] = (zone[sh][z] || 0) + q);
+          const prt = rpU(g(r, 'pr')); if (prt) ((sep[sh] ||= {})[prt] = (sep[sh][prt] || 0) + q);
+          const fl = rpU(g(r, 'floor')); if (fl) ((flr[sh] ||= {})[fl] = (flr[sh][fl] || 0) + q);
+        }
+      }
+      // 사람별 (performance 시트)
+      const gi = RP_PERF_PROC.get(proc);
+      if (gi != null){
+        const emp = String(g(r, 'emp')).trim();
+        let p = ppl.get(emp);
+        if (!p){ p = { e: emp, ct: rpU(g(r, 'ct')), sh: {}, m: RP_PERF.map(() => 0), q: RP_PERF.map(() => 0) }; ppl.set(emp, p); }
+        p.m[gi] += m; p.q[gi] += q;
+        const k = sh || (/^swing/i.test(shiftRaw) ? 'swing' : /^(over|night)/i.test(shiftRaw) ? 'night' : /^day/i.test(shiftRaw) ? 'day' : '');
+        if (k) p.sh[k] = (p.sh[k] || 0) + Math.max(m, 0.0001);
+      }
+    }
+    if (!n) throw new Error('엑셀에 작업 기록이 없어요.');
+    const rnd = bag => { for (const k in bag) bag[k] = bag[k].map(rpR); return bag; };
+    const date = Object.entries(dates).sort((x, y) => y[1] - x[1])[0]?.[0] || '';
+    const people = [...ppl.values()].map(p => [p.e, p.ct, Object.entries(p.sh).sort((x, y) => y[1] - x[1])[0]?.[0] || '', p.m.map(rpR), p.q]);
+    return { v: 1, file: fileName, date, n, mh: rnd(mh), mhf: rnd(mhf), pq: rnd(pq), ut: rnd(ut), ep: rnd(ep), tq: rnd(tq), tm: rnd(tm), zone, sep, flr, people };
+  }
+
+  // WMS 이관현황(TransferOperationList) 엑셀 → 하차완료 날짜 · 시간 · XD/RC · 보내는 센터별 집품수량
+  function rpPrepTr(rows, fileName){
+    const norm = s => String(s || '').replace(/\s/g, '');
+    const hi = rows.findIndex(r => r && r.some(v => norm(v) === '하차완료시간') && r.some(v => norm(v) === '보내는센터'));
+    if (hi < 0) throw new Error("'하차완료 시간' · '보내는 센터' 열을 찾지 못했어요. WMS 이관현황 엑셀인지 확인해 주세요.");
+    const H = rows[hi].map(norm), c = n => H.indexOf(n);
+    const col = { tote:c('토트바코드'), from:c('보내는센터'), qty:c('집품수량'), un:c('하차완료시간') };
+    if (col.tote < 0 || col.qty < 0) throw new Error("'토트 바코드' · '집품수량' 열을 찾지 못했어요.");
+    const t = {};   // t[date][`${XD|RC}|${센터}`] = [0~23시]
+    let n = 0;
+    for (const r of rows.slice(hi + 1)){
+      if (!r) continue;
+      const dt = rpDateTime(r[col.un]);
+      if (!dt || dt.hour == null) continue;
+      const ch = String(r[col.tote] || '').charAt(4).toUpperCase();
+      const type = ch === 'P' ? 'XD' : ch === 'T' ? 'RC' : '';
+      const q = +r[col.qty] || 0;
+      if (!type || !q) continue;
+      const k = type + '|' + rpU(r[col.from]).replace(/\s/g, '');
+      (((t[dt.date] ||= {})[k] ||= new Array(24).fill(0))[dt.hour] += q);
+      n++;
+    }
+    if (!n) throw new Error('하차완료된 이관 기록이 없어요.');
+    return { v: 1, file: fileName, n, days: t };
+  }
+
+  const rpNextDay = d => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + 1); return x.toISOString().slice(0, 10); };
+  // 리포트 날짜 기준 8~31시로 이관 수량 펼치기 (8~23시 = 당일, 24~31시 = 다음날 0~7시)
+  function rpTrHours(tr, date, key){
+    const out = rpZ();
+    if (!tr || !date) return out;
+    const a = tr.days?.[date]?.[key], b = tr.days?.[rpNextDay(date)]?.[key];
+    for (let i = 0; i < 24; i++){ const h = i + 8; out[i] = h < 24 ? (a?.[h] || 0) : (b?.[h - 24] || 0); }
+    return out;
+  }
+
+  // 계획 입력값 기본 모양 (Staffing Plan · Production Status 직접 입력칸)
+  function rpPlanBlank(){
+    const z3 = () => [0, 0, 0];
+    return {
+      snop: { dA:0, dC:0, dF:0, xAy:0, xAi:0, xCy:0, xC39:0, xC17:0, rFy:0, rF39:0, rF17:0,
+        rmY:0, rmX:0, rm34:0, rm13:0, rmG1:0, rmG2:0, rmD1:0, blXD:0, blRC:0, blRM:0 },
+      hc: { cap:z3(), fixed:z3(), temp:z3(), ob:z3(), proj:z3() },
+      act: { cap:z3(), fixed:z3(), temp:z3(), ob:z3(), proj:z3() },
+      tar: { htp:245.3, receive:2500, stow:245, nys:0, dfix:0 },
+      adj: {},
+    };
+  }
+  function rpPlanFix(p){
+    const b = rpPlanBlank();
+    if (!p || typeof p !== 'object') return b;
+    for (const g of ['snop', 'tar']) for (const k in b[g]) if (Number.isFinite(+p[g]?.[k])) b[g][k] = +p[g][k];
+    for (const g of ['hc', 'act']) for (const k in b[g]) for (let i = 0; i < 3; i++) if (Number.isFinite(+p[g]?.[k]?.[i])) b[g][k][i] = +p[g][k][i];
+    for (const [k] of RP_DETAIL) if (Array.isArray(p.adj?.[k])) b.adj[k] = RP_H.map((_, i) => +p.adj[k][i] || 0);
+    return b;
+  }
+
+  // 세 가지 입력(작업자 이력 · 이관현황 · 계획)으로 Production Status 전체 계산
+  function rpCompute(wh, tr, plan, date){
+    const P = rpPlanFix(plan), S = P.snop;
+    const W = wh || { mh:{}, pq:{}, ut:{}, ep:{}, tq:{}, tm:{}, zone:{}, sep:{}, flr:{}, people:[] };
+    const mhKey = {};
+    for (const [k, a] of Object.entries(W.mh || {})) mhKey[k.toUpperCase()] = a;
+    const mhfKey = {};
+    for (const [k, a] of Object.entries(W.mhf || {})) mhfKey[k.toUpperCase()] = a;
+    const wrow = r => {
+      const code = RP_MHROW[r];
+      if (!code) return rpZ();
+      if (r in RP_MHFLOOR) return RP_MHFLOOR[r] ? (mhfKey[(code + '|' + RP_MHFLOOR[r]).toUpperCase()] || rpZ()) : rpZ();
+      return mhKey[code.toUpperCase()] || rpZ();
+    };
+    const sumRows = rows => { const o = rpZ(); for (const r of rows){ const a = wrow(r); for (let i = 0; i < 24; i++) o[i] += a[i]; } return o; };
+    const vec = (a) => a || rpZ();
+    const plus = (...arrs) => RP_H.map((_, i) => arrs.reduce((s, a) => s + (a?.[i] || 0), 0));
+    const ut = (it, t) => vec(W.ut?.[it + '|' + t]);
+    // 하차 (Unloaded): 직납 = UNLOAD(UNLOAD) 수량, XD · RC = 이관 INC17 + YON3, RM = 로켓마트 센터 이관
+    const trv = (type, ctr) => rpTrHours(tr, date, type + '|' + ctr);
+    const unl = {
+      direct: vec(W.pq?.['UNLOAD(UNLOAD)']),
+      xd: plus(trv('XD', 'INC17'), trv('XD', 'YON3')),
+      rc: plus(trv('RC', 'INC17'), trv('RC', 'YON3')),
+      rm: plus(...RP_RM_CENTERS.flatMap(cn => [trv('XD', cn), trv('RC', cn)])),
+    };
+    const receiveAct = vec(W.pq?.['RECEIVE(RECEIVE)']);
+    const transferUnl = vec(W.pq?.['TRANSFER(TRANSFER_CART_UNLOAD)']);
+    // 진열 (Stow): 직납 = NORMAL, XD = TRANSFER 상온+냉장, RC = TRANSFER 냉동, RM = TRANSFER RM
+    const stow = {
+      direct: plus(ut('NORMAL', 'AMBIENT'), ut('NORMAL', 'CHILLED'), ut('NORMAL', 'FROZEN')),
+      xd: plus(ut('TRANSFER', 'AMBIENT'), ut('TRANSFER', 'CHILLED')),
+      rc: ut('TRANSFER', 'FROZEN'),
+      rm: ut('TRANSFER', 'RM'),
+    };
+    const stowTot = plus(stow.direct, stow.xd, stow.rc, stow.rm);
+    // 공정별 투입 MH
+    const mp = RP_MP.map(([k, label, rows]) => [k, label, sumRows(rows)]);
+    const r108 = rpSum(wrow(108));
+    mp.find(x => x[0] === 'train')[2][0] += r108;   // 엑셀 E72 = … + 'WASH Report'!K108 (첫 칸에만 하루치가 더해져요)
+    const mpSum = plus(...mp.map(x => x[2]));
+    const det = RP_DETAIL.map(([k, label, rows]) => [k, label, rows ? sumRows(rows) : RP_H.map((_, i) => +(P.adj[k]?.[i]) || 0), !rows]);
+    const detSum = plus(mpSum, ...det.map(x => x[2]));
+    // 목표 · 누적
+    const dNys = S.blXD + S.blRC + S.blRM;   // D-1 NYS = Staffing Plan Backlog 합
+    const recTar = rpZ(), backlog = rpZ(), acc = rpZ(), accHtp = rpZ();
+    for (let i = 0; i < 24; i++){
+      recTar[i] = i === 0 ? receiveAct[0] + unl.direct[0] : recTar[i - 1] - receiveAct[i - 1] + unl.direct[i];
+      backlog[i] = (i === 0 ? dNys : backlog[i - 1] - stowTot[i - 1]) + receiveAct[i] + unl.xd[i] + unl.rc[i] + unl.rm[i];
+    }
+    const stowTar = detSum.map(v => P.tar.htp * v);
+    const stowDiff = stowTot.map((v, i) => v - stowTar[i]);
+    let cs = 0, cm = 0;
+    for (let i = 0; i < 24; i++){ acc[i] = (i ? acc[i - 1] : 0) + stowDiff[i]; cs += stowTot[i]; cm += detSum[i]; accHtp[i] = rpDiv(cs, cm); }
+    const htpAct = stowTot.map((v, i) => rpDiv(v, mpSum[i]));
+    const needRec = recTar.map(v => rpDiv(v, P.tar.receive));
+    const eachA = vec(W.ep?.EACH), palA = vec(W.ep?.PALLET);
+    // 조별 진열 (Day 8~16 · Swing 17~20 · Swing+Night 21~25 · Night 26~31)
+    const rng = (a, s) => { let t = 0; for (let h = s[3]; h <= s[4]; h++) t += a[h - 8] || 0; return t; };
+    const shiftStow = k => RP_SHIFTS.map(s => rng(stow[k], s));
+    const shiftHtp = RP_SHIFTS.map(s => rpDiv(rng(stowTot, s), rng(mpSum, s)));
+    // 인원 (HC)
+    const HC = [['cap', 'Captain'], ['fixed', 'Fixed'], ['temp', 'Temp'], ['ob', 'OB → IB'], ['proj', 'Project']]
+      .map(([k, label]) => ({ k, label, plan: P.hc[k], act: P.act[k] }));
+    const hcPlanNoProj = HC.filter(h => h.k !== 'proj').reduce((s, h) => s + rpSum(h.plan), 0);
+    const otHc = ((P.hc.cap[0] + P.hc.cap[2]) * 2.5) / 8;   // Staffing Plan K2
+    // 물량 표 (15~19행)
+    const pv = { direct: S.dA + S.dC + S.dF, xd: S.xAy + S.xAi + S.xCy + S.xC39 + S.xC17, rc: S.rFy + S.rF39 + S.rF17,
+      rm: S.rmY + S.rmX + S.rm34 + S.rm13 + S.rmG1 + S.rmG2 + S.rmD1 };
+    const vol = ['direct', 'xd', 'rc', 'rm'].map(k => {
+      const u = rpSum(unl[k]), s = rpSum(stow[k]);
+      const nys = k === 'direct' ? u - s - P.tar.dfix : u - s + ({ xd:S.blXD, rc:S.blRC, rm:S.blRM })[k];
+      return { k, plan: pv[k], unl: u, nyu: pv[k] - u, stow: s, nys, sh: shiftStow(k) };
+    });
+    const vt = { plan: rpSum(vol.map(v => v.plan)), unl: rpSum(vol.map(v => v.unl)), nyu: rpSum(vol.map(v => v.nyu)),
+      stow: rpSum(vol.map(v => v.stow)), nys: rpSum(vol.map(v => v.nys)), sh: RP_SHIFTS.map((_, i) => rpSum(vol.map(v => v.sh[i]))) };
+    const htp = {
+      plan: rpDiv(vt.plan, (hcPlanNoProj - 3 + otHc) * 8),
+      unl: rpDiv(vt.unl, rpSum(mp.find(x => x[0] === 'unload')[2])),
+      stow: rpDiv(vt.stow, rpSum(mpSum)),
+      sh: shiftHtp,
+    };
+    // 온도별 HTP (WASH 110~122행)
+    const temps = ['AMBIENT', 'CHILLED', 'FROZEN', 'RM'].map(t => ({ t, mh: vec(W.tm?.[t]), q: vec(W.tq?.[t]) }));
+    const tAllQ = plus(...temps.map(x => x.q)), tAllM = plus(...temps.map(x => x.mh));
+    return { P, unl, receiveAct, transferUnl, stow, stowTot, mp, mpSum, det, detSum, recTar, backlog, stowTar, stowDiff, acc, accHtp, htpAct,
+      needRec, eachA, palA, HC, vol, vt, htp, dNys, temps, tAllQ, tAllM, zone: W.zone || {}, sep: W.sep || {}, flr: W.flr || {}, people: W.people || [] };
+  }
+
+  const rp = { date:'', dates:[], wh:null, tr:null, plan:null, rev:-1, loading:false, sub:'ps', ppSort:'stow', ppShift:'all', saveT:0 };
+  const rpF0 = v => v == null || !isFinite(v) ? '' : (Math.round(v) || 0).toLocaleString('ko-KR');
+  const rpF1 = v => v == null || !isFinite(v) ? '' : ((Math.round(v * 10) / 10) || 0).toLocaleString('ko-KR', { minimumFractionDigits:1, maximumFractionDigits:1 });
+  const rpPct = v => v == null || !isFinite(v) ? '' : Math.round(v * 100) + '%';
+  const rpHourLabel = h => pad(h % 24);
+  const rpBusy = () => !!rp.saveT || !!document.activeElement?.closest?.('#rpt input');   // 입력 중에는 새로 불러오지 않아요
+
+  async function rpLoad(date){
+    if (rp.loading) return;
+    rp.loading = true;
+    try {
+      const d = await request('GET', '/api/prod?kind=rpt' + (date || rp.date ? '&date=' + (date || rp.date) : ''));
+      rp.rev = d.rev; rp.dates = d.dates || [];
+      if (!(rp.saveT && d.date === rp.date)) rp.plan = d.plan;   // 입력 중인 계획은 덮어쓰지 않아요
+      Object.assign(rp, { date: d.date || rp.date || todayIso, wh: d.wh, tr: d.tr });
+      if (mode === 'rpt') renderReport();
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+      toast(e.message || '리포트를 불러오지 못했어요.');
+    } finally { rp.loading = false; }
+  }
+
+  function rpPick(kind){
+    const inp = el('input', { type:'file', accept:'.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    inp.onchange = () => { if (inp.files[0]) rpImport(kind, inp.files[0]); };
+    inp.click();
+  }
+  async function rpImport(kind, file){
+    let data;
+    try {
+      toast('엑셀을 읽는 중이에요…');
+      const rows = await hoReadXlsx(file);
+      data = kind === 'wh' ? rpPrepWh(rows, file.name) : rpPrepTr(rows, file.name);
+    } catch(e) { return toast(e.message || '엑셀을 읽지 못했어요.'); }
+    try {
+      const date = kind === 'wh' ? (data.date || rp.date || todayIso) : rp.date;
+      toast('계산했어요 · 팀에 공유하는 중…');
+      const r = await api('PUT', '/api/prod?kind=rpt', kind === 'wh' ? { part:'wh', date, data } : { part:'tr', data });
+      rp.rev = r.rev; setSync('', '저장됨');
+      if (kind === 'wh') rp.date = date;
+      await rpLoad(rp.date);
+      toast(kind === 'wh' ? `${retMD(date)} 작업자 이력을 반영했어요.` : '이관현황을 반영했어요.');
+    } catch(e) {
+      if (e instanceof Locked) return showLock(e.message);
+      toast('공유 저장을 못 했어요: ' + (e.message || ''));
+    }
+  }
+  function rpPlanSet(fn){
+    rp.plan = rpPlanFix(rp.plan); fn(rp.plan);
+    clearTimeout(rp.saveT);
+    rp.saveT = setTimeout(async () => {
+      try { const r = await api('PUT', '/api/prod?kind=rpt', { part:'plan', date: rp.date, data: rp.plan }); rp.rev = r.rev; setSync('', '저장됨'); }
+      catch(e) { if (e instanceof Locked) return showLock(e.message); toast('계획을 저장하지 못했어요: ' + (e.message || '')); }
+      finally { rp.saveT = 0; }
+    }, 700);
+  }
+
+  function rpUpCard(kind, title, help, snap){
+    const when = snap?.at ? new Date(snap.at).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+    const b = el('div', { class:'rp-up' + (snap ? ' ok' : ''), role:'button', tabindex:'0', onclick: () => rpPick(kind),
+      onkeydown: e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); rpPick(kind); } } },
+      el('b', { text: title }), el('span', { text: snap ? `${snap.file || '올린 파일'} · ${when}` : help }),
+      el('small', { text: snap ? '눌러서 새 파일로 바꾸기' : '눌러서 엑셀 고르기 · 끌어다 놓기' }));
+    b.ondragover = e => { e.preventDefault(); b.classList.add('drag'); };
+    b.ondragleave = () => b.classList.remove('drag');
+    b.ondrop = e => { e.preventDefault(); b.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) rpImport(kind, f); };
+    return b;
+  }
+
+  function renderReport(){
+    const box = $('#rpt');
+    if (!rp.date && rp.rev >= 0) rp.date = todayIso;   // 처음 불러오기 전에는 최근 올린 날을 기다려요
+    const C = rpCompute(rp.wh, rp.tr, rp.plan, rp.date);
+    const dateSel = el('input', { type:'date', value: rp.date, 'aria-label':'리포트 날짜',
+      onchange: e => { if (e.target.value){ rp.date = e.target.value; rp.plan = null; rp.wh = null; rpLoad(rp.date); } } });
+    const others = rp.dates.filter(d => d !== rp.date).slice(0, 6);
+    const head = el('section', { class:'ret-sec rp-head' },
+      el('div', { class:'ret-sec-head' }, el('h3', { text:'GWJ3 IB Daily Production Status' }), dateSel,
+        others.length ? el('span', { class:'rp-dates' }, el('span', { class:'ret-help', text:'다른 날' }),
+          ...others.map(d => el('button', { type:'button', class:'rp-chip', text: retMD(d), onclick: () => { rp.date = d; rp.plan = null; rp.wh = null; rpLoad(d); } }))) : null),
+      el('div', { class:'rp-ups' },
+        rpUpCard('wh', '작업자 이력', 'worker_history 엑셀 · 진열 · 공정별 MH · HTP', rp.wh),
+        rpUpCard('tr', '이관현황', 'WMS 이관현황 엑셀 · XD · RC · RM 하차', rp.tr)),
+      el('div', { class:'pr-chips rp-tabs', role:'group', 'aria-label':'리포트 보기' },
+        ...[['ps','Production Status'], ['temp','온도별 HTP'], ['zone','존별 진열'], ['ppl','개인별'], ['plan','계획 · 인원 입력']].map(([v, l]) =>
+          el('button', { type:'button', 'aria-pressed': rp.sub === v ? 'true' : 'false', text: l, onclick: () => { rp.sub = v; renderReport(); } }))));
+    const body = rp.sub === 'plan' ? rpPlanView(C) : rp.sub === 'temp' ? rpTempView(C) : rp.sub === 'zone' ? rpZoneView(C)
+      : rp.sub === 'ppl' ? rpPeopleView(C) : rpPsView(C);
+    const keepX = [...box.querySelectorAll('.rp-scroll')].map(n => n.scrollLeft);
+    box.replaceChildren(head, ...[].concat(body));
+    box.querySelectorAll('.rp-scroll').forEach((n, i) => { if (keepX[i]) n.scrollLeft = keepX[i]; });
+  }
+
+  // 표 만들기: cols = 머리글, rows = [{ label, cells, cls, sub }]
+  function rpTable(cols, rows, cls){
+    return el('div', { class:'rp-scroll' }, el('table', { class:'rp-table ' + (cls || '') },
+      el('thead', {}, el('tr', {}, ...cols.map((c, i) => el('th', { text: c, scope:'col', class: i === 0 ? 'rp-l' : '' })))),
+      el('tbody', {}, ...rows.map(r => el('tr', { class: r.cls || '' },
+        el('th', { scope:'row', class:'rp-l' }, r.group ? el('small', { text: r.group }) : null, r.label),
+        ...r.cells.map(v => el('td', { class: typeof v === 'object' && v ? v.c : '', text: typeof v === 'object' && v ? v.t : v })))))));
+  }
+  const rpDiffCell = (v, f = rpF0) => ({ t: f(v), c: v == null ? '' : v < 0 ? 'neg' : v > 0 ? 'pos' : '' });
+
+  function rpPsView(C){
+    const S3 = RP_SHIFTS.filter(s => s[0] !== 'sn');
+    // 인원 (HC)
+    const hcRows = C.HC.map(h => ({ label: h.label, cells: [...[0, 1, 2].flatMap(i => [rpF0(h.plan[i]), rpF0(h.act[i]), rpDiffCell(h.act[i] - h.plan[i])]),
+      rpF0(rpSum(h.plan)), rpF0(rpSum(h.act)), rpDiffCell(rpSum(h.act) - rpSum(h.plan))] }));
+    const tot = i => [C.HC.reduce((s, h) => s + h.plan[i], 0), C.HC.reduce((s, h) => s + h.act[i], 0)];
+    const [pT, aT] = [0, 1].map(j => [0, 1, 2].reduce((s, i) => s + tot(i)[j], 0));
+    hcRows.push({ label:'Total', cls:'rp-tot', cells: [...[0, 1, 2].flatMap(i => { const [p, a] = tot(i); return [rpF0(p), rpF0(a), rpDiffCell(a - p)]; }), rpF0(pT), rpF0(aT), rpDiffCell(aT - pT)] });
+    const hc = el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'인원 (HC)' }),
+      el('span', { class:'ret-help', text:'계획 · 실제 출근은 [계획 · 인원 입력]에서 적어요' })),
+      rpTable(['Category', ...S3.flatMap(s => [s[1] + ' Plan', 'Act.', 'Diff.']), 'Total Plan', 'Act.', 'Diff.'], hcRows, 'rp-hc'));
+    // 물량 · 조별 진열
+    const names = { direct:'Direct', xd:'XD', rc:'RC', rm:'RM' };
+    const vRows = C.vol.map(v => ({ label: names[v.k], cells: [rpF0(v.plan), rpF0(v.unl), rpF0(v.nyu), rpF0(v.stow), rpF0(v.nys), ...v.sh.map(rpF0)] }));
+    vRows.push({ label:'Total', cls:'rp-tot', cells: [rpF0(C.vt.plan), rpF0(C.vt.unl), rpF0(C.vt.nyu), rpF0(C.vt.stow), rpF0(C.vt.nys), ...C.vt.sh.map(rpF0)] });
+    vRows.push({ label:'HTP', cls:'rp-htp', cells: [rpF1(C.htp.plan), rpF1(C.htp.unl), '', rpF1(C.htp.stow), '', ...C.htp.sh.map(rpF1)] });
+    const vol = el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'물량 · 조별 진열' }),
+      el('span', { class:'ret-help', text:'Plan = SNOP · Unloaded = 하차 · NYU = 미하차 · NYS = 미진열' })),
+      rpTable(['Category', 'Plan', 'Unloaded', 'NYU', 'Stow', 'NYS', ...RP_SHIFTS.map(s => s[1] + ' Stow')], vRows, 'rp-vol'));
+    // KPI
+    const kpi = (label, v, sub) => el('div', { class:'rp-kpi' }, el('span', { text: label }), el('b', { text: v }), sub ? el('small', { text: sub }) : null);
+    const lastHtp = [...C.accHtp].reverse().find(v => v != null);
+    const kpis = el('div', { class:'rp-kpis' },
+      kpi('Stow', rpF0(C.vt.stow), C.vt.plan ? `Plan 대비 ${rpPct(C.vt.stow / C.vt.plan)}` : ''),
+      kpi('HTP Act.', rpF1(C.htp.stow), `Tar. ${rpF1(C.P.tar.htp)}`),
+      kpi('누적 HTP', rpF1(lastHtp), '진열 ÷ 세부 투입 MH'),
+      kpi('Unloaded', rpF0(C.vt.unl), C.vt.nyu ? `NYU ${rpF0(C.vt.nyu)}` : ''),
+      kpi('NYS', rpF0(C.vt.nys), C.P.tar.nys ? `Tar. ${rpF0(C.P.tar.nys)}` : ''));
+    return [kpis, hc, vol, rpHourly(C)];
+  }
+
+  function rpHourly(C){
+    const H = v => v.map(x => x ? rpF0(x) : '');
+    const H1 = v => v.map(x => x ? rpF1(x) : '');
+    const sum = a => rpSum(a);
+    const row = (group, label, arr, total, fmt, cls) => ({ group, label, cls, cells: [{ t: total === '' ? '' : (fmt === 1 ? rpF1(total) : rpF0(total)), c:'rp-sum' }, ...(fmt === 1 ? H1(arr) : H(arr))] });
+    const unlTot = RP_H.map((_, i) => C.unl.direct[i] + C.unl.xd[i] + C.unl.rc[i] + C.unl.rm[i]);
+    const recDiff = C.recTar.map((v, i) => v - C.receiveAct[i]);
+    const eTot = sum(C.eachA), pTot = sum(C.palA);
+    const htpCells = arr => arr.map(v => v == null ? '' : rpF1(v));
+    const rows = [
+      row('Unloaded', 'Direct', C.unl.direct, sum(C.unl.direct)), row('', 'XD', C.unl.xd, sum(C.unl.xd)), row('', 'RC', C.unl.rc, sum(C.unl.rc)),
+      row('', 'RM', C.unl.rm, sum(C.unl.rm)), row('', 'Total', unlTot, sum(unlTot), 0, 'rp-tot'),
+      row('Receive', 'Receive Tar.', C.recTar, sum(C.unl.direct)), row('', 'Receive Act.', C.receiveAct, sum(C.receiveAct)),
+      { label:'Receive Diff.', cells: [rpDiffCell(sum(C.unl.direct) - sum(C.receiveAct)), ...recDiff.map(v => v ? rpDiffCell(v) : '')] },
+      row('', '필요 인원(MHR)', C.needRec, sum(C.needRec), 1),
+      row('', 'Backlog(NYS)', C.backlog, C.backlog[23], 0, 'rp-tot'),
+      row('Stow', 'Stow Tar.', C.stowTar, sum(C.stowTar)),
+      { label:'Stow Act. E', cells: [{ t: `${rpF0(eTot)} · ${rpPct(rpDiv(eTot, eTot + pTot))}`, c:'rp-sum' }, ...H(C.eachA)] },
+      { label:'Stow Act. P', cells: [{ t: `${rpF0(pTot)} · ${rpPct(rpDiv(pTot, eTot + pTot))}`, c:'rp-sum' }, ...H(C.palA)] },
+      row('', 'Direct', C.stow.direct, sum(C.stow.direct)), row('', 'XD', C.stow.xd, sum(C.stow.xd)), row('', 'RC', C.stow.rc, sum(C.stow.rc)), row('', 'RM', C.stow.rm, sum(C.stow.rm)),
+      row('', 'Stow Act. Total', C.stowTot, sum(C.stowTot), 0, 'rp-tot'),
+      { label:'Stow Diff.', cells: [rpDiffCell(sum(C.stowDiff)), ...C.stowDiff.map(v => v ? rpDiffCell(v) : '')] },
+      { label:'Accumulated Diff.', cells: [rpDiffCell(C.acc[23]), ...C.acc.map((v, i) => C.stowTot[i] || C.stowTar[i] ? rpDiffCell(v) : '')] },
+      ...C.mp.map(([, label, arr], i) => row(i ? '' : 'Manpower (MH)', label, arr, sum(arr), 1)),
+      row('', 'SUM', C.mpSum, sum(C.mpSum), 1, 'rp-tot'),
+      row('Detail (HC In/Out)', 'Detail SUM', C.detSum, sum(C.detSum), 1, 'rp-tot'),
+      ...C.det.map(([, label, arr, manual]) => ({ ...row('', label + (manual ? ' ✎' : ''), arr, sum(arr), 1) })),
+      { group:'HTP', label:'HTP Tar.', cls:'rp-htp', cells: [{ t: rpF1(C.P.tar.htp), c:'rp-sum' }, ...RP_H.map(() => rpF1(C.P.tar.htp))] },
+      { label:'HTP Act.', cls:'rp-htp', cells: [{ t: rpF1(rpDiv(sum(C.stowTot), sum(C.mpSum))), c:'rp-sum' }, ...htpCells(C.htpAct)] },
+      { label:'Accumulated HTP Act.', cls:'rp-htp', cells: [{ t: rpF1(rpDiv(rpSum(C.accHtp.filter(v => v != null)), C.accHtp.filter(v => v != null).length)), c:'rp-sum' }, ...htpCells(C.accHtp)] },
+    ];
+    return el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'시간대별' }),
+      el('span', { class:'ret-help', text:'08시 ~ 다음날 07시 · ✎ 줄은 [계획 · 인원 입력]에서 적어요' })),
+      rpTable(['', 'TOTAL', ...RP_H.map(rpHourLabel)], rows, 'rp-hour'));
+  }
+
+  function rpTempView(C){
+    const names = { AMBIENT:'상온 (Ambient)', CHILLED:'냉장 (Chilled)', FROZEN:'냉동 (Frozen)', RM:'RM' };
+    const tiles = el('div', { class:'rp-kpis' }, ...C.temps.map(x => {
+      const q = rpSum(x.q), m = rpSum(x.mh);
+      return el('div', { class:'rp-kpi' }, el('span', { text: names[x.t] }), el('b', { text: rpF1(rpDiv(q, m)) }), el('small', { text: `${rpF0(q)}개 · ${rpF1(m)} MH` }));
+    }), el('div', { class:'rp-kpi' }, el('span', { text:'STOW HTP' }), el('b', { text: rpF1(rpDiv(rpSum(C.tAllQ), rpSum(C.tAllM))) }),
+      el('small', { text: `${rpF0(rpSum(C.tAllQ))}개 · ${rpF1(rpSum(C.tAllM))} MH` })));
+    const rows = [];
+    for (const x of C.temps){
+      rows.push({ group: names[x.t], label:'MH', cells: [{ t: rpF1(rpSum(x.mh)), c:'rp-sum' }, ...x.mh.map(v => v ? rpF1(v) : '')] });
+      rows.push({ label:'진열량', cells: [{ t: rpF0(rpSum(x.q)), c:'rp-sum' }, ...x.q.map(v => v ? rpF0(v) : '')] });
+      rows.push({ label:'HTP', cls:'rp-htp', cells: [{ t: rpF1(rpDiv(rpSum(x.q), rpSum(x.mh))), c:'rp-sum' }, ...x.q.map((v, i) => rpF1(rpDiv(v, x.mh[i])))] });
+    }
+    rows.push({ group:'전체', label:'STOW HTP', cls:'rp-tot', cells: [{ t: rpF1(rpDiv(rpSum(C.tAllQ), rpSum(C.tAllM))), c:'rp-sum' }, ...C.tAllQ.map((v, i) => rpF1(rpDiv(v, C.tAllM[i])))] });
+    return [tiles, el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'온도별 HTP' }),
+      el('span', { class:'ret-help', text:'STOW(STOW) 진열 수량 ÷ MH · 존 코드로 온도를 나눠요 (11N = 상온, 2x · 3x = 냉장, 5x · 6x · 7x = 냉동, 11K · 12T 등 = RM)' })),
+      rpTable(['', 'TOTAL', ...RP_H.map(rpHourLabel)], rows, 'rp-hour'))];
+  }
+
+  function rpZoneView(C){
+    const S3 = RP_SHIFTS.filter(s => s[0] !== 'sn');
+    const zsum = sh => rpSum(Object.values(C.zone[sh] || {}));
+    const allZ = z => S3.reduce((s, x) => s + (C.zone[x[0]]?.[z] || 0), 0);
+    const T = S3.map(s => zsum(s[0])), TT = rpSum(T);
+    const extra = Object.keys(Object.assign({}, ...S3.map(s => C.zone[s[0]] || {}))).filter(z => !RP_ZONES.includes(z)).sort();
+    const zones = [...RP_ZONES, ...extra].filter(z => allZ(z));
+    const cell = (v, t) => v ? `${rpF0(v)} · ${rpPct(v / t)}` : '';
+    const rows = zones.map(z => ({ label: z, group: RP_TEMP[z] ? { AMBIENT:'상온', CHILLED:'냉장', FROZEN:'냉동', RM:'RM' }[RP_TEMP[z]] : '', cells: [
+      ...S3.map((s, i) => cell(C.zone[s[0]]?.[z] || 0, T[i])), { t: cell(allZ(z), TT), c:'rp-sum' }] }));
+    rows.push({ label:'SUM', cls:'rp-tot', cells: [...T.map(rpF0), { t: rpF0(TT), c:'rp-sum' }] });
+    const kv = (bag, keys) => keys.map(k => ({ label: k, cells: [...S3.map((s, i) => { const t = rpSum(Object.values(bag[s[0]] || {})); return cell(bag[s[0]]?.[k] || 0, t); }),
+      { t: (() => { const a = S3.reduce((s, x) => s + (bag[x[0]]?.[k] || 0), 0), t = S3.reduce((s, x) => s + rpSum(Object.values(bag[x[0]] || {})), 0); return cell(a, t); })(), c:'rp-sum' }] }));
+    const cols = ['', ...S3.map(s => s[1]), 'Total'];
+    if (!zones.length) return el('section', { class:'ret-sec' }, el('h3', { text:'존별 진열' }), el('p', { class:'ho-empty', text:'작업자 이력을 올리면 조별 · 존별 진열 수량이 나와요.' }));
+    return [
+      el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'존별 진열 (STOW)' }), el('span', { class:'ret-help', text:'수량 · 조 안에서 비율' })), rpTable(cols, rows, 'rp-zone')),
+      el('section', { class:'ret-sec' }, el('h3', { text:'EACH · PALLET' }), rpTable(cols, kv(C.sep, ['EACH', 'PALLET']), 'rp-zone')),
+      el('section', { class:'ret-sec' }, el('h3', { text:'층별 (1F · 1.5F)' }), rpTable(cols, kv(C.flr, ['1F', '1.5F']), 'rp-zone')),
+    ];
+  }
+
+  function rpPeopleView(C){
+    const shName = { day:'Day', swing:'Swing', night:'Night' };
+    let list = C.people.map(([e, ct, sh, m, q]) => ({ e, name: prName(e), ct, sh, m, q, tm: rpSum(m), tq: rpSum(q) }))
+      .filter(p => p.tm > 0 && (rp.ppShift === 'all' || p.sh === rp.ppShift));
+    const gi = RP_PERF.findIndex(g => g[0] === 'STOW');
+    const key = p => rp.ppSort === 'stow' ? rpDiv(p.q[gi], p.m[gi]) ?? -1 : rp.ppSort === 'ttl' ? rpDiv(p.tq, p.tm) ?? -1 : p.tm;
+    list.sort((a, b) => key(b) - key(a));
+    const chips = (cur, opts, set) => el('span', { class:'pr-chips' }, ...opts.map(([v, l]) => el('button', { type:'button', 'aria-pressed': cur === v ? 'true' : 'false', text: l, onclick: () => { set(v); renderReport(); } })));
+    const rows = list.map(p => ({ label: p.name, group: [p.ct, shName[p.sh] || ''].filter(Boolean).join(' · '), cells: [
+      { t: rpF1(rpDiv(p.tq, p.tm)), c:'rp-sum' }, rpF1(p.tm), ...RP_PERF.map((_, i) => p.m[i] ? `${rpF1(rpDiv(p.q[i], p.m[i]))}` : ''), ...RP_PERF.map((_, i) => p.m[i] ? rpF1(p.m[i]) : '')] }));
+    return el('section', { class:'ret-sec' },
+      el('div', { class:'ret-sec-head' }, el('h3', { text:'개인별 HTP (performance)' }), el('span', { class:'ret-help', text:`${list.length}명 · 공정 묶음별 수량 ÷ MH` })),
+      el('div', { class:'pr-filters' },
+        el('span', { class:'pr-f' }, el('span', { class:'pr-fl', text:'조' }), chips(rp.ppShift, [['all','전체'], ['day','Day'], ['swing','Swing'], ['night','Night']], v => rp.ppShift = v)),
+        el('span', { class:'pr-f' }, el('span', { class:'pr-fl', text:'정렬' }), chips(rp.ppSort, [['stow','STOW HTP'], ['ttl','TTL HTP'], ['mh','MH']], v => rp.ppSort = v))),
+      list.length ? rpTable(['이름', 'TTL HTP', 'MH', ...RP_PERF.map(g => g[0] + ' HTP'), ...RP_PERF.map(g => g[0] + ' MH')], rows, 'rp-ppl')
+        : el('p', { class:'ho-empty', text:'작업자 이력을 올리면 사람별 공정 HTP가 나와요.' }));
+  }
+
+  function rpPlanView(C){
+    const P = rpPlanFix(rp.plan);
+    const num = (val, set, label) => el('input', { type:'number', inputmode:'decimal', step:'any', value: val || val === 0 ? String(val) : '', 'aria-label': label,
+      oninput: e => rpPlanSet(p => set(p, +e.target.value || 0)) });
+    const field = (label, g, k) => el('label', { class:'rp-field' }, el('span', { text: label }), num(P[g][k], (p, v) => p[g][k] = v, label));
+    const grp = (title, help, ...fields) => el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text: title }), help ? el('span', { class:'ret-help', text: help }) : null),
+      el('div', { class:'rp-fields' }, ...fields));
+    const hcTable = (title, g, help) => el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text: title }), help ? el('span', { class:'ret-help', text: help }) : null),
+      el('div', { class:'rp-scroll' }, el('table', { class:'rp-table rp-in' },
+        el('thead', {}, el('tr', {}, el('th', { class:'rp-l', text:'' }), ...['Day', 'Swing', 'Night', 'Total'].map(t => el('th', { text: t })))),
+        el('tbody', {}, ...C.HC.map(h => el('tr', {}, el('th', { class:'rp-l', text: h.label }),
+          ...[0, 1, 2].map(i => el('td', {}, num(P[g][h.k][i], (p, v) => p[g][h.k][i] = v, `${h.label} ${['Day', 'Swing', 'Night'][i]}`))),
+          el('td', { class:'rp-sum', text: rpF0(rpSum(P[g][h.k])) })))))));
+    const adj = el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'시간대별 HC In / Out (MH)' }),
+      el('span', { class:'ret-help', text:'Detail SUM에 더해져요 · 빠진 시간은 마이너스로 적어요' })),
+      el('div', { class:'rp-scroll' }, el('table', { class:'rp-table rp-in rp-hour' },
+        el('thead', {}, el('tr', {}, el('th', { class:'rp-l', text:'' }), ...RP_H.map(h => el('th', { text: rpHourLabel(h) })))),
+        el('tbody', {}, ...RP_DETAIL.filter(d => !d[2]).map(([k, label]) => el('tr', {}, el('th', { class:'rp-l', text: label }),
+          ...RP_H.map((_, i) => el('td', {}, num(P.adj[k]?.[i] || '', (p, v) => { p.adj[k] ||= RP_H.map(() => 0); p.adj[k][i] = v; }, `${label} ${rpHourLabel(RP_H[i])}시`)))))))));
+    return [
+      el('p', { class:'ret-help rp-note', text:`${retMD(rp.date)} 리포트에 들어가는 값이에요. 적으면 바로 팀 모두에게 저장돼요.` }),
+      grp('SNOP 물량 (Plan)', 'Staffing Plan 시트',
+        field('Direct 상온', 'snop', 'dA'), field('Direct 냉장', 'snop', 'dC'), field('Direct 냉동', 'snop', 'dF'),
+        field('XD 상온 YON3', 'snop', 'xAy'), field('XD 상온 INC17/39', 'snop', 'xAi'), field('XD 냉장 YON3', 'snop', 'xCy'), field('XD 냉장 INC39', 'snop', 'xC39'), field('XD 냉장 INC17', 'snop', 'xC17'),
+        field('RC 냉동 YON3', 'snop', 'rFy'), field('RC 냉동 INC39', 'snop', 'rF39'), field('RC 냉동 INC17', 'snop', 'rF17'),
+        field('RM YON3', 'snop', 'rmY'), field('RM XRC02', 'snop', 'rmX'), field('RM INC34', 'snop', 'rm34'), field('RM INC13', 'snop', 'rm13'),
+        field('RM GOY1', 'snop', 'rmG1'), field('RM GON2', 'snop', 'rmG2'), field('RM DON1', 'snop', 'rmD1')),
+      grp('Backlog (D-1 NYS)', '전날 못 한 진열 · NYS 계산과 Backlog 시작값에 들어가요',
+        field('XD', 'snop', 'blXD'), field('RC', 'snop', 'blRC'), field('RM', 'snop', 'blRM')),
+      grp('목표', '', field('HTP Tar.', 'tar', 'htp'), field('Receive Tar. (시간당)', 'tar', 'receive'), field('NYS Tar.', 'tar', 'nys'), field('Direct 보정값', 'tar', 'dfix')),
+      hcTable('인원 계획 (Plan)', 'hc', 'Staffing Plan의 T/C · Fixed · Temp · OB→IB · P-BOX'),
+      hcTable('실제 출근 (Act.)', 'act', '인원&차량현황 시트에서 세던 인원 수'),
+      adj,
+    ];
+  }
+
   // 상위 메뉴 (IB 운영 / Productivity Report) — 마지막에 본 쪽을 기억
   let mode = store.get('app-mode', 'ib') === 'rpt' ? 'rpt' : 'ib';
   const setMode = m => { mode = m; store.set('app-mode', m);
-    $('#app').classList.toggle('mode-rpt', m === 'rpt'); document.querySelectorAll('#modeNav button').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === m)); if (m === 'ib') render(); };
+    $('#app').classList.toggle('mode-rpt', m === 'rpt'); document.querySelectorAll('#modeNav button').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === m));
+    if (m === 'ib') render(); else { renderReport(); if (rp.rev < 0 && loaded) rpLoad(); } };
   document.querySelectorAll('#modeNav button').forEach(b => b.onclick = () => setMode(b.dataset.m));
   setMode(mode);
   document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { filter = b.dataset.f; store.set('todo-filter', filter); render(); });
