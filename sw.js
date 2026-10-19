@@ -3,7 +3,7 @@
 // - 아이콘 · 글꼴 · 바코드 읽기 프로그램: 한 번 받으면 폰에 보관해서 오프라인에서도 써요
 // - 팀 데이터(/api): 여기서는 건드리지 않아요 (화면 쪽에서 받아둔 내용을 따로 관리해요)
 const SHELL = 'gwj3-shell-v1';
-const STATIC = 'gwj3-static-v1';
+const STATIC = 'gwj3-static-v2';
 const KEEP = [SHELL, STATIC, 'gwj3-data-v1'];
 
 self.addEventListener('install', () => self.skipWaiting());
