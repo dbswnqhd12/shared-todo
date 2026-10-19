@@ -1002,6 +1002,45 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   .cal{padding:12px}
   .cal-title,.dayhead h2{font-size:24px}
 }
+/* Productivity Report · 엑셀 시트 모양 (테마와 상관없이 엑셀 색 그대로) */
+.xs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px 6px}
+.xs{background:#fff;color:#000;font:11px/1.25 Arial,'IBM Plex Sans KR',sans-serif;font-variant-numeric:tabular-nums;padding:14px 16px 18px;border:1px solid #D9D9D9;border-radius:6px;width:max-content;min-width:100%;box-sizing:border-box}
+.xs-title{display:flex;align-items:baseline;gap:56px;margin:2px 0 14px 70px}
+.xs-title>b{font-size:19px}
+.xs-title span{font-weight:700;font-size:13px;display:flex;gap:18px}
+.xs-top{margin-bottom:12px}
+.xs-t{border-collapse:collapse}
+.xs-t th,.xs-t td{border:1px solid #BFBFBF;padding:2px 6px;height:18px;text-align:right;white-space:nowrap;font-weight:400;background:#fff}
+.xs-t .xs-hd{background:#595959;color:#fff;font-weight:700;text-align:center;border-color:#A6A6A6}
+.xs-t .xs-cap{background:none;border:none;font-weight:700;text-align:center;color:#000}
+.xs-t .xs-u{text-decoration:underline}
+.xs-t .xs-b{font-weight:700}
+.xs-t .xs-day{background:#FFF2CC}.xs-t .xs-swing{background:#FCE4D6}.xs-t .xs-night{background:#D9E1F2}
+.xs-t .xs-tot,.xs-t .xs-gray{background:#F2F2F2}
+.xs-t .xs-yel{background:#FFFF00;color:#000;font-weight:700;text-align:center}
+.xs-t td.xs-yel{text-align:right}
+.xs-t .xs-yel2{background:#FFF2CC}
+.xs-t .xs-grn{background:#A9D08E}
+.xs-t .xs-red{background:#FF0000}
+.xs-t .xs-peach,.xs-t .xs-row-peach td{background:#FCE4D6}
+.xs-t .xs-redlab{background:#F85656;color:#fff;font-weight:700;text-align:center;border-color:#A6A6A6}
+.xs-t .xs-grp{white-space:pre-line;vertical-align:middle;min-width:64px}
+.xs-t .xs-neg{color:#FF0000}
+.xs-hc td{min-width:44px}.xs-vol td{min-width:58px}.xs-tar td,.xs-tar th{min-width:70px}
+.xs-big td{min-width:38px}.xs-big th.xs-hd{min-width:38px}
+.xs-htp{display:flex;justify-content:space-between;gap:10px}.xs-htp small{background:#595959;color:#fff;font-weight:700;padding:0 4px;margin:-2px 0 -2px -6px}
+.xs-in{all:unset;box-sizing:border-box;width:4.5em;text-align:right;font:inherit;color:inherit;cursor:text}
+.xs-big .xs-in{width:3.2em}
+.xs-in:focus{outline:2px solid #217346;outline-offset:1px;background:#fff}
+.xs-in::-webkit-inner-spin-button,.xs-in::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.xs-charts{display:flex;gap:10px;margin:4px 0 14px}
+.xs-chart{border:1px solid #D9D9D9;padding:6px 8px 4px;width:380px;box-sizing:border-box;text-align:center}
+.xs-chart>b{font-size:13px;color:#595959}
+.xs-svg{display:block;width:100%;height:auto}
+.xs-svg .xs-grid{stroke:#E5E5E5;stroke-width:1}
+.xs-svg .xs-ax{font-size:7px;fill:#595959}
+.xs-legend{display:flex;justify-content:center;gap:10px;font-size:9px;color:#595959}
+.xs-legend i{display:inline-block;width:8px;height:8px;margin-right:3px;vertical-align:-1px}
 /* Productivity Report */
 #rpt{gap:14px}
 .rp-head{gap:12px}
@@ -5307,7 +5346,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
         ...[['ps','Production Status'], ['temp','온도별 HTP'], ['zone','존별 진열'], ['ppl','개인별'], ['plan','계획 · 인원 입력']].map(([v, l]) =>
           el('button', { type:'button', 'aria-pressed': rp.sub === v ? 'true' : 'false', text: l, onclick: () => { rp.sub = v; renderReport(); } }))));
     const body = rp.sub === 'plan' ? rpPlanView(C) : rp.sub === 'temp' ? rpTempView(C) : rp.sub === 'zone' ? rpZoneView(C)
-      : rp.sub === 'ppl' ? rpPeopleView(C) : rpPsView(C);
+      : rp.sub === 'ppl' ? rpPeopleView(C) : rpSheetView(C);
     const keepX = [...box.querySelectorAll('.rp-scroll')].map(n => n.scrollLeft);
     box.replaceChildren(head, ...[].concat(body));
     box.querySelectorAll('.rp-scroll').forEach((n, i) => { if (keepX[i]) n.scrollLeft = keepX[i]; });
@@ -5323,71 +5362,121 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   }
   const rpDiffCell = (v, f = rpF0) => ({ t: f(v), c: v == null ? '' : v < 0 ? 'neg' : v > 0 ? 'pos' : '' });
 
-  function rpPsView(C){
-    const S3 = RP_SHIFTS.filter(s => s[0] !== 'sn');
-    // 인원 (HC)
-    const hcRows = C.HC.map(h => ({ label: h.label, cells: [...[0, 1, 2].flatMap(i => [rpF0(h.plan[i]), rpF0(h.act[i]), rpDiffCell(h.act[i] - h.plan[i])]),
-      rpF0(rpSum(h.plan)), rpF0(rpSum(h.act)), rpDiffCell(rpSum(h.act) - rpSum(h.plan))] }));
-    const tot = i => [C.HC.reduce((s, h) => s + h.plan[i], 0), C.HC.reduce((s, h) => s + h.act[i], 0)];
-    const [pT, aT] = [0, 1].map(j => [0, 1, 2].reduce((s, i) => s + tot(i)[j], 0));
-    hcRows.push({ label:'Total', cls:'rp-tot', cells: [...[0, 1, 2].flatMap(i => { const [p, a] = tot(i); return [rpF0(p), rpF0(a), rpDiffCell(a - p)]; }), rpF0(pT), rpF0(aT), rpDiffCell(aT - pT)] });
-    const hc = el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'인원 (HC)' }),
-      el('span', { class:'ret-help', text:'계획 · 실제 출근은 [계획 · 인원 입력]에서 적어요' })),
-      rpTable(['Category', ...S3.flatMap(s => [s[1] + ' Plan', 'Act.', 'Diff.']), 'Total Plan', 'Act.', 'Diff.'], hcRows, 'rp-hc'));
-    // 물량 · 조별 진열
-    const names = { direct:'Direct', xd:'XD', rc:'RC', rm:'RM' };
-    const vRows = C.vol.map(v => ({ label: names[v.k], cells: [rpF0(v.plan), rpF0(v.unl), rpF0(v.nyu), rpF0(v.stow), rpF0(v.nys), ...v.sh.map(rpF0)] }));
-    vRows.push({ label:'Total', cls:'rp-tot', cells: [rpF0(C.vt.plan), rpF0(C.vt.unl), rpF0(C.vt.nyu), rpF0(C.vt.stow), rpF0(C.vt.nys), ...C.vt.sh.map(rpF0)] });
-    vRows.push({ label:'HTP', cls:'rp-htp', cells: [rpF1(C.htp.plan), rpF1(C.htp.unl), '', rpF1(C.htp.stow), '', ...C.htp.sh.map(rpF1)] });
-    const vol = el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'물량 · 조별 진열' }),
-      el('span', { class:'ret-help', text:'Plan = SNOP · Unloaded = 하차 · NYU = 미하차 · NYS = 미진열' })),
-      rpTable(['Category', 'Plan', 'Unloaded', 'NYU', 'Stow', 'NYS', ...RP_SHIFTS.map(s => s[1] + ' Stow')], vRows, 'rp-vol'));
-    // KPI
-    const kpi = (label, v, sub) => el('div', { class:'rp-kpi' }, el('span', { text: label }), el('b', { text: v }), sub ? el('small', { text: sub }) : null);
-    const lastHtp = [...C.accHtp].reverse().find(v => v != null);
-    const kpis = el('div', { class:'rp-kpis' },
-      kpi('Stow', rpF0(C.vt.stow), C.vt.plan ? `Plan 대비 ${rpPct(C.vt.stow / C.vt.plan)}` : ''),
-      kpi('HTP Act.', rpF1(C.htp.stow), `Tar. ${rpF1(C.P.tar.htp)}`),
-      kpi('누적 HTP', rpF1(lastHtp), '진열 ÷ 세부 투입 MH'),
-      kpi('Unloaded', rpF0(C.vt.unl), C.vt.nyu ? `NYU ${rpF0(C.vt.nyu)}` : ''),
-      kpi('NYS', rpF0(C.vt.nys), C.P.tar.nys ? `Tar. ${rpF0(C.P.tar.nys)}` : ''));
-    return [kpis, hc, vol, rpHourly(C)];
+  // ---------- 엑셀 Production Status 시트와 같은 모양 ----------
+  // 행 순서 · 머리글 · 칸 색을 팀 양식 그대로 두고, 노란 칸처럼 원래 손으로 적던 칸은 여기서 바로 적어요.
+  const xsN = (v, d = 0) => v == null || v === '' || !isFinite(v) ? '' : ((Math.round(v * 10 ** d) / 10 ** d) || 0).toLocaleString('ko-KR', { minimumFractionDigits:d, maximumFractionDigits:d });
+  const xsHour = h => `${h % 24}:00`;
+  function xsInput(val, set, label, d = 0){
+    return el('input', { class:'xs-in', type:'number', inputmode:'decimal', step:'any', value: val ? String(val) : val === 0 && d >= 0 ? '0' : '', 'aria-label': label,
+      oninput: e => rpPlanSet(p => set(p, +e.target.value || 0)), onchange: () => renderReport() });
+  }
+  // 칸 하나: v = 글자 · 숫자 · 노드, o = { c: 클래스, d: 소수 자리, cs: colspan, rs: rowspan, h: 머리글 칸 }
+  function xc(v, o = {}){
+    const neg = typeof v === 'number' && v < 0 && !o.noNeg;
+    const txt = typeof v === 'number' ? xsN(v, o.d || 0) : v;
+    return el(o.h ? 'th' : 'td', { class: (o.c || '') + (neg ? ' xs-neg' : ''), colspan: o.cs || null, rowspan: o.rs || null, scope: o.h ? (o.scope || null) : null },
+      txt instanceof Node ? txt : (txt ?? ''));
+  }
+  const xtr = (...cells) => el('tr', {}, ...cells.filter(Boolean));
+
+  // 차트 (엑셀 양식의 Unload · Stow · HTP 차트 자리)
+  function xsChart(title, series, opt = {}){
+    const W = 360, H = 150, L = 34, B = 18, T = 8, n = 24, cw = (W - L - 6) / n;
+    const vals = series.flatMap(s => s.v.map(v => +v || 0));
+    const max = Math.max(1, ...vals), min = Math.min(0, ...vals), y = v => T + (H - T - B) * (1 - ((+v || 0) - min) / (max - min));
+    const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('class', 'xs-svg'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', title + ' 차트');
+    const add = (tag, at) => { const e = document.createElementNS(ns, tag); for (const k in at) e.setAttribute(k, at[k]); svg.appendChild(e); return e; };
+    for (let g = 0; g <= 4; g++){ const v = min + (max - min) * g / 4, yy = y(v);
+      add('line', { x1:L, x2:W - 4, y1:yy, y2:yy, class:'xs-grid' });
+      add('text', { x:L - 4, y:yy + 3, class:'xs-ax', 'text-anchor':'end' }).textContent = xsN(v, max < 10 ? 1 : 0); }
+    RP_H.forEach((h, i) => { if (i % 3 === 0) add('text', { x:L + cw * (i + .5), y:H - 5, class:'xs-ax', 'text-anchor':'middle' }).textContent = xsHour(h); });
+    const bars = series.filter(s => s.type === 'bar');
+    bars.forEach((s, k) => s.v.forEach((v, i) => { const bw = cw * .7 / bars.length, x = L + cw * i + cw * .15 + bw * k, y0 = y(0), y1 = y(v);
+      add('rect', { x, y: Math.min(y0, y1), width: bw, height: Math.max(.5, Math.abs(y0 - y1)), fill: s.color }); }));
+    series.filter(s => s.type !== 'bar').forEach(s => add('polyline', { points: s.v.map((v, i) => `${L + cw * (i + .5)},${y(v)}`).join(' '), fill:'none', stroke: s.color, 'stroke-width': 1.6 }));
+    return el('div', { class:'xs-chart' }, el('b', { text: title }), svg,
+      el('div', { class:'xs-legend' }, ...series.map(s => el('span', {}, el('i', { style:`background:${s.color}` }), s.name))));
   }
 
-  function rpHourly(C){
-    const H = v => v.map(x => x ? rpF0(x) : '');
-    const H1 = v => v.map(x => x ? rpF1(x) : '');
-    const sum = a => rpSum(a);
-    const row = (group, label, arr, total, fmt, cls) => ({ group, label, cls, cells: [{ t: total === '' ? '' : (fmt === 1 ? rpF1(total) : rpF0(total)), c:'rp-sum' }, ...(fmt === 1 ? H1(arr) : H(arr))] });
+  function rpSheetView(C){
+    const P = C.P, sum = rpSum, hc = (k, g, i) => P[g][k][i];
+    // ① 인원 (Day HC · Swing HC · Night HC · Total)
+    const sh = [['Day HC', 'xs-day'], ['Swing HC', 'xs-swing'], ['Night HC', 'xs-night']];
+    const hcRows = C.HC.map(h => xtr(xc(h.label, { h:1, c:'xs-hd', scope:'row' }),
+      ...sh.flatMap(([n, c], i) => [xc(xsInput(hc(h.k, 'hc', i), (p, v) => p.hc[h.k][i] = v, `${h.label} ${n} Plan`), { c:c + ' xs-b' }),
+        xc(xsInput(hc(h.k, 'act', i), (p, v) => p.act[h.k][i] = v, `${h.label} ${n} Act.`), { c:c + ' xs-b' }),
+        xc(h.act[i] - h.plan[i], { c:c + ' xs-b' })]),
+      xc(sum(h.plan), { c:'xs-tot xs-b' }), xc(sum(h.act), { c:'xs-tot xs-b' }), xc(sum(h.act) - sum(h.plan), { c:'xs-tot xs-b' })));
+    const tp = i => C.HC.reduce((s, h) => s + h.plan[i], 0), ta = i => C.HC.reduce((s, h) => s + h.act[i], 0);
+    hcRows.push(xtr(xc('Total', { h:1, c:'xs-hd', scope:'row' }), ...sh.flatMap(([, c], i) => [xc(tp(i), { c:c + ' xs-b' }), xc(ta(i), { c:c + ' xs-b' }), xc(ta(i) - tp(i), { c:c + ' xs-b' })]),
+      ...(() => { const p = [0, 1, 2].reduce((s, i) => s + tp(i), 0), a = [0, 1, 2].reduce((s, i) => s + ta(i), 0); return [xc(p, { c:'xs-tot xs-b' }), xc(a, { c:'xs-tot xs-b' }), xc(a - p, { c:'xs-tot xs-b' })]; })()));
+    const hcT = el('table', { class:'xs-t xs-hc' },
+      el('thead', {}, xtr(xc('', { h:1, c:'xs-cap' }), ...[...sh.map(s => s[0]), 'Total'].map(t => xc(t, { h:1, cs:3, c:'xs-cap', scope:'colgroup' }))),
+        xtr(xc('Category', { h:1, c:'xs-hd' }), ...Array.from({ length:4 }, () => ['Plan', 'Act.', 'Diff.']).flat().map(t => xc(t, { h:1, c:'xs-hd', scope:'col' })))),
+      el('tbody', {}, ...hcRows));
+    // ② 물량 (GWJ3 IB · 조별 Stow Act.)
+    const names = { direct:'Direct', xd:'XD', rc:'RC', rm:'RM' };
+    const volRow = (label, v) => xtr(xc(label, { h:1, c:'xs-hd', scope:'row' }), xc(v.plan), xc(v.unl), xc(v.nyu), xc(v.stow), xc(v.nys), ...v.sh.map(x => xc(x)));
+    const volT = el('table', { class:'xs-t xs-vol' },
+      el('thead', {}, xtr(xc('Category', { h:1, c:'xs-hd', rs:2 }), xc('GWJ3 IB', { h:1, cs:5, c:'xs-yel', scope:'colgroup' }),
+          ...RP_SHIFTS.map(s => xc(s[1], { h:1, c:'xs-cap xs-u', scope:'col' }))),
+        xtr(...['Plan', 'Unloaded', 'NYU', 'Stow', 'NYS'].map(t => xc(t, { h:1, c:'xs-hd', scope:'col' })), ...RP_SHIFTS.map(() => xc('Stow Act.', { h:1, c:'xs-hd', scope:'col' })))),
+      el('tbody', {}, ...C.vol.map(v => volRow(names[v.k], v)), volRow('Total', { ...C.vt }),
+        xtr(xc('HTP', { h:1, c:'xs-hd', scope:'row' }), xc(C.htp.plan, { d:1 }), xc(C.htp.unl, { d:1 }), xc('HTP', { h:1, c:'xs-hd' }), xc(C.htp.stow, { d:1, c:'xs-yel' }), xc(''),
+          ...C.htp.sh.map(v => xc(el('span', { class:'xs-htp' }, el('small', { text:'HTP' }), xsN(v, 1)))))));
+    // ③ 차트
     const unlTot = RP_H.map((_, i) => C.unl.direct[i] + C.unl.xd[i] + C.unl.rc[i] + C.unl.rm[i]);
+    const charts = el('div', { class:'xs-charts' },
+      xsChart('Unload', [{ name:'Unloaded Direct', v:C.unl.direct, color:'#4472C4' }, { name:'XD', v:C.unl.xd, color:'#ED7D31' }, { name:'RC', v:C.unl.rc, color:'#A5A5A5' }, { name:'Total', v:unlTot, color:'#FFC000' }]),
+      xsChart('Stow', [{ name:'Stow Tar.', v:C.stowTar, color:'#4472C4', type:'bar' }, { name:'Stow Act. Total', v:C.stowTot, color:'#ED7D31', type:'bar' }]),
+      xsChart('HTP', [{ name:'HTP Tar.', v:RP_H.map(() => P.tar.htp), color:'#4472C4', type:'bar' }, { name:'HTP Act.', v:C.htpAct.map(v => v || 0), color:'#ED7D31' }]));
+    // ④ 목표 줄
+    const tarIn = (k, label, c) => xc(xsInput(P.tar[k], (p, v) => p.tar[k] = v, label), { c:'xs-b ' + (c || '') });
+    const tarT = el('table', { class:'xs-t xs-tar' },
+      el('thead', {}, xtr(...['Category', 'D-1 NYS', 'HTP Tar.', 'Receive Tar.', 'Stow Tar.', 'NYS Tar.', 'Direct 보정값'].map(t => xc(t, { h:1, c:'xs-hd', scope:'col' })))),
+      el('tbody', {}, xtr(xc('', { c:'xs-hd' }), xc(C.dNys, { c:'xs-grn xs-b' }), tarIn('htp', 'HTP Tar.'), tarIn('receive', 'Receive Tar.', 'xs-tot'), tarIn('stow', 'Stow Tar.', 'xs-tot'),
+        tarIn('nys', 'NYS Tar.'), tarIn('dfix', 'Direct 보정값', 'xs-red'))));
+    // ⑤ 시간대별 큰 표 (엑셀 38~87행)
     const recDiff = C.recTar.map((v, i) => v - C.receiveAct[i]);
-    const eTot = sum(C.eachA), pTot = sum(C.palA);
-    const htpCells = arr => arr.map(v => v == null ? '' : rpF1(v));
-    const rows = [
-      row('Unloaded', 'Direct', C.unl.direct, sum(C.unl.direct)), row('', 'XD', C.unl.xd, sum(C.unl.xd)), row('', 'RC', C.unl.rc, sum(C.unl.rc)),
-      row('', 'RM', C.unl.rm, sum(C.unl.rm)), row('', 'Total', unlTot, sum(unlTot), 0, 'rp-tot'),
-      row('Receive', 'Receive Tar.', C.recTar, sum(C.unl.direct)), row('', 'Receive Act.', C.receiveAct, sum(C.receiveAct)),
-      { label:'Receive Diff.', cells: [rpDiffCell(sum(C.unl.direct) - sum(C.receiveAct)), ...recDiff.map(v => v ? rpDiffCell(v) : '')] },
-      row('', '필요 인원(MHR)', C.needRec, sum(C.needRec), 1),
-      row('', 'Backlog(NYS)', C.backlog, C.backlog[23], 0, 'rp-tot'),
-      row('Stow', 'Stow Tar.', C.stowTar, sum(C.stowTar)),
-      { label:'Stow Act. E', cells: [{ t: `${rpF0(eTot)} · ${rpPct(rpDiv(eTot, eTot + pTot))}`, c:'rp-sum' }, ...H(C.eachA)] },
-      { label:'Stow Act. P', cells: [{ t: `${rpF0(pTot)} · ${rpPct(rpDiv(pTot, eTot + pTot))}`, c:'rp-sum' }, ...H(C.palA)] },
-      row('', 'Direct', C.stow.direct, sum(C.stow.direct)), row('', 'XD', C.stow.xd, sum(C.stow.xd)), row('', 'RC', C.stow.rc, sum(C.stow.rc)), row('', 'RM', C.stow.rm, sum(C.stow.rm)),
-      row('', 'Stow Act. Total', C.stowTot, sum(C.stowTot), 0, 'rp-tot'),
-      { label:'Stow Diff.', cells: [rpDiffCell(sum(C.stowDiff)), ...C.stowDiff.map(v => v ? rpDiffCell(v) : '')] },
-      { label:'Accumulated Diff.', cells: [rpDiffCell(C.acc[23]), ...C.acc.map((v, i) => C.stowTot[i] || C.stowTar[i] ? rpDiffCell(v) : '')] },
-      ...C.mp.map(([, label, arr], i) => row(i ? '' : 'Manpower (MH)', label, arr, sum(arr), 1)),
-      row('', 'SUM', C.mpSum, sum(C.mpSum), 1, 'rp-tot'),
-      row('Detail (HC In/Out)', 'Detail SUM', C.detSum, sum(C.detSum), 1, 'rp-tot'),
-      ...C.det.map(([, label, arr, manual]) => ({ ...row('', label + (manual ? ' ✎' : ''), arr, sum(arr), 1) })),
-      { group:'HTP', label:'HTP Tar.', cls:'rp-htp', cells: [{ t: rpF1(C.P.tar.htp), c:'rp-sum' }, ...RP_H.map(() => rpF1(C.P.tar.htp))] },
-      { label:'HTP Act.', cls:'rp-htp', cells: [{ t: rpF1(rpDiv(sum(C.stowTot), sum(C.mpSum))), c:'rp-sum' }, ...htpCells(C.htpAct)] },
-      { label:'Accumulated HTP Act.', cls:'rp-htp', cells: [{ t: rpF1(rpDiv(rpSum(C.accHtp.filter(v => v != null)), C.accHtp.filter(v => v != null).length)), c:'rp-sum' }, ...htpCells(C.accHtp)] },
-    ];
-    return el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'시간대별' }),
-      el('span', { class:'ret-help', text:'08시 ~ 다음날 07시 · ✎ 줄은 [계획 · 인원 입력]에서 적어요' })),
-      rpTable(['', 'TOTAL', ...RP_H.map(rpHourLabel)], rows, 'rp-hour'));
+    const eT = sum(C.eachA), pT = sum(C.palA);
+    const hrs = (arr, o = {}) => arr.map((v, i) => o.input ? xc(o.input(i), { c:'xs-yel2' }) : xc(v == null ? '' : v, { d:o.d || 0, c:o.c || '' }));
+    const R = []; // [group, rowspan, label, total, cells, opt]
+    const row = (label, total, cells, o = {}) => R.push({ label, total, cells, ...o });
+    row('Direct', sum(C.unl.direct), hrs(C.unl.direct), { g:'Unloaded', gs:5 }); row('XD', sum(C.unl.xd), hrs(C.unl.xd)); row('RC', sum(C.unl.rc), hrs(C.unl.rc));
+    row('RM', sum(C.unl.rm), hrs(C.unl.rm)); row('Total', sum(unlTot), hrs(unlTot, { c:'xs-b' }));
+    row('Receive Tar.', sum(C.unl.direct), hrs(C.recTar), { wide:1 }); row('Receive Act.', sum(C.receiveAct), hrs(C.receiveAct), { wide:1 });
+    row('Receive Diff.', sum(C.unl.direct) - sum(C.receiveAct), hrs(recDiff), { wide:1 }); row('필요 인원(MHR)', sum(C.needRec), hrs(C.needRec, { d:2 }), { wide:1, d:2 });
+    row('Backlog(NYS)', C.backlog[23], hrs(C.backlog, { c:'xs-b' }), { wide:1, rc:'xs-row-peach' }); row('Stow Tar.', sum(C.stowTar), hrs(C.stowTar), { wide:1 });
+    row('Stow Act. E', eT, hrs(C.eachA), { pct: rpPct(rpDiv(eT, eT + pT)) }); row('Stow Act. P', pT, hrs(C.palA), { pct: rpPct(rpDiv(pT, eT + pT)) });
+    row('Direct', sum(C.stow.direct), hrs(C.stow.direct), { g:'Stow', gs:4 }); row('XD', sum(C.stow.xd), hrs(C.stow.xd)); row('RC', sum(C.stow.rc), hrs(C.stow.rc)); row('RM', sum(C.stow.rm), hrs(C.stow.rm));
+    row('Stow Act. Total', sum(C.stowTot), hrs(C.stowTot, { c:'xs-b' }), { wide:1, rc:'xs-row-peach' });
+    row('Stow Diff.', sum(C.stowDiff), hrs(C.stowDiff), { wide:1 }); row('Accumulated Diff.', C.acc[23], hrs(C.acc), { wide:1 });
+    row('필요 인원(MHR)', 0, RP_H.map(() => xc('')), { wide:1 });
+    C.mp.forEach(([, label, arr], i) => row(label, sum(arr), hrs(arr, { d:1, c:'xs-gray' }), i ? { d:1 } : { g:'Manpower\n(세부공정투입인원)', gs: C.mp.length + 1, d:1 }));
+    row('SUM', sum(C.mpSum), hrs(C.mpSum, { d:1 }), { d:1, b:1 });
+    row('Detail SUM', sum(C.detSum), hrs(C.detSum, { d:1, c:'xs-b' }), { g:'Manpower\nDetail\n(HC In / Out)', gs: C.det.length + 1, d:1, b:1 });
+    C.det.forEach(([k, label, arr, manual]) => row(label, sum(arr), manual
+      ? hrs(arr, { input: i => xsInput(P.adj[k]?.[i] || '', (p, v) => { p.adj[k] ||= RP_H.map(() => 0); p.adj[k][i] = v; }, `${label} ${xsHour(RP_H[i])}`, -1) })
+      : hrs(arr, { d:1, c:'xs-gray' }), { d:1, lc:'xs-redlab' }));
+    const accA = C.accHtp.filter(v => v != null);
+    row('HTP Tar.', P.tar.htp, hrs(RP_H.map(() => P.tar.htp), { d:1 }), { wide:1, d:1 });
+    row('HTP Act.', rpDiv(sum(C.stowTot), sum(C.mpSum)), hrs(C.htpAct, { d:1, c:'xs-b xs-peach' }), { wide:1, d:1 });
+    row('Accumulated HTP Act.', rpDiv(sum(accA), accA.length), hrs(C.accHtp, { d:1, c:'xs-b xs-peach' }), { wide:1, d:1 });
+    const body = R.map(r => {
+      const lead = r.wide ? [xc(r.label, { h:1, c:'xs-hd', cs:2, scope:'row' })]
+        : r.pct != null ? [xc(r.label, { h:1, c:'xs-hd', scope:'row' }), xc(r.pct, { c:'xs-hd' })]
+        : [r.g ? xc(r.g, { h:1, c:'xs-hd xs-grp', rs:r.gs, scope:'rowgroup' }) : null, xc(r.label, { h:1, c: r.lc || 'xs-hd', scope:'row' })];
+      return el('tr', { class: r.rc || '' }, ...lead.filter(Boolean), xc(r.total, { d:r.d || 0, c:'xs-tot xs-b' }), ...r.cells);
+    });
+    const bigT = el('table', { class:'xs-t xs-big' },
+      el('thead', {}, xtr(xc('Time', { h:1, c:'xs-hd', cs:2 }), xc('TOTAL', { h:1, c:'xs-hd' }), ...RP_H.map(h => xc(xsHour(h), { h:1, c:'xs-hd', scope:'col' })))),
+      el('tbody', {}, ...body));
+    const head = el('div', { class:'xs-title' }, el('b', { text:'GWJ3 IB Daily Production Status' }), el('span', {}, 'Date', el('b', { text: rp.date.replace(/-/g, '/') })));
+    return el('section', { class:'ret-sec xs-sec' },
+      el('p', { class:'ret-help', text:'팀 엑셀 양식(Production Status 시트) 그대로예요. 흰 칸 안의 숫자를 눌러 바로 고칠 수 있어요. 옆으로 밀어서 보세요.' }),
+      el('div', { class:'xs-wrap' }, el('div', { class:'xs' }, head,
+        el('div', { class:'xs-top' }, hcT), el('div', { class:'xs-top' }, volT), charts, el('div', { class:'xs-top' }, tarT), bigT)));
   }
 
   function rpTempView(C){
