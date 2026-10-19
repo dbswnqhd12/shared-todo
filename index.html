@@ -1043,6 +1043,25 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .xs-svg .xs-ax{font-size:7px;fill:var(--muted)}
 .xs-legend{display:flex;gap:10px;font-size:10px;color:var(--muted)}
 .xs-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.rp-ta{width:100%;min-width:110px;box-sizing:border-box;resize:vertical;font:inherit;font-size:12.5px;line-height:1.45;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.rp-ta:focus,.rp-tx:focus{outline:2px solid var(--focus);outline-offset:1px}
+.rp-tx{box-sizing:border-box;font:inherit;font-size:12.5px;padding:4px 6px;border:1px solid color-mix(in srgb,var(--line) 80%,transparent);border-radius:6px;background:var(--paper);color:var(--ink)}
+.rp-cnt{display:block;font-size:11px;color:var(--accent);font-weight:600;text-align:right;min-height:14px}
+.rp-crew td{vertical-align:top;min-width:120px}
+.rp-bgrp{margin-top:12px}.rp-bgrp h4,.rp-cart h4,.rp-kv h4{margin:0 0 6px;font-size:13px;font-weight:600}
+.rp-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.rp-board.ch{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+.rp-bcell{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.rp-bcell>span{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-weight:600}.rp-bcell .rp-cnt{display:inline}
+.rp-kvs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.rp-kv{background:var(--tone);border-radius:12px;padding:10px 12px}
+.rp-kv>div{display:flex;justify-content:space-between;font-size:12.5px;padding:2px 0}.rp-kv>div span{color:var(--muted)}
+.rp-carts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(420px,100%),1fr));gap:14px;margin-top:12px}
+.rp-cart{min-width:0}
+.rp-cart h4 small{display:block;font-size:10.5px;color:var(--accent);font-weight:600}
+.rp-car td{padding:3px 4px}.rp-car th.rp-l{min-width:32px}
+.rp-carsum{max-width:460px}
+@media (max-width:520px){.rp-carts{grid-template-columns:1fr}}
 /* Productivity Report */
 #rpt{gap:14px}
 .rp-head{gap:12px}
@@ -5024,6 +5043,24 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   ];
   const RP_PERF_PROC = new Map(RP_PERF.flatMap(([g, ps], gi) => ps.map(p => [p.toUpperCase(), gi])));
   const RP_RM_CENTERS = ['GOY1', 'DON1', 'INC16', 'XRC02', 'GON2'];   // WASH AD4:AD12 (로켓마트 이관)
+  // 인원&차량현황 시트: 조별 출근 명단 (C~F열 Captain · Fixed · Temp · P-BOX, 55행 OB → IB)
+  // → Production Status HC Act. (Captain · Fixed · Temp · OB→IB, Project = P-BOX 명단 수)
+  const RP_ATT = [['cap', 'Captain'], ['fixed', 'Fixed'], ['temp', 'Temp'], ['pbox', 'P-BOX'], ['ob', 'OB → IB']];
+  const RP_ATT_ACT = { cap:'cap', fixed:'fixed', temp:'temp', ob:'ob', pbox:'proj' };
+  // 인원 배치판 (모니터 공지용 검은 테두리 칸)
+  const RP_BOARD = [
+    ['ws', 'Water Spider (W/S) · 워터, 대량진열', ['1C', '2C', '3C', '5C', '6C']],
+    ['stow', 'Stow · 진열', ['1C', '2C', '3C', '5C', '6C']],
+    ['ind', '간접공정', ['Replenish 보충', 'P-BOX 피박스', 'Receive Prepack 쉬링크/수박', 'Receive Water 프리팩(에그·깻잎)', 'Receive 입고', 'Unload 하차']],
+    ['sup', '지원 · 기타', ['OB → IB', 'IB → OB', 'Consolidation 32R', 'Consolidation 51R', '교육', '콘솔']],
+  ];
+  // XD & RC 차량 이동 정보 (보내는 센터 · 층 · 온도별 표)
+  const RP_CARS = [['i5', 'INC17', '5F CHILLED XD', 'XD', 10], ['i6', 'INC17', '6F CHILLED XD', 'XD', 10], ['i7', 'INC17', '7F AMBIENT XD', 'XD', 10],
+    ['ir', 'INC17', 'FROZEN RC', 'RC', 10], ['yc', 'YON3', 'CHILLED XD', 'XD', 8], ['ya', 'YON3', 'AMBIENT XD', 'XD', 8], ['yr', 'YON3', 'FROZEN RC', 'RC', 8],
+    ['rm', 'RM 직발차', 'Rocket Mart', 'RM', 10]];
+  const RP_CAR_F = ['car', 'load', 'plt', 'arr', 'note', 'from'];
+  const rpNames = s => String(s || '').split(/[\n,]+/).map(x => x.trim()).filter(Boolean);
+  const rpTxt = (v, n = 4000) => typeof v === 'string' ? v.slice(0, n) : '';
 
   const rpU = s => String(s ?? '').trim().toUpperCase();
   const rpZ = () => new Array(24).fill(0);
@@ -5161,6 +5198,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
       act: { cap:z3(), fixed:z3(), temp:z3(), ob:z3(), proj:z3() },
       tar: { htp:245.3, receive:2500, stow:245, nys:0, dfix:0 },
       adj: {},
+      att: [{}, {}, {}], board: {}, memo: {}, cars: {},
     };
   }
   function rpPlanFix(p){
@@ -5169,12 +5207,26 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     for (const g of ['snop', 'tar']) for (const k in b[g]) if (Number.isFinite(+p[g]?.[k])) b[g][k] = +p[g][k];
     for (const g of ['hc', 'act']) for (const k in b[g]) for (let i = 0; i < 3; i++) if (Number.isFinite(+p[g]?.[k]?.[i])) b[g][k][i] = +p[g][k][i];
     for (const [k] of RP_DETAIL) if (Array.isArray(p.adj?.[k])) b.adj[k] = RP_H.map((_, i) => +p.adj[k][i] || 0);
+    for (let i = 0; i < 3; i++) for (const [k] of RP_ATT) if (rpTxt(p.att?.[i]?.[k])) b.att[i][k] = rpTxt(p.att[i][k]);
+    for (const [g, , cols] of RP_BOARD) for (const c of cols) if (rpTxt(p.board?.[g + '|' + c])) b.board[g + '|' + c] = rpTxt(p.board[g + '|' + c]);
+    for (const k of ['ibob', 'icqa', 'rest']) if (rpTxt(p.memo?.[k])) b.memo[k] = rpTxt(p.memo[k]);
+    for (const [k] of RP_CARS) if (Array.isArray(p.cars?.[k])) b.cars[k] = p.cars[k].slice(0, 30).map(r => Object.fromEntries(RP_CAR_F.map(f => [f, rpTxt(r?.[f], 200)])));
     return b;
   }
 
   // 세 가지 입력(작업자 이력 · 이관현황 · 계획)으로 Production Status 전체 계산
   function rpCompute(wh, tr, plan, date){
     const P = rpPlanFix(plan), S = P.snop;
+    // 출근 명단이 있는 조는 HC Act.를 명단 수로 (엑셀 Production Status D6 = COUNTA('인원&차량현황'!C37:C54) 등)
+    const attOn = [0, 1, 2].map(i => RP_ATT.some(([k]) => rpNames(P.att[i][k]).length));
+    attOn.forEach((on, i) => { if (on) for (const [k] of RP_ATT) P.act[RP_ATT_ACT[k]][i] = rpNames(P.att[i][k]).length; });
+    // 차량 이동 요약 (배차 · 하차 · 이동중 · 미발차)
+    const cars = {};
+    for (const t of ['XD', 'RC', 'RM']){
+      const rows = RP_CARS.filter(c => c[3] === t).flatMap(c => P.cars[c[0]] || []).filter(r => r && String(r.car || '').trim());
+      const done = rows.filter(r => String(r.arr || '').trim()).length, moving = rows.filter(r => !String(r.arr || '').trim() && String(r.plt || '').trim()).length;
+      cars[t] = { sent: rows.length, done, moving, wait: rows.length - done - moving };
+    }
     const W = wh || { mh:{}, pq:{}, ut:{}, ep:{}, tq:{}, tm:{}, zone:{}, sep:{}, flr:{}, people:[] };
     const mhKey = {};
     for (const [k, a] of Object.entries(W.mh || {})) mhKey[k.toUpperCase()] = a;
@@ -5257,7 +5309,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     // 온도별 HTP (WASH 110~122행)
     const temps = ['AMBIENT', 'CHILLED', 'FROZEN', 'RM'].map(t => ({ t, mh: vec(W.tm?.[t]), q: vec(W.tq?.[t]) }));
     const tAllQ = plus(...temps.map(x => x.q)), tAllM = plus(...temps.map(x => x.mh));
-    return { P, unl, receiveAct, transferUnl, stow, stowTot, mp, mpSum, det, detSum, recTar, backlog, stowTar, stowDiff, acc, accHtp, htpAct,
+    return { P, attOn, cars, unl, receiveAct, transferUnl, stow, stowTot, mp, mpSum, det, detSum, recTar, backlog, stowTar, stowDiff, acc, accHtp, htpAct,
       needRec, eachA, palA, HC, vol, vt, htp, dNys, temps, tAllQ, tAllM, zone: W.zone || {}, sep: W.sep || {}, flr: W.flr || {}, people: W.people || [] };
   }
 
@@ -5266,7 +5318,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   const rpF1 = v => v == null || !isFinite(v) ? '' : ((Math.round(v * 10) / 10) || 0).toLocaleString('ko-KR', { minimumFractionDigits:1, maximumFractionDigits:1 });
   const rpPct = v => v == null || !isFinite(v) ? '' : Math.round(v * 100) + '%';
   const rpHourLabel = h => pad(h % 24);
-  const rpBusy = () => !!rp.saveT || !!document.activeElement?.closest?.('#rpt input');   // 입력 중에는 새로 불러오지 않아요
+  const rpBusy = () => !!rp.saveT || !!document.activeElement?.closest?.('#rpt input, #rpt textarea');   // 입력 중에는 새로 불러오지 않아요
 
   async function rpLoad(date){
     if (rp.loading) return;
@@ -5345,13 +5397,15 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
         rpUpCard('wh', '작업자 이력', 'worker_history 엑셀 · 진열 · 공정별 MH · HTP', rp.wh),
         rpUpCard('tr', '이관현황', 'WMS 이관현황 엑셀 · XD · RC · RM 하차', rp.tr)),
       el('div', { class:'pr-chips rp-tabs', role:'group', 'aria-label':'리포트 보기' },
-        ...[['ps','Production Status'], ['temp','온도별 HTP'], ['zone','존별 진열'], ['ppl','개인별'], ['plan','계획 · 인원 입력']].map(([v, l]) =>
+        ...[['ps','Production Status'], ['crew','인원 · 차량'], ['temp','온도별 HTP'], ['zone','존별 진열'], ['ppl','개인별'], ['plan','계획 · 인원 입력']].map(([v, l]) =>
           el('button', { type:'button', 'aria-pressed': rp.sub === v ? 'true' : 'false', text: l, onclick: () => { rp.sub = v; renderReport(); } }))));
-    const body = rp.sub === 'plan' ? rpPlanView(C) : rp.sub === 'temp' ? rpTempView(C) : rp.sub === 'zone' ? rpZoneView(C)
+    const body = rp.sub === 'plan' ? rpPlanView(C) : rp.sub === 'crew' ? rpCrewView(C) : rp.sub === 'temp' ? rpTempView(C) : rp.sub === 'zone' ? rpZoneView(C)
       : rp.sub === 'ppl' ? rpPeopleView(C) : rpSheetView(C);
-    const keepX = [...box.querySelectorAll('.rp-scroll')].map(n => n.scrollLeft);
+    const keepX = [...box.querySelectorAll('.rp-scroll, .xs-wrap')].map(n => n.scrollLeft);
+    const fo = document.activeElement?.closest?.('#rpt') ? document.activeElement.getAttribute('aria-label') : null;   // 다시 그려도 입력하던 칸에 그대로 있게
     box.replaceChildren(head, ...[].concat(body));
-    box.querySelectorAll('.rp-scroll').forEach((n, i) => { if (keepX[i]) n.scrollLeft = keepX[i]; });
+    box.querySelectorAll('.rp-scroll, .xs-wrap').forEach((n, i) => { if (keepX[i]) n.scrollLeft = keepX[i]; });
+    if (fo){ const n = box.querySelector(`[aria-label="${CSS.escape(fo)}"]`); if (n && n.tagName !== 'BUTTON') n.focus({ preventScroll:true }); }
   }
 
   // 표 만들기: cols = 머리글, rows = [{ label, cells, cls, sub }]
@@ -5370,7 +5424,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   const xsHour = h => `${h % 24}:00`;
   function xsInput(val, set, label, d = 0){
     return el('input', { class:'xs-in', type:'number', inputmode:'decimal', step:'any', value: val ? String(val) : val === 0 && d >= 0 ? '0' : '', 'aria-label': label,
-      oninput: e => rpPlanSet(p => set(p, +e.target.value || 0)), onchange: () => renderReport() });
+      oninput: e => rpPlanSet(p => set(p, +e.target.value || 0)), onchange: () => setTimeout(renderReport) });
   }
   // 칸 하나: v = 글자 · 숫자 · 노드, o = { c: 클래스, d: 소수 자리, cs: colspan, rs: rowspan, h: 머리글 칸 }
   function xc(v, o = {}){
@@ -5407,7 +5461,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     const sh = [['Day HC', 'xs-day'], ['Swing HC', 'xs-swing'], ['Night HC', 'xs-night']];
     const hcRows = C.HC.map(h => xtr(xc(h.label, { h:1, c:'xs-hd', scope:'row' }),
       ...sh.flatMap(([n, c], i) => [xc(xsInput(hc(h.k, 'hc', i), (p, v) => p.hc[h.k][i] = v, `${h.label} ${n} Plan`), { c:c + ' xs-b' }),
-        xc(xsInput(hc(h.k, 'act', i), (p, v) => p.act[h.k][i] = v, `${h.label} ${n} Act.`), { c:c + ' xs-b' }),
+        xc(C.attOn[i] ? h.act[i] : xsInput(hc(h.k, 'act', i), (p, v) => p.act[h.k][i] = v, `${h.label} ${n} Act.`), { c:c + ' xs-b' }),
         xc(h.act[i] - h.plan[i], { c:c + ' xs-b' })]),
       xc(sum(h.plan), { c:'xs-tot xs-b' }), xc(sum(h.act), { c:'xs-tot xs-b' }), xc(sum(h.act) - sum(h.plan), { c:'xs-tot xs-b' })));
     const tp = i => C.HC.reduce((s, h) => s + h.plan[i], 0), ta = i => C.HC.reduce((s, h) => s + h.act[i], 0);
@@ -5538,6 +5592,72 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
         el('span', { class:'pr-f' }, el('span', { class:'pr-fl', text:'정렬' }), chips(rp.ppSort, [['stow','STOW HTP'], ['ttl','TTL HTP'], ['mh','MH']], v => rp.ppSort = v))),
       list.length ? rpTable(['이름', 'TTL HTP', 'MH', ...RP_PERF.map(g => g[0] + ' HTP'), ...RP_PERF.map(g => g[0] + ' MH')], rows, 'rp-ppl')
         : el('p', { class:'ho-empty', text:'작업자 이력을 올리면 사람별 공정 HTP가 나와요.' }));
+  }
+
+  // ---------- 인원 · 차량 (엑셀 인원&차량현황 시트) ----------
+  function rpCrewView(C){
+    const P = rpPlanFix(rp.plan);
+    const ta = (val, set, label, rows = 3) => el('textarea', { class:'rp-ta', rows: String(rows), 'aria-label': label, placeholder:'한 줄에 한 명', value: val || '',
+      oninput: e => rpPlanSet(p => set(p, e.target.value)), onchange: () => setTimeout(renderReport) });
+    const txt = (val, set, label, w) => el('input', { class:'rp-tx', type:'text', value: val || '', 'aria-label': label, style: w ? `width:${w}` : null,
+      oninput: e => rpPlanSet(p => set(p, e.target.value)), onchange: () => setTimeout(renderReport) });
+    const cnt = n => el('b', { class:'rp-cnt', text: n ? n + '명' : '' });
+    // ① 조별 출근 인원 → HC Act.
+    const shifts = ['주간조 (Day)', '오후조 (Swing)', '심야조 (Night)'];
+    const att = el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'출근 인원 확인' }),
+      el('span', { class:'ret-help', text:'이름을 적으면 Production Status 인원 표의 Act.가 명단 수로 채워져요 (P-BOX → Project)' })),
+      el('div', { class:'rp-scroll' }, el('table', { class:'rp-table rp-crew' },
+        el('thead', {}, el('tr', {}, el('th', { class:'rp-l', text:'' }), ...RP_ATT.map(([, l]) => el('th', { text: l })), el('th', { text:'합계' }))),
+        el('tbody', {}, ...shifts.map((sl, i) => el('tr', {}, el('th', { class:'rp-l', scope:'row', text: sl }),
+          ...RP_ATT.map(([k, l]) => el('td', {}, ta(P.att[i][k], (p, v) => p.att[i][k] = rpTxt(v), `${sl} ${l} 명단`, 4), cnt(rpNames(P.att[i][k]).length))),
+          el('td', { class:'rp-sum', text: rpF0(RP_ATT.reduce((s, [k]) => s + rpNames(P.att[i][k]).length, 0)) })))))));
+    // ② 인원 배치판
+    const bcount = k => rpNames(P.board[k]).length;
+    const board = el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'인원 배치' }),
+      el('span', { class:'ret-help', text:'모니터 공지용 배치판 · 칸마다 한 줄에 한 명' })),
+      ...RP_BOARD.map(([g, title, cols]) => el('div', { class:'rp-bgrp' }, el('h4', { text: title }),
+        el('div', { class:'rp-board' + (cols[0].length <= 2 ? ' ch' : '') }, ...cols.map(c => el('label', { class:'rp-bcell' },
+          el('span', {}, c, cnt(bcount(g + '|' + c))), ta(P.board[g + '|' + c], (p, v) => p.board[g + '|' + c] = rpTxt(v), `${title} ${c}`, 4)))))));
+    const chamber = ['1C', '2C', '3C', '5C', '6C'].map(c => [c.replace('C', '챔버'), bcount('ws|' + c) + bcount('stow|' + c)]);
+    const ind = RP_BOARD[2][2].map(c => [c.split(' ')[0] + (c.startsWith('Receive') ? ' ' + c.split(' ')[1] : ''), bcount('ind|' + c)]);
+    const sup = RP_BOARD[3][2].map(c => [c, bcount('sup|' + c)]);
+    const dist = [...chamber, ...ind, ...sup].reduce((s, x) => s + x[1], 0);
+    const came = [0, 1, 2].reduce((s, i) => s + ['cap', 'fixed', 'temp', 'pbox'].reduce((t, k) => t + rpNames(P.att[i][k]).length, 0), 0);
+    const kv = (title, list) => el('div', { class:'rp-kv' }, el('h4', { text: title }), ...list.map(([k, v]) => el('div', {}, el('span', { text: k }), el('b', { text: rpF0(v) }))));
+    const sum = el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'인원 현황' })),
+      el('div', { class:'rp-kvs' }, kv('챔버별 (W/S + Stow)', chamber), kv('간접공정', ind), kv('지원 · 기타', sup),
+        kv('총원', [['출근인원', came], ['분배인원', dist], ['미배치', came - dist]])));
+    // ③ 지원 인력 · 메모
+    const memo = el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'지원 · 휴게 명부' })),
+      el('div', { class:'rp-board' }, ...[['ibob', 'IB → OB (성명 · 쿠코드 · 시간)'], ['icqa', 'IB → ICQA (성명 · 쿠코드 · 시간)'], ['rest', 'IB 옥외작업자 휴게시간 명부']]
+        .map(([k, l]) => el('label', { class:'rp-bcell' }, el('span', { text: l }), ta(P.memo[k], (p, v) => p.memo[k] = rpTxt(v), l, 4)))));
+    // ④ XD & RC 차량 이동 정보
+    const cs = C.cars;
+    const carSum = el('div', { class:'rp-scroll' }, el('table', { class:'rp-table rp-carsum' },
+      el('thead', {}, el('tr', {}, el('th', { class:'rp-l', text:'' }), ...['배차', '하차', '이동중', '미발차'].map(t => el('th', { text: t })))),
+      el('tbody', {}, ...['XD', 'RC', 'RM'].map(t => el('tr', {}, el('th', { class:'rp-l', text: t === 'RM' ? '로켓마트' : t }),
+        ...['sent', 'done', 'moving', 'wait'].map(f => el('td', { text: rpF0(cs[t][f]) })))))));
+    const carTable = ([k, from, label, , n]) => {
+      const rows = P.cars[k] || [];
+      const rm = k === 'rm';
+      const cols = ['호', '차량번호', rm ? '보낸센터' : '상차완료 시간', 'PLT', '입차시간', '+Transfer time', '특이사항'];
+      return el('div', { class:'rp-cart' }, el('h4', {}, el('small', { text: from }), label),
+        el('div', { class:'rp-scroll' }, el('table', { class:'rp-table rp-car' },
+          el('thead', {}, el('tr', {}, ...cols.map((c, i) => el('th', { class: i ? '' : 'rp-l', text: c })))),
+          el('tbody', {}, ...Array.from({ length: Math.max(n, rows.length) }, (_, i) => { const r = rows[i] || {};
+            const f = (fk, w) => el('td', {}, txt(r[fk], (p, v) => { const a = (p.cars[k] ||= []); a[i] = { ...(a[i] || {}), [fk]: rpTxt(v, 200) }; }, `${from} ${label} ${i + 1}호 ${fk}`, w));
+            return el('tr', {}, el('th', { class:'rp-l', text: String(i + 1) }), f('car', '7em'), f(rm ? 'from' : 'load', '5.5em'), f('plt', '3em'), f('arr', '5em'),
+              el('td', { class:'rp-sum', text: rm ? '' : rpPlus8(r.load) }), f('note', '10em')); })))));
+    };
+    const cars = el('section', { class:'ret-sec' }, el('div', { class:'ret-sec-head' }, el('h3', { text:'XD & RC 차량 이동 정보' }),
+      el('span', { class:'ret-help', text:'차량번호 = 배차 · PLT를 적으면 이동중 · 입차시간을 적으면 하차 · +Transfer time = 상차완료 + 8시간' })),
+      carSum, el('div', { class:'rp-carts' }, ...RP_CARS.map(carTable)));
+    return [att, sum, board, memo, cars];
+  }
+  // 상차완료 시간 + 8시간 (엑셀 G열 =D+TIME(8,0,0))
+  function rpPlus8(v){
+    const m = String(v || '').match(/(\d{1,2}):(\d{2})/);
+    return m ? `${pad((+m[1] + 8) % 24)}:${m[2]}` : '';
   }
 
   function rpPlanView(C){
