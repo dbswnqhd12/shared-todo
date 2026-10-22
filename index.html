@@ -1223,6 +1223,11 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     document.body.appendChild(box);
   }
   document.getElementById('sync')?.addEventListener('click', showErrLog);
+  // 화면 코드 자체의 오류도 기록해요
+  window.addEventListener('error', e => errLog('-', location.pathname, '화면 오류', `${e.message} @ ${(e.filename || '').split('/').pop()}:${e.lineno}`));
+  window.addEventListener('unhandledrejection', e => errLog('-', location.pathname, '처리 안 된 오류', String(e.reason && (e.reason.message || e.reason))));
+  // 주소 끝에 ?debug 를 붙이면 열자마자 오류 기록 창을 띄워요
+  if (/[?&]debug\b/.test(location.search)) setTimeout(showErrLog, 3000);
   async function request(method, url, body){
     const headers = {};
     if (body) headers['Content-Type'] = 'application/json';
