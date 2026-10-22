@@ -75,6 +75,11 @@ input,select{font:inherit}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--accent)}
 .sync.err i{background:var(--high)}
 .sync.busy i{background:var(--mid)}
+.errlog{position:fixed;inset:calc(12px + env(safe-area-inset-top,0px)) 12px auto 12px;max-height:70vh;display:flex;flex-direction:column;background:var(--paper);color:var(--ink);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.25);z-index:100;overflow:hidden}
+.errlog-head{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}.errlog-head b{flex:1}
+.errlog-head button{font:inherit;font-size:13px;border:0;border-radius:999px;padding:6px 12px;background:var(--bg);color:var(--ink);cursor:pointer}
+.errlog pre{margin:0;padding:12px;overflow:auto;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-all}
+#sync{cursor:pointer;max-width:min(60vw,420px)}#syncText{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:13.5px;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.18);z-index:5}
 
 /* 잠금 화면 */
@@ -1197,6 +1202,32 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     }
   }
   window.addEventListener('online', () => { setTimeout(() => loadFull(), 500); });
+  // ---------- 오류 기록 (디버깅) ----------
+  // 최근 오류 30개를 이 기기에만 남겨요. 상단 상태 표시(저장됨/오프라인)를 누르면 볼 수 있어요
+  function errLog(method, url, kind, detail){
+    const e = { at: new Date().toLocaleString('ko-KR'), method, url: String(url).slice(0, 120), kind, detail: String(detail || '').slice(0, 300) };
+    console.error('[GWJ3]', e);
+    try { const list = JSON.parse(localStorage.getItem('err-log') || '[]'); list.unshift(e); localStorage.setItem('err-log', JSON.stringify(list.slice(0, 30))); } catch {}
+  }
+  function showErrLog(){
+    let list = []; try { list = JSON.parse(localStorage.getItem('err-log') || '[]'); } catch {}
+    const text = [`주소: ${location.host} · ${navigator.onLine ? '온라인' : '오프라인'} · ${navigator.userAgent}`, '',
+      ...(list.length ? list.map(e => `${e.at} | ${e.kind} | ${e.method} ${e.url}\n  ${e.detail}`) : ['기록된 오류가 없어요.'])].join('\n');
+    document.getElementById('errLogBox')?.remove();
+    const box = el('div', { id:'errLogBox', class:'errlog', role:'dialog', 'aria-label':'오류 기록' },
+      el('div', { class:'errlog-head' }, el('b', { text:`오류 기록 (${list.length})` }),
+        el('button', { type:'button', text:'복사', onclick: () => { navigator.clipboard?.writeText(text).then(() => toast('복사했어요. Claude에게 붙여넣어 주세요.'), () => toast('복사가 막혔어요. 화면을 캡처해 주세요.')); } }),
+        el('button', { type:'button', text:'지우기', onclick: () => { try { localStorage.removeItem('err-log'); } catch {} box.remove(); toast('오류 기록을 지웠어요.'); } }),
+        el('button', { type:'button', text:'닫기', onclick: () => box.remove() })),
+      el('pre', { text }));
+    document.body.appendChild(box);
+  }
+  document.getElementById('sync')?.addEventListener('click', showErrLog);
+  // 화면 코드 자체의 오류도 기록해요
+  window.addEventListener('error', e => errLog('-', location.pathname, '화면 오류', `${e.message} @ ${(e.filename || '').split('/').pop()}:${e.lineno}`));
+  window.addEventListener('unhandledrejection', e => errLog('-', location.pathname, '처리 안 된 오류', String(e.reason && (e.reason.message || e.reason))));
+  // 주소 끝에 ?debug 를 붙이면 열자마자 오류 기록 창을 띄워요
+  if (/[?&]debug\b/.test(location.search)) setTimeout(showErrLog, 3000);
   async function request(method, url, body){
     const headers = {};
     if (body) headers['Content-Type'] = 'application/json';
@@ -1206,6 +1237,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     let r;
     try { r = await fetch(url, {method, headers, body: body ? JSON.stringify(body) : undefined, cache:'no-store'}); }
     catch(netErr) {
+      errLog(method, url, '연결 실패', String(netErr && netErr.message || netErr));
       // 인터넷이 끊기면: 보기(GET)는 마지막으로 받아둔 내용으로, 저장은 막아요
       const hit = cacheable ? await offGet(url) : null;
       setOffline(hit ? hit.at : (offAt || -1));
@@ -1213,11 +1245,18 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       throw new Error(method === 'GET' ? '인터넷에 연결되어 있지 않고, 이 화면은 받아둔 내용이 없어요.' : '인터넷에 연결되어 있지 않아요. 연결되면 다시 해주세요.');
     }
     if (offAt) setOffline(0);
-    const data = await r.json().catch(() => ({}));
+    const raw = await r.text().catch(() => '');
+    let data = {}, notJson = false;
+    try { data = raw ? JSON.parse(raw) : {}; } catch { notJson = true; }
     if (r.status === 401){ offClear(); throw new Locked(data.error || '팀 비밀번호를 입력하세요.'); }
-    if (cacheable && r.ok) offPut(url, data);
+    if (cacheable && r.ok && !notJson) offPut(url, data);
     if (data.editLocked) throw new EditLocked(data.error || '편집 비밀번호를 입력하세요.');
-    if (!r.ok) throw new Error(data.error || '서버에 연결하지 못했어요.');
+    if (!r.ok || notJson){
+      // 디버깅용: 응답 코드와 내용 앞부분을 기록하고 메시지에도 붙여요
+      const snip = raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
+      errLog(method, url, 'HTTP ' + r.status, data.error || snip || '(빈 응답)');
+      throw new Error(`${data.error || '서버에 연결하지 못했어요.'} [HTTP ${r.status}${!data.error && snip ? ' · ' + snip.slice(0, 80) : ''}] · 상단 상태 표시를 누르면 오류 기록을 볼 수 있어요`);
+    }
     return data;
   }
   async function api(method, url, body){
