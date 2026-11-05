@@ -3,8 +3,17 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
       ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/report?cron=1",
+      "schedule": "0 11 * * *"
     }
   ]
 }

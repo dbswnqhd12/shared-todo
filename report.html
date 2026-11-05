@@ -42,6 +42,8 @@ tr.sum td{font-weight:700;border-bottom:0}
 #lock input{width:100%;font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);margin:10px 0}
 #lock button{width:100%;font:inherit;font-weight:600;background:var(--accent);color:#fff;border:0;border-radius:999px;padding:9px}
 .err{color:var(--high);font-size:13px}
+.ghostb{font:inherit;font-size:14px;font-weight:600;background:var(--paper);color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:8px 16px;cursor:pointer}
+.ghostb:disabled{opacity:.6}
 .pair span{white-space:nowrap}
 @media (max-width:600px){.grid{gap:8px}.grid .card{padding:12px}.pair{gap:12px}.pair b{font-size:24px}.card h2{font-size:14px}.tbl{padding:14px 12px}th,td{padding:8px 4px;font-size:13px}th{font-size:12px}}
 </style></head><body>
@@ -60,7 +62,10 @@ tr.sum td{font-weight:700;border-bottom:0}
     <div class="actions"><button class="dl" id="dl">엑셀 결산표 받기</button><span class="note" id="dlMsg" style="margin:0"></span></div>
   </section>
   <section class="card" style="margin-top:12px"><h2>말일에 카카오톡으로 받을 메시지</h2>
-    <div class="bubble"><div class="who">GWJ3 IB 알림</div><div class="msg" id="kt"></div><span class="btn">결산표 보기</span></div></section>
+    <div class="bubble"><div class="who">GWJ3 IB 알림</div><div class="msg" id="kt"></div><span class="btn">엑셀 받기</span><span class="btn">결산표 보기</span></div>
+    <p class="note" id="kaState">카카오 연결 상태를 확인하는 중…</p>
+    <div class="actions"><button class="ghostb" id="kaConn" hidden>카카오톡 연결하기</button><button class="ghostb" id="kaSend" hidden>지금 이 달 결산 보내 보기</button></div>
+  </section>
 </main>
 <script>
 (() => {
@@ -94,6 +99,7 @@ tr.sum td{font-weight:700;border-bottom:0}
     if (!r.ok) { $('err').textContent = d.error || '불러오지 못했어요.'; return; }
     history.replaceState(null, '', '?month=' + month);
     render(d);
+    if (!kakao.once) { kakao.once = 1; if (!kq) kakao().catch(() => {}); else setTimeout(() => kakao().catch(() => {}), 2500); }
   }
   $('dl').onclick = async () => {
     $('dl').disabled = true; $('dlMsg').textContent = '만드는 중…';
@@ -108,6 +114,32 @@ tr.sum td{font-weight:700;border-bottom:0}
     } catch (e) { $('dlMsg').textContent = e.message; }
     finally { $('dl').disabled = false; }
   };
+  // 카카오톡 연결 · 보내 보기
+  async function kakao() {
+    const r = await fetch('/api/report?kakao=status', { headers: hdr() });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { $('kaState').textContent = d.error || ''; return; }
+    const exp = d.refreshExp ? new Date(d.refreshExp + 9 * 3600e3).toISOString().slice(0, 10) : '';
+    $('kaState').textContent = !d.ready ? '카카오 앱 키가 아직 설정되지 않았어요.'
+      : d.connected ? `카카오톡 연결됨 · 매달 말일 저녁 8시쯤 '나와의 채팅'으로 보내요${exp ? ` (연결 유지 ~${exp}, 보낼 때마다 자동 연장)` : ''}`
+      : '카카오톡이 아직 연결되지 않았어요. 받을 사람의 카카오 계정으로 연결해 주세요.';
+    $('kaConn').hidden = !d.ready; $('kaConn').textContent = d.connected ? '다른 계정으로 다시 연결' : '카카오톡 연결하기';
+    $('kaSend').hidden = !d.connected;
+  }
+  $('kaConn').onclick = async () => {
+    const r = await fetch('/api/report?kakao=start', { headers: hdr() });
+    const d = await r.json().catch(() => ({}));
+    if (d.url) location.href = d.url; else $('kaState').textContent = d.error || '연결 주소를 만들지 못했어요.';
+  };
+  $('kaSend').onclick = async () => {
+    $('kaSend').disabled = true; $('kaState').textContent = '보내는 중…';
+    const r = await fetch('/api/report?kakao=send&month=' + month, { method: 'POST', headers: hdr() });
+    const d = await r.json().catch(() => ({}));
+    $('kaState').textContent = r.ok ? '보냈어요. 카카오톡 나와의 채팅을 확인해 보세요.' : (d.error || '보내지 못했어요.');
+    $('kaSend').disabled = false;
+  };
+  const kq = q.get('kakao');
+  if (kq) setTimeout(() => { $('kaState').textContent = kq === 'ok' ? '카카오톡을 연결했어요.' : kq; }, 600);
   $('go').onclick = () => { key = $('pw').value; ls.set('team-key', key); load(); };
   $('pw').onkeydown = e => { if (e.key === 'Enter') $('go').click(); };
   $('prev').onclick = () => { month = shift(month, -1); load(); };
