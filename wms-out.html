@@ -41,7 +41,7 @@ function grab(){
     return f && !txt(n) ? val(f) : txt(n);
   };
   var vis = function(n){ return n.getClientRects().length > 0; };
-  var out = { v: 1, sel: String(W.getSelection ? W.getSelection() : '').trim().slice(0, 60000), pairs: [], tables: [], text: '' };
+  var out = { v: 2, sel: String(W.getSelection ? W.getSelection() : '').trim().slice(0, 60000), pairs: [], near: [], tables: [], text: '' };
   var docs = [D];
   try { D.querySelectorAll('iframe').forEach(function(f){ try { if (f.contentDocument) docs.push(f.contentDocument); } catch (e) {} }); } catch (e) {}
   docs.forEach(function(d){
@@ -68,11 +68,17 @@ function grab(){
       if (!f && l.parentElement) f = l.parentElement.querySelector('input,select,textarea');
       if (f && f !== l){ var v = val(f); if (v) out.pairs.push([txt(l), v]); }
     });
+    d.querySelectorAll('body *').forEach(function(n){
+      if (out.near.length > 4000 || n.children.length || /^(SCRIPT|STYLE|OPTION)$/.test(n.tagName) || !vis(n)) return;
+      var t = txt(n); if (!t || t.length > 24) return;
+      var s = n.nextElementSibling || (n.parentElement && n.parentElement.children.length === 1 ? n.parentElement.nextElementSibling : null);
+      if (s){ var v = val(s); if (v && v !== t && v.length <= 200) out.near.push([t, v]); }
+    });
     if (d.body) out.text += String(d.body.innerText || '').slice(0, 40000) + '\n';
   });
   var s = 'GWJ3-OUT ' + JSON.stringify(out);
   var done = function(ok){
-    var b = D.createElement('div');
+    var b = D.createElement('div'); b.id = 'gwj3-out-msg';
     b.style.cssText = 'position:fixed;top:16px;right:16px;z-index:2147483647;background:#2557A7;color:#fff;padding:10px 14px;border-radius:8px;font:13px/1.5 sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:300px';
     b.textContent = ok ? '복사했어요 (칸 ' + out.pairs.length + '개 · 표 ' + out.tables.length + '개). GWJ3 사이트 반출 탭 → WMS 붙여넣기에 Ctrl+V 하세요.'
       : '복사가 막혔어요. 필요한 부분을 드래그해서 Ctrl+C로 복사해 주세요.';
