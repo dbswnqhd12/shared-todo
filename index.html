@@ -625,6 +625,14 @@ button.ret-stat{cursor:pointer}button.ret-stat:hover{border-color:var(--accent)}
 .ob-grp{border:1px solid var(--line);border-radius:9px;padding:6px 12px 12px;margin:0 0 10px}
 .ob-grp legend{font-size:12px;font-weight:800;color:var(--muted);padding:0 4px}.ob-grp legend small{font-weight:500}
 .ob-g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ob-wms{border:1px dashed var(--accent);border-radius:9px;padding:10px 12px;margin:0 0 10px;background:var(--accent-soft)}
+.ob-wms[hidden]{display:none}
+.ob-wms-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}.ob-wms-head a{font-size:12.5px;color:var(--accent)}.ob-wms-head button{margin-left:auto}
+.ob-wms textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:54px;background:var(--paper)}
+.ob-wms-g{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:8px 0;font-size:13px}.ob-wms-g dt{color:var(--muted);font-weight:700}.ob-wms-g dd{margin:0;overflow-wrap:anywhere}
+.ob-wms-scroll{overflow-x:auto;background:var(--paper);border-radius:7px}
+.ob-wms-t{border-collapse:collapse;width:100%;font-size:12.5px}.ob-wms-t th,.ob-wms-t td{padding:5px 8px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.ob-wms-t th{color:var(--muted);font-weight:700}.ob-wms-t tr.dup td{color:var(--muted)}
 .ob-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
 .ob-chips button{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:700;background:var(--paper);color:var(--muted)}
 .ob-chips button b{font-family:var(--mono)}.ob-chips button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
@@ -3719,7 +3727,9 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     const grp = (title, note, cls, ...kids) => el('fieldset', { class:'ob-grp' }, el('legend', {}, title, note ? el('small', { text: ' · ' + note }) : null), el('div', { class:'ret-grid ov-grid ' + cls }, ...kids));
     const form = el('form', { class:'ret-sec ret-form', id:'ob-form', autocomplete:'off' },
       el('div', { class:'ret-sec-head' }, el('h3', { id:'ob-form-title', text:'반출 건 입력' }),
-        el('p', { class:'ret-help', text:'빈 칸이 있어도 추가돼요 · 나중에 줄을 눌러 채울 수 있어요 · Tab으로 다음 칸' })),
+        el('p', { class:'ret-help', text:'빈 칸이 있어도 추가돼요 · 나중에 줄을 눌러 채울 수 있어요 · Tab으로 다음 칸' }),
+        el('button', { type:'button', class:'ret-btn sm', id:'ob-wms-btn', text:'WMS 붙여넣기', title:'WMS 화면에서 복사한 내용으로 칸 채우기', onclick: () => obWmsOpen() })),
+      el('div', { class:'ob-wms', id:'ob-wms', hidden:true }),
       grp('반출 정보', '', 'ob-g4',
         f('grp', '반출그룹번호', { mono:true, max:40, im:'numeric', cls:'s1' }), f('ext', '외부반출번호', { mono:true, max:40, im:'numeric', cls:'s1' }),
         f('cdate', '반출생성일자', { type:'date', mono:true, cls:'s1' }), f('due', '반출마감일자', { type:'date', mono:true, cls:'s1' })),
@@ -3749,6 +3759,164 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     $('#ob-clear').hidden = editing;
     $('#ob-del').textContent = obDelArm && Date.now() - obDelArm < 4000 ? '한 번 더 누르면 삭제' : '삭제';
   }
+  // ---- WMS 붙여넣기: WMS 화면에서 복사한 내용 → 반출 칸 ----
+  //   ① /wms-out.html 즐겨찾기 버튼이 만든 "GWJ3-OUT {…}"  ② 표를 드래그해서 Ctrl+C 한 글자(탭으로 나뉨)  ③ "이름: 값" 줄
+  const OBW_SYN = {
+    grp:['반출그룹번호', '반출그룹id', '반출그룹', '그룹번호'], ext:['외부반출번호', '외부반출id', '외부번호'],
+    cdate:['반출생성일자', '반출생성일', '생성일자', '생성일시', '생성일', '등록일자', '등록일', '요청일자', '요청일'],
+    due:['반출마감일자', '반출마감일', '마감일자', '마감일시', '마감일', '반출기한', '기한'],
+    vendor:['업체명', '거래처명', '거래처', '공급사명', '공급사', '업체', '판매자명', '판매자', '벤더명', '벤더', 'vendorname', 'vendor'],
+    addr:['반출지주소', '회수지주소', '반송지주소', '주소'], phone:['핸드폰번호', '휴대폰번호', '휴대폰', '핸드폰', '연락처', '전화번호', 'phone'],
+    name:['상품명', 'sku명', 'skuname', '품명', 'productname'], barcode:['상품바코드', 'sku바코드', 'skubarcode', '바코드', 'barcode'],
+    qty:['반출수량', '확정수량', '요청수량', '수량', 'qty'], box:['박스수량', '박스수', '박스'], tote:['집품토트', '토트번호', '토트'], note:['비고', '메모'],
+  };
+  const OBW_PROD = ['name', 'barcode', 'qty', 'box', 'tote'];
+  const obwNorm = s => String(s || '').toLowerCase().replace(/[^0-9a-z가-힣]/g, '');
+  function obwField(label){
+    const L = obwNorm(label); if (!L || L.length > 20) return null;
+    let best = null, score = 0;
+    for (const [k, syns] of Object.entries(OBW_SYN)) for (const w of syns){
+      const i = L.lastIndexOf(w); if (i < 0) continue;
+      const sc = (L === w ? 1000 : 0) + w.length * 10 + i;   // 같으면 우선 · 길게 맞을수록 · 뒤쪽 낱말일수록 (예: 업체주소 → 주소)
+      if (sc > score){ score = sc; best = k; }
+    }
+    return best;
+  }
+  function obwVal(k, v){
+    v = String(v ?? '').replace(/\s+/g, ' ').trim();
+    if (!v || v === '-') return '';
+    if (k === 'cdate' || k === 'due'){
+      const m = v.match(/(20\d{2})\s*[.\-/년]\s*(\d{1,2})\s*[.\-/월]\s*(\d{1,2})/) || v.match(/^(20\d{2})(\d{2})(\d{2})/);
+      return m ? `${m[1]}-${pad(+m[2])}-${pad(+m[3])}` : '';
+    }
+    if (k === 'qty' || k === 'box'){ const m = v.replace(/,/g, '').match(/\d+(\.\d+)?/); return m ? m[0] : ''; }
+    return v;
+  }
+  // 글자(붙여넣은 것) → { pairs, tables }
+  function obwText(t){
+    const lines = String(t || '').replace(/\r/g, '').split('\n').map(l => l.trim()).filter(Boolean);
+    const pairs = [], tables = [];
+    for (let i = 0; i < lines.length; i++){
+      const cells = lines[i].split('\t').map(c => c.trim());
+      const hit = cells.map(c => !!obwField(c)), mapped = hit.filter(Boolean).length;
+      const pairRow = cells.length % 2 === 0 && hit.every((h, j) => j % 2 === 0 || !h);   // 이름 ⇥ 값 ⇥ 이름 ⇥ 값 모양
+      if (cells.length >= 3 && mapped >= 2 && !pairRow && i + 1 < lines.length && lines[i + 1].includes('\t')){   // 머리줄 + 아래 줄들 = 표
+        const rows = [];
+        while (i + 1 < lines.length && lines[i + 1].includes('\t')) rows.push(lines[++i].split('\t').map(c => c.trim()));
+        tables.push({ head: cells, rows });
+        continue;
+      }
+      for (let j = 0; j + 1 < cells.length; j += 2) pairs.push([cells[j], cells[j + 1]]);   // 이름 ⇥ 값 ⇥ 이름 ⇥ 값
+      if (cells.length === 1){
+        const m = cells[0].match(/^([^:：]{1,20})\s*[:：]\s*(.+)$/);
+        if (m) pairs.push([m[1], m[2]]);
+        else if (obwField(cells[0]) && obwNorm(cells[0]).length <= 8 && i + 1 < lines.length && !obwField(lines[i + 1])) pairs.push([cells[0], lines[++i]]);   // 이름 줄 다음 값 줄
+      }
+    }
+    return { pairs, tables };
+  }
+  // 복사한 내용 → 반출 건 목록
+  function obwParse(raw){
+    raw = String(raw || '').trim();
+    let src = null;
+    if (raw.startsWith('GWJ3-OUT ')){ try { src = JSON.parse(raw.slice(9)); } catch { src = null; } }
+    const parts = [];
+    if (src){
+      if (src.sel) parts.push(obwText(src.sel));
+      else {
+        parts.push({ pairs: src.pairs || [], tables: src.tables || [] });
+        if (!(src.pairs || []).length && !(src.tables || []).length) parts.push(obwText(src.text));
+      }
+    } else parts.push(obwText(raw));
+    const group = {};
+    const add = (o, label, v) => { const k = obwField(label); if (!k) return; const x = obwVal(k, v); if (x && !o[k]) o[k] = x; };
+    for (const p of parts) for (const [l, v] of p.pairs) add(group, l, v);
+    // 상품 칸이 가장 많이 맞는 표를 상품 목록으로
+    let best = null, bestN = 0;
+    for (const p of parts) for (const t of p.tables){
+      const ks = t.head.map(obwField);
+      const n = ks.filter(k => k && OBW_PROD.includes(k)).length * 10 + ks.filter(Boolean).length;
+      if (ks.some(k => k === 'name' || k === 'barcode') && n > bestN){ bestN = n; best = { ks, rows: t.rows }; }
+    }
+    let rows = [];
+    if (best) rows = best.rows.map(r => { const o = {}; best.ks.forEach((k, i) => { if (k){ const x = obwVal(k, r[i]); if (x && !o[k]) o[k] = x; } }); return o; })
+      .filter(o => (o.name || o.barcode) && !(!o.barcode && /^(합계|총계|소계|total)/i.test(o.name || '')));
+    const items = (rows.length ? rows : [{}]).map(o => ({ ...group, ...o }));
+    return items.filter(o => OB_FIELDS.some(k => o[k]));
+  }
+
+  const obw = { items:[], pick:new Set() };
+  function obWmsOpen(){
+    const box = $('#ob-wms');
+    if (!box.hidden){ box.hidden = true; return; }
+    box.hidden = false; obw.items = []; obw.pick = new Set();
+    const ta = el('textarea', { id:'ob-wms-in', class:'ret-in', rows:3, placeholder:'여기를 누르고 Ctrl+V · WMS 화면에서 [GWJ3 반출 복사] 버튼으로 복사하거나, 표를 드래그해서 Ctrl+C 한 내용' });
+    ta.oninput = () => {
+      const v = ta.value; obWmsRead(v);
+      if (v.trim().startsWith('GWJ3-OUT ')){ ta.value = ''; ta.placeholder = obw.items.length ? 'WMS 화면 내용을 읽었어요 · 다른 건은 여기에 다시 Ctrl+V' : ta.placeholder; }   // 긴 복사 글자는 숨겨요
+    };
+    box.replaceChildren(
+      el('div', { class:'ob-wms-head' }, el('b', { text:'WMS에서 가져오기' }),
+        el('a', { href:'/wms-out.html', target:'_blank', rel:'noopener', text:'즐겨찾기 버튼 만들기' }),
+        el('button', { type:'button', class:'ret-btn sm ghost', text:'닫기', onclick: () => { box.hidden = true; } })),
+      ta, el('div', { id:'ob-wms-out' }));
+    ta.focus();
+  }
+  function obWmsRead(raw){
+    obw.items = obwParse(raw); obw.tried = !!String(raw).trim();
+    const have = new Set((obItems || []).map(t => (t.grp || '') + '|' + (t.barcode || '') + '|' + (t.name || '')));
+    obw.dup = obw.items.map(o => have.has((o.grp || '') + '|' + (o.barcode || '') + '|' + (o.name || '')));
+    obw.pick = new Set(obw.items.map((_, i) => i).filter(i => !obw.dup[i]));
+    obWmsShow();
+  }
+  function obWmsShow(){
+    const out = $('#ob-wms-out'); if (!out) return;
+    const its = obw.items;
+    if (!its.length){ out.replaceChildren(obw.tried ? el('p', { class:'ret-help err', text:'반출 정보를 찾지 못했어요. WMS 반출 상세 화면에서 다시 복사해 주세요.' }) : ''); return; }
+    const g = its[0], L = { grp:'반출그룹번호', ext:'외부반출번호', cdate:'생성일', due:'마감일', vendor:'업체', addr:'주소', phone:'번호' };
+    const same = k => its.every(o => (o[k] || '') === (g[k] || ''));
+    const head = el('dl', { class:'ob-wms-g' }, ...Object.entries(L).filter(([k]) => same(k) && g[k]).flatMap(([k, l]) => [el('dt', { text:l }), el('dd', { text:g[k] })]));
+    const cols = [['name', '상품명'], ['barcode', '바코드'], ['qty', '수량'], ['box', '박스'], ['tote', '토트'], ...Object.entries(L).filter(([k]) => !same(k))];
+    const tbl = el('table', { class:'ob-wms-t' },
+      el('thead', {}, el('tr', {}, el('th', {}), ...cols.map(([, l]) => el('th', { text:l })))),
+      el('tbody', {}, ...its.map((o, i) => {
+        const cb = el('input', { type:'checkbox', 'aria-label':'추가할 건 고르기' }); cb.checked = obw.pick.has(i);
+        cb.onchange = () => { cb.checked ? obw.pick.add(i) : obw.pick.delete(i); obWmsShow(); };
+        return el('tr', { class: obw.dup[i] ? 'dup' : '' }, el('td', {}, cb),
+          ...cols.map(([k], j) => el('td', { text: (o[k] || '') + (j === 0 && obw.dup[i] ? ' · 이미 있음' : '') })));
+      })));
+    const n = obw.pick.size;
+    out.replaceChildren(head, el('div', { class:'ob-wms-scroll' }, tbl),
+      el('div', { class:'ret-acts' },
+        el('span', { class:'ret-help', text:`${its.length}건을 찾았어요 · 확인하고 추가해 주세요` }),
+        el('button', { type:'button', class:'ret-btn ghost', text:'입력 칸에 채우기', disabled: n !== 1 && its.length !== 1, title:'한 건만 골랐을 때 아래 칸에 채워서 고친 뒤 추가', onclick: obWmsFill }),
+        el('button', { type:'button', class:'ret-btn solid', text:`${n}건 추가`, disabled: !n, onclick: obWmsAdd })));
+  }
+  function obWmsFill(){
+    const i = obw.pick.size ? [...obw.pick][0] : 0, o = obw.items[i]; if (!o) return;
+    if (obUi.editId) obUi.editId = null;
+    obForm = { ...obBlank(), ...o };
+    $('#ob-wms').hidden = true; renderOuts();
+    $('#ob-form-msg').textContent = 'WMS 내용으로 채웠어요 · 확인하고 추가를 눌러 주세요';
+    $('#ob-name').focus();
+  }
+  async function obWmsAdd(){
+    const list = [...obw.pick].sort((a, b) => a - b).map(i => Object.fromEntries(OB_FIELDS.map(k => [k, obw.items[i][k] || ''])));
+    if (!list.length) return;
+    list.forEach(x => { if (!x.cdate) x.cdate = obToday; });
+    $('#ob-wms').hidden = true;
+    try {
+      const r = await api('POST', '/api/outs', { items: list });
+      obItems = [...(obItems || []), ...(r.items || [])];
+      (r.items || []).forEach(t => { if (t.grp) obUi.open.add(obKey(t)); });
+      obRev = -2; renderOuts(); toast(`WMS에서 ${r.count || list.length}건 추가했어요.`);
+    } catch(e) {
+      $('#ob-wms').hidden = false;
+      if (e instanceof Locked) return showLock(e.message);
+      toast(e.message);
+    }
+  }
+
   // 바코드 → 상품명 (반출 → 과매입 → 회송 기록)
   function obFillName(){
     if (obUi.editId || obForm.name) return;
