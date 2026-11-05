@@ -606,8 +606,6 @@ button.ret-stat{cursor:pointer}button.ret-stat:hover{border-color:var(--accent)}
   .ov-tog{max-width:100%;overflow-x:auto}.ov-tog button{white-space:nowrap;padding:6px 11px}
   .ov-r .ov-rn .nm{white-space:normal}.ov-gh{flex-wrap:wrap}
 }
-/* IST Today 카드 */
-.ist-today{margin:0 0 10px}
 /* IST 안의 회송 · 과매입 */
 .ist-sub{display:flex;gap:22px;border-bottom:1px solid var(--line);margin:-4px 2px 2px;padding:0 4px}
 .ist-sub button{border:0;background:none;padding:8px 2px 9px;font-size:15px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;display:flex;gap:7px;align-items:center}
@@ -1014,7 +1012,6 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   .cal-title,.dayhead h2{font-size:24px}
 }
 </style>
-<script src="/today.js"></script>
 </head>
 <body>
 <section class="lock" id="lock" hidden aria-label="잠금">
@@ -1053,7 +1050,6 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   </div>
 
   <section class="ho" id="ho" hidden aria-label="시프트 교대 인수인계"></section>
-  <section class="ist-today" id="istToday" hidden aria-label="IST Today"></section>
   <nav class="ist-sub" id="istSub" hidden aria-label="IST">
     <button type="button" data-s="ret" aria-pressed="false">회송 <b id="istCntRet"></b></button>
     <button type="button" data-s="over" aria-pressed="false">과매입 <b id="istCntOver"></b></button>
@@ -1578,7 +1574,6 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === filter));
     document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === view || (b.dataset.v === 'ist' && (view === 'ret' || view === 'over' || view === 'out'))));
     $('#istSub').hidden = !(view === 'ret' || view === 'over' || view === 'out');
-    $('#istToday').hidden = !(view === 'ret' || view === 'over' || view === 'out') || !window.IstToday;
     document.querySelectorAll('#istSub button').forEach(b => b.setAttribute('aria-pressed', b.dataset.s === view ? 'true' : 'false'));
     istCounts();
     const cal = view === 'cal';
@@ -4861,23 +4856,6 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     render();
     if (view === 'ret') loadReturns(); else if (view === 'over') loadOvers(); else loadOuts();
   });
-  // IST Today: 매일 아침 7시 기준 오늘 할 일 (목록은 서버, 끝났는지는 지금 데이터로 체크)
-  let tdSnap = null, tdAt = 0, tdLoading = false;
-  async function tdLoad(){
-    if (tdLoading) return; tdLoading = true;
-    try { tdSnap = await request('GET', '/api/report?today=1'); tdAt = Date.now(); tdRender(); }
-    catch(e) { tdAt = Date.now(); }
-    finally { tdLoading = false; }
-  }
-  function tdRender(){
-    const box = $('#istToday');
-    if (!window.IstToday || box.hidden) return;
-    if (!tdSnap) { box.innerHTML = ''; return; }
-    IstToday.render(box, tdSnap, { ret: retItems, over: ovItems, out: obItems }, {
-      limit: 4, compact: true, more: '/today.html',
-      onOpen: t => { const b = document.querySelector(`#istSub button[data-s="${t}"]`); if (b) b.click(); },
-    });
-  }
   // 과매입 · 반출 맨 위 요약 (회송과 같은 모양)
   const istStat = (label, val, sub, cls) => el('div', { class:'ret-stat' + (cls ? ' ' + cls : '') }, el('small', { text: label }), el('b', { text: val }), sub ? el('span', { text: sub }) : null);
   const istDays = d => /^\d{4}-\d{2}-\d{2}$/.test(d || '') ? Math.max(0, Math.round((Date.parse(todayIso) - Date.parse(d)) / 864e5)) : 0;
@@ -4937,8 +4915,6 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   }
   function istCounts(){
     ovRenderTop(); obRenderTop();
-    if ((view === 'ret' || view === 'over' || view === 'out') && window.IstToday && Date.now() - tdAt > 5 * 60e3) tdLoad();
-    tdRender();
     const r = retItems ? retItems.filter(t => t.status !== 'done').length : null;
     const o = ovItems ? ovItems.filter(t => t.status !== 'done').length : null;
     $('#istCntRet').textContent = r == null ? '' : '대기 ' + r;
