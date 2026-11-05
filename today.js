@@ -27,16 +27,35 @@
 .td-tag{font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
 .td-tag.hot{background:var(--high-soft,#F6E1DB);color:var(--high)}
 .td-more{display:inline-block;margin-top:6px;font-size:13px;font-weight:600;color:var(--accent);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:none}
-.td.compact .td-gs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 18px}
-@media (max-width:760px){.td.compact .td-gs{grid-template-columns:1fr}}
-.td.compact .td-row{grid-template-columns:18px minmax(0,1fr) auto;padding:6px 2px;align-items:center}
-.td.compact .td-ck{width:16px;height:16px;margin:0}
-.td.compact .td-main{display:flex;gap:8px;min-width:0}
-.td.compact .td-act{font-size:13px;white-space:nowrap}
-.td.compact .td-ttl{font-size:13px;color:var(--muted)}
-.td.compact .td-sub{display:none}
-.td.compact .td-more-n{display:block!important;font-size:12px;color:var(--muted);padding:2px}
 .td-fold{margin-left:8px;font:inherit;font-size:12px;color:var(--muted);background:none;border:0;cursor:pointer;padding:0}
+.tc{background:var(--paper);border-radius:16px;padding:18px 20px}
+.tc-top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.tc-ring{--p:0;width:52px;height:52px;flex:none;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--accent-soft) 0);display:grid;place-items:center}
+.tc-ring span{width:40px;height:40px;border-radius:50%;background:var(--paper);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.tc-ttl{min-width:0}
+.tc-ttl h2{margin:0;font-size:19px;letter-spacing:-.01em}
+.tc-ttl p{margin:1px 0 0;font-size:13px;color:var(--muted)}
+.tc-all{margin-left:auto;font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;white-space:nowrap}
+.tc-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tc-tile{border:0;text-align:left;font:inherit;color:inherit;background:var(--bg);border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tc-tile:hover{outline:2px solid var(--accent-soft)}
+.tc-tile.hot{background:var(--high-soft,#F6E1DB)}
+.tc-tile .k{font-size:13px;font-weight:600;color:var(--muted)}
+.tc-tile .n{font-size:28px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.tc-tile .n small{font-size:13px;font-weight:600;color:var(--muted);margin-left:2px}
+.tc-tile .h{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-tile.hot .h{color:var(--high);font-weight:600}
+.tc-tile.clear .n{color:var(--accent)}
+.tc-list{margin-top:14px}
+.tc-list h3{margin:0 0 4px;font-size:13px;font-weight:600;color:var(--muted)}
+.tc-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 4px;border-top:1px solid var(--line);cursor:pointer;border-radius:6px}
+.tc-row:hover{background:var(--accent-soft)}
+.tc-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.tc-txt{min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-txt b{font-weight:700;margin-right:6px}
+.tc-txt span{color:var(--muted)}
+.tc-done{margin-top:10px;font-size:13px;color:var(--muted)}
+@media (max-width:600px){.tc{padding:16px}.tc-tiles{gap:8px}.tc-tile{padding:10px 11px}.tc-tile .n{font-size:24px}}
 .td-empty{color:var(--muted);font-size:14px;padding:6px 0}
 `;
   const GROUPS = [['out', '반출'], ['over', '과매입'], ['ret', '회송']];
@@ -59,12 +78,52 @@
     return `${Number(snap.date.slice(5, 7))}월 ${Number(snap.date.slice(8))}일 (${w}) 아침 7시 기준`;
   }
 
-  function render(box, snap, live, opt = {}) {
-    if (!document.getElementById('td-css')) { const s = document.createElement('style'); s.id = 'td-css'; s.textContent = CSS; document.head.appendChild(s); }
+  // IST 탭 맨 위 카드: 남은 건수 타일 3개 + 먼저 할 일 몇 개
+  const RANK_HOT = x => /지남|오늘/.test(x.tag || '');
+  function renderCard(box, snap, live, opt) {
     const items = (snap && snap.items) || [];
     const marked = items.map(it => ({ ...it, done: isDone(it, live) }));
     const doneN = marked.filter(x => x.done).length;
-    let html = `<div class="td${opt.compact ? ' compact' : ''}"><div class="td-head"><h2>Today</h2><span class="td-when">${snap ? esc(when(snap)) : ''}</span>`
+    const pct = items.length ? Math.round(doneN / items.length * 100) : 100;
+    const left = marked.filter(x => !x.done);
+    const tile = (t, name) => {
+      const g = left.filter(x => x.t === t);
+      const hot = g.filter(RANK_HOT);
+      let hint = '';
+      if (t === 'out') hint = hot.length ? [g.filter(x => /지남/.test(x.tag)).length && `기한 지남 ${g.filter(x => /지남/.test(x.tag)).length}`, g.filter(x => x.tag === '오늘 기한').length && `오늘 기한 ${g.filter(x => x.tag === '오늘 기한').length}`].filter(Boolean).join(' · ') : (g.length ? '진행 중인 반출그룹' : '');
+      if (t === 'over') { const m = g.filter(x => !x.mail).length; hint = m ? `메일 전 ${m}` : (g.length ? '처리할 것' : ''); }
+      if (t === 'ret') { const o = g.filter(x => x.tag).length; hint = o ? `7일 넘음 ${o}` : (g.length ? '대기 중' : ''); }
+      if (!g.length) hint = '오늘 할 일 없음';
+      const warn = hot.length || (t !== 'out' && g.some(x => x.tag));
+      return `<button type="button" class="tc-tile${hot.length ? ' hot' : ''}${g.length ? '' : ' clear'}" data-t="${t}"><span class="k">${name}</span><span class="n">${g.length}<small>건</small></span><span class="h">${esc(hint)}</span></button>`;
+    };
+    const rank = x => (/지남/.test(x.tag) ? 0 : x.tag === '오늘 기한' ? 1 : x.tag ? 2 : 3);
+    const order = { out: 0, over: 1, ret: 2 };
+    const first = [...left].sort((a, b) => rank(a) - rank(b) || order[a.t] - order[b.t]).slice(0, opt.limit || 4);
+    const NAME = { out: '반출', over: '과매입', ret: '회송' };
+    let html = `<div class="tc"><div class="tc-top"><div class="tc-ring" style="--p:${pct}"><span>${pct}%</span></div>`
+      + `<div class="tc-ttl"><h2>Today</h2><p>${snap ? esc(when(snap)) : ''} · ${items.length ? `${items.length}건 중 ${doneN}건 끝` : '할 일 없음'}</p></div>`
+      + (opt.more ? `<a class="tc-all" href="${opt.more}" target="_blank" rel="noopener">전체 보기 →</a>` : '') + `</div>`
+      + `<div class="tc-tiles">${tile('out', '반출')}${tile('over', '과매입')}${tile('ret', '회송')}</div>`;
+    if (first.length) html += `<div class="tc-list"><h3>먼저 할 일</h3>` + first.map(x => `<div class="tc-row" data-t="${x.t}" role="button" tabindex="0"><span class="tc-chip">${NAME[x.t]}</span>`
+      + `<div class="tc-txt"><b>${esc(x.action)}</b><span>${esc(x.title)}</span></div>`
+      + (x.tag ? `<span class="td-tag${RANK_HOT(x) ? ' hot' : ''}">${esc(x.tag)}</span>` : '<span></span>') + `</div>`).join('') + `</div>`;
+    else if (items.length) html += `<p class="tc-done">오늘 할 일을 다 끝냈어요.</p>`;
+    html += `</div>`;
+    box.innerHTML = html;
+    if (opt.onOpen) box.querySelectorAll('.tc-row, .tc-tile').forEach(r => {
+      r.onclick = () => opt.onOpen(r.dataset.t);
+      r.onkeydown = e => { if (e.key === 'Enter') opt.onOpen(r.dataset.t); };
+    });
+  }
+
+  function render(box, snap, live, opt = {}) {
+    if (!document.getElementById('td-css')) { const s = document.createElement('style'); s.id = 'td-css'; s.textContent = CSS; document.head.appendChild(s); }
+    if (opt.compact) return renderCard(box, snap, live, opt);
+    const items = (snap && snap.items) || [];
+    const marked = items.map(it => ({ ...it, done: isDone(it, live) }));
+    const doneN = marked.filter(x => x.done).length;
+    let html = `<div class="td"><div class="td-head"><h2>Today</h2><span class="td-when">${snap ? esc(when(snap)) : ''}</span>`
       + (items.length ? `<span class="td-prog">${doneN} / ${items.length} 완료</span>` : '') + `</div>`
       + (items.length ? `<div class="td-bar"><i style="width:${Math.round(doneN / items.length * 100)}%"></i></div>` : '');
     if (!items.length) html += `<p class="td-empty">오늘 처리할 IST 업무가 없어요.</p>`;
