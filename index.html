@@ -443,20 +443,15 @@ ul.todos li.empty{display:block;padding:28px 16px;text-align:center;color:var(--
 .ret-top{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;flex-direction:row!important}
 .ret-stat{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;border:1px solid var(--line);border-radius:10px;padding:7px 14px;min-width:112px;background:var(--paper);font:inherit;color:var(--ink);text-align:left}
 button.ret-stat{cursor:pointer}button.ret-stat:hover{border-color:var(--accent)}.ret-stat small{font-size:11.5px;color:var(--muted)}.ret-stat b{font-family:var(--mono);font-size:19px;font-weight:800;line-height:1.25}.ret-stat span{font-size:11.5px;color:var(--muted)}
-/* IST 맨 위 그래프: 14일 추이 · 대기 기간 */
-.ist-svg{width:100%;height:auto;display:block;overflow:visible}
-.ist-svg text{font-family:var(--body);fill:var(--muted);font-size:11px}
-.ist-svg .v{fill:var(--ink);font-weight:700;font-size:12px}
-.ist-svg .grid{stroke:var(--line);stroke-width:1}
-.ist-svg .wait{fill:none;stroke:var(--high);stroke-width:2;stroke-linejoin:round}
-.ist-svg rect:hover{opacity:.8}
-.ist-leg2{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);margin-top:4px}
-.ist-leg2 span{display:inline-flex;align-items:center;gap:5px}
-.ist-leg2 i{width:10px;height:10px;border-radius:3px;background:var(--c)}
-.ist-leg2 i.ln{height:2px;width:14px;border-radius:1px}
-.ist-charts{flex:1 1 100%;grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px 26px;margin-top:8px}
-.ist-chart{min-width:0}
+/* IST 맨 위 그래프 (막대 하나를 칸별로 나눠 보여 줘요) */
+.ist-charts{flex:1 1 100%;grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px 22px;margin-top:6px}
 .ist-chart-h{display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.ist-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line);gap:2px}
+.ist-bar i{display:block;height:100%;min-width:6px;transition:flex-grow .3s}
+.ist-leg{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:7px;font-size:12px;color:var(--muted)}
+.ist-leg span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.ist-leg span::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--c)}
+.ist-leg b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
 .ret-stat.late{border-color:color-mix(in srgb,var(--high) 35%,var(--line));background:var(--high-soft)}.ret-stat.late b{color:var(--high)}.ret-stat.on{box-shadow:0 0 0 2px var(--accent)}
 #ret-form[hidden]{display:none!important}.ret-top-btns{margin-left:auto;display:flex;gap:8px;align-items:center}.ret-close{margin-left:auto}
 .ret-bar-slot{display:contents}.ret-all{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:20px;padding:4px 12px 4px 9px;font-size:13px;font-weight:700;cursor:pointer;background:var(--paper)}.ret-all input{width:16px;height:16px;accent-color:var(--accent);margin:0}.ret-group{content-visibility:auto;contain-intrinsic-size:auto 240px}
@@ -2630,7 +2625,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   }
   // 맨 위 요약 · 입력 버튼
   function retRenderTop(){
-    const sec = $('#ret-top'); if (!sec) return; istSetW(sec);
+    const sec = $('#ret-top'); if (!sec) return;
     const all = retItems || [], wait = all.filter(t => t.status !== 'done');
     const late = wait.filter(t => retOldDays(t) >= 7), today = all.filter(t => retLocalDay(t.createdAt) === todayIso);
     const qty = wait.reduce((s, t) => s + (+t.qty || 0), 0);
@@ -2643,8 +2638,8 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       stat('업체', `${new Set(wait.map(t => t.vendor || '')).size}곳`, ''),
       stat('오늘 입력', `${today.length}건`, '', retUi.only === 'today' ? 'on' : '', pick('today')),
       el('div', { class:'ist-charts' },
-        istTrend('최근 14일 회송', all.map(t => ({ start: t.date || '', end: t.status === 'done' ? (t.doneAt || '') : '' }))),
-        istCols('회송 대기 기간 (하차일부터)', istAgeCols(wait.map(t => retOldDays(t))))),
+        istBar('대기 기간 (하차일부터)', istAge(wait.map(t => retOldDays(t)))),
+        istBar('온도별 대기', [{ label:'냉장', n: wait.filter(t => t.temp === 'CH').length, c: IST_C[1] }, { label:'냉동', n: wait.filter(t => t.temp === 'FR').length, c: '#1B3F7A' }, { label:'상온', n: wait.filter(t => t.temp === 'AM').length, c: IST_C[2] }, { label:'미정', n: wait.filter(t => !['CH', 'FR', 'AM'].includes(t.temp)).length, c: 'var(--muted)' }])),
       el('div', { class:'ret-top-btns' },
         el('button', { type:'button', class:'ret-btn' + (retUi.formOpen && retUi.mode === 'paste' ? ' solid' : ''), onclick: () => retUi.formOpen && retUi.mode === 'paste' ? retOpenForm(false) : retOpenForm(true, 'paste') }, '📋 여러 건 붙여넣기'),
         el('button', { type:'button', class:'ret-btn solid ret-add', onclick: () => retUi.formOpen && retUi.mode !== 'paste' ? retOpenForm(false) : retOpenForm(true, 'single') }, retUi.formOpen && retUi.mode !== 'paste' ? '입력 닫기' : '+ 회송 입력')));
@@ -4887,65 +4882,26 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   const istStat = (label, val, sub, cls) => el('div', { class:'ret-stat' + (cls ? ' ' + cls : '') }, el('small', { text: label }), el('b', { text: val }), sub ? el('span', { text: sub }) : null);
   const istDays = d => /^\d{4}-\d{2}-\d{2}$/.test(d || '') ? Math.max(0, Math.round((Date.parse(todayIso) - Date.parse(d)) / 864e5)) : 0;
   const istLocalDay = iso => { if (!iso) return ''; const d = new Date(iso); return isNaN(d) ? '' : new Date(d.getTime() + 9 * 3600e3).toISOString().slice(0, 10); };
-  // ---- 그래프 (SVG) ----
-  const svgEl = (tag, attrs, kids) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); for (const k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]); if (kids) for (const c of [].concat(kids)) if (c) e.append(c); return e; };
-  const svgT = (txt, attrs) => { const t = svgEl('text', attrs); t.textContent = txt; return t; };
-  const istDay = (iso, n) => new Date(Date.parse(iso) + n * 864e5).toISOString().slice(0, 10);
-  // A: 최근 14일 — 하루에 들어온 건 · 끝낸 건 (막대) + 그날 끝 기준 남은 대기 (선)
-  //    units: [{ start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' | '' }]
-  let istW = 560;   // 그래프 한 개 너비 (글자가 줄거나 커지지 않게 실제 너비로 그려요)
-  const istSetW = sec => { const w = sec.clientWidth || $('#istSub').clientWidth || Math.min(window.innerWidth - 32, 1080); istW = Math.round(w >= 680 ? (w - 40 - 26) / 2 : w - 36); };
-  function istTrend(title, units){
-    const days = Array.from({ length: 14 }, (_, i) => istDay(todayIso, i - 13));
-    const inn = days.map(d => units.filter(u => u.start === d).length);
-    const out = days.map(d => units.filter(u => u.end === d).length);
-    const wait = days.map(d => units.filter(u => u.start && u.start <= d && (!u.end || u.end > d)).length);
-    const W = istW, H = 150, L = 4, top = 18, bot = 22, ph = H - top - bot, bw = (W - L) / 14;
-    const max = Math.max(1, ...inn, ...out), wmax = Math.max(1, ...wait);
-    const y = v => top + ph - v / max * ph, yw = v => top + ph - v / wmax * ph * 0.92;
-    const g = [];
-    for (const f of [0, .5, 1]) g.push(svgEl('line', { class:'grid', x1:L, x2:W, y1: top + ph - f * ph, y2: top + ph - f * ph }));
-    days.forEach((d, i) => {
-      const x = L + i * bw, w = Math.max(3, bw / 2 - 5), md = `${+d.slice(5, 7)}/${+d.slice(8)}`;
-      if (inn[i]) g.push(svgEl('rect', { x: x + 3, y: y(inn[i]), width: w, height: top + ph - y(inn[i]), rx: 3, fill:'var(--accent)' }, svgEl('title', {}, document.createTextNode(`${md} 들어옴 ${inn[i]}건`))));
-      if (out[i]) g.push(svgEl('rect', { x: x + 3 + w + 2, y: y(out[i]), width: w, height: top + ph - y(out[i]), rx: 3, fill:'#9DB7E0' }, svgEl('title', {}, document.createTextNode(`${md} 끝냄 ${out[i]}건`))));
-      if ((W < 420 ? i % 3 === 1 : i % 2 === 1) || i === 13) g.push(svgT(i === 13 ? '오늘' : md, { x: x + bw / 2, y: H - 4, 'text-anchor':'middle' }));
-    });
-    g.push(svgEl('polyline', { class:'wait', points: wait.map((v, i) => `${L + i * bw + bw / 2},${yw(v)}`).join(' ') }));
-    g.push(svgEl('circle', { cx: L + 13 * bw + bw / 2, cy: yw(wait[13]), r: 4, fill:'var(--high)' }));
-    g.push(svgT(`대기 ${wait[13]}`, { class:'v', x: L + 13 * bw + bw / 2 - 8, y: yw(wait[13]) - 8, 'text-anchor':'end' }));
-    const sumIn = inn.reduce((a, b) => a + b, 0), sumOut = out.reduce((a, b) => a + b, 0);
+  // 막대 그래프 하나: segs = [{ label, n, c }]
+  const IST_C = ['#9DB7E0', 'var(--accent)', '#E39A85', 'var(--high)'];
+  function istBar(title, segs){
+    const total = segs.reduce((a, x) => a + x.n, 0);
+    const on = segs.filter(x => x.n);
     return el('div', { class:'ist-chart' },
-      el('div', { class:'ist-chart-h' }, el('span', { text: title }), el('span', { text: `14일 동안 들어옴 ${sumIn} · 끝냄 ${sumOut}` })),
-      svgEl('svg', { class:'ist-svg', viewBox:`0 0 ${W} ${H}`, role:'img', 'aria-label': `${title}: 14일 동안 들어옴 ${sumIn}건, 끝냄 ${sumOut}건, 지금 대기 ${wait[13]}건` }, g),
-      el('div', { class:'ist-leg2' },
-        el('span', { style:'--c:var(--accent)' }, el('i'), '들어옴'), el('span', { style:'--c:#9DB7E0' }, el('i'), '끝냄'),
-        el('span', { style:'--c:var(--high)' }, el('i', { class:'ln' }), '남은 대기')));
+      el('div', { class:'ist-chart-h' }, el('span', { text: title }), el('span', { text: `${total}건` })),
+      el('div', { class:'ist-bar', role:'img', 'aria-label': title + ' ' + segs.map(x => `${x.label} ${x.n}건`).join(', ') },
+        ...(on.length ? on.map(x => el('i', { style:`flex-grow:${x.n};background:${x.c}`, title:`${x.label} ${x.n}건` })) : [])),
+      el('div', { class:'ist-leg' }, ...segs.map(x => el('span', { style:`--c:${x.c}` }, x.label + ' ', el('b', { text: String(x.n) })))));
   }
-  // C: 세로 막대 (구간별 건수, 값은 막대 위에)
-  function istCols(title, segs){
-    const W = istW, H = 150, top = 22, bot = 22, ph = H - top - bot, n = segs.length, cw = W / n;
-    const max = Math.max(1, ...segs.map(x => x.n)), g = [svgEl('line', { class:'grid', x1:0, x2:W, y1: top + ph, y2: top + ph })];
-    segs.forEach((x, i) => {
-      const h = x.n ? Math.max(4, x.n / max * ph) : 0, bx = i * cw + cw * 0.18, w = cw * 0.64;
-      if (h) g.push(svgEl('rect', { x: bx, y: top + ph - h, width: w, height: h, rx: 4, fill: x.c }, svgEl('title', {}, document.createTextNode(`${x.label} ${x.n}건`))));
-      g.push(svgT(`${x.n}건`, { class:'v', x: i * cw + cw / 2, y: top + ph - h - 6, 'text-anchor':'middle' }));
-      g.push(svgT(x.label, { x: i * cw + cw / 2, y: H - 4, 'text-anchor':'middle' }));
-    });
-    return el('div', { class:'ist-chart' },
-      el('div', { class:'ist-chart-h' }, el('span', { text: title }), el('span', { text: `${segs.reduce((a, x) => a + x.n, 0)}건` })),
-      svgEl('svg', { class:'ist-svg', viewBox:`0 0 ${W} ${H}`, role:'img', 'aria-label': title + ': ' + segs.map(x => `${x.label} ${x.n}건`).join(', ') }, g));
-  }
-  const AGE_C = ['#C9D7EE', '#9DB7E0', '#E39A85', '#C9634B', '#8E2E1C'];
-  const istAgeCols = days => [
-    { label:'0~2일', n: days.filter(d => d <= 2).length, c: AGE_C[0] },
-    { label:'3~6일', n: days.filter(d => d >= 3 && d <= 6).length, c: AGE_C[1] },
-    { label:'7~13일', n: days.filter(d => d >= 7 && d <= 13).length, c: AGE_C[2] },
-    { label:'14~29일', n: days.filter(d => d >= 14 && d <= 29).length, c: AGE_C[3] },
-    { label:'30일+', n: days.filter(d => d >= 30).length, c: AGE_C[4] },
+  // 대기 기간: 0~2일 · 3~6일 · 7~13일 · 14일 이상
+  const istAge = days => [
+    { label:'0~2일', n: days.filter(d => d <= 2).length, c: IST_C[0] },
+    { label:'3~6일', n: days.filter(d => d >= 3 && d <= 6).length, c: IST_C[1] },
+    { label:'7~13일', n: days.filter(d => d >= 7 && d <= 13).length, c: IST_C[2] },
+    { label:'14일+', n: days.filter(d => d >= 14).length, c: IST_C[3] },
   ];
   function ovRenderTop(){
-    const sec = $('#ov-top'); if (!sec || !ovItems) return; istSetW(sec);
+    const sec = $('#ov-top'); if (!sec || !ovItems) return;
     const wait = ovItems.filter(t => t.status !== 'done');
     const noMail = wait.filter(t => !t.mail), late = wait.filter(t => istDays(t.date) >= 7);
     const by = m => wait.filter(t => (t.method || '') === m);
@@ -4958,13 +4914,13 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
       istStat('메일 전', `${noMail.length}건`, '', noMail.length ? 'late' : ''),
       istStat('7일 넘게 대기', `${late.length}건`, '', late.length ? 'late' : ''),
       el('div', { class:'ist-charts' },
-        istTrend('최근 14일 과매입', ovItems.map(t => ({ start: t.date || '', end: t.status === 'done' ? (t.doneAt || '') : '' }))),
-        istCols('과매입 대기 기간 (생성일부터)', istAgeCols(wait.map(t => istDays(t.date))))));
+        istBar('처리 방법별 대기', [{ label:'가상반출', n: vr.length, c: IST_C[1] }, { label:'차감매입', n: ded.length, c: IST_C[0] }, { label:'미정 · 기타', n: etc.length, c: 'var(--muted)' }]),
+        istBar('대기 기간 (생성일부터)', istAge(wait.map(t => istDays(t.date))))));
   }
   function obRenderTop(){
-    const sec = $('#ob-top'); if (!sec || !obItems) return; istSetW(sec);
+    const sec = $('#ob-top'); if (!sec || !obItems) return;
     const groups = new Map();
-    for (const t of obItems){ const k = obKey(t); const g = groups.get(k) || { stage:4, due:'', vendor:t.vendor || '', n:0, cdate:'', done:'' }; g.n++; if (t.doneAt && t.doneAt > g.done) g.done = t.doneAt; g.stage = Math.min(g.stage, +t.stage || 1); if (t.due && (!g.due || t.due < g.due)) g.due = t.due; if (t.cdate && (!g.cdate || t.cdate < g.cdate)) g.cdate = t.cdate; groups.set(k, g); }
+    for (const t of obItems){ const k = obKey(t); const g = groups.get(k) || { stage:4, due:'', vendor:t.vendor || '', n:0, cdate:'' }; g.n++; g.stage = Math.min(g.stage, +t.stage || 1); if (t.due && (!g.due || t.due < g.due)) g.due = t.due; if (t.cdate && (!g.cdate || t.cdate < g.cdate)) g.cdate = t.cdate; groups.set(k, g); }
     const open = [...groups.values()].filter(g => g.stage < 4);
     const over = open.filter(g => g.due && g.due < todayIso), dueToday = open.filter(g => g.due === todayIso);
     sec.replaceChildren(
@@ -4973,12 +4929,11 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
       istStat('오늘 기한', `${dueToday.length}건`, '', dueToday.length ? 'late' : ''),
       istStat('오늘 생성', `${[...groups.values()].filter(g => g.cdate === todayIso).length}건`, ''),
       el('div', { class:'ist-charts' },
-        istTrend('최근 14일 반출 (그룹)', [...groups.values()].map(g => ({ start: g.cdate || '', end: g.stage >= 4 ? (g.done || '') : '' }))),
-        istCols('반출 기한', [
-          { label:'지남', n: over.length, c: AGE_C[4] }, { label:'오늘', n: dueToday.length, c: AGE_C[2] },
-          { label:'3일 안', n: open.filter(g => g.due > todayIso && (Date.parse(g.due) - Date.parse(todayIso)) / 864e5 <= 3).length, c: AGE_C[1] },
-          { label:'4일+', n: open.filter(g => g.due && (Date.parse(g.due) - Date.parse(todayIso)) / 864e5 > 3).length, c: AGE_C[0] },
-          { label:'기한 없음', n: open.filter(g => !g.due).length, c: 'var(--line)' }])));
+        istBar('진행 단계', [{ label:'생성', n: open.filter(g => g.stage === 1).length, c: IST_C[0] }, { label:'포장', n: open.filter(g => g.stage === 2).length, c: IST_C[1] }, { label:'택배접수', n: open.filter(g => g.stage === 3).length, c: '#1B3F7A' }]),
+        istBar('반출 기한', [
+          { label:'지남', n: over.length, c: IST_C[3] }, { label:'오늘', n: dueToday.length, c: IST_C[2] },
+          { label:'3일 안', n: open.filter(g => g.due > todayIso && (Date.parse(g.due) - Date.parse(todayIso)) / 864e5 <= 3).length, c: IST_C[1] },
+          { label:'여유 · 기한 없음', n: open.filter(g => !g.due || (Date.parse(g.due) - Date.parse(todayIso)) / 864e5 > 3).length, c: IST_C[0] }])));
   }
   function istCounts(){
     ovRenderTop(); obRenderTop();
