@@ -1,109 +1,93 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><title>IST 월간 결산 · GWJ3 IB</title>
+<meta name="robots" content="noindex,nofollow"><title>IST 월 결산 · GWJ3 IB</title>
 <link rel="icon" type="image/png" href="/icons/favicon-64.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
-:root{--bg:#EEF1F5;--paper:#FFFFFF;--ink:#18202C;--muted:#5E6776;--line:#D5DBE4;--accent:#2557A7;--accent-soft:#DDE6F4;--high:#B4452F;--kakao:#FEE500;--kakao-ink:#191600}
+:root{--bg:#EEF1F5;--paper:#FFFFFF;--ink:#18202C;--muted:#5E6776;--line:#D5DBE4;--accent:#2557A7;--accent-soft:#DDE6F4;--high:#B4452F}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#10141B;--paper:#171D27;--ink:#E6EAF0;--muted:#939DAD;--line:#29313F;--accent:#7FA9EE;--accent-soft:#1C2A42;--high:#F08A73}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;padding:0 16px}
-main{max-width:880px;margin:0 auto;padding:28px 0 48px}
+main{max-width:760px;margin:0 auto;padding:28px 0 48px}
 header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
 h1{font-size:24px;margin:0;letter-spacing:-.01em}.sub{color:var(--muted);margin:2px 0 0;font-size:13px}
 .mon{display:flex;gap:6px;align-items:center}
 .mon button,.mon input{font:inherit;font-size:14px;border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 14px}
 .mon button{cursor:pointer;font-weight:600}.mon button:hover{color:var(--accent)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-@media (max-width:720px){.grid{grid-template-columns:1fr}}
-.card{background:var(--paper);border-radius:14px;padding:18px 18px 16px}
-.card h2{font-size:15px;margin:0 0 10px;color:var(--muted);font-weight:600}
-.big{font-size:32px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
-.big small{font-size:14px;color:var(--muted);font-weight:500;margin-left:6px}
-.kv{display:flex;flex-wrap:wrap;gap:4px 14px;margin:10px 0 0;font-size:14px}
-.kv b{font-variant-numeric:tabular-nums}.warn{color:var(--high)}
-.sec{margin-top:12px}
-.sec h3{font-size:13px;color:var(--muted);margin:14px 0 6px;font-weight:600}
-.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-size:14px;padding:3px 0}
-.row .bar{grid-column:1/-1;height:5px;background:var(--accent-soft);border-radius:3px;overflow:hidden}
-.row .bar i{display:block;height:100%;background:var(--accent)}
-.row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row b{font-variant-numeric:tabular-nums;font-weight:600}
-.empty{color:var(--muted);font-size:13px}
-.ka{margin-top:16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:12px}
-@media (max-width:720px){.ka{grid-template-columns:1fr}}
-.bubble{background:#B2C7D9;border-radius:14px;padding:16px}
-.bubble .msg{background:#fff;color:#191919;border-radius:4px 14px 14px 14px;padding:12px 14px;white-space:pre-wrap;font-size:14px;max-width:320px}
-.bubble .btn{display:block;margin-top:10px;background:#F2F2F2;color:#191919;text-align:center;border-radius:6px;padding:8px;font-size:13px}
+
+.card{background:var(--paper);border-radius:14px;padding:16px 18px}
+.card h2{font-size:15px;margin:0 0 8px;color:var(--muted);font-weight:600}
+.pair{display:flex;gap:22px}
+.pair div{display:flex;flex-direction:column}
+.pair span{font-size:13px;color:var(--muted)}
+.pair b{font-size:30px;line-height:1.15;font-variant-numeric:tabular-nums}
+.pair .left b{color:var(--high)}
+.tbl{margin-top:12px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:13px}
+tr.sum td{font-weight:700;border-bottom:0}
+.note{font-size:12px;color:var(--muted);margin:8px 2px 0}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
+.dl{font:inherit;font-weight:600;background:var(--accent);color:#fff;border:0;border-radius:999px;padding:10px 20px;cursor:pointer}
+.dl:disabled{opacity:.6}
+.bubble{background:#B2C7D9;border-radius:14px;padding:16px;margin-top:12px}
 .bubble .who{font-size:12px;color:#3C4B5A;margin-bottom:6px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-td,th{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600}
+.bubble .msg{background:#fff;color:#191919;border-radius:4px 14px 14px 14px;padding:12px 14px;white-space:pre-wrap;font-size:14px;max-width:300px}
+.bubble .btn{display:block;max-width:300px;margin-top:8px;background:#F2F2F2;color:#191919;text-align:center;border-radius:6px;padding:8px;font-size:13px}
 #lock{max-width:360px;margin:80px auto;background:var(--paper);border-radius:14px;padding:22px}
 #lock input{width:100%;font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);margin:10px 0}
 #lock button{width:100%;font:inherit;font-weight:600;background:var(--accent);color:#fff;border:0;border-radius:999px;padding:9px}
 .err{color:var(--high);font-size:13px}
+.pair span{white-space:nowrap}
+@media (max-width:600px){.grid{gap:8px}.grid .card{padding:12px}.pair{gap:12px}.pair b{font-size:24px}.card h2{font-size:14px}.tbl{padding:14px 12px}th,td{padding:8px 4px;font-size:13px}th{font-size:12px}}
 </style></head><body>
 <div id="lock" hidden><b>팀 비밀번호를 입력하세요</b><input id="pw" type="password" autocomplete="current-password"><button id="go">열기</button><p class="err" id="lockErr"></p></div>
 <main id="app" hidden>
   <header>
-    <div><h1 id="title">IST 월간 결산</h1><p class="sub" id="sub"></p></div>
+    <div><h1 id="title">IST 월 결산</h1><p class="sub" id="sub"></p></div>
     <div class="mon"><button id="prev" aria-label="이전 달">‹</button><input id="month" type="month"><button id="next" aria-label="다음 달">›</button></div>
   </header>
   <p class="err" id="err"></p>
   <div class="grid" id="cards"></div>
-  <div class="ka">
-    <div class="card"><h2>카카오톡으로 받을 메시지</h2><div class="bubble"><div class="who">GWJ3 IB 알림</div><div class="msg" id="kt"></div><span class="btn">자세히 보기</span></div></div>
-    <div class="card" id="lists"></div>
-  </div>
+  <section class="card tbl" style="margin-top:12px">
+    <h2>결산표</h2>
+    <table id="tbl"></table>
+    <p class="note">전월 이월 + 신규 − 완료 = 남은 건 · 반출은 반출그룹 하나를 1건으로 세요</p>
+    <div class="actions"><button class="dl" id="dl">엑셀 결산표 받기</button><span class="note" id="dlMsg" style="margin:0"></span></div>
+  </section>
+  <section class="card" style="margin-top:12px"><h2>말일에 카카오톡으로 받을 메시지</h2>
+    <div class="bubble"><div class="who">GWJ3 IB 알림</div><div class="msg" id="kt"></div><span class="btn">결산표 보기</span></div></section>
 </main>
 <script>
 (() => {
   const $ = id => document.getElementById(id);
   const ls = { get(k){ try { return localStorage.getItem(k) || ''; } catch { return ''; } }, set(k,v){ try { localStorage.setItem(k, v); } catch {} } };
-  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
   let key = ls.get('team-key');
   const q = new URLSearchParams(location.search);
   const kst = new Date(Date.now() + 9 * 3600e3).toISOString();
-  // 기본은 지난달 결산 (주소에 ?month=2026-11 처럼 바꿀 수 있어요)
   const shift = (m, d) => { let [y, mo] = m.split('-').map(Number); mo += d; while (mo < 1) { mo += 12; y--; } while (mo > 12) { mo -= 12; y++; } return `${y}-${String(mo).padStart(2, '0')}`; };
+  // 기본은 지난달 결산 (주소 끝에 ?month=2026-11 처럼 바꿀 수 있어요)
   let month = /^\d{4}-\d{2}$/.test(q.get('month') || '') ? q.get('month') : shift(kst.slice(0, 7), -1);
-
-  function rows(list, unit) {
-    if (!list || !list.length) return '<p class="empty">없어요</p>';
-    const max = Math.max(...list.map(x => x.count), 1);
-    return list.map(x => `<div class="row"><span>${esc(x.name)}</span><b>${x.count}${unit || '건'}</b><div class="bar"><i style="width:${Math.round(x.count / max * 100)}%"></i></div></div>`).join('');
-  }
-  const vs = (now, before) => before == null ? '' : `<small>지난달 ${before}건</small>`;
+  const hdr = () => key ? { 'x-team-key': encodeURIComponent(key) } : {};
 
   function render(rp) {
     const mo = Number(rp.month.slice(5));
     $('title').textContent = `${rp.month.slice(0, 4)}년 ${mo}월 IST 결산`;
-    $('sub').textContent = `기준: ${rp.today} 현재 데이터 · 대기 건수는 오늘 남아 있는 전체`;
+    $('sub').textContent = rp.partial ? `진행 중인 달이에요 · ${rp.cut} 기준` : `${rp.month}-01 ~ ${rp.cut}`;
     $('month').value = rp.month;
-    const R = rp.returns, O = rp.overs, X = rp.outs;
-    $('cards').innerHTML = `
-      <section class="card"><h2>회송</h2>
-        <div class="big">${R.made}건${vs(R.made, rp.last.returns)}</div>
-        <div class="kv"><span>수량 <b>${R.madeQty.toLocaleString()}</b></span><span>이달 완료 <b>${R.done}</b></span><span>대기 <b>${R.wait}</b></span>${R.waitOld ? `<span class="warn">7일 넘은 대기 <b>${R.waitOld}</b></span>` : ''}${R.avgDays != null ? `<span>평균 처리 <b>${R.avgDays}일</b></span>` : ''}</div>
-        <div class="sec"><h3>사유</h3>${rows(R.byReason)}<h3>업체</h3>${rows(R.byVendor)}<h3>온도</h3>${rows(R.byTemp)}</div></section>
-      <section class="card"><h2>과매입</h2>
-        <div class="big">${O.made}건${vs(O.made, rp.last.overs)}</div>
-        <div class="kv"><span>수량 <b>${O.madeQty.toLocaleString()}</b></span><span>이달 완료 <b>${O.done}</b></span><span>대기 <b>${O.wait}</b></span>${O.waitNoMail ? `<span class="warn">메일 안 보낸 대기 <b>${O.waitNoMail}</b></span>` : ''}</div>
-        <div class="sec"><h3>처리 방법</h3>${rows(O.byMethod)}<h3>담당자</h3>${rows(O.byWho)}<h3>업체</h3>${rows(O.byVendor)}</div></section>
-      <section class="card"><h2>반출</h2>
-        <div class="big">${X.made}건${vs(X.made, rp.last.outs)}</div>
-        <div class="kv"><span>상품 <b>${X.madeLines}</b>줄</span><span>이달 완료 <b>${X.done}</b></span><span>진행 중 <b>${X.open}</b></span>${X.late ? `<span class="warn">기한 지남 <b>${X.late}</b></span>` : ''}</div>
-        <div class="sec"><h3>진행 중 단계</h3>${rows(X.byStage)}<h3>업체</h3>${rows(X.byVendor)}</div></section>`;
+    $('cards').innerHTML = rp.rows.map(r => `<section class="card"><h2>${r.name}</h2><div class="pair"><div><span>완료</span><b>${r.done}</b></div><div class="left"><span>남은 건</span><b>${r.left}</b></div></div></section>`).join('');
+    const tr = (r, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td>${r.name}</td><td>${r.carry}</td><td>${r.added}</td><td>${r.done}</td><td>${r.left}</td></tr>`;
+    $('tbl').innerHTML = `<tr><th>구분</th><th>전월 이월</th><th>신규</th><th>완료</th><th>남은 건</th></tr>` + rp.rows.map(r => tr(r)).join('') + tr(rp.total, 'sum');
     $('kt').textContent = rp.text;
-    const old = R.oldest.length ? `<table><tr><th>하차일</th><th>업체</th><th>상품</th><th>경과</th></tr>${R.oldest.map(x => `<tr><td>${esc(x.date)}</td><td>${esc(x.vendor)}</td><td>${esc(x.name)}</td><td>${x.days}일</td></tr>`).join('')}</table>` : '<p class="empty">없어요</p>';
-    const late = X.lateList.length ? `<table><tr><th>그룹</th><th>업체</th><th>기한</th><th>단계</th></tr>${X.lateList.map(x => `<tr><td>${esc(x.grp)}</td><td>${esc(x.vendor)}</td><td>${esc(x.due)}</td><td>${esc(x.stage)}</td></tr>`).join('')}</table>` : '<p class="empty">없어요</p>';
-    $('lists').innerHTML = `<h2>챙길 것</h2><div class="sec"><h3>오래된 회송 대기</h3>${old}<h3>기한 지난 반출</h3>${late}</div>`;
   }
 
   async function load() {
-    $('err').textContent = '';
-    const r = await fetch('/api/report?month=' + month, { headers: key ? { 'x-team-key': encodeURIComponent(key) } : {} });
+    $('err').textContent = ''; $('dlMsg').textContent = '';
+    const r = await fetch('/api/report?month=' + month, { headers: hdr() });
     const d = await r.json().catch(() => ({}));
     if (r.status === 401 || d.locked) { $('app').hidden = true; $('lock').hidden = false; $('lockErr').textContent = key ? (d.error || '') : ''; return; }
     $('lock').hidden = true; $('app').hidden = false;
@@ -111,6 +95,19 @@ td,th{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}th{col
     history.replaceState(null, '', '?month=' + month);
     render(d);
   }
+  $('dl').onclick = async () => {
+    $('dl').disabled = true; $('dlMsg').textContent = '만드는 중…';
+    try {
+      const r = await fetch(`/api/report?month=${month}&xlsx=1`, { headers: hdr() });
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || '엑셀을 만들지 못했어요.');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(await r.blob());
+      a.download = `IST결산_${month.replace('-', '')}.xlsx`;
+      document.body.appendChild(a); a.click(); a.remove();
+      $('dlMsg').textContent = '';
+    } catch (e) { $('dlMsg').textContent = e.message; }
+    finally { $('dl').disabled = false; }
+  };
   $('go').onclick = () => { key = $('pw').value; ls.set('team-key', key); load(); };
   $('pw').onkeydown = e => { if (e.key === 'Enter') $('go').click(); };
   $('prev').onclick = () => { month = shift(month, -1); load(); };
