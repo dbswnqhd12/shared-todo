@@ -61,8 +61,8 @@ tr.sum td{font-weight:700;border-bottom:0}
     <p class="note">전월 이월 + 신규 − 완료 = 남은 건 · 반출은 반출그룹 하나를 1건으로 세요</p>
     <div class="actions"><button class="dl" id="dl">엑셀 결산표 받기</button><span class="note" id="dlMsg" style="margin:0"></span></div>
   </section>
-  <section class="card" style="margin-top:12px"><h2>말일에 카카오톡으로 받을 메시지</h2>
-    <div class="bubble"><div class="who">GWJ3 IB 알림</div><div class="msg" id="kt"></div><span class="btn">엑셀 받기</span><span class="btn">결산표 보기</span></div>
+  <section class="card" style="margin-top:12px"><h2>말일 자동 보내기</h2>
+    <p class="note" style="margin:0 2px 8px">이메일에는 위 결산표와 엑셀 파일이 첨부돼요. 카카오톡에는 아래처럼 와요.</p><div class="bubble"><div class="who">GWJ3 IB 알림</div><div class="msg" id="kt"></div><span class="btn">엑셀 받기</span><span class="btn">결산표 보기</span></div>
     <p class="note" id="kaState">카카오 연결 상태를 확인하는 중…</p>
     <div class="actions"><button class="ghostb" id="kaConn" hidden>카카오톡 연결하기</button><button class="ghostb" id="kaSend" hidden>지금 이 달 결산 보내 보기</button></div>
   </section>
@@ -120,11 +120,13 @@ tr.sum td{font-weight:700;border-bottom:0}
     const d = await r.json().catch(() => ({}));
     if (!r.ok) { $('kaState').textContent = d.error || ''; return; }
     const exp = d.refreshExp ? new Date(d.refreshExp + 9 * 3600e3).toISOString().slice(0, 10) : '';
-    $('kaState').textContent = !d.ready ? '카카오 앱 키가 아직 설정되지 않았어요.'
-      : d.connected ? `카카오톡 연결됨 · 매달 말일 저녁 8시쯤 '나와의 채팅'으로 보내요${exp ? ` (연결 유지 ~${exp}, 보낼 때마다 자동 연장)` : ''}`
-      : '카카오톡이 아직 연결되지 않았어요. 받을 사람의 카카오 계정으로 연결해 주세요.';
-    $('kaConn').hidden = !d.ready; $('kaConn').textContent = d.connected ? '다른 계정으로 다시 연결' : '카카오톡 연결하기';
-    $('kaSend').hidden = !d.connected;
+    const lines = [];
+    if (d.mail) lines.push(`이메일 연결됨 (${(d.mailTo || []).join(', ')}) · 엑셀을 첨부해서 보내요`);
+    if (d.connected) lines.push(`카카오톡 연결됨${exp ? ` (연결 유지 ~${exp}, 자동 연장)` : ''}`);
+    else if (d.ready) lines.push('카카오톡은 아직 연결되지 않았어요.');
+    $('kaState').textContent = lines.length ? `매달 말일 저녁 8시쯤 자동으로 보내요. ${lines.join(' · ')}` : '보낼 곳(이메일 또는 카카오톡)이 아직 설정되지 않았어요.';
+    $('kaConn').hidden = !d.ready; $('kaConn').textContent = d.connected ? '카카오톡 다시 연결' : '카카오톡 연결하기';
+    $('kaSend').hidden = !(d.connected || d.mail);
   }
   $('kaConn').onclick = async () => {
     const r = await fetch('/api/report?kakao=start', { headers: hdr() });
@@ -135,7 +137,7 @@ tr.sum td{font-weight:700;border-bottom:0}
     $('kaSend').disabled = true; $('kaState').textContent = '보내는 중…';
     const r = await fetch('/api/report?kakao=send&month=' + month, { method: 'POST', headers: hdr() });
     const d = await r.json().catch(() => ({}));
-    $('kaState').textContent = r.ok ? '보냈어요. 카카오톡 나와의 채팅을 확인해 보세요.' : (d.error || '보내지 못했어요.');
+    $('kaState').textContent = r.ok ? `보냈어요 (${(d.sent || []).map(x => x === 'mail' ? '이메일' : '카카오톡').join(', ')}).${d.errors && d.errors.length ? ' 일부 실패: ' + d.errors.join(' / ') : ''}` : (d.error || '보내지 못했어요.');
     $('kaSend').disabled = false;
   };
   const kq = q.get('kakao');
