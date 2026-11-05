@@ -612,6 +612,15 @@ button.ret-stat{cursor:pointer}button.ret-stat:hover{border-color:var(--accent)}
 .ist-sub button b{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--high)}
 .ist-sub button[aria-pressed=true]{color:var(--ink);border-bottom-color:var(--accent)}
 .ist-sub button:hover{color:var(--ink)}
+/* IST 지연 건 알림 배지 (회송 7일 넘게 대기 + 반출 기한 지남) */
+.seg button[data-v=ist]{position:relative}
+.seg-badge{display:inline-block;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--high);color:#fff!important;font:700 11px/18px var(--mono);text-align:center;vertical-align:1px;box-sizing:border-box}
+.seg-badge[hidden]{display:none}
+.ist-late{font-style:normal;font-size:11px;font-weight:700;color:#fff;background:var(--high);border-radius:9px;padding:1px 7px;line-height:16px}
+.ist-late[hidden]{display:none}
+@media (max-width:760px){
+  .seg-badge{position:absolute;top:0;left:calc(50% + 6px);margin:0;min-width:17px;height:17px;line-height:17px;font-size:10.5px;box-shadow:0 0 0 2px var(--paper)}
+}
 /* IST 반출 */
 .ob-grp{border:1px solid var(--line);border-radius:9px;padding:6px 12px 12px;margin:0 0 10px}
 .ob-grp legend{font-size:12px;font-weight:800;color:var(--muted);padding:0 4px}.ob-grp legend small{font-weight:500}
@@ -1043,7 +1052,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   <div class="seg" role="group" aria-label="화면">
     <button type="button" data-v="cal" aria-pressed="true"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>달력</span></button>
     <button type="button" data-v="ho" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10l3 3v13H4V4z"/><path d="M8 11h8M8 15h6"/></svg><span>인수인계</span></button>
-    <button type="button" data-v="ist" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-5 9 5v9l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v9"/></svg><span>IST</span></button>
+    <button type="button" data-v="ist" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-5 9 5v9l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v9"/></svg><span>IST</span><b class="seg-badge" id="istBadge" hidden></b></button>
     <button type="button" data-v="pp" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14l-1 11H6z"/><path d="M9 9a3 3 0 0 1 6 0"/></svg><span>프리팩</span></button>
     <button type="button" data-v="buf" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7M17.5 14v7"/></svg><span class="sl-full">Consolidation</span><span class="sl-short">Consol.</span></button>
     <button type="button" data-v="prod" aria-pressed="false"><svg class="seg-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>생산성</span></button>
@@ -1051,9 +1060,9 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 
   <section class="ho" id="ho" hidden aria-label="시프트 교대 인수인계"></section>
   <nav class="ist-sub" id="istSub" hidden aria-label="IST">
-    <button type="button" data-s="ret" aria-pressed="false">회송 <b id="istCntRet"></b></button>
+    <button type="button" data-s="ret" aria-pressed="false">회송 <b id="istCntRet"></b><i class="ist-late" id="istLateRet" hidden></i></button>
     <button type="button" data-s="over" aria-pressed="false">과매입 <b id="istCntOver"></b></button>
-    <button type="button" data-s="out" aria-pressed="false">반출 <b id="istCntOut"></b></button>
+    <button type="button" data-s="out" aria-pressed="false">반출 <b id="istCntOut"></b><i class="ist-late" id="istLateOut" hidden></i></button>
   </nav>
   <section class="ret" id="ret" hidden aria-label="IST 회송"></section>
   <section class="ret" id="over" hidden aria-label="IST 과매입"></section>
@@ -1253,6 +1262,8 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       if (ist && retRev !== rev) loadReturns();
       if (ist && ovRev !== rev) loadOvers();
       if (ist && obRev !== rev) loadOuts();
+      if (!ist && retRev !== rev) loadReturns();   // IST 밖에서도 알림 배지용으로 회송 · 반출을 불러와요
+      if (!ist && obRev !== rev) loadOuts();
       if (view === 'prod' && prRev !== rev) prLoad();
       if (view === 'pp' && ppRev !== rev) ppLoad();
       if (view === 'buf' && bfRev !== rev) bfLoad();
@@ -4920,6 +4931,26 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     $('#istCntOver').textContent = o == null ? '' : '대기 ' + o;
     const g = obItems ? new Set(obItems.filter(t => (t.stage || 1) < 4).map(t => obKey(t))).size : null;
     $('#istCntOut').textContent = g == null ? '' : '진행 ' + g;
+    istAlert();
+  }
+  // 알림 배지: 회송 7일 넘게 대기 + 반출 기한 지남 (IST 화면 맨 위 숫자 칸과 같은 기준)
+  const IST_LATE_DAYS = 7;
+  function istAlert(){
+    const retLate = retItems ? retItems.filter(t => t.status !== 'done' && retOldDays(t) >= IST_LATE_DAYS).length : 0;
+    let obOver = 0;
+    if (obItems){
+      const groups = new Map();
+      for (const t of obItems){ const k = obKey(t); const g = groups.get(k) || { stage:4, due:'' }; g.stage = Math.min(g.stage, +t.stage || 1); if (t.due && (!g.due || t.due < g.due)) g.due = t.due; groups.set(k, g); }
+      obOver = [...groups.values()].filter(g => g.stage < 4 && g.due && g.due < todayIso).length;
+    }
+    const n = retLate + obOver, b = $('#istBadge'); if (!b) return;
+    const parts = [retLate ? `회송 ${IST_LATE_DAYS}일 넘게 대기 ${retLate}건` : '', obOver ? `반출 기한 지남 ${obOver}건` : ''].filter(Boolean);
+    b.hidden = !n; b.textContent = n > 99 ? '99+' : String(n);
+    b.closest('button').title = n ? '확인할 IST 건: ' + parts.join(', ') : '';
+    b.setAttribute('aria-label', n ? parts.join(', ') : '');
+    const lr = $('#istLateRet'), lo = $('#istLateOut');
+    lr.hidden = !retLate; lr.textContent = `${IST_LATE_DAYS}일+ ${retLate}`; lr.title = `${IST_LATE_DAYS}일 넘게 대기 ${retLate}건`;
+    lo.hidden = !obOver; lo.textContent = `지남 ${obOver}`; lo.title = `반출 기한 지남 ${obOver}건`;
   }
   function enterEdit(){ askEdit = false; editMode = true; render(); const el = $('#add-day'); if (el) el.focus(); }
   $('#editToggle').onclick = () => {
