@@ -8,9 +8,9 @@
 //   POST /api/report?kakao=send&month=…     → 지금 보내 보기 (설정된 메일 · 카톡 모두)
 //   GET  /api/report?cron=1                 → Vercel 예약 실행 (매일 저녁 8시, 말일에만 보내고 다른 날은 카카오 연결만 유지)
 // 화면은 /report.html 에서 봐요.
-import { guard, fail, redis, kstToday } from '../lib/store.js';
+import { guard, fail, redis, kstToday, body } from '../lib/store.js';
 import { buildIstReport, reportXlsx, isLastDayKst } from '../lib/ist-report.js';
-import { mailReady, mailTo, sendMail } from '../lib/mail.js';
+import { mailConfig, saveMailConfig, mask, sendMail } from '../lib/mail.js';
 import { PUBLIC_URL, kakaoReady, randomToken, startUrl, finishLogin, status, sendToMe, keepAlive } from '../lib/kakao.js';
 
 const DL_DAYS = 31;
@@ -29,7 +29,7 @@ async function sendReport(req, month) {
   const rp = await buildIstReport(month);
   const view = `${base}/report.html?month=${rp.month}`;
   const sent = [], errors = [];
-  if (mailReady()) {
+  if ((await mailConfig()).ready) {
     const mo = Number(rp.month.slice(5));
     const esc = v => String(v).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
     const td = 'style="padding:6px 12px;border:1px solid #D5DBE4;text-align:right"';
@@ -70,7 +70,9 @@ export default async function handler(req, res) {
     }
     // 말일 예약 실행 (Vercel이 CRON_SECRET을 붙여서 불러요)
     if (q.cron) {
-      if (!process.env.CRON_SECRET || req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) return res.status(401).json({ error: 'unauthorized' });
+      // CRON_SECRET을 넣었으면 그걸로, 없으면 Vercel 예약 실행 표시로 확인해요 (어차피 말일에만 본인 메일로 보내요)
+      const okCron = process.env.CRON_SECRET ? req.headers.authorization === `Bearer ${process.env.CRON_SECRET}` : /^vercel-cron\//.test(req.headers['user-agent'] || '');
+      if (!okCron) return res.status(401).json({ error: 'unauthorized' });
       const today = kstToday();
       if (!isLastDayKst(today)) return res.status(200).json({ skipped: '말일이 아니에요', today, renewed: await keepAlive().catch(() => false) });
       return res.status(200).json(await sendReport(req, today.slice(0, 7)));
@@ -87,7 +89,17 @@ export default async function handler(req, res) {
 
   if (!(await guard(req, res))) return;
   try {
-    if (q.kakao === 'status') return res.status(200).json({ ...(await status()), mail: mailReady(), mailTo: mailTo() });
+    if (q.kakao === 'status') { const mc = await mailConfig(); return res.status(200).json({ ...(await status()), mail: mc.ready, mailTo: mask(mc.to), editPw: !!process.env.EDIT_PASSWORD }); }
+    // 메일 설정 저장 (편집 비밀번호가 설정돼 있으면 그것도 맞아야 해요)
+    if (q.mail === 'save') {
+      if (req.method !== 'POST') return res.status(405).json({ error: '지원하지 않는 요청이에요.' });
+      const ep = process.env.EDIT_PASSWORD;
+      let given = ''; try { given = decodeURIComponent(req.headers['x-edit-key'] || ''); } catch { given = ''; }
+      if (ep && given !== ep) return res.status(403).json({ error: given ? '편집 비밀번호가 틀렸어요.' : '편집 비밀번호를 입력하세요.' });
+      try { await saveMailConfig(body(req)); } catch (e) { return res.status(400).json({ error: e.message }); }
+      const mc = await mailConfig();
+      return res.status(200).json({ ok: true, mailTo: mask(mc.to) });
+    }
     if (q.kakao === 'start') {
       if (!kakaoReady()) return res.status(400).json({ error: 'Vercel 환경 변수에 KAKAO_REST_KEY가 아직 없어요.' });
       return res.status(200).json({ url: await startUrl(req) });

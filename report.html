@@ -44,6 +44,10 @@ tr.sum td{font-weight:700;border-bottom:0}
 .err{color:var(--high);font-size:13px}
 .ghostb{font:inherit;font-size:14px;font-weight:600;background:var(--paper);color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:8px 16px;cursor:pointer}
 .ghostb:disabled{opacity:.6}
+.mlform{display:grid;gap:10px;margin-top:12px;max-width:420px}
+.mlform label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.mlform input{font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.mlform .dl{justify-self:start}
 .pair span{white-space:nowrap}
 @media (max-width:600px){.grid{gap:8px}.grid .card{padding:12px}.pair{gap:12px}.pair b{font-size:24px}.card h2{font-size:14px}.tbl{padding:14px 12px}th,td{padding:8px 4px;font-size:13px}th{font-size:12px}}
 </style></head><body>
@@ -62,9 +66,15 @@ tr.sum td{font-weight:700;border-bottom:0}
     <div class="actions"><button class="dl" id="dl">엑셀 결산표 받기</button><span class="note" id="dlMsg" style="margin:0"></span></div>
   </section>
   <section class="card" style="margin-top:12px"><h2>말일 자동 보내기</h2>
-    <p class="note" style="margin:0 2px 8px">이메일에는 위 결산표와 엑셀 파일이 첨부돼요. 카카오톡에는 아래처럼 와요.</p><div class="bubble"><div class="who">GWJ3 IB 알림</div><div class="msg" id="kt"></div><span class="btn">엑셀 받기</span><span class="btn">결산표 보기</span></div>
+    <p class="note" style="margin:0 2px 8px">매달 말일 저녁 8시쯤 위 결산표와 엑셀 파일(결산 · 회송 · 과매입 · 반출)을 메일로 보내요.</p><div class="bubble" id="kaBubble" hidden><div class="who">GWJ3 IB 알림</div><div class="msg" id="kt"></div><span class="btn">엑셀 받기</span><span class="btn">결산표 보기</span></div>
     <p class="note" id="kaState">카카오 연결 상태를 확인하는 중…</p>
-    <div class="actions"><button class="ghostb" id="kaConn" hidden>카카오톡 연결하기</button><button class="ghostb" id="kaSend" hidden>지금 이 달 결산 보내 보기</button></div>
+    <div class="actions"><button class="ghostb" id="kaConn" hidden>카카오톡 연결하기</button><button class="ghostb" id="mlOpen">메일 설정</button><button class="ghostb" id="kaSend" hidden>지금 이 달 결산 보내 보기</button></div>
+    <form id="mlForm" class="mlform" hidden autocomplete="off">
+      <label>Resend API 키<input id="mlKey" type="password" placeholder="re_로 시작 (이미 넣었으면 비워 두기)"></label>
+      <label>받을 메일 주소<input id="mlTo" type="email" placeholder="Resend에 가입한 메일"></label>
+      <label id="mlEpWrap" hidden>편집 비밀번호<input id="mlEp" type="password"></label>
+      <button class="dl" type="submit">저장</button>
+    </form>
   </section>
 </main>
 <script>
@@ -127,11 +137,26 @@ tr.sum td{font-weight:700;border-bottom:0}
     $('kaState').textContent = lines.length ? `매달 말일 저녁 8시쯤 자동으로 보내요. ${lines.join(' · ')}` : '보낼 곳(이메일 또는 카카오톡)이 아직 설정되지 않았어요.';
     $('kaConn').hidden = !d.ready; $('kaConn').textContent = d.connected ? '카카오톡 다시 연결' : '카카오톡 연결하기';
     $('kaSend').hidden = !(d.connected || d.mail);
+    $('mlEpWrap').hidden = !d.editPw;
+    $('kaBubble').hidden = !d.ready;
+    $('mlOpen').textContent = d.mail ? '메일 설정 바꾸기' : '메일 설정';
   }
   $('kaConn').onclick = async () => {
     const r = await fetch('/api/report?kakao=start', { headers: hdr() });
     const d = await r.json().catch(() => ({}));
     if (d.url) location.href = d.url; else $('kaState').textContent = d.error || '연결 주소를 만들지 못했어요.';
+  };
+  $('mlOpen').onclick = () => { $('mlForm').hidden = !$('mlForm').hidden; };
+  $('mlForm').onsubmit = async e => {
+    e.preventDefault();
+    const h = { ...hdr(), 'Content-Type': 'application/json' };
+    if ($('mlEp').value) h['x-edit-key'] = encodeURIComponent($('mlEp').value);
+    const r = await fetch('/api/report?mail=save', { method: 'POST', headers: h, body: JSON.stringify({ key: $('mlKey').value, to: $('mlTo').value }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { $('kaState').textContent = d.error || '저장하지 못했어요.'; return; }
+    $('mlKey').value = ''; $('mlEp').value = ''; $('mlForm').hidden = true;
+    await kakao().catch(() => {});
+    $('kaState').textContent = `메일 설정을 저장했어요 (${(d.mailTo || []).join(', ')}). '지금 보내 보기'로 시험해 보세요.`;
   };
   $('kaSend').onclick = async () => {
     $('kaSend').disabled = true; $('kaState').textContent = '보내는 중…';
