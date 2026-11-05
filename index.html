@@ -3204,7 +3204,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
         el('button', { type:'submit', class:'ret-btn solid', id:'ov-submit', text:'추가' })),
       el('datalist', { id:'ov-vendors' }));
     form.onsubmit = e => { e.preventDefault(); ovSubmit(); };
-    box.append(form,
+    box.append(el('section', { class:'ret-sec ret-top', id:'ov-top' }), form,
       el('section', { class:'ret-sec ov-sec s1', id:'ov-s1' }),
       el('section', { class:'ret-sec ov-sec s2', id:'ov-s2' }),
       el('section', { class:'ret-sec ov-sec s3', id:'ov-s3' }));
@@ -3718,7 +3718,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
         el('button', { type:'button', class:'ret-btn ghost', id:'ob-clear', text:'칸 비우기', onclick: () => { obForm = obBlank(); obFillForm(true); $('#ob-grp').focus(); } }),
         el('button', { type:'submit', class:'ret-btn solid', id:'ob-submit', text:'추가' })));
     form.onsubmit = e => { e.preventDefault(); obSubmit(); };
-    box.append(form, el('div', { class:'ob-list', id:'ob-list' }));
+    box.append(el('section', { class:'ret-sec ret-top', id:'ob-top' }), form, el('div', { class:'ob-list', id:'ob-list' }));
   }
 
   function obFillForm(force){
@@ -4866,7 +4866,35 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
       onOpen: t => { const b = document.querySelector(`#istSub button[data-s="${t}"]`); if (b) b.click(); },
     });
   }
+  // 과매입 · 반출 맨 위 요약 (회송과 같은 모양)
+  const istStat = (label, val, sub, cls) => el('div', { class:'ret-stat' + (cls ? ' ' + cls : '') }, el('small', { text: label }), el('b', { text: val }), sub ? el('span', { text: sub }) : null);
+  const istDays = d => /^\d{4}-\d{2}-\d{2}$/.test(d || '') ? Math.max(0, Math.round((Date.parse(todayIso) - Date.parse(d)) / 864e5)) : 0;
+  const istLocalDay = iso => { if (!iso) return ''; const d = new Date(iso); return isNaN(d) ? '' : new Date(d.getTime() + 9 * 3600e3).toISOString().slice(0, 10); };
+  function ovRenderTop(){
+    const sec = $('#ov-top'); if (!sec || !ovItems) return;
+    const wait = ovItems.filter(t => t.status !== 'done');
+    const noMail = wait.filter(t => !t.mail), late = wait.filter(t => istDays(t.date) >= 7);
+    const qty = wait.reduce((a, t) => a + (+t.qty || 0), 0);
+    sec.replaceChildren(
+      istStat('과매입 대기', `${wait.length}건`, `${Math.round(qty * 100) / 100}개`),
+      istStat('메일 전', `${noMail.length}건`, '', noMail.length ? 'late' : ''),
+      istStat('7일 넘게 대기', `${late.length}건`, '', late.length ? 'late' : ''),
+      istStat('오늘 입력', `${ovItems.filter(t => istLocalDay(t.createdAt) === todayIso).length}건`, ''));
+  }
+  function obRenderTop(){
+    const sec = $('#ob-top'); if (!sec || !obItems) return;
+    const groups = new Map();
+    for (const t of obItems){ const k = obKey(t); const g = groups.get(k) || { stage:4, due:'', vendor:t.vendor || '', n:0, cdate:'' }; g.n++; g.stage = Math.min(g.stage, +t.stage || 1); if (t.due && (!g.due || t.due < g.due)) g.due = t.due; if (t.cdate && (!g.cdate || t.cdate < g.cdate)) g.cdate = t.cdate; groups.set(k, g); }
+    const open = [...groups.values()].filter(g => g.stage < 4);
+    const over = open.filter(g => g.due && g.due < todayIso), dueToday = open.filter(g => g.due === todayIso);
+    sec.replaceChildren(
+      istStat('반출 진행 중', `${open.length}건`, `상품 ${open.reduce((a, g) => a + g.n, 0)}개`),
+      istStat('기한 지남', `${over.length}건`, '', over.length ? 'late' : ''),
+      istStat('오늘 기한', `${dueToday.length}건`, '', dueToday.length ? 'late' : ''),
+      istStat('오늘 생성', `${[...groups.values()].filter(g => g.cdate === todayIso).length}건`, ''));
+  }
   function istCounts(){
+    ovRenderTop(); obRenderTop();
     if ((view === 'ret' || view === 'over' || view === 'out') && window.IstToday && Date.now() - tdAt > 5 * 60e3) tdLoad();
     tdRender();
     const r = retItems ? retItems.filter(t => t.status !== 'done').length : null;
