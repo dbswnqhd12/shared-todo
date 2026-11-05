@@ -4881,18 +4881,17 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   function ovRenderTop(){
     const sec = $('#ov-top'); if (!sec || !ovItems) return;
     const wait = ovItems.filter(t => t.status !== 'done');
-    const noMail = wait.filter(t => !t.mail), late = wait.filter(t => istDays(t.date) >= 7);
+    const late = wait.filter(t => istDays(t.date) >= 7);
     const by = m => wait.filter(t => (t.method || '') === m);
     const vr = by('vr'), ded = by('ded'), etc = wait.filter(t => !['vr', 'ded'].includes(t.method || ''));
     const sum = list => `${Math.round(list.reduce((a, t) => a + (+t.qty || 0), 0) * 100) / 100}개`;
     sec.replaceChildren(
       istStat('가상반출 대기', `${vr.length}건`, sum(vr)),
       istStat('차감매입 대기', `${ded.length}건`, sum(ded)),
-      ...(etc.length ? [istStat('미정 · 기타 대기', `${etc.length}건`, sum(etc))] : []),
-      istStat('메일 전', `${noMail.length}건`, '', noMail.length ? 'late' : ''),
+      ...(etc.length ? [istStat('과매입 처리전', `${etc.length}건`, sum(etc))] : []),
       istStat('7일 넘게 대기', `${late.length}건`, '', late.length ? 'late' : ''),
       el('div', { class:'ist-charts' },
-        istBar('처리 방법별 대기', [{ label:'가상반출', n: vr.length, c: IST_C[1] }, { label:'차감매입', n: ded.length, c: IST_C[0] }, { label:'미정 · 기타', n: etc.length, c: 'var(--muted)' }]),
+        istBar('처리 방법별 대기', [{ label:'가상반출', n: vr.length, c: IST_C[1] }, { label:'차감매입', n: ded.length, c: IST_C[0] }, { label:'과매입 처리전', n: etc.length, c: 'var(--muted)' }]),
         istBar('대기 기간 (생성일부터)', istAge(wait.map(t => istDays(t.date))))));
   }
   function obRenderTop(){
