@@ -42,6 +42,9 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
 .lbl>div{border-bottom:calc(var(--u)*.25) solid #000;display:flex;align-items:center;min-height:0}
 .lbl>div:last-child{border-bottom:0}
 .l-top{height:calc(var(--u)*14);background:#D0D0D0;justify-content:center}
+.band-sky .l-top{background:#9FD6F5}
+.band-red .l-top{background:#E0262B;color:#fff}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.25);vertical-align:-2px}
 .fit{display:inline-block;white-space:nowrap;line-height:1.1}
 .l-codes{height:calc(var(--u)*22);flex-direction:column;justify-content:center}
 .l-arrows,.l-codesrow{display:grid;grid-template-columns:calc(var(--u)*17) 1fr calc(var(--u)*17);width:100%;padding:0 calc(var(--u)*2.5);align-items:center;justify-items:center}
@@ -99,10 +102,16 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
 <div class="card">
   <div class="grid wide">
     <div><label>존타입 (왼쪽 파란 글자)<select id="typeSel"></select></label><input id="typeTxt" class="custom" placeholder="직접 입력" hidden></div>
-    <div><label>로케이션 설명 (맨 위 회색 띠)<select id="descSel"></select></label><input id="descTxt" class="custom" placeholder="직접 입력" hidden></div>
+    <div><label>로케이션 설명 (맨 위 색 띠)<select id="descSel"></select></label><input id="descTxt" class="custom" placeholder="직접 입력" hidden></div>
     <div><label>진열 구역 코멘트 (가운데)<select id="cmtSel"></select></label><input id="cmtTxt" class="custom" placeholder="직접 입력" hidden></div>
   </div>
   <div class="inline" style="margin-top:14px">
+    <span style="font-size:13px;color:var(--mute);font-weight:600">맨 위 띠 색</span>
+    <label><input type="radio" name="band" value="gray" checked><i class="sw" style="background:#D0D0D0"></i>회색</label>
+    <label><input type="radio" name="band" value="sky"><i class="sw" style="background:#9FD6F5"></i>하늘색</label>
+    <label><input type="radio" name="band" value="red"><i class="sw" style="background:#E0262B"></i>빨간색</label>
+  </div>
+  <div class="inline" style="margin-top:10px">
     <span style="font-size:13px;color:var(--mute);font-weight:600">화살표</span>
     <label><input type="radio" name="arrow" value="down" checked>아래 ▼</label>
     <label><input type="radio" name="arrow" value="up">위 ▲</label>
@@ -118,7 +127,7 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
       <label id="zCustom" hidden>가로 × 세로 (mm)<div class="rng"><input id="zW" value="100" inputmode="decimal"><span>×</span><input id="zH" value="150" inputmode="decimal"></div></label>
       <label>해상도<select id="zDpi"><option value="203">203 dpi</option><option value="300">300 dpi</option><option value="600">600 dpi</option></select></label>
     </div>
-    <p class="hint">가로는 프린터에서 나오는 방향 기준 라벨지 폭이에요. 세로가 더 길면 라벨을 90도 돌려서 꽉 차게 넣어요. 감열 프린터라 빨간 화살표 · 파란 글자는 검게 나와요.</p>
+    <p class="hint">가로는 프린터에서 나오는 방향 기준 라벨지 폭이에요. 세로가 더 길면 라벨을 90도 돌려서 꽉 차게 넣어요. 감열 프린터는 검정 한 색만 찍혀서 빨간 화살표 · 파란 글자는 검게, 맨 위 띠는 회색 → 점무늬, 하늘색 → 흰 바탕, 빨간색 → 검은 띠(흰 글자)로 나와요.</p>
   </div>
 </div>
 
@@ -130,7 +139,7 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
   <button class="ghostbtn zonly" id="zplBtn" type="button" hidden>ZPL 파일 받기</button>
   <button class="btn" id="printBtn" type="button">인쇄하기</button>
 </div>
-<p class="hint" id="hintA4" style="margin:-4px 0 14px">인쇄 창에서 <b>배경 그래픽</b>을 켜면 맨 위 회색 띠도 같이 나와요. 여백은 '기본값', 배율은 '100'으로 두세요.</p>
+<p class="hint" id="hintA4" style="margin:-4px 0 14px">인쇄 창에서 <b>배경 그래픽</b>을 켜면 맨 위 색 띠도 같이 나와요. 여백은 '기본값', 배율은 '100'으로 두세요.</p>
 <div class="hint" id="hintZ" style="margin:-4px 0 14px" hidden>
   <b>인쇄하기</b>: 인쇄 창에서 프린터를 <b>ZT411</b>로 고르고, '설정 더보기'에서 용지 크기를 라벨지와 같게(예: 100×150mm), 여백 <b>없음</b>, 배율 <b>100</b>, 배경 그래픽 <b>켜기</b>로 두세요. 용지 크기가 목록에 없으면 Zebra 드라이버의 '인쇄 기본 설정 → 용지 크기'에서 한 번 맞춰 두면 돼요.<br>
   <b>ZPL 파일</b>: 드라이버 설정 없이 프린터 명령으로 바로 뽑아요. 한글은 그림으로 들어가서 프린터에 한글 글꼴이 없어도 돼요. Zebra Setup Utilities의 <b>프린터와 통신 열기 → 파일 보내기</b>로 보내거나, ZPL 복사 후 같은 창에 붙여넣고 보내면 돼요.
@@ -234,7 +243,7 @@ function labelHtml(it, opt){
         <div class="l-heads"><div></div><div></div><div><span class="fit" data-f="2.8">챔버</span></div><div><span class="fit" data-f="2.8">통로</span></div><div></div><div><span class="fit" data-f="2.8">베이</span></div><div></div><div><span class="fit" data-f="2.8">빈</span></div></div>
         <div class="l-vals"><div><span class="fit" data-f="6">${esc(it.fc)}</span></div><div><span class="fit" data-f="6.5">-</span></div><div><span class="fit" data-f="9">${esc(it.zone)}</span></div><div><span class="fit" data-f="9">${esc(it.aisle)}</span></div><div><span class="fit" data-f="6.5">-</span></div><div><span class="fit" data-f="12">${esc(it.bay)}</span></div><div><span class="fit" data-f="6.5">-</span></div><div><span class="fit" data-f="6">${esc(it.shelf)}</span></div></div>
       </div>`;
-  return `<div class="lbl">
+  return `<div class="lbl band-${opt.band}">
     <div class="l-top"><span class="fit" data-f="9.5">${esc(opt.desc)}</span></div>
     <div class="l-codes">
       <div class="l-arrows ${opt.arrow}">${ARROW}${ARROW}${ARROW}</div>
@@ -262,7 +271,7 @@ function setPage(paper){
     $('pageStyle').textContent = `@page{size:${z.w}mm ${z.h}mm;margin:0}@media print{#sheet{--u:${u}mm}`
       + `.pg{display:flex;width:${z.w}mm;height:${z.h}mm;align-items:center;justify-content:center;overflow:hidden;break-after:page;page-break-after:always}`
       + `.pg:last-child{break-after:auto;page-break-after:auto}.lbl{flex:none${rot ? ';transform:rotate(90deg)' : ''}}`
-      + `.l-type{color:#000!important}.l-arrows path{fill:#000}.l-heads{color:#555!important}}`;
+      + `.l-type{color:#000!important}.l-arrows path{fill:#000}.l-heads{color:#555!important}.band-red .l-top{background:#000}}`;
     return;
   }
   $('pageStyle').textContent = paper === 'half'
@@ -292,7 +301,9 @@ function drawLabel(ctx, lbl, it, W, H, dpmm){
   if (rot){ ctx.translate(W, 0); ctx.rotate(Math.PI / 2); }
   ctx.translate(ox, oy);
   const R = el => { const r = el.getBoundingClientRect(); return { x: (r.left - box.left) * s, y: (r.top - box.top) * s, w: r.width * s, h: r.height * s }; };
-  const top = lbl.querySelector('.l-top'); { const r = R(top); ctx.fillStyle = '#D0D0D0'; ctx.fillRect(r.x, r.y, r.w, r.h); }
+  // 띠 색: 감열 프린터는 검정 한 가지라 회색은 옅은 점무늬, 하늘색은 흰 바탕, 빨간색은 검은 띠에 흰 글자로 바꿔요
+  const red = lbl.classList.contains('band-red');
+  const top = lbl.querySelector('.l-top'); { const r = R(top); ctx.fillStyle = red ? '#000' : lbl.classList.contains('band-sky') ? '#fff' : '#D0D0D0'; ctx.fillRect(r.x, r.y, r.w, r.h); }
   ctx.fillStyle = '#000';
   for (const row of lbl.children){
     const bw = parseFloat(getComputedStyle(row).borderBottomWidth) * s;
@@ -303,7 +314,7 @@ function drawLabel(ctx, lbl, it, W, H, dpmm){
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   lbl.querySelectorAll('.fit, .bc span').forEach(el => {
     const r = R(el), cs = getComputedStyle(el);
-    ctx.fillStyle = el.closest('.l-heads') ? '#555' : '#000';
+    ctx.fillStyle = el.closest('.l-heads') ? '#555' : red && el.closest('.l-top') ? '#fff' : '#000';
     ctx.font = `${cs.fontWeight} ${parseFloat(cs.fontSize) * s}px ${cs.fontFamily}`;
     ctx.fillText(el.textContent, r.x + r.w / 2, r.y + r.h / 2);
   });
@@ -388,7 +399,7 @@ function render(){
   const list = buildList();
   const sheet = $('sheet');
   const opt = { type: pick('type'), desc: pick('desc'), cmt: pick('cmt'),
-    arrow: document.querySelector('input[name=arrow]:checked').value };
+    arrow: document.querySelector('input[name=arrow]:checked').value, band: document.querySelector('input[name=band]:checked').value };
   setPage(document.querySelector('input[name=paper]:checked').value);
   $('warn').textContent = '';
   if (list.error || !list.length){
@@ -413,7 +424,7 @@ const later = () => { clearTimeout(timer); timer = setTimeout(render, 200); };
 const FIELDS = ['fc','zone','a1','a2','b1','b2','s1','s2','side','codes','typeSel','typeTxt','descSel','descTxt','cmtSel','cmtTxt','zSize','zW','zH','zDpi'];
 function save(){
   try {
-    const o = { mode, arrow: document.querySelector('input[name=arrow]:checked').value, paper: document.querySelector('input[name=paper]:checked').value };
+    const o = { mode, band: document.querySelector('input[name=band]:checked').value, arrow: document.querySelector('input[name=arrow]:checked').value, paper: document.querySelector('input[name=paper]:checked').value };
     for (const f of FIELDS) o[f] = $(f).value;
     localStorage.setItem('gwj3-labels', JSON.stringify(o));
   } catch (e) {}
@@ -422,7 +433,7 @@ function load(){
   try {
     const o = JSON.parse(localStorage.getItem('gwj3-labels') || 'null'); if (!o) return;
     for (const f of FIELDS) if (o[f] != null) $(f).value = o[f];
-    for (const n of ['arrow','paper']){ const r = document.querySelector(`input[name=${n}][value="${o[n]}"]`); if (r) r.checked = true; }
+    for (const n of ['band','arrow','paper']){ const r = document.querySelector(`input[name=${n}][value="${o[n]}"]`); if (r) r.checked = true; }
     if (o.mode) setMode(o.mode);
   } catch (e) {}
 }
