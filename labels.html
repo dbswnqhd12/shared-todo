@@ -271,7 +271,7 @@ function setPage(paper){
     $('pageStyle').textContent = `@page{size:${z.w}mm ${z.h}mm;margin:0}@media print{#sheet{--u:${u}mm}`
       + `.pg{display:flex;width:${z.w}mm;height:${z.h}mm;align-items:center;justify-content:center;overflow:hidden;break-after:page;page-break-after:always}`
       + `.pg:last-child{break-after:auto;page-break-after:auto}.lbl{flex:none${rot ? ';transform:rotate(90deg)' : ''}}`
-      + `.l-type{color:#000!important}.l-arrows path{fill:#000}.l-heads{color:#555!important}.band-red .l-top{background:#000}}`;
+      + `.l-type{color:#000!important}.l-arrows path{fill:#000}.l-heads{color:#555!important}.band-red .l-top{background:#000;color:#fff}}`;
     return;
   }
   $('pageStyle').textContent = paper === 'half'
