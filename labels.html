@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>로케이션 라벨 출력 · GWJ3 IB</title>
+<link rel="icon" href="/icons/favicon-64.png">
+<style>
+:root{--bg:#EEF1F5;--card:#fff;--ink:#18202C;--mute:#5E6776;--line:#D5DBE4;--accent:#2557A7}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:24px;margin:0 0 2px}.sub{color:var(--mute);margin:0 0 18px}
+.top a{color:var(--accent);text-decoration:none;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:0 0 auto;background:#fff;border:1px solid var(--line);color:var(--mute);border-radius:8px;padding:7px 14px;font:inherit;font-weight:600;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px 14px}
+.grid.wide{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+label{display:block;font-size:13px;color:var(--mute);font-weight:600}
+input,select,textarea{display:block;width:100%;margin-top:3px;font:inherit;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:7px;padding:7px 9px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+.rng{display:flex;align-items:center;gap:6px}.rng input{min-width:0}.rng span{margin-top:3px;color:var(--mute)}
+textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
+.custom{margin-top:6px}
+.hint{color:var(--mute);font-size:13px;margin:8px 0 0}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.count{font-weight:700}.count small{color:var(--mute);font-weight:400}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:10px 20px;font:inherit;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:.45;cursor:default}
+.warn{color:#B42318;font-size:13.5px}
+.inline{display:flex;gap:14px;flex-wrap:wrap;align-items:center}.inline label{display:flex;align-items:center;gap:5px;font-weight:500;color:var(--ink);font-size:14px}
+.inline input{display:inline;width:auto;margin:0}
+#sheet{display:flex;flex-wrap:wrap;gap:14px;--u:min(5.4px,calc((100vw - 34px) / 100))}
+
+/* ── 라벨 한 장: 모든 크기는 --u(라벨 너비의 1/100) 기준이라 화면 · 인쇄 크기가 달라도 모양이 같아요 ── */
+.lbl{width:calc(var(--u)*100);height:calc(var(--u)*69);background:#fff;color:#000;border:calc(var(--u)*.35) solid #000;
+  display:flex;flex-direction:column;overflow:hidden;font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-weight:700;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;break-inside:avoid}
+.lbl>div{border-bottom:calc(var(--u)*.25) solid #000;display:flex;align-items:center;min-height:0}
+.lbl>div:last-child{border-bottom:0}
+.l-top{height:calc(var(--u)*14);background:#D0D0D0;justify-content:center}
+.fit{display:inline-block;white-space:nowrap;line-height:1.1}
+.l-codes{height:calc(var(--u)*22);flex-direction:column;justify-content:center}
+.l-arrows,.l-codesrow{display:grid;grid-template-columns:calc(var(--u)*17) 1fr calc(var(--u)*17);width:100%;padding:0 calc(var(--u)*2.5);align-items:center;justify-items:center}
+.l-arrows{height:calc(var(--u)*5)}.l-arrows svg{height:calc(var(--u)*4.4);width:auto}
+.l-arrows.none{display:none}.l-arrows.up svg{transform:rotate(180deg)}
+.qr{width:calc(var(--u)*14);height:calc(var(--u)*14);display:block}
+.bc{display:flex;flex-direction:column;align-items:center}
+.bc svg{height:calc(var(--u)*11.5);width:calc(var(--u)*50);display:block}
+.bc span{font-size:calc(var(--u)*1.9);font-weight:400;letter-spacing:.05em;margin-top:calc(var(--u)*.3)}
+.l-mid{height:calc(var(--u)*13);padding:0 calc(var(--u)*2.5);gap:calc(var(--u)*2)}
+.l-type{flex:0 0 calc(var(--u)*22);color:#1F6FC5;text-align:center}
+.l-cmt{flex:1;text-align:center;min-width:0}
+.l-loc{flex:1;flex-direction:column;justify-content:center;padding:0 calc(var(--u)*1.5)}
+.l-heads,.l-vals{display:grid;grid-template-columns:13fr 5fr 23fr 15fr 5fr 18fr 5fr 13fr;width:100%;align-items:center}
+.l-heads{color:#A6A6A6;height:calc(var(--u)*4)}
+.l-vals{height:calc(var(--u)*14)}
+.l-heads>div,.l-vals>div,.l-type,.l-cmt{text-align:center;min-width:0}
+
+@media print{
+  body{background:#fff}
+  main>*:not(#sheet){display:none!important}
+  main{max-width:none;padding:0;margin:0}
+  #sheet{display:block}
+  .lbl{page-break-inside:avoid}
+}
+</style>
+<style id="pageStyle"></style>
+</head><body><main>
+<p class="top"><a href="/">← GWJ3 IB</a></p>
+<h1>로케이션 라벨 출력</h1>
+<p class="sub">범위만 넣으면 QR · 바코드 라벨을 한꺼번에 만들어 인쇄해요. 엑셀 추가기능은 필요 없어요.</p>
+
+<div class="card">
+  <div class="tabs" role="group" aria-label="입력 방식">
+    <button type="button" data-mode="range" aria-pressed="true">범위로 만들기</button>
+    <button type="button" data-mode="list" aria-pressed="false">코드 붙여넣기</button>
+  </div>
+  <div id="rangeBox">
+    <div class="grid">
+      <label>FC<input id="fc" value="140" inputmode="numeric"></label>
+      <label>존 이름 (Zone)<input id="zone" value="RCRT" autocapitalize="characters"></label>
+      <label>통로 (aisle)<div class="rng"><input id="a1" value="99" inputmode="numeric"><span>~</span><input id="a2" value="99" inputmode="numeric"></div></label>
+      <label>베이<div class="rng"><input id="b1" value="1" inputmode="numeric"><span>~</span><input id="b2" value="24" inputmode="numeric"></div></label>
+      <label>베이 고르기<select id="side"><option value="all">전부</option><option value="odd">홀수만</option><option value="even">짝수만</option></select></label>
+      <label>빈 (Shelf · 단)<div class="rng"><input id="s1" value="1" inputmode="numeric"><span>~</span><input id="s2" value="1" inputmode="numeric"></div></label>
+    </div>
+    <p class="hint">코드는 <b>FC-존이름통로-베이-빈</b> 순서예요. 예) 140, RCRT, 99, 1, 1 → <code>140-RCRT99-1-1</code></p>
+  </div>
+  <div id="listBox" hidden>
+    <label>로케이션 코드 (한 줄에 하나)<textarea id="codes" spellcheck="false" placeholder="140-RCRT99-1-1&#10;140-RCRT99-2-1&#10;140-22N3-12-1"></textarea></label>
+    <p class="hint">엑셀이나 WMS에서 코드 열을 복사해서 붙여넣으면 돼요. 빈 줄은 건너뛰어요.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="grid wide">
+    <div><label>존타입 (왼쪽 파란 글자)<select id="typeSel"></select></label><input id="typeTxt" class="custom" placeholder="직접 입력" hidden></div>
+    <div><label>로케이션 설명 (맨 위 회색 띠)<select id="descSel"></select></label><input id="descTxt" class="custom" placeholder="직접 입력" hidden></div>
+    <div><label>진열 구역 코멘트 (가운데)<select id="cmtSel"></select></label><input id="cmtTxt" class="custom" placeholder="직접 입력" hidden></div>
+  </div>
+  <div class="inline" style="margin-top:14px">
+    <span style="font-size:13px;color:var(--mute);font-weight:600">화살표</span>
+    <label><input type="radio" name="arrow" value="down" checked>아래 ▼</label>
+    <label><input type="radio" name="arrow" value="up">위 ▲</label>
+    <label><input type="radio" name="arrow" value="none">없음</label>
+    <span style="font-size:13px;color:var(--mute);font-weight:600;margin-left:12px">용지</span>
+    <label><input type="radio" name="paper" value="full" checked>A4 가로 1장</label>
+    <label><input type="radio" name="paper" value="half">A4 세로 2장 (작게)</label>
+  </div>
+</div>
+
+<div class="card bar">
+  <span class="count" id="count"></span>
+  <span class="warn" id="warn"></span>
+  <span style="flex:1"></span>
+  <button class="btn" id="printBtn" type="button">인쇄하기</button>
+</div>
+<p class="hint" style="margin:-4px 0 14px">인쇄 창에서 <b>배경 그래픽</b>을 켜면 맨 위 회색 띠도 같이 나와요. 여백은 '기본값', 배율은 '100'으로 두세요.</p>
+
+<div id="sheet"></div>
+</main>
+<script src="/lib/qrcode.js"></script>
+<script>
+// ── 목록 (엑셀 서식의 오른쪽 목록 그대로, '스량' 오타만 '수량'으로 고침) ──
+const TYPES = ['가공','축산','마트','버퍼','수박'];
+const DESCS = ['냉동 버퍼 구역','냉동 진열 구역','냉장 버퍼 구역','냉장 진열 구역','로켓마트 버퍼 구역','로켓마트 진열 구역',
+  '상온 버퍼 구역','상온 진열 구역','축산 버퍼 구역','축산 진열 구역','수박 진열 구역','유제품 진열 구역','쉬링크 버퍼 구역'];
+const CMTS = ['중량물 취급시 주의요망','진열/집품시 미끄럼 주의','박스/번들상품 개봉금지','유통기한 확인 후 재고이동','선입선출 습관화',
+  '진열시 실물 수량 확인','파손주의 제품','집품/진열시 상품 낙하주의','상품 바닥 적재 금지','전산/실물 수량 확인 필수'];
+const MAX = 1000;
+const $ = id => document.getElementById(id);
+const CUSTOM = '__custom';
+
+function fillSel(sel, list, extra){
+  sel.innerHTML = '';
+  for (const v of list) sel.add(new Option(v, v));
+  if (extra) sel.add(new Option(extra, ''));
+  sel.add(new Option('직접 입력…', CUSTOM));
+}
+fillSel($('typeSel'), TYPES); fillSel($('descSel'), DESCS); fillSel($('cmtSel'), CMTS, '(코멘트 없음)');
+$('typeSel').value = '마트'; $('descSel').value = '로켓마트 진열 구역'; $('cmtSel').value = '진열시 실물 수량 확인';
+const pick = k => $(k + 'Sel').value === CUSTOM ? $(k + 'Txt').value.trim() : $(k + 'Sel').value;
+
+// ── Code 128 (B) 바코드: 막대/공백 폭 표 ──
+const C128 = ('212222 222122 222221 121223 121322 131222 122213 122312 132212 221213 221312 231212 112232 122132 122231 113222 123122 123221 223211 221132 '+
+ '221231 213212 223112 312131 311222 321122 321221 312212 322112 322211 212123 212321 232121 111323 131123 131321 112313 132113 132311 211313 '+
+ '231113 231311 112133 112331 132131 113123 113321 133121 313121 211331 231131 213113 213311 213131 311123 311321 331121 312113 312311 332111 '+
+ '314111 221411 431111 111224 111422 121124 121421 141122 141221 112214 112412 122114 122411 142112 142211 241211 221114 413111 241112 134111 '+
+ '111242 121142 121241 114212 124112 124211 411212 421112 421211 212141 214121 412121 111143 111341 131141 114113 114311 411113 411311 113141 '+
+ '114131 311141 411131 211412 211214 211232 2331112').split(' ');
+function code128Svg(text){
+  const vals = [104];
+  for (const ch of text){ const c = ch.charCodeAt(0) - 32; vals.push(c >= 0 && c < 95 ? c : 0); }
+  let sum = 104; for (let i = 1; i < vals.length; i++) sum += vals[i] * i;
+  vals.push(sum % 103, 106);
+  const Q = 10; let x = Q, d = '';
+  for (const v of vals){
+    const w = C128[v];
+    for (let i = 0; i < w.length; i++){ const n = +w[i]; if (i % 2 === 0) d += `M${x} 0h${n}v1h-${n}z`; x += n; }
+  }
+  return `<svg viewBox="0 0 ${x + Q} 1" preserveAspectRatio="none" shape-rendering="crispEdges"><path d="${d}" fill="#000"/></svg>`;
+}
+function qrSvg(text){
+  const q = qrcode(0, 'M'); q.addData(text); q.make();
+  const n = q.getModuleCount(), m = 2; let d = '';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c + m} ${r + m}h1v1h-1z`;
+  return `<svg class="qr" viewBox="0 0 ${n + 2 * m} ${n + 2 * m}" shape-rendering="crispEdges"><path d="${d}" fill="#000"/></svg>`;
+}
+const ARROW = '<svg viewBox="0 0 10 12"><path d="M3.2 0h3.6v6H10L5 12 0 6h3.2z" fill="#E00000"/></svg>';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+// ── 코드 만들기 ──
+let mode = 'range';
+const num = id => { const v = $(id).value.trim(); return v === '' ? NaN : Number(v); };
+function rangeOf(a, b){ if (!Number.isInteger(a)) return null; if (!Number.isInteger(b)) b = a; if (b < a) [a, b] = [b, a]; return [a, b]; }
+function buildList(){
+  if (mode === 'list'){
+    return $('codes').value.split(/\r?\n/).map(s => s.trim()).filter(Boolean).map(parseCode);
+  }
+  const fc = $('fc').value.trim(), zone = $('zone').value.trim().toUpperCase();
+  const A = rangeOf(num('a1'), num('a2')), B = rangeOf(num('b1'), num('b2')), S = rangeOf(num('s1'), num('s2'));
+  if (!fc || !zone || !A || !B || !S) return { error: 'FC · 존 이름 · 통로 · 베이 · 빈을 모두 숫자로 넣어주세요.' };
+  const side = $('side').value, total = (A[1] - A[0] + 1) * (B[1] - B[0] + 1) * (S[1] - S[0] + 1);
+  if (total > MAX * 4) return { error: `한 번에 ${MAX}장까지만 만들 수 있어요. 범위를 줄여주세요.` };
+  const out = [];
+  for (let a = A[0]; a <= A[1]; a++) for (let b = B[0]; b <= B[1]; b++){
+    if (side === 'odd' && b % 2 === 0 || side === 'even' && b % 2 !== 0) continue;
+    for (let s = S[0]; s <= S[1]; s++) out.push({ code: `${fc}-${zone}${a}-${b}-${s}`, fc, zone, aisle: String(a), bay: String(b), shelf: String(s) });
+  }
+  return out;
+}
+// 140-RCRT99-1-1 → FC 140 · 존 RCRT · 통로 99 · 베이 1 · 빈 1 (존 칸 끝의 숫자를 통로로 봐요)
+function parseCode(code){
+  code = code.split(/\t/)[0].trim().toUpperCase();
+  const p = code.split('-');
+  if (p.length >= 4){
+    const m = p[1].match(/^(.*?)(\d+)$/) || [, p[1], ''];
+    return { code, fc: p[0], zone: m[1], aisle: m[2], bay: p[2], shelf: p.slice(3).join('-') };
+  }
+  return { code, fc: '', zone: code, aisle: '', bay: '', shelf: '', raw: true };
+}
+
+// ── 라벨 그리기 ──
+function labelHtml(it, opt){
+  const q = qrSvg(it.code);
+  const loc = it.raw
+    ? `<div class="l-loc"><div class="l-vals" style="grid-template-columns:1fr"><div><span class="fit" data-f="9">${esc(it.code)}</span></div></div></div>`
+    : `<div class="l-loc">
+        <div class="l-heads"><div></div><div></div><div><span class="fit" data-f="2.8">챔버</span></div><div><span class="fit" data-f="2.8">통로</span></div><div></div><div><span class="fit" data-f="2.8">베이</span></div><div></div><div><span class="fit" data-f="2.8">빈</span></div></div>
+        <div class="l-vals"><div><span class="fit" data-f="6">${esc(it.fc)}</span></div><div><span class="fit" data-f="6.5">-</span></div><div><span class="fit" data-f="9">${esc(it.zone)}</span></div><div><span class="fit" data-f="9">${esc(it.aisle)}</span></div><div><span class="fit" data-f="6.5">-</span></div><div><span class="fit" data-f="12">${esc(it.bay)}</span></div><div><span class="fit" data-f="6.5">-</span></div><div><span class="fit" data-f="6">${esc(it.shelf)}</span></div></div>
+      </div>`;
+  return `<div class="lbl">
+    <div class="l-top"><span class="fit" data-f="9.5">${esc(opt.desc)}</span></div>
+    <div class="l-codes">
+      <div class="l-arrows ${opt.arrow}">${ARROW}${ARROW}${ARROW}</div>
+      <div class="l-codesrow">${q}<div class="bc">${code128Svg(it.code)}<span>${esc(it.code)}</span></div>${q}</div>
+    </div>
+    <div class="l-mid"><div class="l-type"><span class="fit" data-f="8.5">${esc(opt.type)}</span></div><div class="l-cmt"><span class="fit" data-f="5.6">${esc(opt.cmt)}</span></div></div>
+    ${loc}
+  </div>`;
+}
+// 글자가 칸보다 길면 그 칸에 맞게 줄여요 (크기를 --u 기준으로 저장해서 인쇄할 때도 그대로 맞아요)
+function fitAll(root){
+  const els = [...root.querySelectorAll('.fit')];
+  els.forEach(el => { el.style.fontSize = `calc(var(--u) * ${el.dataset.f})`; });
+  const m = els.map(el => [el.offsetWidth, el.parentElement.clientWidth * .95]);
+  els.forEach((el, i) => {
+    const [need, avail] = m[i];
+    if (need > avail && avail > 0) el.style.fontSize = `calc(var(--u) * ${(el.dataset.f * Math.max(.3, avail / need)).toFixed(3)})`;
+  });
+}
+
+function setPage(paper){
+  $('pageStyle').textContent = paper === 'half'
+    ? '@page{size:A4 portrait;margin:8mm}@media print{#sheet{--u:1.94mm}.lbl{margin:0 0 6mm}.lbl:nth-child(2n){margin:0;break-after:page;page-break-after:always}}'
+    : '@page{size:A4 landscape;margin:8mm}@media print{#sheet{--u:2.78mm}.lbl{break-after:page;page-break-after:always}}';
+}
+
+let timer = 0;
+function render(){
+  const list = buildList();
+  const sheet = $('sheet');
+  const opt = { type: pick('type'), desc: pick('desc'), cmt: pick('cmt'),
+    arrow: document.querySelector('input[name=arrow]:checked').value };
+  setPage(document.querySelector('input[name=paper]:checked').value);
+  $('warn').textContent = '';
+  if (list.error || !list.length){
+    sheet.innerHTML = ''; $('count').innerHTML = '0장'; $('printBtn').disabled = true;
+    $('warn').textContent = list.error || (mode === 'list' ? '코드를 붙여넣어 주세요.' : '');
+    return;
+  }
+  let items = list;
+  if (items.length > MAX){ $('warn').textContent = `한 번에 ${MAX}장까지만 만들어요. 앞의 ${MAX}장만 보여요.`; items = items.slice(0, MAX); }
+  const half = document.querySelector('input[name=paper]:checked').value === 'half';
+  const pages = half ? Math.ceil(items.length / 2) : items.length;
+  $('count').innerHTML = `${items.length}장 <small>· 종이 ${pages}장 · ${esc(items[0].code)}${items.length > 1 ? ' ~ ' + esc(items[items.length - 1].code) : ''}</small>`;
+  $('printBtn').disabled = false;
+  sheet.innerHTML = items.map(it => labelHtml(it, opt)).join('');
+  fitAll(sheet);
+  save();
+}
+const later = () => { clearTimeout(timer); timer = setTimeout(render, 200); };
+
+// ── 입력값 기억 (이 PC에서만) ──
+const FIELDS = ['fc','zone','a1','a2','b1','b2','s1','s2','side','codes','typeSel','typeTxt','descSel','descTxt','cmtSel','cmtTxt'];
+function save(){
+  try {
+    const o = { mode, arrow: document.querySelector('input[name=arrow]:checked').value, paper: document.querySelector('input[name=paper]:checked').value };
+    for (const f of FIELDS) o[f] = $(f).value;
+    localStorage.setItem('gwj3-labels', JSON.stringify(o));
+  } catch (e) {}
+}
+function load(){
+  try {
+    const o = JSON.parse(localStorage.getItem('gwj3-labels') || 'null'); if (!o) return;
+    for (const f of FIELDS) if (o[f] != null) $(f).value = o[f];
+    for (const n of ['arrow','paper']){ const r = document.querySelector(`input[name=${n}][value="${o[n]}"]`); if (r) r.checked = true; }
+    if (o.mode) setMode(o.mode);
+  } catch (e) {}
+}
+function setMode(m){
+  mode = m;
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+  $('rangeBox').hidden = m !== 'range'; $('listBox').hidden = m !== 'list';
+}
+function syncCustom(){ for (const k of ['type','desc','cmt']) $(k + 'Txt').hidden = $(k + 'Sel').value !== CUSTOM; }
+
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { setMode(b.dataset.mode); render(); });
+document.querySelector('main').addEventListener('input', later);
+document.querySelector('main').addEventListener('change', () => { syncCustom(); later(); });
+$('printBtn').onclick = () => window.print();
+addEventListener('resize', later);
+load(); syncCustom(); render();
+</script>
+</body></html>
