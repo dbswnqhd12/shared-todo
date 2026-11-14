@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>IST 월 결산 · GWJ3 IB</title>
+<link rel="icon" type="image/png" href="/icons/favicon-64.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#EEF1F5;--paper:#FFFFFF;--ink:#18202C;--muted:#5E6776;--line:#D5DBE4;--accent:#2557A7;--accent-soft:#DDE6F4;--high:#B4452F}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#10141B;--paper:#171D27;--ink:#E6EAF0;--muted:#939DAD;--line:#29313F;--accent:#7FA9EE;--accent-soft:#1C2A42;--high:#F08A73}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;padding:0 16px}
+main{max-width:760px;margin:0 auto;padding:28px 0 48px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+h1{font-size:24px;margin:0;letter-spacing:-.01em}.sub{color:var(--muted);margin:2px 0 0;font-size:13px}
+.mon{display:flex;gap:6px;align-items:center}
+.mon button,.mon input{font:inherit;font-size:14px;border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 14px}
+.mon button{cursor:pointer;font-weight:600}.mon button:hover{color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+.card{background:var(--paper);border-radius:14px;padding:16px 18px}
+.card h2{font-size:15px;margin:0 0 8px;color:var(--muted);font-weight:600}
+.pair{display:flex;gap:22px}
+.pair div{display:flex;flex-direction:column}
+.pair span{font-size:13px;color:var(--muted)}
+.pair b{font-size:30px;line-height:1.15;font-variant-numeric:tabular-nums}
+.pair .left b{color:var(--high)}
+.tbl{margin-top:12px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:13px}
+tr.sum td{font-weight:700;border-bottom:0}
+.note{font-size:12px;color:var(--muted);margin:8px 2px 0}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
+.dl{font:inherit;font-weight:600;background:var(--accent);color:#fff;border:0;border-radius:999px;padding:10px 20px;cursor:pointer}
+.dl:disabled{opacity:.6}
+.bubble{background:#B2C7D9;border-radius:14px;padding:16px;margin-top:12px}
+.bubble .who{font-size:12px;color:#3C4B5A;margin-bottom:6px}
+.bubble .msg{background:#fff;color:#191919;border-radius:4px 14px 14px 14px;padding:12px 14px;white-space:pre-wrap;font-size:14px;max-width:300px}
+.bubble .btn{display:block;max-width:300px;margin-top:8px;background:#F2F2F2;color:#191919;text-align:center;border-radius:6px;padding:8px;font-size:13px}
+#lock{max-width:360px;margin:80px auto;background:var(--paper);border-radius:14px;padding:22px}
+#lock input{width:100%;font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);margin:10px 0}
+#lock button{width:100%;font:inherit;font-weight:600;background:var(--accent);color:#fff;border:0;border-radius:999px;padding:9px}
+.err{color:var(--high);font-size:13px}
+.ghostb{font:inherit;font-size:14px;font-weight:600;background:var(--paper);color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:8px 16px;cursor:pointer}
+.ghostb:disabled{opacity:.6}
+.mlform{display:grid;gap:10px;margin-top:12px;max-width:420px}
+.mlform label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.mlform input{font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.mlform .dl{justify-self:start}
+.pair span{white-space:nowrap}
+@media (max-width:600px){.grid{gap:8px}.grid .card{padding:12px}.pair{gap:12px}.pair b{font-size:24px}.card h2{font-size:14px}.tbl{padding:14px 12px}th,td{padding:8px 4px;font-size:13px}th{font-size:12px}}
+</style></head><body>
+<div id="lock" hidden><b>로그인하세요</b><input id="uid" placeholder="아이디 (없으면 비우고 공용 비밀번호)" autocapitalize="off" spellcheck="false"><input id="pw" type="password" placeholder="비밀번호" autocomplete="current-password"><button id="go">로그인</button><p class="err" id="lockErr"></p></div>
+<main id="app" hidden>
+  <header>
+    <div><h1 id="title">IST 월 결산</h1><p class="sub" id="sub"></p></div>
+    <div class="mon"><button id="prev" aria-label="이전 달">‹</button><input id="month" type="month"><button id="next" aria-label="다음 달">›</button></div>
+  </header>
+  <p class="err" id="err"></p>
+  <div class="grid" id="cards"></div>
+  <section class="card tbl" style="margin-top:12px">
+    <h2>결산표</h2>
+    <table id="tbl"></table>
+    <p class="note">전월 이월 + 신규 − 완료 = 남은 건 · 반출은 반출그룹 하나를 1건으로 세요</p>
+    <div class="actions"><button class="dl" id="dl">엑셀 결산표 받기</button><span class="note" id="dlMsg" style="margin:0"></span></div>
+  </section>
+</main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const ls = { get(k){ try { return localStorage.getItem(k) || ''; } catch { return ''; } }, set(k,v){ try { localStorage.setItem(k, v); } catch {} } };
+  let key = ls.get('auth-token');   // 메인 화면과 같은 로그인을 써요
+  const q = new URLSearchParams(location.search);
+  const kst = new Date(Date.now() + 9 * 3600e3).toISOString();
+  const shift = (m, d) => { let [y, mo] = m.split('-').map(Number); mo += d; while (mo < 1) { mo += 12; y--; } while (mo > 12) { mo -= 12; y++; } return `${y}-${String(mo).padStart(2, '0')}`; };
+  // 기본은 지난달 결산 (주소 끝에 ?month=2026-11 처럼 바꿀 수 있어요)
+  let month = /^\d{4}-\d{2}$/.test(q.get('month') || '') ? q.get('month') : shift(kst.slice(0, 7), -1);
+  const hdr = () => key ? { 'x-auth': key } : {};
+
+  function render(rp) {
+    const mo = Number(rp.month.slice(5));
+    $('title').textContent = `${rp.month.slice(0, 4)}년 ${mo}월 IST 결산`;
+    $('sub').textContent = rp.partial ? `진행 중인 달이에요 · ${rp.cut} 기준` : `${rp.month}-01 ~ ${rp.cut}`;
+    $('month').value = rp.month;
+    $('cards').innerHTML = rp.rows.map(r => `<section class="card"><h2>${r.name}</h2><div class="pair"><div><span>완료</span><b>${r.done}</b></div><div class="left"><span>남은 건</span><b>${r.left}</b></div></div></section>`).join('');
+    const tr = (r, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td>${r.name}</td><td>${r.carry}</td><td>${r.added}</td><td>${r.done}</td><td>${r.left}</td></tr>`;
+    $('tbl').innerHTML = `<tr><th>구분</th><th>전월 이월</th><th>신규</th><th>완료</th><th>남은 건</th></tr>` + rp.rows.map(r => tr(r)).join('') + tr(rp.total, 'sum');
+  }
+
+  async function load() {
+    $('err').textContent = ''; $('dlMsg').textContent = '';
+    const r = await fetch('/api/report?month=' + month, { headers: hdr() });
+    const d = await r.json().catch(() => ({}));
+    if (r.status === 401 || d.locked) { $('app').hidden = true; $('lock').hidden = false; $('lockErr').textContent = key ? (d.error || '') : ''; return; }
+    $('lock').hidden = true; $('app').hidden = false;
+    if (!r.ok) { $('err').textContent = d.error || '불러오지 못했어요.'; return; }
+    history.replaceState(null, '', '?month=' + month);
+    render(d);
+  }
+  $('dl').onclick = async () => {
+    $('dl').disabled = true; $('dlMsg').textContent = '만드는 중…';
+    try {
+      const r = await fetch(`/api/report?month=${month}&xlsx=1`, { headers: hdr() });
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || '엑셀을 만들지 못했어요.');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(await r.blob());
+      a.download = `IST결산_${month.replace('-', '')}.xlsx`;
+      document.body.appendChild(a); a.click(); a.remove();
+      $('dlMsg').textContent = '';
+    } catch (e) { $('dlMsg').textContent = e.message; }
+    finally { $('dl').disabled = false; }
+  };
+  $('go').onclick = async () => {
+    const r = await fetch('/api/state?auth=1&login=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: $('uid').value.trim(), pw: $('pw').value }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { $('lockErr').textContent = d.error || '로그인하지 못했어요.'; return; }
+    key = d.token; ls.set('auth-token', key); ls.set('auth-me', JSON.stringify(d.me)); load();
+  };
+  $('pw').onkeydown = e => { if (e.key === 'Enter') $('go').click(); };
+  $('prev').onclick = () => { month = shift(month, -1); load(); };
+  $('next').onclick = () => { month = shift(month, 1); load(); };
+  $('month').onchange = e => { if (e.target.value) { month = e.target.value; load(); } };
+  load();
+})();
+</script>
+</body></html>

@@ -1,8 +1,10 @@
 // 화면이 쓰는 전체 상태 조회
+//   /api/state?auth=1...                          → 로그인 · 사람 관리 (lib/auth-api.js)
 //   GET /api/state?only=rev                       → { rev }  (변경 확인용, Redis 명령 1개 · 계정 확인도 같이 해요)
 //   GET /api/state?months=2026-08,2026-09,2026-10 → { rev, todos, templates, checks, today }
 import { K, redis, pipeline, parseHash, guard, fail, kstToday } from '../lib/store.js';
 import { AK, MASTER, stillValid, publicUser } from '../lib/auth.js';
+import authHandler from '../lib/auth-api.js';
 
 // 지운 계정 · 등급이 바뀐 계정은 여기서 걸러서 다시 로그인하게 해요
 function kicked(req, res, raw) {
@@ -12,6 +14,7 @@ function kicked(req, res, raw) {
 }
 
 export default async function handler(req, res) {
+  if (req.query?.auth) return authHandler(req, res);   // 로그인 · 사람 관리
   if (!(await guard(req, res))) return;
   try {
     if (req.method !== 'GET') {
