@@ -1084,7 +1084,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 <section class="ppl" id="ppl" hidden aria-label="사람 관리">
   <div class="ppl-box">
     <div class="ppl-head"><h2>사람 관리</h2><button type="button" class="ghost" id="pplClose">닫기</button></div>
-    <p class="ppl-note">관리자는 모든 탭을 보고 고칠 수 있어요. 일반은 보기만 할 수 있어요.</p>
+    <p class="ppl-note">관리자는 모든 탭을 보고 고칠 수 있어요. 일반은 보기만 할 수 있어요. 사람 관리는 담당자 한 명만 할 수 있어요.</p>
     <form class="ppl-add" id="pplAdd" autocomplete="off">
       <input type="text" id="pplId" placeholder="아이디 (로그인용)" maxlength="20" autocapitalize="off" spellcheck="false" aria-label="아이디">
       <input type="text" id="pplName" placeholder="이름 (화면 표시)" maxlength="20" aria-label="이름">
@@ -5297,12 +5297,17 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     document.body.classList.toggle('ro', ro);
     $('#meChip').innerHTML = '';
     if (me) $('#meChip').append(el('b', { text: me.name }), el('span', { class: 'role' + (isAdmin() ? ' admin' : ''), text: isAdmin() ? '관리자' : '보기 전용' }));
-    $('#usersBtn').hidden = !isAdmin();
     $('#logoutBtn').hidden = !me;
     if (ro){ editMode = false; askEdit = false; lockControls(document); }
-    // 공용으로 들어왔고 관리자가 아직 없으면 '첫 관리자 만들기'를 보여줘요 (한 번만 확인)
+    // 공용으로 들어왔고 관리자가 아직 없으면 '첫 관리자 만들기'를, 관리 담당 관리자면 '사람 관리'를 보여줘요 (로그인마다 한 번 확인)
     if (me?.id !== '_team') $('#setup').hidden = true;
-    else if (!setupChecked){ setupChecked = true; request('GET', AUTH).then(d => { $('#setup').hidden = !d.setup; }, e => { setupChecked = false; toast('관리자 확인을 못 했어요: ' + e.message); }); }
+    if (!isAdmin()) $('#usersBtn').hidden = true;
+    const key = me ? me.id + '|' + me.role : '';
+    if (key && (me.id === '_team' || isAdmin()) && setupChecked !== key){
+      setupChecked = key;
+      request('GET', AUTH).then(d => { $('#setup').hidden = !d.setup; $('#usersBtn').hidden = !d.owner; },
+        e => { setupChecked = ''; toast('계정 확인을 못 했어요: ' + e.message); });
+    }
     else document.querySelectorAll('.ro-off').forEach(n => { n.disabled = false; n.classList.remove('ro-off'); });
   }
   new MutationObserver(ms => { if (document.body.classList.contains('ro')) for (const m of ms) m.addedNodes.forEach(n => n.nodeType === 1 && (n.matches('input, select, textarea') ? lockControls(n.parentNode || n) : lockControls(n))); })
@@ -5354,7 +5359,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
         el('option', { value: 'member', text: '일반 (보기만)' }), el('option', { value: 'admin', text: '관리자' }));
       role.value = u.role;
       ul.append(el('li', {},
-        el('div', { class: 'who' }, el('b', { text: u.name + (self ? ' (나)' : '') }), el('small', { text: '아이디 ' + u.id })),
+        el('div', { class: 'who' }, el('b', { text: u.name + (self ? ' (나)' : '') + (u.owner ? ' · 사람 관리 담당' : '') }), el('small', { text: '아이디 ' + u.id })),
         role,
         el('button', { type: 'button', class: 'ghost', text: '비밀번호 바꾸기', onclick: () => {
           const pw = prompt(`${u.name}의 새 비밀번호 (4자 이상)`); if (pw) pplPatch(u, { pw });
