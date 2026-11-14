@@ -31,6 +31,26 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
 .ghostbtn:disabled{opacity:.45;cursor:default}
 .zbox{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .pg{display:contents}
+.kinds{display:flex;gap:6px;margin:0 0 14px}
+.kinds button{background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:8px 18px;font:inherit;font-weight:700;cursor:pointer}
+.kinds button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.a4pg{display:contents}
+
+/* ── 선반 라벨 (엑셀 'Bay 음영' 서식): 104 × 50.8mm 비율, 왼쪽 QR · 오른쪽 존/통로 · 베이 · 단+빈(검은 칸) · 바코드 ── */
+.lbl.shelf{height:calc(var(--u)*48.8);border:0;display:grid;grid-template-columns:calc(var(--u)*31) 1fr;column-gap:calc(var(--u)*2);padding:calc(var(--u)*2.2) calc(var(--u)*2.5)}
+@media screen{.lbl.shelf{box-shadow:0 0 0 1px #B8C0CC}}
+.lbl.shelf>div{border:0}
+.s-qr{display:flex;align-items:center;justify-content:center}
+.s-qr .qr{width:calc(var(--u)*30);height:calc(var(--u)*30)}
+.s-right{display:flex!important;flex-direction:column;justify-content:space-between;min-width:0}
+.s-info{display:grid!important;grid-template-columns:calc(var(--u)*15) 1fr calc(var(--u)*25);grid-template-rows:1fr 1fr;height:calc(var(--u)*22);align-items:center;column-gap:calc(var(--u)*1)}
+.s-info>div{min-width:0;text-align:center;display:flex;align-items:center;justify-content:center;height:100%}
+.s-zone{grid-row:1;grid-column:1;justify-content:flex-start!important}.s-aisle{grid-row:2;grid-column:1;justify-content:flex-start!important}
+.s-bay{grid-row:1/3;grid-column:2}.s-lb{grid-row:1/3;grid-column:3}
+.s-lb.inv{background:#000;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.lbl.shelf .bc{width:100%}
+.lbl.shelf .bc svg{width:100%;height:calc(var(--u)*12)}
+.lbl.shelf .bc span{font-size:calc(var(--u)*2.6)}
 .inline{display:flex;gap:14px;flex-wrap:wrap;align-items:center}.inline label{display:flex;align-items:center;gap:5px;font-weight:500;color:var(--ink);font-size:14px}
 .inline input{display:inline;width:auto;margin:0}
 #sheet{display:flex;flex-wrap:wrap;gap:14px;--u:min(5.4px,calc((100vw - 34px) / 100))}
@@ -77,6 +97,11 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
 <h1>로케이션 바코드 출력</h1>
 <p class="sub">범위만 넣으면 QR · 바코드 라벨을 한꺼번에 만들어 인쇄해요.</p>
 
+<div class="kinds" role="group" aria-label="라벨 종류">
+  <button type="button" data-kind="pallet" aria-pressed="true">파렛트 라벨</button>
+  <button type="button" data-kind="shelf" aria-pressed="false">선반 라벨 (빈)</button>
+</div>
+
 <div class="card">
   <div class="tabs" role="group" aria-label="입력 방식">
     <button type="button" data-mode="range" aria-pressed="true">범위로 만들기</button>
@@ -93,13 +118,30 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
     </div>
     <p class="hint">코드는 <b>FC-존이름통로-베이-빈</b> 순서예요. 예) 140, RCRT, 99, 1, 1 → <code>140-RCRT99-1-1</code></p>
   </div>
+  <div id="shelfBox" hidden>
+    <div class="grid">
+      <label>FC<input id="sfc" value="140" inputmode="numeric"></label>
+      <label>존 이름 (Zone)<input id="szone" value="12RA" autocapitalize="characters"></label>
+      <label>통로<div class="rng"><input id="sa1" value="1" inputmode="numeric"><span>~</span><input id="sa2" value="1" inputmode="numeric"></div></label>
+      <label>베이 (큰 번호부터면 11 ~ 1)<div class="rng"><input id="sb1" value="11" inputmode="numeric"><span>~</span><input id="sb2" value="1" inputmode="numeric"></div></label>
+      <label>베이 고르기<select id="sside"><option value="all">전부</option><option value="odd" selected>홀수만</option><option value="even">짝수만</option></select></label>
+      <label>단<div class="rng"><input id="sl1" value="1" inputmode="numeric"><span>~</span><input id="sl2" value="1" inputmode="numeric"></div></label>
+      <label>단마다 빈 개수<input id="sbins" value="1" inputmode="numeric"></label>
+    </div>
+    <div class="inline" style="margin-top:12px">
+      <label><input type="checkbox" id="sflip" checked>홀수 베이는 큰 빈부터 (엑셀 순서)</label>
+      <label><input type="checkbox" id="sshade" checked>단+빈 번호 검은 칸 (Bay 음영)</label>
+    </div>
+    <p class="hint">코드는 <b>FC-존이름통로-베이-단+빈(2자리)</b> 순서예요. 예) 140, 12RA, 1, 11, 1단 1번 빈 → <code>140-12RA1-11-101</code>. 순서는 통로 → 단 → 베이 → 빈이에요.</p>
+  </div>
   <div id="listBox" hidden>
     <label>로케이션 코드 (한 줄에 하나)<textarea id="codes" spellcheck="false" placeholder="140-RCRT99-1-1&#10;140-RCRT99-2-1&#10;140-22N3-12-1"></textarea></label>
     <p class="hint">엑셀이나 WMS에서 코드 열을 복사해서 붙여넣으면 돼요. 빈 줄은 건너뛰어요.</p>
   </div>
 </div>
 
-<div class="card">
+<div class="card" id="optCard">
+  <div class="pal-only">
   <div class="grid wide">
     <div><label>존타입 (왼쪽 파란 글자)<select id="typeSel"></select></label><input id="typeTxt" class="custom" placeholder="직접 입력" hidden></div>
     <div><label>로케이션 설명 (맨 위 색 띠)<select id="descSel"></select></label><input id="descTxt" class="custom" placeholder="직접 입력" hidden></div>
@@ -116,14 +158,18 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
     <label><input type="radio" name="arrow" value="down" checked>아래 ▼</label>
     <label><input type="radio" name="arrow" value="up">위 ▲</label>
     <label><input type="radio" name="arrow" value="none">없음</label>
-    <span style="font-size:13px;color:var(--mute);font-weight:600;margin-left:12px">용지</span>
-    <label><input type="radio" name="paper" value="full" checked>A4 가로 1장</label>
-    <label><input type="radio" name="paper" value="half">A4 세로 2장 (작게)</label>
+  </div>
+  </div>
+  <div class="inline" style="margin-top:10px">
+    <span style="font-size:13px;color:var(--mute);font-weight:600">용지</span>
+    <label class="pal-only"><input type="radio" name="paper" value="full" checked>A4 가로 1장</label>
+    <label class="pal-only"><input type="radio" name="paper" value="half">A4 세로 2장 (작게)</label>
+    <label class="shelf-only" hidden><input type="radio" name="paper" value="grid">A4에 10장씩</label>
     <label><input type="radio" name="paper" value="zebra">Zebra 라벨지 (ZT411)</label>
   </div>
   <div id="zebraBox" class="zbox" hidden>
     <div class="grid wide">
-      <label>라벨지 크기<select id="zSize"><option value="100x150">100 × 150 mm (4×6인치)</option><option value="100x100">100 × 100 mm</option><option value="100x75">100 × 75 mm</option><option value="100x50">100 × 50 mm</option><option value="custom">직접 입력</option></select></label>
+      <label>라벨지 크기<select id="zSize"><option value="104x50.8">104 × 50.8 mm (4×2인치)</option><option value="100x150" selected>100 × 150 mm (4×6인치)</option><option value="100x100">100 × 100 mm</option><option value="100x75">100 × 75 mm</option><option value="100x50">100 × 50 mm</option><option value="custom">직접 입력</option></select></label>
       <label id="zCustom" hidden>가로 × 세로 (mm)<div class="rng"><input id="zW" value="100" inputmode="decimal"><span>×</span><input id="zH" value="150" inputmode="decimal"></div></label>
       <label>해상도<select id="zDpi"><option value="203">203 dpi</option><option value="300">300 dpi</option><option value="600">600 dpi</option></select></label>
     </div>
@@ -204,10 +250,29 @@ const ARROW = '<svg viewBox="0 0 10 12"><path d="M3.2 0h3.6v6H10L5 12 0 6h3.2z" 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 
 // ── 코드 만들기 ──
-let mode = 'range';
+let mode = 'range', kind = 'pallet';
 const num = id => { const v = $(id).value.trim(); return v === '' ? NaN : Number(v); };
 function rangeOf(a, b){ if (!Number.isInteger(a)) return null; if (!Number.isInteger(b)) b = a; if (b < a) [a, b] = [b, a]; return [a, b]; }
+// 범위를 적은 방향 그대로 (11 ~ 1 이면 큰 번호부터)
+function seq(a, b){ if (!Number.isInteger(a)) return null; if (!Number.isInteger(b)) b = a; const st = a <= b ? 1 : -1, out = []; for (let i = a; st > 0 ? i <= b : i >= b; i += st) out.push(i); return out; }
+// 선반 라벨: 통로 → 단 → 베이 → 빈. 홀수 베이는 빈을 큰 번호부터 (엑셀 'Bay 음영' 서식과 같은 순서)
+function buildShelf(){
+  const fc = $('sfc').value.trim(), zone = $('szone').value.trim().toUpperCase(), bins = num('sbins');
+  const A = seq(num('sa1'), num('sa2')), B = seq(num('sb1'), num('sb2')), L = seq(num('sl1'), num('sl2'));
+  if (!fc || !zone || !A || !B || !L || !(Number.isInteger(bins) && bins >= 1 && bins <= 99)) return { error: 'FC · 존 이름 · 통로 · 베이 · 단 · 빈 개수를 모두 숫자로 넣어주세요.' };
+  const side = $('sside').value, flip = $('sflip').checked;
+  if (A.length * B.length * L.length * bins > MAX * 4) return { error: `한 번에 ${MAX}장까지만 만들 수 있어요. 범위를 줄여주세요.` };
+  const out = [];
+  for (const a of A) for (const l of L) for (const b of B){
+    if (side === 'odd' && b % 2 === 0 || side === 'even' && b % 2 !== 0) continue;
+    const order = []; for (let i = 1; i <= bins; i++) order.push(i);
+    if (flip && b % 2 !== 0) order.reverse();
+    for (const n of order){ const lb = `${l}${String(n).padStart(2, '0')}`; out.push({ code: `${fc}-${zone}${a}-${b}-${lb}`, fc, zone, aisle: String(a), bay: String(b), shelf: lb }); }
+  }
+  return out;
+}
 function buildList(){
+  if (mode === 'range' && kind === 'shelf') return buildShelf();
   if (mode === 'list'){
     return $('codes').value.split(/\r?\n/).map(s => s.trim()).filter(Boolean).map(parseCode);
   }
@@ -235,7 +300,22 @@ function parseCode(code){
 }
 
 // ── 라벨 그리기 ──
+function shelfHtml(it, opt){
+  return `<div class="lbl shelf">
+    <div class="s-qr">${qrSvg(it.code)}</div>
+    <div class="s-right">
+      <div class="s-info">
+        <div class="s-zone"><span class="fit" data-f="6">${esc(it.raw ? '' : it.zone)}</span></div>
+        <div class="s-aisle"><span class="fit" data-f="6">${esc(it.raw ? '' : it.aisle)}</span></div>
+        <div class="s-bay"><span class="fit" data-f="9">${esc(it.raw ? it.code : `- ${it.bay} -`)}</span></div>
+        <div class="s-lb${opt.shade ? ' inv' : ''}"><span class="fit" data-f="12">${esc(it.raw ? '' : it.shelf)}</span></div>
+      </div>
+      <div class="bc">${code128Svg(it.code)}<span>${esc(it.code)}</span></div>
+    </div>
+  </div>`;
+}
 function labelHtml(it, opt){
+  if (kind === 'shelf') return shelfHtml(it, opt);
   const q = qrSvg(it.code);
   const loc = it.raw
     ? `<div class="l-loc"><div class="l-vals" style="grid-template-columns:1fr"><div><span class="fit" data-f="9">${esc(it.code)}</span></div></div></div>`
@@ -267,11 +347,18 @@ function fitAll(root){
 function setPage(paper){
   if (paper === 'zebra'){
     const z = zebraSize(), m = 1.5, rot = z.h > z.w, lw = rot ? z.h : z.w, lh = rot ? z.w : z.h;
-    const u = Math.min((lw - 2 * m) / 100, (lh - 2 * m) / 69).toFixed(3);
+    const ratio = kind === 'shelf' ? 48.8 : 69;
+    const u = Math.min((lw - 2 * m) / 100, (lh - 2 * m) / ratio).toFixed(3);
     $('pageStyle').textContent = `@page{size:${z.w}mm ${z.h}mm;margin:0}@media print{#sheet{--u:${u}mm}`
       + `.pg{display:flex;width:${z.w}mm;height:${z.h}mm;align-items:center;justify-content:center;overflow:hidden;break-after:page;page-break-after:always}`
       + `.pg:last-child{break-after:auto;page-break-after:auto}.lbl{flex:none${rot ? ';transform:rotate(90deg)' : ''}}`
       + `.l-type{color:#000!important}.l-arrows path{fill:#000}.l-heads{color:#555!important}.band-red .l-top{background:#000;color:#fff}}`;
+    return;
+  }
+  if (paper === 'grid'){
+    $('pageStyle').textContent = '@page{size:A4 portrait;margin:8mm}@media print{#sheet{--u:0.93mm;display:block}'
+      + '.a4pg{display:grid;grid-template-columns:repeat(2,auto);gap:4mm 4mm;justify-content:center;break-after:page;page-break-after:always}.a4pg:last-child{break-after:auto}'
+      + '.lbl.shelf{outline:0.2mm dashed #999}}';
     return;
   }
   $('pageStyle').textContent = paper === 'half'
@@ -303,24 +390,25 @@ function drawLabel(ctx, lbl, it, W, H, dpmm){
   const R = el => { const r = el.getBoundingClientRect(); return { x: (r.left - box.left) * s, y: (r.top - box.top) * s, w: r.width * s, h: r.height * s }; };
   // 띠 색: 감열 프린터는 검정 한 가지라 회색은 옅은 점무늬, 하늘색은 흰 바탕, 빨간색은 검은 띠에 흰 글자로 바꿔요
   const red = lbl.classList.contains('band-red');
-  const top = lbl.querySelector('.l-top'); { const r = R(top); ctx.fillStyle = red ? '#000' : lbl.classList.contains('band-sky') ? '#fff' : '#D0D0D0'; ctx.fillRect(r.x, r.y, r.w, r.h); }
+  const top = lbl.querySelector('.l-top'); if (top){ const r = R(top); ctx.fillStyle = red ? '#000' : lbl.classList.contains('band-sky') ? '#fff' : '#D0D0D0'; ctx.fillRect(r.x, r.y, r.w, r.h); }
   ctx.fillStyle = '#000';
+  lbl.querySelectorAll('.inv').forEach(el => { const r = R(el); ctx.fillRect(Math.round(r.x), Math.round(r.y), Math.round(r.w), Math.round(r.h)); });
   for (const row of lbl.children){
     const bw = parseFloat(getComputedStyle(row).borderBottomWidth) * s;
     if (bw > 0){ const r = R(row); ctx.fillRect(r.x, Math.round(r.y + r.h - bw), r.w, Math.max(1, Math.round(bw))); }
   }
-  const ob = Math.max(1, Math.round(parseFloat(getComputedStyle(lbl).borderTopWidth) * s)), LW = Math.round(box.width * s), LH = Math.round(box.height * s);
-  ctx.fillRect(0, 0, LW, ob); ctx.fillRect(0, LH - ob, LW, ob); ctx.fillRect(0, 0, ob, LH); ctx.fillRect(LW - ob, 0, ob, LH);
+  const obw = parseFloat(getComputedStyle(lbl).borderTopWidth), ob = Math.max(1, Math.round(obw * s)), LW = Math.round(box.width * s), LH = Math.round(box.height * s);
+  if (obw > 0){ ctx.fillRect(0, 0, LW, ob); ctx.fillRect(0, LH - ob, LW, ob); ctx.fillRect(0, 0, ob, LH); ctx.fillRect(LW - ob, 0, ob, LH); }
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   lbl.querySelectorAll('.fit, .bc span').forEach(el => {
     const r = R(el), cs = getComputedStyle(el);
-    ctx.fillStyle = el.closest('.l-heads') ? '#555' : red && el.closest('.l-top') ? '#fff' : '#000';
+    ctx.fillStyle = el.closest('.l-heads') ? '#555' : (red && el.closest('.l-top')) || el.closest('.inv') ? '#fff' : '#000';
     ctx.font = `${cs.fontWeight} ${parseFloat(cs.fontSize) * s}px ${cs.fontFamily}`;
     ctx.fillText(el.textContent, r.x + r.w / 2, r.y + r.h / 2);
   });
   ctx.fillStyle = '#000';
   const arrows = lbl.querySelector('.l-arrows');
-  if (!arrows.classList.contains('none')){
+  if (arrows && !arrows.classList.contains('none')){
     const up = arrows.classList.contains('up'), p = new Path2D(ARROW_PATH);
     arrows.querySelectorAll('svg').forEach(el => {
       const r = R(el); ctx.save(); ctx.translate(r.x, r.y); ctx.scale(r.w / 10, r.h / 12);
@@ -399,7 +487,7 @@ function render(){
   const list = buildList();
   const sheet = $('sheet');
   const opt = { type: pick('type'), desc: pick('desc'), cmt: pick('cmt'),
-    arrow: document.querySelector('input[name=arrow]:checked').value, band: document.querySelector('input[name=band]:checked').value };
+    arrow: document.querySelector('input[name=arrow]:checked').value, band: document.querySelector('input[name=band]:checked').value, shade: $('sshade').checked };
   setPage(document.querySelector('input[name=paper]:checked').value);
   $('warn').textContent = '';
   if (list.error || !list.length){
@@ -409,11 +497,14 @@ function render(){
   }
   let items = list;
   if (items.length > MAX){ $('warn').textContent = `한 번에 ${MAX}장까지만 만들어요. 앞의 ${MAX}장만 보여요.`; items = items.slice(0, MAX); }
-  const paper = document.querySelector('input[name=paper]:checked').value, half = paper === 'half', zebra = paper === 'zebra';
-  const pages = half ? Math.ceil(items.length / 2) : items.length;
+  const paper = document.querySelector('input[name=paper]:checked').value, half = paper === 'half', zebra = paper === 'zebra', grid = paper === 'grid';
+  const pages = half ? Math.ceil(items.length / 2) : grid ? Math.ceil(items.length / 10) : items.length;
   $('count').innerHTML = `${items.length}장 <small>· 종이 ${pages}장 · ${esc(items[0].code)}${items.length > 1 ? ' ~ ' + esc(items[items.length - 1].code) : ''}</small>`;
   $('printBtn').disabled = $('zplBtn').disabled = $('zplCopy').disabled = false;
-  sheet.innerHTML = items.map(it => zebra ? `<div class="pg">${labelHtml(it, opt)}</div>` : labelHtml(it, opt)).join('');
+  if (grid){
+    let h = ''; for (let i = 0; i < items.length; i += 10) h += `<div class="a4pg">${items.slice(i, i + 10).map(it => labelHtml(it, opt)).join('')}</div>`;
+    sheet.innerHTML = h;
+  } else sheet.innerHTML = items.map(it => zebra ? `<div class="pg">${labelHtml(it, opt)}</div>` : labelHtml(it, opt)).join('');
   lastItems = items;
   fitAll(sheet);
   save();
@@ -421,11 +512,13 @@ function render(){
 const later = () => { clearTimeout(timer); timer = setTimeout(render, 200); };
 
 // ── 입력값 기억 (이 PC에서만) ──
-const FIELDS = ['fc','zone','a1','a2','b1','b2','s1','s2','side','codes','typeSel','typeTxt','descSel','descTxt','cmtSel','cmtTxt','zSize','zW','zH','zDpi'];
+const FIELDS = ['fc','zone','a1','a2','b1','b2','s1','s2','side','codes','typeSel','typeTxt','descSel','descTxt','cmtSel','cmtTxt','zSize','zW','zH','zDpi','sfc','szone','sa1','sa2','sb1','sb2','sside','sl1','sl2','sbins'];
+const CHECKS = ['sflip','sshade'];
 function save(){
   try {
-    const o = { mode, band: document.querySelector('input[name=band]:checked').value, arrow: document.querySelector('input[name=arrow]:checked').value, paper: document.querySelector('input[name=paper]:checked').value };
+    const o = { mode, kind, band: document.querySelector('input[name=band]:checked').value, arrow: document.querySelector('input[name=arrow]:checked').value, paper: document.querySelector('input[name=paper]:checked').value };
     for (const f of FIELDS) o[f] = $(f).value;
+    for (const f of CHECKS) o[f] = $(f).checked;
     localStorage.setItem('gwj3-labels', JSON.stringify(o));
   } catch (e) {}
 }
@@ -433,14 +526,29 @@ function load(){
   try {
     const o = JSON.parse(localStorage.getItem('gwj3-labels') || 'null'); if (!o) return;
     for (const f of FIELDS) if (o[f] != null) $(f).value = o[f];
+    for (const f of CHECKS) if (o[f] != null) $(f).checked = o[f];
     for (const n of ['band','arrow','paper']){ const r = document.querySelector(`input[name=${n}][value="${o[n]}"]`); if (r) r.checked = true; }
     if (o.mode) setMode(o.mode);
+    if (o.kind) setKind(o.kind, true);
   } catch (e) {}
 }
 function setMode(m){
   mode = m;
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
-  $('rangeBox').hidden = m !== 'range'; $('listBox').hidden = m !== 'list';
+  $('rangeBox').hidden = m !== 'range' || kind !== 'pallet'; $('shelfBox').hidden = m !== 'range' || kind !== 'shelf'; $('listBox').hidden = m !== 'list';
+}
+// 라벨 종류: 파렛트 ↔ 선반. 선반은 ZT411 104 × 50.8mm 가 기본
+function setKind(k, fromLoad){
+  kind = k;
+  document.querySelectorAll('.kinds button').forEach(b => b.setAttribute('aria-pressed', b.dataset.kind === k));
+  document.querySelectorAll('.pal-only').forEach(e => e.hidden = k !== 'pallet');
+  document.querySelectorAll('.shelf-only').forEach(e => e.hidden = k !== 'shelf');
+  const cur = document.querySelector('input[name=paper]:checked');
+  if (!fromLoad || cur.closest('[hidden]')){
+    document.querySelector(`input[name=paper][value="${k === 'shelf' ? 'zebra' : 'full'}"]`).checked = true;
+    $('zSize').value = k === 'shelf' ? '104x50.8' : '100x150';
+  }
+  setMode(mode); syncCustom();
 }
 function syncCustom(){
   for (const k of ['type','desc','cmt']) $(k + 'Txt').hidden = $(k + 'Sel').value !== CUSTOM;
@@ -451,6 +559,7 @@ function syncCustom(){
 }
 
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { setMode(b.dataset.mode); render(); });
+document.querySelectorAll('.kinds button').forEach(b => b.onclick = () => { setKind(b.dataset.kind); render(); });
 document.querySelector('main').addEventListener('input', later);
 document.querySelector('main').addEventListener('change', () => { syncCustom(); later(); });
 $('printBtn').onclick = () => window.print();
