@@ -86,6 +86,7 @@ input,select{font:inherit}
 .lock .err{color:var(--high);font-size:13px;min-height:1.2em}
 .lock form.lock-form{flex-direction:column}
 .lock .lock-hint{font-size:12px}
+.lock.setup{margin:0 auto 20px}
 .me-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
 .me-chip{font-size:13px;color:var(--muted)}
 .me-chip b{color:var(--ink);font-weight:600}
@@ -1085,6 +1086,17 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 </section>
 
 <div class="wrap" id="app">
+  <section class="lock setup" id="setup" hidden aria-label="첫 관리자 만들기">
+    <h2>첫 관리자 만들기</h2>
+    <p>아직 관리자가 없어요. 내가 쓸 아이디와 비밀번호를 정하면 관리자로 바로 로그인돼요. 그다음 "사람 관리"에서 팀원을 추가하세요.</p>
+    <form id="setupForm" class="lock-form" autocomplete="off">
+      <input type="text" id="setupId" placeholder="아이디 (영어 소문자 · 숫자 · 한글)" maxlength="20" autocapitalize="off" spellcheck="false" aria-label="아이디">
+      <input type="text" id="setupName" placeholder="이름 (화면 표시)" maxlength="20" aria-label="이름">
+      <input type="password" id="setupPw" placeholder="비밀번호 (4자 이상)" maxlength="64" aria-label="비밀번호">
+      <button class="btn" type="submit">관리자 만들기</button>
+    </form>
+    <div class="err" id="setupErr" role="alert"></div>
+  </section>
   <div class="offbar" id="offBar" hidden role="status"><b>인터넷 연결 없음</b><span></span></div>
   <header>
     <div>
@@ -1281,7 +1293,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     const headers = {};
     if (body) headers['Content-Type'] = 'application/json';
     if (authToken) headers['x-auth'] = authToken;
-    if (method !== 'GET' && !isAdmin() && !url.startsWith(AUTH + '&login')) throw new ReadOnly('보기 전용 계정이라 수정할 수 없어요.');
+    if (method !== 'GET' && !isAdmin() && !url.startsWith(AUTH + '&login') && !url.startsWith(AUTH + '&setup')) throw new ReadOnly('보기 전용 계정이라 수정할 수 없어요.');
     const cacheable = method === 'GET' && !!authToken && !url.includes('verify=') && !url.startsWith(AUTH);
     let r;
     try { r = await fetch(url, {method, headers, body: body ? JSON.stringify(body) : undefined, cache:'no-store'}); }
@@ -5258,7 +5270,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     applyRole();
   }
   // 보기 전용일 때도 쓸 수 있는 칸 (찾기 · 날짜 이동 · 로그인)
-  const RO_OK = 'input[type=search], .bf-find, #ho-date, #lockForm *, .ppl *';
+  const RO_OK = 'input[type=search], .bf-find, #ho-date, #lockForm *, #setup *, .ppl *';
   function lockControls(root){
     if (!document.body.classList.contains('ro')) return;
     root.querySelectorAll?.('input, select, textarea').forEach(n => {
@@ -5266,6 +5278,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
       if (!n.disabled){ n.disabled = true; n.classList.add('ro-off'); }
     });
   }
+  let setupChecked = false;
   function applyRole(){
     const ro = !!me && !isAdmin();
     document.body.classList.toggle('ro', ro);
@@ -5274,10 +5287,25 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     $('#usersBtn').hidden = !isAdmin();
     $('#logoutBtn').hidden = !me;
     if (ro){ editMode = false; askEdit = false; lockControls(document); }
+    // 공용으로 들어왔고 관리자가 아직 없으면 '첫 관리자 만들기'를 보여줘요 (한 번만 확인)
+    if (me?.id !== '_team') $('#setup').hidden = true;
+    else if (!setupChecked){ setupChecked = true; request('GET', AUTH).then(d => { $('#setup').hidden = !d.setup; }, () => {}); }
     else document.querySelectorAll('.ro-off').forEach(n => { n.disabled = false; n.classList.remove('ro-off'); });
   }
   new MutationObserver(ms => { if (document.body.classList.contains('ro')) for (const m of ms) m.addedNodes.forEach(n => n.nodeType === 1 && (n.matches('input, select, textarea') ? lockControls(n.parentNode || n) : lockControls(n))); })
     .observe(document.getElementById('app'), { childList: true, subtree: true });
+
+  $('#setupForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    $('#setupErr').textContent = '';
+    try {
+      const d = await request('POST', AUTH + '&setup=1', { id: $('#setupId').value, name: $('#setupName').value, pw: $('#setupPw').value });
+      setAuth(d.token, d.me);
+      ['#setupId', '#setupName', '#setupPw'].forEach(k => $(k).value = '');
+      toast(`${d.me.name} 관리자로 로그인했어요. 이제 "사람 관리"에서 팀원을 추가하세요.`);
+      loadFull();
+    } catch(err) { $('#setupErr').textContent = err.message; }
+  });
 
   // ---------- 사람 관리 (관리자) ----------
   let pplUsers = [];
