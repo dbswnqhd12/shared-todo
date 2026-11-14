@@ -169,7 +169,7 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
   </div>
   <div id="zebraBox" class="zbox" hidden>
     <div class="grid wide">
-      <label>라벨지 크기<select id="zSize"><option value="105x35x20">105 × 35 mm (오른쪽 20mm 화살표 칸 비움)</option><option value="104x50.8">104 × 50.8 mm (4×2인치)</option><option value="100x150" selected>100 × 150 mm (4×6인치)</option><option value="100x100">100 × 100 mm</option><option value="100x75">100 × 75 mm</option><option value="100x50">100 × 50 mm</option><option value="custom">직접 입력</option></select></label>
+      <label>라벨지 크기<select id="zSize"><option value="105x35x20xL">105 × 35 mm (왼쪽 20mm 화살표 칸 비움)</option><option value="105x35x20xR">105 × 35 mm (오른쪽 20mm 화살표 칸 비움)</option><option value="104x50.8">104 × 50.8 mm (4×2인치)</option><option value="100x150" selected>100 × 150 mm (4×6인치)</option><option value="100x100">100 × 100 mm</option><option value="100x75">100 × 75 mm</option><option value="100x50">100 × 50 mm</option><option value="custom">직접 입력</option></select></label>
       <label id="zCustom" hidden>가로 × 세로 (mm)<div class="rng"><input id="zW" value="100" inputmode="decimal"><span>×</span><input id="zH" value="150" inputmode="decimal"></div></label>
       <label>해상도<select id="zDpi"><option value="203">203 dpi</option><option value="300">300 dpi</option><option value="600">600 dpi</option></select></label>
     </div>
@@ -352,7 +352,7 @@ function setPage(paper){
     $('sheet').style.setProperty('--sh', kind === 'shelf' ? ratio : 48.8);
     const u = Math.min((lw - 2 * m) / 100, (lh - 2 * m) / ratio).toFixed(3);
     $('pageStyle').textContent = `@page{size:${z.w}mm ${z.h}mm;margin:0}@media print{#sheet{--u:${u}mm}`
-      + `.pg{display:flex;box-sizing:border-box;width:${z.w}mm;height:${z.h}mm;padding-right:${z.r}mm;align-items:center;justify-content:center;overflow:hidden;break-after:page;page-break-after:always}`
+      + `.pg{display:flex;box-sizing:border-box;width:${z.w}mm;height:${z.h}mm;padding-${z.side === 'L' ? 'left' : 'right'}:${z.r}mm;align-items:center;justify-content:center;overflow:hidden;break-after:page;page-break-after:always}`
       + `.pg:last-child{break-after:auto;page-break-after:auto}.lbl{flex:none${rot ? ';transform:rotate(90deg)' : ''}}`
       + `.l-type{color:#000!important}.l-arrows path{fill:#000}.l-heads{color:#555!important}.band-red .l-top{background:#000;color:#fff}}`;
     return;
@@ -370,23 +370,23 @@ function setPage(paper){
 }
 
 function zebraSize(){
-  let w, h, r = 0;   // r: 오른쪽에 미리 인쇄돼 있어서 비워 둘 폭(mm)
+  let w, h, r = 0, side = 'R';   // r: 화살표가 미리 인쇄돼 있어서 비워 둘 폭(mm), side: 그 칸이 왼쪽(L)/오른쪽(R)
   if ($('zSize').value === 'custom'){ w = parseFloat($('zW').value); h = parseFloat($('zH').value); }
-  else [w, h, r = 0] = $('zSize').value.split('x').map(Number);
+  else { const v = $('zSize').value.split('x'); [w, h, r = 0] = v.slice(0, 3).map(Number); side = v[3] || 'R'; }
   if (!(w >= 20 && w <= 120)) w = 100;   // ZT411 최대 인쇄 폭 104mm
   if (!(h >= 20 && h <= 400)) h = 150;
-  return { w, h, r, dpi: +$('zDpi').value };
+  return { w, h, r, side, dpi: +$('zDpi').value };
 }
 
 // ── ZPL: 화면에 그려진 라벨을 프린터 해상도 그림(1비트)으로 다시 그려서 ^GF 로 보내요 ──
 // 글자는 그림이라 프린터에 한글 글꼴이 없어도 되고, QR · 바코드는 프린터 점 단위에 맞춰 그려서 잘 읽혀요
 const BAYER = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
 const ARROW_PATH = 'M3.2 0h3.6v6H10L5 12 0 6h3.2z';
-function drawLabel(ctx, lbl, it, W, H, dpmm, rsv = 0){
+function drawLabel(ctx, lbl, it, W, H, dpmm, rsv = 0, left = false){
   const rot = H > W, lw = (rot ? H : W) - rsv, lh = rot ? W : H, m = 1.5 * dpmm;
   const box = lbl.getBoundingClientRect();
   const s = Math.min((lw - 2 * m) / box.width, (lh - 2 * m) / box.height);
-  const ox = Math.round((lw - box.width * s) / 2), oy = Math.round((lh - box.height * s) / 2);
+  const ox = Math.round((lw - box.width * s) / 2) + (left ? rsv : 0), oy = Math.round((lh - box.height * s) / 2);
   ctx.save();
   if (rot){ ctx.translate(W, 0); ctx.rotate(Math.PI / 2); }
   ctx.translate(ox, oy);
@@ -478,7 +478,7 @@ async function makeZpl(){
   const parts = [];
   for (let k = 0; k < lbls.length; k++){
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, PW, H);
-    drawLabel(ctx, lbls[k], lastItems[k], W, H, dpmm, Math.round(z.r * dpmm));
+    drawLabel(ctx, lbls[k], lastItems[k], W, H, dpmm, Math.round(z.r * dpmm), z.side === 'L');
     const g = gfa(ctx.getImageData(0, 0, PW, H), PW, H);
     parts.push(`^XA^PW${PW}^LL${H}^LH0,0^FO0,0^GFA,${g.total},${g.total},${g.bpr},${g.data}^FS^PQ1^XZ`);
     if (k % 10 === 9){ $('warn').textContent = `ZPL 만드는 중… ${k + 1} / ${lbls.length}`; await new Promise(r => setTimeout(r)); }
@@ -542,7 +542,7 @@ function setMode(m){
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
   $('rangeBox').hidden = m !== 'range' || kind !== 'pallet'; $('shelfBox').hidden = m !== 'range' || kind !== 'shelf'; $('listBox').hidden = m !== 'list';
 }
-// 라벨 종류: 파렛트 ↔ 선반. 선반은 ZT411 105 × 35mm(오른쪽 20mm 화살표 칸 비움)가 기본
+// 라벨 종류: 파렛트 ↔ 선반. 선반은 ZT411 105 × 35mm(왼쪽 20mm 화살표 칸 비움)가 기본
 function setKind(k, fromLoad){
   kind = k;
   document.querySelectorAll('.kinds button').forEach(b => b.setAttribute('aria-pressed', b.dataset.kind === k));
@@ -551,7 +551,7 @@ function setKind(k, fromLoad){
   const cur = document.querySelector('input[name=paper]:checked');
   if (!fromLoad || cur.closest('[hidden]')){
     document.querySelector(`input[name=paper][value="${k === 'shelf' ? 'zebra' : 'full'}"]`).checked = true;
-    $('zSize').value = k === 'shelf' ? '105x35x20' : '100x150';
+    $('zSize').value = k === 'shelf' ? '105x35x20xL' : '100x150';
   }
   setMode(mode); syncCustom();
 }
