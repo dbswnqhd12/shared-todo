@@ -192,7 +192,7 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
       <label>위치 조정 (mm) <small>아래로 + / 위로 −</small><input id="zOffY" value="0" inputmode="decimal"></label>
       <label>위치 조정 (mm) <small>오른쪽 + / 왼쪽 −</small><input id="zOffX" value="0" inputmode="decimal"></label>
     </div>
-    <p class="hint pal-only">시험 인쇄했을 때 위쪽으로 치우치면 '아래로'에 2~3 같은 숫자를 넣고 다시 인쇄해 보세요. 선반 라벨은 아래로 10mm가 기본이에요. 이 값은 '인쇄' 버튼(브라우저 인쇄)에만 써요. ZPL은 라벨에 점 단위로 딱 맞춰서 보내요.</p>
+    <p class="hint pal-only">시험 인쇄했을 때 위쪽으로 치우치면 '아래로'에 2~3 같은 숫자를 넣고 다시 인쇄해 보세요. 선반 라벨은 아래로 10mm가 기본이에요.</p>
     <p class="hint pal-only">가로는 프린터에서 나오는 방향 기준 라벨지 폭이에요. 세로가 더 길면 라벨을 90도 돌려서 꽉 차게 넣어요. 감열 프린터는 검정 한 색만 찍혀서 빨간 화살표 · 파란 글자는 검게, 맨 위 띠는 회색 → 점무늬, 하늘색 → 흰 바탕, 빨간색 → 검은 띠(흰 글자)로 나와요.</p>
   </div>
 </div>
@@ -201,14 +201,11 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
   <span class="count" id="count"></span>
   <span class="warn" id="warn"></span>
   <span style="flex:1"></span>
-  <button class="ghostbtn zonly" id="zplCopy" type="button" hidden>ZPL 복사</button>
-  <button class="ghostbtn zonly" id="zplBtn" type="button" hidden>ZPL 파일 받기</button>
   <button class="btn" id="printBtn" type="button">인쇄하기</button>
 </div>
 <p class="hint" id="hintA4" style="margin:-4px 0 14px">인쇄 창에서 <b>배경 그래픽</b>을 켜면 맨 위 색 띠도 같이 나와요. 여백은 '기본값', 배율은 '100'으로 두세요.</p>
 <div class="hint" id="hintZ" style="margin:-4px 0 14px" hidden>
-  <b>인쇄하기</b>: 인쇄 창에서 프린터를 <b>ZT411</b>로 고르고, '설정 더보기'에서 용지 크기를 라벨지와 같게(예: 105×35mm), 여백 <b>없음</b>, 배율 <b>100</b>, 배경 그래픽 <b>켜기</b>로 두세요. 용지 크기가 목록에 없으면 Zebra 드라이버의 '인쇄 기본 설정 → 용지 크기'에서 한 번 맞춰 두면 돼요.<br>
-  <b>ZPL 파일</b>: 드라이버 설정 없이 프린터 명령으로 바로 뽑아요. 한글은 그림으로 들어가서 프린터에 한글 글꼴이 없어도 돼요. Zebra Setup Utilities의 <b>프린터와 통신 열기 → 파일 보내기</b>로 보내거나, ZPL 복사 후 같은 창에 붙여넣고 보내면 돼요.
+  <b>인쇄하기</b>: 인쇄 창에서 프린터를 <b>ZT411</b>로 고르고, '설정 더보기'에서 용지 크기를 라벨지와 같게(예: 105×35mm), 여백 <b>없음</b>, 배율 <b>100</b>, 배경 그래픽 <b>켜기</b>로 두세요. 용지 크기가 목록에 없으면 Zebra 드라이버의 '인쇄 기본 설정 → 용지 크기'에서 한 번 맞춰 두면 돼요.
 </div>
 
 <div id="sheet"></div>
@@ -441,115 +438,6 @@ function zebraSize(){
   return { w, h, r, side, dpi: +$('zDpi').value, ox: off('zOffX'), oy: off('zOffY') };
 }
 
-// ── ZPL: 화면에 그려진 라벨을 프린터 해상도 그림(1비트)으로 다시 그려서 ^GF 로 보내요 ──
-// 글자는 그림이라 프린터에 한글 글꼴이 없어도 되고, QR · 바코드는 프린터 점 단위에 맞춰 그려서 잘 읽혀요
-const BAYER = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
-const ARROW_PATH = 'M3.2 0h3.6v6H10L5 12 0 6h3.2z';
-function drawLabel(ctx, lbl, it, W, H, dpmm, rsv = 0, left = false, shift = [0, 0]){
-  const rot = H > W, lw = (rot ? H : W) - rsv, lh = rot ? W : H, m = 1.5 * dpmm;
-  const box = lbl.getBoundingClientRect();
-  const s = Math.min((lw - 2 * m) / box.width, (lh - 2 * m) / box.height);
-  const ox = Math.round((lw - box.width * s) / 2) + (left ? rsv : 0) + Math.round(shift[0] * dpmm), oy = Math.round((lh - box.height * s) / 2) + Math.round(shift[1] * dpmm);
-  ctx.save();
-  if (rot){ ctx.translate(W, 0); ctx.rotate(Math.PI / 2); }
-  ctx.translate(ox, oy);
-  const R = el => { const r = el.getBoundingClientRect(); return { x: (r.left - box.left) * s, y: (r.top - box.top) * s, w: r.width * s, h: r.height * s }; };
-  // 띠 색: 감열 프린터는 검정 한 가지라 회색은 옅은 점무늬, 하늘색은 흰 바탕, 빨간색은 검은 띠에 흰 글자로 바꿔요
-  const red = lbl.classList.contains('band-red');
-  const top = lbl.querySelector('.l-top'); if (top){ const r = R(top); ctx.fillStyle = red ? '#000' : lbl.classList.contains('band-sky') ? '#fff' : '#D0D0D0'; ctx.fillRect(r.x, r.y, r.w, r.h); }
-  ctx.fillStyle = '#000';
-  lbl.querySelectorAll('.inv').forEach(el => { const r = R(el); ctx.fillRect(Math.round(r.x), Math.round(r.y), Math.round(r.w), Math.round(r.h)); });
-  for (const row of lbl.children){
-    const bw = parseFloat(getComputedStyle(row).borderBottomWidth) * s;
-    if (bw > 0){ const r = R(row); ctx.fillRect(r.x, Math.round(r.y + r.h - bw), r.w, Math.max(1, Math.round(bw))); }
-  }
-  const obw = parseFloat(getComputedStyle(lbl).borderTopWidth), ob = Math.max(1, Math.round(obw * s)), LW = Math.round(box.width * s), LH = Math.round(box.height * s);
-  if (obw > 0){ ctx.fillRect(0, 0, LW, ob); ctx.fillRect(0, LH - ob, LW, ob); ctx.fillRect(0, 0, ob, LH); ctx.fillRect(LW - ob, 0, ob, LH); }
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  lbl.querySelectorAll('.fit, .bc span').forEach(el => {
-    const r = R(el), cs = getComputedStyle(el);
-    ctx.fillStyle = el.closest('.l-heads') ? '#555' : (red && el.closest('.l-top')) || el.closest('.inv') ? '#fff' : '#000';
-    ctx.font = `${cs.fontWeight} ${parseFloat(cs.fontSize) * s}px ${cs.fontFamily}`;
-    ctx.fillText(el.textContent, r.x + r.w / 2, r.y + r.h / 2);
-  });
-  ctx.fillStyle = '#000';
-  const arrows = lbl.querySelector('.l-arrows');
-  if (arrows && !arrows.classList.contains('none')){
-    const up = arrows.classList.contains('up'), p = new Path2D(ARROW_PATH);
-    arrows.querySelectorAll('svg').forEach(el => {
-      const r = R(el); ctx.save(); ctx.translate(r.x, r.y); ctx.scale(r.w / 10, r.h / 12);
-      if (up){ ctx.translate(10, 12); ctx.rotate(Math.PI); }
-      ctx.fill(p); ctx.restore();
-    });
-  }
-  const q = qrcode(0, 'M'); q.addData(it.code); q.make();
-  const n = q.getModuleCount();
-  lbl.querySelectorAll('svg.qr').forEach(el => {
-    const r = R(el), mod = Math.max(1, Math.floor(Math.min(r.w, r.h) / (n + 4)));
-    const x0 = Math.round(r.x + (r.w - n * mod) / 2), y0 = Math.round(r.y + (r.h - n * mod) / 2);
-    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (q.isDark(i, j)) ctx.fillRect(x0 + j * mod, y0 + i * mod, mod, mod);
-  });
-  const bcSvg = lbl.querySelector('.bc svg');
-  if (bcSvg){
-    const r = R(bcSvg), { bars, total } = code128Bars(it.code), mod = Math.max(1, Math.floor(r.w / total));
-    const x0 = Math.round(r.x + (r.w - total * mod) / 2), y0 = Math.round(r.y), bh = Math.round(r.h);
-    for (const [x, w] of bars) ctx.fillRect(x0 + x * mod, y0, w * mod, bh);
-  }
-  ctx.restore();
-}
-// ZPL 그림 압축 (^GFA 의 ASCII 압축: 같은 글자 반복 · 줄 끝 0 생략 · 윗줄과 같으면 ':')
-function zcount(n){
-  if (n === 1) return '';
-  let r = '';
-  while (n >= 400){ r += 'z'; n -= 400; }
-  if (n >= 20){ r += String.fromCharCode(102 + Math.floor(n / 20)); n %= 20; }
-  if (n > 0) r += String.fromCharCode(70 + n);
-  return r;
-}
-function gfa(img, W, H){
-  const bpr = Math.ceil(W / 8), d = img.data, HEX = '0123456789ABCDEF';
-  let out = '', prev = null;
-  for (let y = 0; y < H; y++){
-    let row = '';
-    for (let b = 0; b < bpr; b++){
-      let v = 0;
-      for (let k = 0; k < 8; k++){
-        const x = b * 8 + k; if (x >= W) continue;
-        const i = (y * W + x) * 4, lum = (d[i] * 299 + d[i + 1] * 587 + d[i + 2] * 114) / 1000;
-        if (lum < (BAYER[(y & 3) * 4 + (x & 3)] + .5) * 16) v |= 128 >> k;
-      }
-      row += HEX[v >> 4] + HEX[v & 15];
-    }
-    if (row === prev){ out += ':'; continue; }
-    prev = row;
-    const t = row.replace(/0+$/, '');
-    if (!t){ out += ','; continue; }
-    let enc = '';
-    for (let i = 0; i < t.length;){ let j = i; while (j < t.length && t[j] === t[i]) j++; enc += zcount(j - i) + t[i]; i = j; }
-    out += enc + (t.length < row.length ? ',' : '');
-  }
-  return { data: out, total: bpr * H, bpr };
-}
-async function makeZpl(){
-  const lbls = [...$('sheet').querySelectorAll('.lbl')];
-  if (!lbls.length || document.querySelector('input[name=paper]:checked').value !== 'zebra') return '';
-  const z = zebraSize(), dpmm = z.dpi / 25.4, W = Math.round(z.w * dpmm), H = Math.round(z.h * dpmm);
-  // ZT411 헤드 폭은 104mm 라서 그보다 넓은 라벨은 오른쪽 끝을 잘라 보내요 (비움 칸이라 괜찮아요)
-  const PW = z.h > z.w ? W : Math.min(W, Math.floor(104 * dpmm));
-  const cv = document.createElement('canvas'); cv.width = PW; cv.height = H;
-  const ctx = cv.getContext('2d', { willReadFrequently: true });
-  const parts = [];
-  for (let k = 0; k < lbls.length; k++){
-    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, PW, H);
-    drawLabel(ctx, lbls[k], lastItems[k], W, H, dpmm, Math.round(z.r * dpmm), z.side === 'L');   // ZPL은 점 단위로 라벨에 딱 맞아서 위치 조정은 브라우저 인쇄에만 써요
-    const g = gfa(ctx.getImageData(0, 0, PW, H), PW, H);
-    parts.push(`^XA^PW${PW}^LL${H}^LH0,0^FO0,0^GFA,${g.total},${g.total},${g.bpr},${g.data}^FS^PQ1^XZ`);
-    if (k % 10 === 9){ $('warn').textContent = `ZPL 만드는 중… ${k + 1} / ${lbls.length}`; await new Promise(r => setTimeout(r)); }
-  }
-  $('warn').textContent = `ZPL ${lbls.length}장 (${z.w}×${z.h}mm, ${z.dpi}dpi)`;
-  return parts.join('\n') + '\n';
-}
-
 let timer = 0, lastItems = [];
 function render(){
   const list = buildList();
@@ -559,7 +447,7 @@ function render(){
   setPage(document.querySelector('input[name=paper]:checked').value);
   $('warn').textContent = '';
   if (list.error || !list.length){
-    sheet.innerHTML = ''; lastItems = []; $('count').innerHTML = '0장'; $('printBtn').disabled = $('zplBtn').disabled = $('zplCopy').disabled = true;
+    sheet.innerHTML = ''; lastItems = []; $('count').innerHTML = '0장'; $('printBtn').disabled = true;
     $('warn').textContent = list.error || (mode === 'list' ? '코드를 붙여넣어 주세요.' : '');
     return;
   }
@@ -568,7 +456,7 @@ function render(){
   const paper = document.querySelector('input[name=paper]:checked').value, half = paper === 'half', zebra = paper === 'zebra', grid = paper === 'grid';
   const pages = half ? Math.ceil(items.length / 2) : grid ? Math.ceil(items.length / 10) : items.length;
   $('count').innerHTML = `${items.length}장 <small>· 종이 ${pages}장 · ${esc(items[0].code)}${items.length > 1 ? ' ~ ' + esc(items[items.length - 1].code) : ''}</small>`;
-  $('printBtn').disabled = $('zplBtn').disabled = $('zplCopy').disabled = false;
+  $('printBtn').disabled = false;
   if (grid){
     let h = ''; for (let i = 0; i < items.length; i += 10) h += `<div class="a4pg">${items.slice(i, i + 10).map(it => labelHtml(it, opt)).join('')}</div>`;
     sheet.innerHTML = h;
@@ -626,7 +514,6 @@ function syncCustom(){
   for (const k of ['type','desc','cmt']) $(k + 'Txt').hidden = $(k + 'Sel').value !== CUSTOM;
   const zebra = document.querySelector('input[name=paper]:checked').value === 'zebra';
   $('zebraBox').hidden = !zebra; $('hintZ').hidden = !zebra; $('hintA4').hidden = zebra;
-  document.querySelectorAll('.zonly').forEach(b => b.hidden = !zebra);
   $('zCustom').hidden = $('zSize').value !== 'custom';
 }
 
@@ -635,18 +522,6 @@ document.querySelectorAll('.kinds button').forEach(b => b.onclick = () => { setK
 document.querySelector('main').addEventListener('input', later);
 document.querySelector('main').addEventListener('change', () => { syncCustom(); later(); });
 $('printBtn').onclick = () => window.print();
-$('zplBtn').onclick = async () => {
-  const zpl = await makeZpl(); if (!zpl) return;
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([zpl], { type: 'text/plain' }));
-  a.download = `로케이션라벨_${lastItems.length}장.zpl`; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-};
-$('zplCopy').onclick = async () => {
-  const zpl = await makeZpl(); if (!zpl) return;
-  try { await navigator.clipboard.writeText(zpl); $('warn').textContent = 'ZPL을 복사했어요.'; }
-  catch (e) { $('warn').textContent = '복사가 막혔어요. ZPL 파일 받기를 써 주세요.'; }
-};
 addEventListener('resize', later);
 load(); syncCustom(); render();
 </script>
