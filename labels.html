@@ -172,7 +172,10 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
       <label>라벨지 크기<select id="zSize"><option value="105x35x20xL">105 × 35 mm (왼쪽 20mm 화살표 칸 비움)</option><option value="105x35x20xR">105 × 35 mm (오른쪽 20mm 화살표 칸 비움)</option><option value="104x50.8">104 × 50.8 mm (4×2인치)</option><option value="100x150" selected>100 × 150 mm (4×6인치)</option><option value="100x100">100 × 100 mm</option><option value="100x75">100 × 75 mm</option><option value="100x50">100 × 50 mm</option><option value="custom">직접 입력</option></select></label>
       <label id="zCustom" hidden>가로 × 세로 (mm)<div class="rng"><input id="zW" value="100" inputmode="decimal"><span>×</span><input id="zH" value="150" inputmode="decimal"></div></label>
       <label>해상도<select id="zDpi"><option value="203">203 dpi</option><option value="300">300 dpi</option><option value="600">600 dpi</option></select></label>
+      <label>위치 조정 (mm) <small>아래로 + / 위로 −</small><input id="zOffY" value="0" inputmode="decimal"></label>
+      <label>위치 조정 (mm) <small>오른쪽 + / 왼쪽 −</small><input id="zOffX" value="0" inputmode="decimal"></label>
     </div>
+    <p class="hint">시험 인쇄했을 때 위쪽으로 치우치면 '아래로'에 2~3 같은 숫자를 넣고 다시 인쇄해 보세요. 브라우저 인쇄와 ZPL 둘 다 같이 움직여요.</p>
     <p class="hint">가로는 프린터에서 나오는 방향 기준 라벨지 폭이에요. 세로가 더 길면 라벨을 90도 돌려서 꽉 차게 넣어요. 감열 프린터는 검정 한 색만 찍혀서 빨간 화살표 · 파란 글자는 검게, 맨 위 띠는 회색 → 점무늬, 하늘색 → 흰 바탕, 빨간색 → 검은 띠(흰 글자)로 나와요.</p>
   </div>
 </div>
@@ -353,7 +356,7 @@ function setPage(paper){
     const u = Math.min((lw - 2 * m) / 100, (lh - 2 * m) / ratio).toFixed(3);
     $('pageStyle').textContent = `@page{size:${z.w}mm ${z.h}mm;margin:0}@media print{#sheet{--u:${u}mm}`
       + `.pg{display:flex;box-sizing:border-box;width:${z.w}mm;height:${z.h}mm;padding-${z.side === 'L' ? 'left' : 'right'}:${z.r}mm;align-items:center;justify-content:center;overflow:hidden;break-after:page;page-break-after:always}`
-      + `.pg:last-child{break-after:auto;page-break-after:auto}.lbl{flex:none${rot ? ';transform:rotate(90deg)' : ''}}`
+      + `.pg:last-child{break-after:auto;page-break-after:auto}.lbl{flex:none;transform:translate(${z.ox}mm,${z.oy}mm)${rot ? ' rotate(90deg)' : ''}}`
       + `.l-type{color:#000!important}.l-arrows path{fill:#000}.l-heads{color:#555!important}.band-red .l-top{background:#000;color:#fff}}`;
     return;
   }
@@ -375,18 +378,19 @@ function zebraSize(){
   else { const v = $('zSize').value.split('x'); [w, h, r = 0] = v.slice(0, 3).map(Number); side = v[3] || 'R'; }
   if (!(w >= 20 && w <= 120)) w = 100;   // ZT411 최대 인쇄 폭 104mm
   if (!(h >= 20 && h <= 400)) h = 150;
-  return { w, h, r, side, dpi: +$('zDpi').value };
+  const off = id => { const v = parseFloat($(id).value); return isFinite(v) ? Math.max(-20, Math.min(20, v)) : 0; };
+  return { w, h, r, side, dpi: +$('zDpi').value, ox: off('zOffX'), oy: off('zOffY') };
 }
 
 // ── ZPL: 화면에 그려진 라벨을 프린터 해상도 그림(1비트)으로 다시 그려서 ^GF 로 보내요 ──
 // 글자는 그림이라 프린터에 한글 글꼴이 없어도 되고, QR · 바코드는 프린터 점 단위에 맞춰 그려서 잘 읽혀요
 const BAYER = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
 const ARROW_PATH = 'M3.2 0h3.6v6H10L5 12 0 6h3.2z';
-function drawLabel(ctx, lbl, it, W, H, dpmm, rsv = 0, left = false){
+function drawLabel(ctx, lbl, it, W, H, dpmm, rsv = 0, left = false, shift = [0, 0]){
   const rot = H > W, lw = (rot ? H : W) - rsv, lh = rot ? W : H, m = 1.5 * dpmm;
   const box = lbl.getBoundingClientRect();
   const s = Math.min((lw - 2 * m) / box.width, (lh - 2 * m) / box.height);
-  const ox = Math.round((lw - box.width * s) / 2) + (left ? rsv : 0), oy = Math.round((lh - box.height * s) / 2);
+  const ox = Math.round((lw - box.width * s) / 2) + (left ? rsv : 0) + Math.round(shift[0] * dpmm), oy = Math.round((lh - box.height * s) / 2) + Math.round(shift[1] * dpmm);
   ctx.save();
   if (rot){ ctx.translate(W, 0); ctx.rotate(Math.PI / 2); }
   ctx.translate(ox, oy);
@@ -478,7 +482,7 @@ async function makeZpl(){
   const parts = [];
   for (let k = 0; k < lbls.length; k++){
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, PW, H);
-    drawLabel(ctx, lbls[k], lastItems[k], W, H, dpmm, Math.round(z.r * dpmm), z.side === 'L');
+    drawLabel(ctx, lbls[k], lastItems[k], W, H, dpmm, Math.round(z.r * dpmm), z.side === 'L', [z.ox, z.oy]);
     const g = gfa(ctx.getImageData(0, 0, PW, H), PW, H);
     parts.push(`^XA^PW${PW}^LL${H}^LH0,0^FO0,0^GFA,${g.total},${g.total},${g.bpr},${g.data}^FS^PQ1^XZ`);
     if (k % 10 === 9){ $('warn').textContent = `ZPL 만드는 중… ${k + 1} / ${lbls.length}`; await new Promise(r => setTimeout(r)); }
@@ -517,7 +521,7 @@ function render(){
 const later = () => { clearTimeout(timer); timer = setTimeout(render, 200); };
 
 // ── 입력값 기억 (이 PC에서만) ──
-const FIELDS = ['fc','zone','a1','a2','b1','b2','s1','s2','side','codes','typeSel','typeTxt','descSel','descTxt','cmtSel','cmtTxt','zSize','zW','zH','zDpi','sfc','szone','sa1','sa2','sb1','sb2','sside','sl1','sl2','sbins'];
+const FIELDS = ['fc','zone','a1','a2','b1','b2','s1','s2','side','codes','typeSel','typeTxt','descSel','descTxt','cmtSel','cmtTxt','zSize','zW','zH','zDpi','zOffX','zOffY','sfc','szone','sa1','sa2','sb1','sb2','sside','sl1','sl2','sbins'];
 const CHECKS = ['sflip','sshade'];
 function save(){
   try {
