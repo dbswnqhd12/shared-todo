@@ -87,6 +87,8 @@ input,select{font:inherit}
 .lock form.lock-form{flex-direction:column}
 .lock .lock-hint{font-size:12px}
 .lock.setup{margin:0 auto 20px}
+.lock-setup summary{cursor:pointer;font-size:13px;color:var(--accent)}
+.lock-setup form{margin-top:10px}
 .me-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
 .me-chip{font-size:13px;color:var(--muted)}
 .me-chip b{color:var(--ink);font-weight:600}
@@ -1065,6 +1067,17 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     <button class="btn" type="submit">로그인</button>
   </form>
   <p class="lock-hint">아이디가 없으면 아이디는 비우고 공용 팀 비밀번호를 넣으세요. 보기만 할 수 있어요.</p>
+  <details class="lock-setup">
+    <summary>설정 코드로 첫 관리자 만들기</summary>
+    <form id="codeForm" class="lock-form" autocomplete="off">
+      <input type="text" id="codeCode" placeholder="설정 코드 (예: ABCD-EFGH)" autocapitalize="characters" spellcheck="false" aria-label="설정 코드">
+      <input type="text" id="codeId" placeholder="내 아이디 (영어 소문자 · 숫자 · 한글)" maxlength="20" autocapitalize="off" spellcheck="false" aria-label="아이디">
+      <input type="text" id="codeName" placeholder="이름 (화면 표시)" maxlength="20" aria-label="이름">
+      <input type="password" id="codePw" placeholder="내 비밀번호 (4자 이상)" maxlength="64" aria-label="비밀번호">
+      <button class="btn" type="submit">관리자 만들기</button>
+    </form>
+    <div class="err" id="codeErr" role="alert"></div>
+  </details>
   <div class="err" id="lockErr" role="alert"></div>
 </section>
 
@@ -1306,7 +1319,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     }
     if (offAt) setOffline(0);
     const data = await r.json().catch(() => ({}));
-    if (r.status === 401 && !url.startsWith(AUTH + '&login')){ offClear(); setAuth('', null); throw new Locked(data.error || '로그인하세요.'); }
+    if (r.status === 401 && !url.startsWith(AUTH + '&login') && !url.startsWith(AUTH + '&setup')){ offClear(); setAuth('', null); throw new Locked(data.error || '로그인하세요.'); }
     if (cacheable && r.ok) offPut(url, data);
     if (data.editLocked) throw new EditLocked(data.error || '편집 비밀번호를 입력하세요.');
     if (!r.ok) throw new Error(data.error || '서버에 연결하지 못했어요.');
@@ -5295,6 +5308,18 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   new MutationObserver(ms => { if (document.body.classList.contains('ro')) for (const m of ms) m.addedNodes.forEach(n => n.nodeType === 1 && (n.matches('input, select, textarea') ? lockControls(n.parentNode || n) : lockControls(n))); })
     .observe(document.getElementById('app'), { childList: true, subtree: true });
 
+  $('#codeForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    $('#codeErr').textContent = '';
+    try {
+      const d = await request('POST', AUTH + '&setup=1', { code: $('#codeCode').value, id: $('#codeId').value, name: $('#codeName').value, pw: $('#codePw').value });
+      setAuth(d.token, d.me);
+      ['#codeCode', '#codeId', '#codeName', '#codePw'].forEach(k => $(k).value = '');
+      $('#lock').hidden = true; $('#app').hidden = false;
+      toast(`${d.me.name} 관리자로 로그인했어요. 이제 "사람 관리"에서 팀원을 추가하세요.`);
+      loadFull();
+    } catch(err) { $('#codeErr').textContent = err.message; }
+  });
   $('#setupForm').addEventListener('submit', async e => {
     e.preventDefault();
     $('#setupErr').textContent = '';
