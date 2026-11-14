@@ -3768,9 +3768,10 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     vendor:['업체명', '거래처명', '거래처', '공급사명', '공급사', '업체', '판매자명', '판매자', '벤더명', '벤더', '협력사명', '협력사', '반출처', '수취인명', '수취인', '수령인', '받는분', '받는사람', '회사명', '상호', 'vendorname', 'vendor'],
     addr:['반출지주소', '회수지주소', '반송지주소', '수령지주소', '배송지주소', '배송지', '수령지', '주소', 'address'], phone:['핸드폰번호', '휴대폰번호', '휴대전화', '휴대폰', '핸드폰', '연락처', '전화번호', '전화', 'phone', 'tel'],
     name:['상품명', 'sku명', 'skuname', '품명', 'productname'], barcode:['상품바코드', 'sku바코드', 'skubarcode', '바코드', 'barcode'],
-    qty:['반출수량', '확정수량', '요청수량', '수량', 'qty'], box:['박스수량', '박스수', '박스'], tote:['집품토트', '토트번호', '토트'], note:['비고', '메모'],
+    qty:['반출수량', '확정수량', '요청수량', '수량', 'qty'], box:['박스수량', '박스수', '박스'], tote:['집품토트', '토트번호', '토트'], note:['비고', '메모'],   // 토트는 칸 이름만 알아두고 가져오지 않아요 (WMS 집품토트 칸은 '상세보기' 링크)
   };
   const OBW_PROD = ['name', 'barcode', 'qty', 'box', 'tote'];
+  const OBW_SKIP = ['tote'];
   const obwNorm = s => String(s || '').toLowerCase().replace(/[^0-9a-z가-힣]/g, '');
   function obwField(label){
     const L = obwNorm(label); if (!L || L.length > 20) return null;
@@ -3795,7 +3796,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   }
   function obwVal(k, v){
     v = String(v ?? '').replace(/\s+/g, ' ').trim();
-    if (!v || v === '-') return '';
+    if (!v || v === '-' || OBW_SKIP.includes(k)) return '';
     if (k === 'cdate' || k === 'due'){
       const m = v.match(/(20\d{2})\s*[.\-/년]\s*(\d{1,2})\s*[.\-/월]\s*(\d{1,2})/) || v.match(/^(20\d{2})(\d{2})(\d{2})/);
       return m ? `${m[1]}-${pad(+m[2])}-${pad(+m[3])}` : '';
@@ -3898,7 +3899,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     const g = its[0], L = { grp:'반출그룹번호', ext:'외부반출번호', cdate:'생성일', due:'마감일', vendor:'업체', addr:'주소', phone:'번호' };
     const same = k => its.every(o => (o[k] || '') === (g[k] || ''));
     const head = el('dl', { class:'ob-wms-g' }, ...Object.entries(L).filter(([k]) => same(k) && g[k]).flatMap(([k, l]) => [el('dt', { text:l }), el('dd', { text:g[k] })]));
-    const cols = [['name', '상품명'], ['barcode', '바코드'], ['qty', '수량'], ['box', '박스'], ['tote', '토트'], ...Object.entries(L).filter(([k]) => !same(k))];
+    const cols = [['name', '상품명'], ['barcode', '바코드'], ['qty', '수량'], ['box', '박스'], ...Object.entries(L).filter(([k]) => !same(k))];
     const tbl = el('table', { class:'ob-wms-t' },
       el('thead', {}, el('tr', {}, el('th', {}), ...cols.map(([, l]) => el('th', { text:l })))),
       el('tbody', {}, ...its.map((o, i) => {
