@@ -38,6 +38,9 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
 .lbl>div{border-bottom:calc(var(--u)*.25) solid #000;display:flex;align-items:center;min-height:0}
 .lbl>div:last-child{border-bottom:0}
 .l-top{height:calc(var(--u)*14);background:#D0D0D0;justify-content:center}
+.band-sky .l-top{background:#9FD6F5}
+.band-red .l-top{background:#F07070}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.25);vertical-align:-2px}
 .fit{display:inline-block;white-space:nowrap;line-height:1.1}
 .l-codes{height:calc(var(--u)*22);flex-direction:column;justify-content:center}
 .l-arrows,.l-codesrow{display:grid;grid-template-columns:calc(var(--u)*17) 1fr calc(var(--u)*17);width:100%;padding:0 calc(var(--u)*2.5);align-items:center;justify-items:center}
@@ -95,10 +98,16 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
 <div class="card">
   <div class="grid wide">
     <div><label>존타입 (왼쪽 파란 글자)<select id="typeSel"></select></label><input id="typeTxt" class="custom" placeholder="직접 입력" hidden></div>
-    <div><label>로케이션 설명 (맨 위 회색 띠)<select id="descSel"></select></label><input id="descTxt" class="custom" placeholder="직접 입력" hidden></div>
+    <div><label>로케이션 설명 (맨 위 색 띠)<select id="descSel"></select></label><input id="descTxt" class="custom" placeholder="직접 입력" hidden></div>
     <div><label>진열 구역 코멘트 (가운데)<select id="cmtSel"></select></label><input id="cmtTxt" class="custom" placeholder="직접 입력" hidden></div>
   </div>
   <div class="inline" style="margin-top:14px">
+    <span style="font-size:13px;color:var(--mute);font-weight:600">맨 위 띠 색</span>
+    <label><input type="radio" name="band" value="gray" checked><i class="sw" style="background:#D0D0D0"></i>회색</label>
+    <label><input type="radio" name="band" value="sky"><i class="sw" style="background:#9FD6F5"></i>하늘색</label>
+    <label><input type="radio" name="band" value="red"><i class="sw" style="background:#F07070"></i>빨간색</label>
+  </div>
+  <div class="inline" style="margin-top:10px">
     <span style="font-size:13px;color:var(--mute);font-weight:600">화살표</span>
     <label><input type="radio" name="arrow" value="down" checked>아래 ▼</label>
     <label><input type="radio" name="arrow" value="up">위 ▲</label>
@@ -115,7 +124,7 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
   <span style="flex:1"></span>
   <button class="btn" id="printBtn" type="button">인쇄하기</button>
 </div>
-<p class="hint" style="margin:-4px 0 14px">인쇄 창에서 <b>배경 그래픽</b>을 켜면 맨 위 회색 띠도 같이 나와요. 여백은 '기본값', 배율은 '100'으로 두세요.</p>
+<p class="hint" style="margin:-4px 0 14px">인쇄 창에서 <b>배경 그래픽</b>을 켜면 맨 위 색 띠도 같이 나와요. 여백은 '기본값', 배율은 '100'으로 두세요.</p>
 
 <div id="sheet"></div>
 </main>
@@ -209,7 +218,7 @@ function labelHtml(it, opt){
         <div class="l-heads"><div></div><div></div><div><span class="fit" data-f="2.8">챔버</span></div><div><span class="fit" data-f="2.8">통로</span></div><div></div><div><span class="fit" data-f="2.8">베이</span></div><div></div><div><span class="fit" data-f="2.8">빈</span></div></div>
         <div class="l-vals"><div><span class="fit" data-f="6">${esc(it.fc)}</span></div><div><span class="fit" data-f="6.5">-</span></div><div><span class="fit" data-f="9">${esc(it.zone)}</span></div><div><span class="fit" data-f="9">${esc(it.aisle)}</span></div><div><span class="fit" data-f="6.5">-</span></div><div><span class="fit" data-f="12">${esc(it.bay)}</span></div><div><span class="fit" data-f="6.5">-</span></div><div><span class="fit" data-f="6">${esc(it.shelf)}</span></div></div>
       </div>`;
-  return `<div class="lbl">
+  return `<div class="lbl band-${opt.band}">
     <div class="l-top"><span class="fit" data-f="9.5">${esc(opt.desc)}</span></div>
     <div class="l-codes">
       <div class="l-arrows ${opt.arrow}">${ARROW}${ARROW}${ARROW}</div>
@@ -241,7 +250,7 @@ function render(){
   const list = buildList();
   const sheet = $('sheet');
   const opt = { type: pick('type'), desc: pick('desc'), cmt: pick('cmt'),
-    arrow: document.querySelector('input[name=arrow]:checked').value };
+    arrow: document.querySelector('input[name=arrow]:checked').value, band: document.querySelector('input[name=band]:checked').value };
   setPage(document.querySelector('input[name=paper]:checked').value);
   $('warn').textContent = '';
   if (list.error || !list.length){
@@ -265,7 +274,7 @@ const later = () => { clearTimeout(timer); timer = setTimeout(render, 200); };
 const FIELDS = ['fc','zone','a1','a2','b1','b2','s1','s2','side','codes','typeSel','typeTxt','descSel','descTxt','cmtSel','cmtTxt'];
 function save(){
   try {
-    const o = { mode, arrow: document.querySelector('input[name=arrow]:checked').value, paper: document.querySelector('input[name=paper]:checked').value };
+    const o = { mode, band: document.querySelector('input[name=band]:checked').value, arrow: document.querySelector('input[name=arrow]:checked').value, paper: document.querySelector('input[name=paper]:checked').value };
     for (const f of FIELDS) o[f] = $(f).value;
     localStorage.setItem('gwj3-labels', JSON.stringify(o));
   } catch (e) {}
@@ -274,7 +283,7 @@ function load(){
   try {
     const o = JSON.parse(localStorage.getItem('gwj3-labels') || 'null'); if (!o) return;
     for (const f of FIELDS) if (o[f] != null) $(f).value = o[f];
-    for (const n of ['arrow','paper']){ const r = document.querySelector(`input[name=${n}][value="${o[n]}"]`); if (r) r.checked = true; }
+    for (const n of ['band','arrow','paper']){ const r = document.querySelector(`input[name=${n}][value="${o[n]}"]`); if (r) r.checked = true; }
     if (o.mode) setMode(o.mode);
   } catch (e) {}
 }
