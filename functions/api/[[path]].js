@@ -23,6 +23,11 @@ export async function onRequest({ request }) {
       body: ['GET', 'HEAD'].includes(request.method) ? undefined : await request.arrayBuffer(),
       redirect: 'manual',
     });
+    // Vercel 미리보기가 'Vercel 로그인' 잠금이면 로그인 화면으로 돌려보내요 → 화면이 이해할 수 있는 오류로 바꿔요
+    const ct = r.headers.get('content-type') || '';
+    if ((r.status >= 300 && r.status < 400) || (r.status === 401 && !ct.includes('json'))) {
+      return Response.json({ error: '미리보기 서버가 Vercel 로그인으로 잠겨 있어요. Vercel 설정의 Deployment Protection에서 Vercel Authentication을 꺼 주세요.' }, { status: 502 });
+    }
     const out = new Headers(r.headers);
     out.delete('content-encoding'); out.delete('content-length');
     return new Response(r.body, { status: r.status, headers: out });
