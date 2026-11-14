@@ -92,8 +92,26 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
 }
 </style>
 <style id="pageStyle"></style>
-</head><body><main>
-<p class="top"><a href="/">← GWJ3 IB</a></p>
+<style>
+.gate{max-width:360px;margin:12vh auto 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:10px}
+.gate h2{margin:0;font-size:22px}.gate p{margin:0;color:var(--mute);font-size:14px}
+.gate .err{color:#C0392B;font-size:13px;min-height:1.2em}
+.who{float:right;font-size:13px;color:var(--mute)}.who button{margin-left:8px;background:none;border:0;color:var(--accent);font:inherit;cursor:pointer;padding:0}
+@media print{.gate,.who{display:none!important}}
+</style>
+</head><body>
+<section class="gate" id="gate" hidden aria-label="로그인">
+  <h2>로케이션 바코드 출력</h2>
+  <p>아이디와 비밀번호로 로그인하세요.</p>
+  <form id="gateForm" autocomplete="off">
+    <input type="text" id="gateId" placeholder="아이디" autocapitalize="off" spellcheck="false" aria-label="아이디">
+    <input type="password" id="gatePw" placeholder="비밀번호" aria-label="비밀번호" style="margin-top:8px">
+    <button class="btn" type="submit" style="width:100%;margin-top:10px">로그인</button>
+  </form>
+  <div class="err" id="gateErr" role="alert"></div>
+</section>
+<main id="lblMain" hidden>
+<p class="top"><span class="who" id="who"></span><a href="/" id="homeLink">← GWJ3 IB</a></p>
 <h1>로케이션 바코드 출력</h1>
 <p class="sub">범위만 넣으면 QR · 바코드 라벨을 한꺼번에 만들어 인쇄해요.</p>
 
@@ -195,6 +213,48 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
 
 <div id="sheet"></div>
 </main>
+<script>
+// 로그인 확인: 메인 화면과 같은 출입증을 써요. 바코드 출력만 · 일반 · 관리자 모두 열 수 있어요
+(() => {
+  const $ = id => document.getElementById(id);
+  const ls = { get(k){ try { return localStorage.getItem(k) || ''; } catch { return ''; } }, set(k, v){ try { localStorage.setItem(k, v); } catch {} }, del(k){ try { localStorage.removeItem(k); } catch {} } };
+  const AUTH = '/api/state?auth=1';
+  function open(me){
+    $('gate').hidden = true; $('lblMain').hidden = false;
+    $('who').textContent = '';
+    if (me){ $('who').append(me.name + (me.role === 'labels' ? ' · 바코드 출력만' : '')); }
+    const out = document.createElement('button'); out.type = 'button'; out.textContent = '로그아웃';
+    out.onclick = () => { if (confirm('로그아웃할까요?')){ ls.del('auth-token'); ls.del('auth-me'); location.reload(); } };
+    $('who').append(out);
+    if (me?.role === 'labels') $('homeLink').hidden = true;   // 다른 화면은 못 들어가요
+  }
+  function lock(msg){ $('lblMain').hidden = true; $('gate').hidden = false; $('gateErr').textContent = msg || ''; $('gateId').focus(); }
+  async function check(){
+    const token = ls.get('auth-token');
+    if (!token) return lock('');
+    let me = null; try { me = JSON.parse(ls.get('auth-me') || 'null'); } catch {}
+    try {
+      const r = await fetch(AUTH, { headers: { 'x-auth': token }, cache: 'no-store' });
+      const d = await r.json().catch(() => ({}));
+      if (r.status === 401){ ls.del('auth-token'); ls.del('auth-me'); return lock(d.error || ''); }
+      if (r.ok && d.me){ ls.set('auth-me', JSON.stringify(d.me)); me = d.me; }
+    } catch { /* 인터넷이 끊겨도 이미 로그인한 기기는 열어줘요 */ }
+    open(me);
+  }
+  $('gateForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    $('gateErr').textContent = '';
+    try {
+      const r = await fetch(AUTH + '&login=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: $('gateId').value.trim(), pw: $('gatePw').value }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || '로그인하지 못했어요.');
+      ls.set('auth-token', d.token); ls.set('auth-me', JSON.stringify(d.me)); $('gatePw').value = '';
+      open(d.me);
+    } catch (err) { $('gateErr').textContent = err.message; }
+  });
+  check();
+})();
+</script>
 <script src="/lib/qrcode.js"></script>
 <script>
 // ── 목록 (엑셀 서식의 오른쪽 목록 그대로, '스량' 오타만 '수량'으로 고침) ──

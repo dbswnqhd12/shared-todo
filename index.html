@@ -1084,12 +1084,12 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 <section class="ppl" id="ppl" hidden aria-label="사람 관리">
   <div class="ppl-box">
     <div class="ppl-head"><h2>사람 관리</h2><button type="button" class="ghost" id="pplClose">닫기</button></div>
-    <p class="ppl-note">관리자는 모든 탭을 보고 고칠 수 있어요. 일반은 보기만 할 수 있어요. 사람 관리는 담당자 한 명만 할 수 있어요.</p>
+    <p class="ppl-note">관리자는 모든 탭을 보고 고칠 수 있어요. 일반은 보기만 할 수 있어요. 바코드 출력만은 로케이션 바코드 출력 페이지만 열 수 있어요. 사람 관리는 담당자 한 명만 할 수 있어요.</p>
     <form class="ppl-add" id="pplAdd" autocomplete="off">
       <input type="text" id="pplId" placeholder="아이디 (로그인용)" maxlength="20" autocapitalize="off" spellcheck="false" aria-label="아이디">
       <input type="text" id="pplName" placeholder="이름 (화면 표시)" maxlength="20" aria-label="이름">
       <input type="text" id="pplPw" placeholder="처음 비밀번호" maxlength="64" aria-label="처음 비밀번호" autocomplete="off">
-      <select id="pplRole" aria-label="등급"><option value="member" selected>일반 (보기만)</option><option value="admin">관리자</option></select>
+      <select id="pplRole" aria-label="등급"><option value="member" selected>일반 (보기만)</option><option value="labels">바코드 출력만</option><option value="admin">관리자</option></select>
       <button class="btn" type="submit">추가</button>
     </form>
     <div class="err" id="pplErr" role="alert"></div>
@@ -5293,6 +5293,8 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   }
   let setupChecked = false;
   function applyRole(){
+    // 바코드 출력 전용 계정은 바코드 출력 페이지로 보내요
+    if (me?.role === 'labels'){ location.replace('/labels.html'); return; }
     const ro = !!me && !isAdmin();
     document.body.classList.toggle('ro', ro);
     $('#meChip').innerHTML = '';
@@ -5356,7 +5358,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     for (const u of pplUsers){
       const self = me && u.id === me.id;
       const role = el('select', { 'aria-label': `${u.name} 등급`, disabled: self, onchange: e => pplPatch(u, { role: e.target.value }) },
-        el('option', { value: 'member', text: '일반 (보기만)' }), el('option', { value: 'admin', text: '관리자' }));
+        el('option', { value: 'member', text: '일반 (보기만)' }), el('option', { value: 'labels', text: '바코드 출력만' }), el('option', { value: 'admin', text: '관리자' }));
       role.value = u.role;
       ul.append(el('li', {},
         el('div', { class: 'who' }, el('b', { text: u.name + (self ? ' (나)' : '') + (u.owner ? ' · 사람 관리 담당' : '') }), el('small', { text: '아이디 ' + u.id })),
@@ -5375,7 +5377,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     try {
       const d = await request('PATCH', AUTH + '&id=' + encodeURIComponent(u.id), patch);
       if (d.token) setAuth(d.token, d.me);
-      toast(patch.pw ? `${u.name}의 비밀번호를 바꿨어요.` : `${u.name}을 ${patch.role === 'admin' ? '관리자' : '일반'}로 바꿨어요.`);
+      toast(patch.pw ? `${u.name}의 비밀번호를 바꿨어요.` : `${u.name}을 ${({ admin: '관리자', member: '일반', labels: '바코드 출력만' })[patch.role]}(으)로 바꿨어요.`);
     } catch(e) { $('#pplErr').textContent = e.message; }
     pplLoad();
   }
