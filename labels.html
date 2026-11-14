@@ -175,7 +175,7 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
       <label>위치 조정 (mm) <small>아래로 + / 위로 −</small><input id="zOffY" value="0" inputmode="decimal"></label>
       <label>위치 조정 (mm) <small>오른쪽 + / 왼쪽 −</small><input id="zOffX" value="0" inputmode="decimal"></label>
     </div>
-    <p class="hint">시험 인쇄했을 때 위쪽으로 치우치면 '아래로'에 2~3 같은 숫자를 넣고 다시 인쇄해 보세요. 브라우저 인쇄와 ZPL 둘 다 같이 움직여요.</p>
+    <p class="hint">시험 인쇄했을 때 위쪽으로 치우치면 '아래로'에 2~3 같은 숫자를 넣고 다시 인쇄해 보세요. 선반 라벨은 아래로 10mm가 기본이에요. 이 값은 '인쇄' 버튼(브라우저 인쇄)에만 써요. ZPL은 라벨에 점 단위로 딱 맞춰서 보내요.</p>
     <p class="hint">가로는 프린터에서 나오는 방향 기준 라벨지 폭이에요. 세로가 더 길면 라벨을 90도 돌려서 꽉 차게 넣어요. 감열 프린터는 검정 한 색만 찍혀서 빨간 화살표 · 파란 글자는 검게, 맨 위 띠는 회색 → 점무늬, 하늘색 → 흰 바탕, 빨간색 → 검은 띠(흰 글자)로 나와요.</p>
   </div>
 </div>
@@ -482,7 +482,7 @@ async function makeZpl(){
   const parts = [];
   for (let k = 0; k < lbls.length; k++){
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, PW, H);
-    drawLabel(ctx, lbls[k], lastItems[k], W, H, dpmm, Math.round(z.r * dpmm), z.side === 'L', [z.ox, z.oy]);
+    drawLabel(ctx, lbls[k], lastItems[k], W, H, dpmm, Math.round(z.r * dpmm), z.side === 'L');   // ZPL은 점 단위로 라벨에 딱 맞아서 위치 조정은 브라우저 인쇄에만 써요
     const g = gfa(ctx.getImageData(0, 0, PW, H), PW, H);
     parts.push(`^XA^PW${PW}^LL${H}^LH0,0^FO0,0^GFA,${g.total},${g.total},${g.bpr},${g.data}^FS^PQ1^XZ`);
     if (k % 10 === 9){ $('warn').textContent = `ZPL 만드는 중… ${k + 1} / ${lbls.length}`; await new Promise(r => setTimeout(r)); }
@@ -556,6 +556,8 @@ function setKind(k, fromLoad){
   if (!fromLoad || cur.closest('[hidden]')){
     document.querySelector(`input[name=paper][value="${k === 'shelf' ? 'zebra' : 'full'}"]`).checked = true;
     $('zSize').value = k === 'shelf' ? '105x35x20xL' : '100x150';
+    // 선반 라벨 기본값: 105 × 35mm, 203dpi, 아래로 10mm (2026-11-14 ZT411 시험 인쇄로 맞춘 값)
+    $('zDpi').value = '203'; $('zOffY').value = k === 'shelf' ? '10' : '0'; $('zOffX').value = '0';
   }
   setMode(mode); syncCustom();
 }
