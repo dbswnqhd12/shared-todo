@@ -84,6 +84,33 @@ input,select{font:inherit}
 .lock form{display:flex;gap:8px}
 .lock input{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:8px 10px}
 .lock .err{color:var(--high);font-size:13px;min-height:1.2em}
+.lock form.lock-form{flex-direction:column}
+.lock .lock-hint{font-size:12px}
+.lock.setup{margin:0 auto 20px}
+.lock-setup summary{cursor:pointer;font-size:13px;color:var(--accent)}
+.lock-setup form{margin-top:10px}
+.me-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+.me-chip{font-size:13px;color:var(--muted)}
+.me-chip b{color:var(--ink);font-weight:600}
+.me-chip .role{margin-left:6px;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--tone,#E6EBF2);color:var(--muted)}
+.me-chip .role.admin{background:var(--accent);color:#fff}
+.ppl{position:fixed;inset:0;z-index:50;background:rgba(15,22,34,.45);overflow:auto;padding:16px}
+.ppl-box{max-width:560px;margin:6vh auto;background:var(--paper);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.ppl-head{display:flex;justify-content:space-between;align-items:center}
+.ppl-head h2{margin:0;font-size:20px}
+.ppl-note{margin:0;color:var(--muted);font-size:13px}
+.ppl-add{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ppl-add input,.ppl-add select,.ppl-list select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:8px 10px;min-width:0}
+.ppl-add .btn{grid-column:1/-1}
+.ppl .err{color:var(--high);font-size:13px;min-height:1.2em}
+.ppl-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.ppl-list li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;background:var(--bg);border-radius:10px}
+.ppl-list .who{flex:1;min-width:120px}
+.ppl-list .who small{display:block;color:var(--muted);font-size:12px}
+.ppl-list .empty{color:var(--muted);font-size:13px;background:none}
+.ppl-team{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+body.ro #addForm,body.ro #editToggle,body.ro #clearDone{display:none!important}
+body.ro .ro-off{opacity:.75}
 
 /* 할 일 입력 */
 form.add{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-wrap:wrap;gap:8px}
@@ -1033,15 +1060,56 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 <body>
 <section class="lock" id="lock" hidden aria-label="잠금">
   <h2>GWJ3 IB</h2>
-  <p>팀 비밀번호를 입력하세요. 한 번 입력하면 이 기기에서는 다시 묻지 않아요.</p>
-  <form id="lockForm" autocomplete="off">
-    <input type="password" id="lockPw" aria-label="팀 비밀번호" placeholder="팀 비밀번호">
-    <button class="btn" type="submit">열기</button>
+  <p>아이디와 비밀번호로 로그인하세요. 한 번 로그인하면 이 기기에서는 다시 묻지 않아요.</p>
+  <form id="lockForm" class="lock-form" autocomplete="off">
+    <input type="text" id="lockId" aria-label="아이디" placeholder="아이디" autocapitalize="off" spellcheck="false">
+    <input type="password" id="lockPw" aria-label="비밀번호" placeholder="비밀번호">
+    <button class="btn" type="submit">로그인</button>
   </form>
+  <p class="lock-hint">아이디가 없으면 아이디는 비우고 공용 팀 비밀번호를 넣으세요. 보기만 할 수 있어요.</p>
+  <details class="lock-setup">
+    <summary>설정 코드로 첫 관리자 만들기</summary>
+    <form id="codeForm" class="lock-form" autocomplete="off">
+      <input type="text" id="codeCode" placeholder="설정 코드 (예: ABCD-EFGH)" autocapitalize="characters" spellcheck="false" aria-label="설정 코드">
+      <input type="text" id="codeId" placeholder="내 아이디 (영어 소문자 · 숫자 · 한글)" maxlength="20" autocapitalize="off" spellcheck="false" aria-label="아이디">
+      <input type="text" id="codeName" placeholder="이름 (화면 표시)" maxlength="20" aria-label="이름">
+      <input type="password" id="codePw" placeholder="내 비밀번호 (4자 이상)" maxlength="64" aria-label="비밀번호">
+      <button class="btn" type="submit">관리자 만들기</button>
+    </form>
+    <div class="err" id="codeErr" role="alert"></div>
+  </details>
   <div class="err" id="lockErr" role="alert"></div>
 </section>
 
+<section class="ppl" id="ppl" hidden aria-label="사람 관리">
+  <div class="ppl-box">
+    <div class="ppl-head"><h2>사람 관리</h2><button type="button" class="ghost" id="pplClose">닫기</button></div>
+    <p class="ppl-note">관리자는 모든 탭을 보고 고칠 수 있어요. 일반은 보기만 할 수 있어요. 사람 관리는 담당자 한 명만 할 수 있어요.</p>
+    <form class="ppl-add" id="pplAdd" autocomplete="off">
+      <input type="text" id="pplId" placeholder="아이디 (로그인용)" maxlength="20" autocapitalize="off" spellcheck="false" aria-label="아이디">
+      <input type="text" id="pplName" placeholder="이름 (화면 표시)" maxlength="20" aria-label="이름">
+      <input type="text" id="pplPw" placeholder="처음 비밀번호" maxlength="64" aria-label="처음 비밀번호" autocomplete="off">
+      <select id="pplRole" aria-label="등급"><option value="member" selected>일반 (보기만)</option><option value="admin">관리자</option></select>
+      <button class="btn" type="submit">추가</button>
+    </form>
+    <div class="err" id="pplErr" role="alert"></div>
+    <ul class="ppl-list" id="pplList"></ul>
+    <label class="ppl-team"><input type="checkbox" id="pplTeam"> 공용 팀 비밀번호로도 들어올 수 있게 하기 (보기만)</label>
+  </div>
+</section>
+
 <div class="wrap" id="app">
+  <section class="lock setup" id="setup" hidden aria-label="첫 관리자 만들기">
+    <h2>첫 관리자 만들기</h2>
+    <p>아직 관리자가 없어요. 내가 쓸 아이디와 비밀번호를 정하면 관리자로 바로 로그인돼요. 그다음 "사람 관리"에서 팀원을 추가하세요.</p>
+    <form id="setupForm" class="lock-form" autocomplete="off">
+      <input type="text" id="setupId" placeholder="아이디 (영어 소문자 · 숫자 · 한글)" maxlength="20" autocapitalize="off" spellcheck="false" aria-label="아이디">
+      <input type="text" id="setupName" placeholder="이름 (화면 표시)" maxlength="20" aria-label="이름">
+      <input type="password" id="setupPw" placeholder="비밀번호 (4자 이상)" maxlength="64" aria-label="비밀번호">
+      <button class="btn" type="submit">관리자 만들기</button>
+    </form>
+    <div class="err" id="setupErr" role="alert"></div>
+  </section>
   <div class="offbar" id="offBar" hidden role="status"><b>인터넷 연결 없음</b><span></span></div>
   <header>
     <div>
@@ -1049,6 +1117,11 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       <h1>GWJ3 IB</h1>
       <button type="button" class="ghost app-inst" id="installBtn" hidden>앱으로 설치</button>
       <a class="ghost ext-dl lbl-dl" href="/labels.html" target="_blank" rel="noopener" title="로케이션 QR · 바코드 라벨 한꺼번에 인쇄">로케이션 바코드 출력</a>
+      <div class="me-row">
+        <span class="me-chip" id="meChip"></span>
+        <button type="button" class="ghost" id="usersBtn" hidden>사람 관리</button>
+        <button type="button" class="ghost" id="logoutBtn">로그아웃</button>
+      </div>
     </div>
     <div class="progress" hidden>
       <span class="progress-num" id="progressNum">0 / 0 완료</span>
@@ -1168,7 +1241,11 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   let view = store.get('todo-view2', 'cal');
   if (view === 'list') view = 'cal';   // 할 일 목록 탭은 없앴어요
   if (view === 'prod' && document.querySelector('.seg [data-v=prod]')?.hidden) view = 'cal';   // 숨긴 탭에 머물러 있지 않게
-  let teamKey = store.get('team-key', '');
+  let teamKey = store.get('team-key', '');   // 예전 공용 비밀번호 (한 번만 출입증으로 바꿔요)
+  let authToken = store.get('auth-token', '');
+  let me = null;
+  try { me = JSON.parse(store.get('auth-me', 'null')); } catch(e) {}
+  const isAdmin = () => me?.role === 'admin';
   let editKey = '', askEdit = false;
   let openShifts = new Set();
   try { openShifts = new Set(JSON.parse(store.get('open-shifts', '[]'))); } catch(e) {}
@@ -1184,11 +1261,13 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 4000); }
 
   class Locked extends Error {}
+  class ReadOnly extends Error {}
+  const AUTH = '/api/state?auth=1';   // 로그인 · 사람 관리 (서버 파일 수를 늘리지 않으려고 state가 같이 받아요)
   class EditLocked extends Error {}
   function showLock(msg){
     $('#app').hidden = true; $('#lock').hidden = false;
     $('#lockErr').textContent = msg || '';
-    $('#lockPw').focus();
+    ($('#lockId').value ? $('#lockPw') : $('#lockId')).focus();
   }
 
   // ---------- 오프라인 보기 ----------
@@ -1210,7 +1289,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   }
   // 온라인일 때 모든 탭 내용을 한 번 받아둬요 (1시간에 한 번까지)
   async function offWarm(){
-    if (!teamKey || !navigator.onLine || !hasCaches()) return;
+    if (!authToken || !navigator.onLine || !hasCaches()) return;
     const last = Number(store.get('off-warm', 0)) || 0;
     if (Date.now() - last < 3600e3) return;
     store.set('off-warm', String(Date.now()));
@@ -1226,9 +1305,9 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   async function request(method, url, body){
     const headers = {};
     if (body) headers['Content-Type'] = 'application/json';
-    if (teamKey) headers['x-team-key'] = encodeURIComponent(teamKey);
-    if (editKey && url.startsWith('/api/shifts')) headers['x-edit-key'] = encodeURIComponent(editKey);
-    const cacheable = method === 'GET' && !!teamKey && !url.includes('verify=');
+    if (authToken) headers['x-auth'] = authToken;
+    if (method !== 'GET' && !isAdmin() && !url.startsWith(AUTH + '&login') && !url.startsWith(AUTH + '&setup')) throw new ReadOnly('보기 전용 계정이라 수정할 수 없어요.');
+    const cacheable = method === 'GET' && !!authToken && !url.includes('verify=') && !url.startsWith(AUTH);
     let r;
     try { r = await fetch(url, {method, headers, body: body ? JSON.stringify(body) : undefined, cache:'no-store'}); }
     catch(netErr) {
@@ -1240,7 +1319,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     }
     if (offAt) setOffline(0);
     const data = await r.json().catch(() => ({}));
-    if (r.status === 401){ offClear(); throw new Locked(data.error || '팀 비밀번호를 입력하세요.'); }
+    if (r.status === 401 && !url.startsWith(AUTH + '&login') && !url.startsWith(AUTH + '&setup')){ offClear(); setAuth('', null); throw new Locked(data.error || '로그인하세요.'); }
     if (cacheable && r.ok) offPut(url, data);
     if (data.editLocked) throw new EditLocked(data.error || '편집 비밀번호를 입력하세요.');
     if (!r.ok) throw new Error(data.error || '서버에 연결하지 못했어요.');
@@ -1262,6 +1341,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     try {
       const data = await request('GET', '/api/state?months=' + months);
       if (pending || editing) return;
+      if (data.me) setAuth(authToken, data.me);
       items = data.todos || []; templates = data.templates || []; checks = data.checks || {};
       rev = data.rev; loadedMonths = months; loaded = true;
       render();
@@ -1278,7 +1358,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       setSync('', '동기화됨 · ' + new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
       if (!offWarmed && !offAt){ offWarmed = true; setTimeout(offWarm, 5000); }
     } catch(e) {
-      if (e instanceof Locked) return showLock(teamKey ? e.message : '');
+      if (e instanceof Locked) return showLock(authToken || teamKey ? e.message : '');
       setSync('err', e.message);
       if (!loaded) { list.innerHTML = ''; const li = document.createElement('li'); li.className = 'empty'; li.textContent = e.message; list.appendChild(li); }
     }
@@ -1315,6 +1395,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     } catch(e) {
       ({items, templates, checks} = JSON.parse(before)); render();
       if (e instanceof Locked) return showLock(e.message);
+      if (e instanceof ReadOnly){ toast(e.message); setSync('', '보기 전용'); return; }
       if (e instanceof EditLocked){ setEditKey(''); editMode = false; askEdit = true; render(); $('#editErr').textContent = e.message; $('#editPw').focus(); setSync('', '저장 안 됨'); loadFull(); return; }
       toast(e.message); setSync('err', e.message);
     }
@@ -3588,7 +3669,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   }
   // ---- 과매입 PDF 첨부 (비공개 저장소 · 팀 비밀번호로만 열려요) ----
   const OV_PDF_MAX = 4 * 1024 * 1024;
-  const ovFileHeaders = extra => ({ ...(extra || {}), ...(teamKey ? { 'x-team-key': encodeURIComponent(teamKey) } : {}) });
+  const ovFileHeaders = extra => ({ ...(extra || {}), ...(authToken ? { 'x-auth': authToken } : {}) });
   const ovFileSize = n => n >= 1048576 ? (Math.round(n / 104857.6) / 10) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB';
   function ovFileChip(t){
     const n = (t.files || []).length;
@@ -5146,9 +5227,8 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   function enterEdit(){ askEdit = false; editMode = true; render(); const el = $('#add-day'); if (el) el.focus(); }
   $('#editToggle').onclick = () => {
     if (editMode) { editMode = false; render(); return; }
-    if (editKey) return enterEdit();
-    askEdit = !askEdit; $('#editErr').textContent = ''; render();
-    if (askEdit) $('#editPw').focus();
+    if (isAdmin()) return enterEdit();
+    toast('보기 전용 계정이라 편집할 수 없어요.');
   };
   $('#editCancel').onclick = () => { askEdit = false; $('#editPw').value = ''; render(); };
   $('#editLock').addEventListener('submit', async e => {
@@ -5172,27 +5252,161 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   $('#calToday').onclick = () => { selDate = todayIso; calMonth = new Date(now.getFullYear(), now.getMonth(), 1); $('#newDue').value = todayIso; render(); if (monthsNeeded() !== loadedMonths) loadFull(); };
   $('#clearDone').onclick = () => mutate(() => { items = items.filter(t=>!t.done); }, () => api('DELETE', '/api/todos?done=1'));
 
+  async function logIn(id, pw){
+    const d = await request('POST', AUTH + '&login=1', { id, pw });
+    setAuth(d.token, d.me);
+    teamKey = ''; store.del('team-key');
+  }
   $('#lockForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const pw = $('#lockPw').value;
+    const id = $('#lockId').value.trim(), pw = $('#lockPw').value;
     if (!pw) return $('#lockPw').focus();
-    teamKey = pw;
     try {
-      await request('GET', '/api/state?only=rev');
-      store.set('team-key', pw);
+      await logIn(id, pw);
       $('#lock').hidden = true; $('#app').hidden = false; $('#lockPw').value = '';
       loadFull();
     } catch(err) {
-      teamKey = ''; store.del('team-key');
-      $('#lockErr').textContent = err instanceof Locked ? '비밀번호가 틀렸어요. 다시 입력하세요.' : err.message;
+      $('#lockErr').textContent = err.message;
     }
   });
+  $('#logoutBtn').onclick = () => {
+    if (!confirm('로그아웃할까요?')) return;
+    setAuth('', null); offClear(); showLock('');
+  };
+
+  // ---------- 로그인 · 등급 ----------
+  // 관리자: 보기 + 모든 수정 / 일반: 보기만 (서버에서도 막아요)
+  function setAuth(token, who){
+    authToken = token || ''; me = token ? who : null;
+    if (authToken) store.set('auth-token', authToken); else store.del('auth-token');
+    if (me) store.set('auth-me', JSON.stringify(me)); else store.del('auth-me');
+    applyRole();
+  }
+  // 보기 전용일 때도 쓸 수 있는 칸 (찾기 · 날짜 이동 · 로그인)
+  const RO_OK = 'input[type=search], .bf-find, #ho-date, #lockForm *, #setup *, .ppl *';
+  function lockControls(root){
+    if (!document.body.classList.contains('ro')) return;
+    root.querySelectorAll?.('input, select, textarea').forEach(n => {
+      if (n.matches(RO_OK) || n.dataset.roOk != null) return;
+      if (!n.disabled){ n.disabled = true; n.classList.add('ro-off'); }
+    });
+  }
+  let setupChecked = false;
+  function applyRole(){
+    const ro = !!me && !isAdmin();
+    document.body.classList.toggle('ro', ro);
+    $('#meChip').innerHTML = '';
+    if (me) $('#meChip').append(el('b', { text: me.name }), el('span', { class: 'role' + (isAdmin() ? ' admin' : ''), text: isAdmin() ? '관리자' : '보기 전용' }));
+    $('#logoutBtn').hidden = !me;
+    if (ro){ editMode = false; askEdit = false; lockControls(document); }
+    // 공용으로 들어왔고 관리자가 아직 없으면 '첫 관리자 만들기'를, 관리 담당 관리자면 '사람 관리'를 보여줘요 (로그인마다 한 번 확인)
+    if (me?.id !== '_team') $('#setup').hidden = true;
+    if (!isAdmin()) $('#usersBtn').hidden = true;
+    const key = me ? me.id + '|' + me.role : '';
+    if (key && (me.id === '_team' || isAdmin()) && setupChecked !== key){
+      setupChecked = key;
+      request('GET', AUTH).then(d => { $('#setup').hidden = !d.setup; $('#usersBtn').hidden = !d.owner; },
+        e => { setupChecked = ''; toast('계정 확인을 못 했어요: ' + e.message); });
+    }
+    else document.querySelectorAll('.ro-off').forEach(n => { n.disabled = false; n.classList.remove('ro-off'); });
+  }
+  new MutationObserver(ms => { if (document.body.classList.contains('ro')) for (const m of ms) m.addedNodes.forEach(n => n.nodeType === 1 && (n.matches('input, select, textarea') ? lockControls(n.parentNode || n) : lockControls(n))); })
+    .observe(document.getElementById('app'), { childList: true, subtree: true });
+
+  $('#codeForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    $('#codeErr').textContent = '';
+    try {
+      const d = await request('POST', AUTH + '&setup=1', { code: $('#codeCode').value, id: $('#codeId').value, name: $('#codeName').value, pw: $('#codePw').value });
+      setAuth(d.token, d.me);
+      ['#codeCode', '#codeId', '#codeName', '#codePw'].forEach(k => $(k).value = '');
+      $('#lock').hidden = true; $('#app').hidden = false;
+      toast(`${d.me.name} 관리자로 로그인했어요. 이제 "사람 관리"에서 팀원을 추가하세요.`);
+      loadFull();
+    } catch(err) { $('#codeErr').textContent = err.message; }
+  });
+  $('#setupForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    $('#setupErr').textContent = '';
+    try {
+      const d = await request('POST', AUTH + '&setup=1', { id: $('#setupId').value, name: $('#setupName').value, pw: $('#setupPw').value });
+      setAuth(d.token, d.me);
+      ['#setupId', '#setupName', '#setupPw'].forEach(k => $(k).value = '');
+      toast(`${d.me.name} 관리자로 로그인했어요. 이제 "사람 관리"에서 팀원을 추가하세요.`);
+      loadFull();
+    } catch(err) { $('#setupErr').textContent = err.message; }
+  });
+
+  // ---------- 사람 관리 (관리자) ----------
+  let pplUsers = [];
+  async function pplLoad(){
+    try {
+      const d = await request('GET', AUTH + '&users=1');
+      pplUsers = d.users || [];
+      $('#pplTeam').checked = !d.team?.off; $('#pplTeam').disabled = !d.team?.allowed;
+      pplRender();
+    } catch(e) {
+      if (e instanceof Locked){ $('#ppl').hidden = true; return showLock(e.message); }
+      $('#pplErr').textContent = e.message;
+    }
+  }
+  function pplRender(){
+    const ul = $('#pplList'); ul.innerHTML = '';
+    if (!pplUsers.length) ul.append(el('li', { class: 'empty', text: '아직 추가한 사람이 없어요. 위에서 팀원을 추가하세요.' }));
+    for (const u of pplUsers){
+      const self = me && u.id === me.id;
+      const role = el('select', { 'aria-label': `${u.name} 등급`, disabled: self, onchange: e => pplPatch(u, { role: e.target.value }) },
+        el('option', { value: 'member', text: '일반 (보기만)' }), el('option', { value: 'admin', text: '관리자' }));
+      role.value = u.role;
+      ul.append(el('li', {},
+        el('div', { class: 'who' }, el('b', { text: u.name + (self ? ' (나)' : '') + (u.owner ? ' · 사람 관리 담당' : '') }), el('small', { text: '아이디 ' + u.id })),
+        role,
+        el('button', { type: 'button', class: 'ghost', text: '비밀번호 바꾸기', onclick: () => {
+          const pw = prompt(`${u.name}의 새 비밀번호 (4자 이상)`); if (pw) pplPatch(u, { pw });
+        } }),
+        self ? null : el('button', { type: 'button', class: 'ghost', text: '삭제', onclick: async () => {
+          if (!confirm(`${u.name}(${u.id})을 지울까요? 그 사람은 바로 로그아웃돼요.`)) return;
+          try { await request('DELETE', AUTH + '&id=' + encodeURIComponent(u.id)); pplLoad(); } catch(e) { $('#pplErr').textContent = e.message; }
+        } })));
+    }
+  }
+  async function pplPatch(u, patch){
+    $('#pplErr').textContent = '';
+    try {
+      const d = await request('PATCH', AUTH + '&id=' + encodeURIComponent(u.id), patch);
+      if (d.token) setAuth(d.token, d.me);
+      toast(patch.pw ? `${u.name}의 비밀번호를 바꿨어요.` : `${u.name}을 ${patch.role === 'admin' ? '관리자' : '일반'}로 바꿨어요.`);
+    } catch(e) { $('#pplErr').textContent = e.message; }
+    pplLoad();
+  }
+  $('#usersBtn').onclick = () => { $('#ppl').hidden = false; $('#pplErr').textContent = ''; pplLoad(); };
+  $('#pplClose').onclick = () => { $('#ppl').hidden = true; };
+  $('#ppl').addEventListener('click', e => { if (e.target.id === 'ppl') $('#ppl').hidden = true; });
+  $('#pplAdd').addEventListener('submit', async e => {
+    e.preventDefault();
+    $('#pplErr').textContent = '';
+    try {
+      await request('POST', AUTH, { id: $('#pplId').value, name: $('#pplName').value, pw: $('#pplPw').value, role: $('#pplRole').value });
+      ['#pplId', '#pplName', '#pplPw'].forEach(k => $(k).value = '');
+      pplLoad();
+    } catch(err) { $('#pplErr').textContent = err.message; }
+  });
+  $('#pplTeam').onchange = async e => {
+    const teamOff = !e.target.checked;
+    if (teamOff && !confirm('공용 팀 비밀번호로 들어온 기기는 모두 로그아웃돼요. 막을까요?')) { e.target.checked = true; return; }
+    try { await request('PUT', AUTH, { teamOff }); } catch(err) { $('#pplErr').textContent = err.message; }
+    pplLoad();
+  };
 
   if (view === 'cal') $('#newDue').value = selDate;
   document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
   setInterval(poll, POLL_MS);
   render();
-  loadFull();
+  applyRole();
+  if (!authToken && teamKey){
+    // 예전에 공용 비밀번호로 들어와 있던 기기는 묻지 않고 보기 전용으로 이어서 들어가요
+    logIn('', teamKey).then(loadFull, () => { teamKey = ''; store.del('team-key'); loadFull(); });
+  } else loadFull();
 
   // ---------- 홈 화면 앱 설치 ----------
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});

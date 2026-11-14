@@ -51,7 +51,7 @@ tr.sum td{font-weight:700;border-bottom:0}
 .pair span{white-space:nowrap}
 @media (max-width:600px){.grid{gap:8px}.grid .card{padding:12px}.pair{gap:12px}.pair b{font-size:24px}.card h2{font-size:14px}.tbl{padding:14px 12px}th,td{padding:8px 4px;font-size:13px}th{font-size:12px}}
 </style></head><body>
-<div id="lock" hidden><b>팀 비밀번호를 입력하세요</b><input id="pw" type="password" autocomplete="current-password"><button id="go">열기</button><p class="err" id="lockErr"></p></div>
+<div id="lock" hidden><b>로그인하세요</b><input id="uid" placeholder="아이디 (없으면 비우고 공용 비밀번호)" autocapitalize="off" spellcheck="false"><input id="pw" type="password" placeholder="비밀번호" autocomplete="current-password"><button id="go">로그인</button><p class="err" id="lockErr"></p></div>
 <main id="app" hidden>
   <header>
     <div><h1 id="title">IST 월 결산</h1><p class="sub" id="sub"></p></div>
@@ -70,13 +70,13 @@ tr.sum td{font-weight:700;border-bottom:0}
 (() => {
   const $ = id => document.getElementById(id);
   const ls = { get(k){ try { return localStorage.getItem(k) || ''; } catch { return ''; } }, set(k,v){ try { localStorage.setItem(k, v); } catch {} } };
-  let key = ls.get('team-key');
+  let key = ls.get('auth-token');   // 메인 화면과 같은 로그인을 써요
   const q = new URLSearchParams(location.search);
   const kst = new Date(Date.now() + 9 * 3600e3).toISOString();
   const shift = (m, d) => { let [y, mo] = m.split('-').map(Number); mo += d; while (mo < 1) { mo += 12; y--; } while (mo > 12) { mo -= 12; y++; } return `${y}-${String(mo).padStart(2, '0')}`; };
   // 기본은 지난달 결산 (주소 끝에 ?month=2026-11 처럼 바꿀 수 있어요)
   let month = /^\d{4}-\d{2}$/.test(q.get('month') || '') ? q.get('month') : shift(kst.slice(0, 7), -1);
-  const hdr = () => key ? { 'x-team-key': encodeURIComponent(key) } : {};
+  const hdr = () => key ? { 'x-auth': key } : {};
 
   function render(rp) {
     const mo = Number(rp.month.slice(5));
@@ -111,7 +111,12 @@ tr.sum td{font-weight:700;border-bottom:0}
     } catch (e) { $('dlMsg').textContent = e.message; }
     finally { $('dl').disabled = false; }
   };
-  $('go').onclick = () => { key = $('pw').value; ls.set('team-key', key); load(); };
+  $('go').onclick = async () => {
+    const r = await fetch('/api/state?auth=1&login=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: $('uid').value.trim(), pw: $('pw').value }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { $('lockErr').textContent = d.error || '로그인하지 못했어요.'; return; }
+    key = d.token; ls.set('auth-token', key); ls.set('auth-me', JSON.stringify(d.me)); load();
+  };
   $('pw').onkeydown = e => { if (e.key === 'Enter') $('go').click(); };
   $('prev').onclick = () => { month = shift(month, -1); load(); };
   $('next').onclick = () => { month = shift(month, 1); load(); };
