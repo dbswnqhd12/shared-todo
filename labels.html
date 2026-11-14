@@ -37,13 +37,13 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
 .a4pg{display:contents}
 
 /* ── 선반 라벨 (엑셀 'Bay 음영' 서식): 104 × 50.8mm 비율, 왼쪽 QR · 오른쪽 존/통로 · 베이 · 단+빈(검은 칸) · 바코드 ── */
-.lbl.shelf{height:calc(var(--u)*48.8);border:0;display:grid;grid-template-columns:calc(var(--u)*31) 1fr;column-gap:calc(var(--u)*2);padding:calc(var(--u)*2.2) calc(var(--u)*2.5)}
+.lbl.shelf{height:calc(var(--u)*var(--sh,48.8));border:0;display:grid;grid-template-columns:calc(var(--u)*31) 1fr;column-gap:calc(var(--u)*2);padding:calc(var(--u)*2.2) calc(var(--u)*2.5)}
 @media screen{.lbl.shelf{box-shadow:0 0 0 1px #B8C0CC}}
 .lbl.shelf>div{border:0}
 .s-qr{display:flex;align-items:center;justify-content:center}
 .s-qr .qr{width:calc(var(--u)*30);height:calc(var(--u)*30)}
-.s-right{display:flex!important;flex-direction:column;justify-content:space-between;min-width:0}
-.s-info{display:grid!important;grid-template-columns:calc(var(--u)*15) 1fr calc(var(--u)*25);grid-template-rows:1fr 1fr;height:calc(var(--u)*22);align-items:center;column-gap:calc(var(--u)*1)}
+.s-right{display:flex!important;flex-direction:column;justify-content:space-between;gap:calc(var(--u)*1.5);min-width:0}
+.s-info{display:grid!important;grid-template-columns:calc(var(--u)*15) 1fr calc(var(--u)*25);grid-template-rows:1fr 1fr;flex:1;min-height:0;max-height:calc(var(--u)*24);align-items:center;column-gap:calc(var(--u)*1)}
 .s-info>div{min-width:0;text-align:center;display:flex;align-items:center;justify-content:center;height:100%}
 .s-zone{grid-row:1;grid-column:1;justify-content:flex-start!important}.s-aisle{grid-row:2;grid-column:1;justify-content:flex-start!important}
 .s-bay{grid-row:1/3;grid-column:2}.s-lb{grid-row:1/3;grid-column:3}
@@ -169,7 +169,7 @@ textarea{height:130px;font:14px/1.5 ui-monospace,Consolas,monospace}
   </div>
   <div id="zebraBox" class="zbox" hidden>
     <div class="grid wide">
-      <label>라벨지 크기<select id="zSize"><option value="104x50.8">104 × 50.8 mm (4×2인치)</option><option value="100x150" selected>100 × 150 mm (4×6인치)</option><option value="100x100">100 × 100 mm</option><option value="100x75">100 × 75 mm</option><option value="100x50">100 × 50 mm</option><option value="custom">직접 입력</option></select></label>
+      <label>라벨지 크기<select id="zSize"><option value="105x35x20">105 × 35 mm (오른쪽 20mm 화살표 칸 비움)</option><option value="104x50.8">104 × 50.8 mm (4×2인치)</option><option value="100x150" selected>100 × 150 mm (4×6인치)</option><option value="100x100">100 × 100 mm</option><option value="100x75">100 × 75 mm</option><option value="100x50">100 × 50 mm</option><option value="custom">직접 입력</option></select></label>
       <label id="zCustom" hidden>가로 × 세로 (mm)<div class="rng"><input id="zW" value="100" inputmode="decimal"><span>×</span><input id="zH" value="150" inputmode="decimal"></div></label>
       <label>해상도<select id="zDpi"><option value="203">203 dpi</option><option value="300">300 dpi</option><option value="600">600 dpi</option></select></label>
     </div>
@@ -346,15 +346,18 @@ function fitAll(root){
 
 function setPage(paper){
   if (paper === 'zebra'){
-    const z = zebraSize(), m = 1.5, rot = z.h > z.w, lw = rot ? z.h : z.w, lh = rot ? z.w : z.h;
-    const ratio = kind === 'shelf' ? 48.8 : 69;
+    const z = zebraSize(), m = 1.5, rot = z.h > z.w, lw = (rot ? z.h : z.w) - z.r, lh = rot ? z.w : z.h;
+    // 선반 라벨은 인쇄 칸(오른쪽 비움 칸 뺀 흰 부분) 모양에 맞춰 세로 길이를 정해요
+    const ratio = kind === 'shelf' ? +Math.min(60, Math.max(36, (lh - 2 * m) / (lw - 2 * m) * 100)).toFixed(2) : 69;
+    $('sheet').style.setProperty('--sh', kind === 'shelf' ? ratio : 48.8);
     const u = Math.min((lw - 2 * m) / 100, (lh - 2 * m) / ratio).toFixed(3);
     $('pageStyle').textContent = `@page{size:${z.w}mm ${z.h}mm;margin:0}@media print{#sheet{--u:${u}mm}`
-      + `.pg{display:flex;width:${z.w}mm;height:${z.h}mm;align-items:center;justify-content:center;overflow:hidden;break-after:page;page-break-after:always}`
+      + `.pg{display:flex;box-sizing:border-box;width:${z.w}mm;height:${z.h}mm;padding-right:${z.r}mm;align-items:center;justify-content:center;overflow:hidden;break-after:page;page-break-after:always}`
       + `.pg:last-child{break-after:auto;page-break-after:auto}.lbl{flex:none${rot ? ';transform:rotate(90deg)' : ''}}`
       + `.l-type{color:#000!important}.l-arrows path{fill:#000}.l-heads{color:#555!important}.band-red .l-top{background:#000;color:#fff}}`;
     return;
   }
+  $('sheet').style.setProperty('--sh', 48.8);
   if (paper === 'grid'){
     $('pageStyle').textContent = '@page{size:A4 portrait;margin:8mm}@media print{#sheet{--u:0.93mm;display:block}'
       + '.a4pg{display:grid;grid-template-columns:repeat(2,auto);gap:4mm 4mm;justify-content:center;break-after:page;page-break-after:always}.a4pg:last-child{break-after:auto}'
@@ -367,20 +370,20 @@ function setPage(paper){
 }
 
 function zebraSize(){
-  let w, h;
+  let w, h, r = 0;   // r: 오른쪽에 미리 인쇄돼 있어서 비워 둘 폭(mm)
   if ($('zSize').value === 'custom'){ w = parseFloat($('zW').value); h = parseFloat($('zH').value); }
-  else [w, h] = $('zSize').value.split('x').map(Number);
+  else [w, h, r = 0] = $('zSize').value.split('x').map(Number);
   if (!(w >= 20 && w <= 120)) w = 100;   // ZT411 최대 인쇄 폭 104mm
   if (!(h >= 20 && h <= 400)) h = 150;
-  return { w, h, dpi: +$('zDpi').value };
+  return { w, h, r, dpi: +$('zDpi').value };
 }
 
 // ── ZPL: 화면에 그려진 라벨을 프린터 해상도 그림(1비트)으로 다시 그려서 ^GF 로 보내요 ──
 // 글자는 그림이라 프린터에 한글 글꼴이 없어도 되고, QR · 바코드는 프린터 점 단위에 맞춰 그려서 잘 읽혀요
 const BAYER = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
 const ARROW_PATH = 'M3.2 0h3.6v6H10L5 12 0 6h3.2z';
-function drawLabel(ctx, lbl, it, W, H, dpmm){
-  const rot = H > W, lw = rot ? H : W, lh = rot ? W : H, m = 1.5 * dpmm;
+function drawLabel(ctx, lbl, it, W, H, dpmm, rsv = 0){
+  const rot = H > W, lw = (rot ? H : W) - rsv, lh = rot ? W : H, m = 1.5 * dpmm;
   const box = lbl.getBoundingClientRect();
   const s = Math.min((lw - 2 * m) / box.width, (lh - 2 * m) / box.height);
   const ox = Math.round((lw - box.width * s) / 2), oy = Math.round((lh - box.height * s) / 2);
@@ -468,14 +471,16 @@ async function makeZpl(){
   const lbls = [...$('sheet').querySelectorAll('.lbl')];
   if (!lbls.length || document.querySelector('input[name=paper]:checked').value !== 'zebra') return '';
   const z = zebraSize(), dpmm = z.dpi / 25.4, W = Math.round(z.w * dpmm), H = Math.round(z.h * dpmm);
-  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  // ZT411 헤드 폭은 104mm 라서 그보다 넓은 라벨은 오른쪽 끝을 잘라 보내요 (비움 칸이라 괜찮아요)
+  const PW = z.h > z.w ? W : Math.min(W, Math.floor(104 * dpmm));
+  const cv = document.createElement('canvas'); cv.width = PW; cv.height = H;
   const ctx = cv.getContext('2d', { willReadFrequently: true });
   const parts = [];
   for (let k = 0; k < lbls.length; k++){
-    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
-    drawLabel(ctx, lbls[k], lastItems[k], W, H, dpmm);
-    const g = gfa(ctx.getImageData(0, 0, W, H), W, H);
-    parts.push(`^XA^PW${W}^LL${H}^LH0,0^FO0,0^GFA,${g.total},${g.total},${g.bpr},${g.data}^FS^PQ1^XZ`);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, PW, H);
+    drawLabel(ctx, lbls[k], lastItems[k], W, H, dpmm, Math.round(z.r * dpmm));
+    const g = gfa(ctx.getImageData(0, 0, PW, H), PW, H);
+    parts.push(`^XA^PW${PW}^LL${H}^LH0,0^FO0,0^GFA,${g.total},${g.total},${g.bpr},${g.data}^FS^PQ1^XZ`);
     if (k % 10 === 9){ $('warn').textContent = `ZPL 만드는 중… ${k + 1} / ${lbls.length}`; await new Promise(r => setTimeout(r)); }
   }
   $('warn').textContent = `ZPL ${lbls.length}장 (${z.w}×${z.h}mm, ${z.dpi}dpi)`;
@@ -537,7 +542,7 @@ function setMode(m){
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
   $('rangeBox').hidden = m !== 'range' || kind !== 'pallet'; $('shelfBox').hidden = m !== 'range' || kind !== 'shelf'; $('listBox').hidden = m !== 'list';
 }
-// 라벨 종류: 파렛트 ↔ 선반. 선반은 ZT411 104 × 50.8mm 가 기본
+// 라벨 종류: 파렛트 ↔ 선반. 선반은 ZT411 105 × 35mm(오른쪽 20mm 화살표 칸 비움)가 기본
 function setKind(k, fromLoad){
   kind = k;
   document.querySelectorAll('.kinds button').forEach(b => b.setAttribute('aria-pressed', b.dataset.kind === k));
@@ -546,7 +551,7 @@ function setKind(k, fromLoad){
   const cur = document.querySelector('input[name=paper]:checked');
   if (!fromLoad || cur.closest('[hidden]')){
     document.querySelector(`input[name=paper][value="${k === 'shelf' ? 'zebra' : 'full'}"]`).checked = true;
-    $('zSize').value = k === 'shelf' ? '104x50.8' : '100x150';
+    $('zSize').value = k === 'shelf' ? '105x35x20' : '100x150';
   }
   setMode(mode); syncCustom();
 }
