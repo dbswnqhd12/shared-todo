@@ -45,7 +45,7 @@ h2{font-size:19px;margin:0 0 4px}
 
 /* 선반 */
 /* 선반: 실제 랙처럼 — 파란 기둥, 주황 빔, 빔 위 로케이션 라벨(단+0+빈), 상품이 여러 개 서 있는 모습 */
-.rack{display:grid;gap:0;--cell:70px;width:max-content;max-width:100%;
+.rack{display:grid;gap:0;--cell:86px;width:max-content;max-width:100%;
   --r-ok:#12B862;--r-bad:#1A1A1A;--r-focus:#2557A7;--beam:12px}
 .rack .lv{font-size:12px;color:var(--mute);font-weight:600;display:flex;align-items:center;justify-content:flex-end;padding:0 6px var(--beam) 0;white-space:nowrap}
 .rack .bay{font-size:12px;color:var(--mute);font-weight:600;text-align:center;padding-top:6px}
@@ -53,46 +53,50 @@ h2{font-size:19px;margin:0 0 4px}
 .rack .post::after{content:"";position:absolute;inset:4px 2px;background:repeating-linear-gradient(to bottom,transparent 0 8px,#9E998C 8px 11px);opacity:.55}
 .rack .top{height:10px;background:linear-gradient(#F4F2EC,#D9D6CC);box-shadow:0 0 0 1px #BDB8AC}
 .rack .floor{height:8px;background:linear-gradient(#9AA1AB,#C5CAD1);border-radius:0 0 3px 3px}
-.slot{width:var(--cell);height:var(--cell);border:0;margin:0;padding:0 2px var(--beam);position:relative;font:inherit;color:var(--ink);
+.bin{width:var(--cell);height:var(--cell);position:relative;display:flex;padding-bottom:var(--beam);
   /* 흰 뒤판 + 철망 */
   background:
     repeating-linear-gradient(90deg,rgba(150,145,135,.35) 0 1px,transparent 1px 9px),
     repeating-linear-gradient(0deg,rgba(150,145,135,.35) 0 1px,transparent 1px 9px),
     linear-gradient(#ECEAE4,#F7F6F2 60%,#FBFAF7);
-  box-shadow:inset 0 6px 8px -4px rgba(0,0,0,.18);
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+  box-shadow:inset 0 6px 8px -4px rgba(0,0,0,.18)}
 /* 흰 선반 앞판 */
-.slot::after{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--beam);background:linear-gradient(#FFFFFF,#F1EFE9 60%,#D8D4CA);box-shadow:0 -2px 0 rgba(0,0,0,.18)}
+.bin::after{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--beam);background:linear-gradient(#FFFFFF,#F1EFE9 60%,#D8D4CA);box-shadow:0 -2px 0 rgba(0,0,0,.18)}
 /* 칸막이(주황 철망) — 빈 사이마다, 앞판 위 주황 클립 */
-.slot:not(.b0)::before{content:"";position:absolute;left:-1px;top:6px;bottom:var(--beam);width:3px;z-index:1;
+.bin:not(.b0)::before{content:"";position:absolute;left:-1px;top:6px;bottom:var(--beam);width:3px;z-index:3;pointer-events:none;
   background:repeating-linear-gradient(to bottom,#F07A2A 0 2px,rgba(240,122,42,.35) 2px 7px);border-left:1px solid #F07A2A}
-.slot .clip{position:absolute;left:-4px;bottom:1px;width:8px;height:calc(var(--beam) - 2px);background:#E8732A;z-index:2;border-radius:1px}
+.bin .clip{position:absolute;left:-4px;bottom:1px;width:8px;height:calc(var(--beam) - 2px);background:#E8732A;z-index:3;border-radius:1px}
 /* 로케이션 라벨: QR · 번호(검은 칸) · 단별 색 화살표 */
-.slot .tg{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);z-index:1;display:flex;align-items:center;gap:1px;font-size:7.5px;line-height:1;font-weight:700;white-space:nowrap}
-.slot .tg i{width:7px;height:7px;background:conic-gradient(#000 0 25%,#fff 0 50%,#000 0 75%,#fff 0) 0 0/3.5px 3.5px;outline:1px solid #000}
-.slot .tg b{background:#000;color:#fff;padding:1px 2px}
-.slot .tg u{text-decoration:none;width:8px;height:8px;display:grid;place-items:center;font-size:7px;color:#000;background:var(--lc)}
-.slot.l5 .tg u,.slot.l6 .tg u{color:#fff}
+.bin .tg{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);z-index:2;display:flex;align-items:center;gap:1px;font-size:7.5px;line-height:1;font-weight:700;white-space:nowrap;pointer-events:none}
+.bin .tg i{width:7px;height:7px;background:conic-gradient(#000 0 25%,#fff 0 50%,#000 0 75%,#fff 0) 0 0/3.5px 3.5px;outline:1px solid #000}
+.bin .tg b{background:#000;color:#fff;padding:1px 2px}
+.bin .tg u{text-decoration:none;width:8px;height:8px;display:grid;place-items:center;font-size:7px;color:#000;background:var(--lc)}
+.bin.l5 .tg u,.bin.l6 .tg u{color:#fff}
+/* 한 빈 = 왼쪽 · 오른쪽 두 칸 (SKU 2개까지) */
+.slot{flex:1 1 0;min-width:0;height:100%;border:0;margin:0;padding:0 1px;position:relative;font:inherit;color:var(--ink);background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.slot.s1{border-left:1px dashed rgba(120,115,105,.35)}
+.slot.over{background:rgba(37,87,167,.16);outline:2px solid var(--r-focus);outline-offset:-2px}
 button.slot{cursor:pointer}
 @media (hover:hover){button.slot.empty:not(.bad):not(.hint):hover{outline:2px dashed var(--r-focus);outline-offset:-3px}}
 button.slot:focus-visible{outline:3px solid var(--r-focus);outline-offset:-3px}
 .slot .goods{display:flex;align-items:flex-end;justify-content:center;width:100%;filter:drop-shadow(0 2px 1px rgba(0,0,0,.5))}
-.slot .goods span{display:block;line-height:0;margin:0 calc(var(--cell)*-.07)}
-.slot .goods span:nth-child(2){transform:translateY(1px)}
-.slot .goods svg{height:calc(var(--cell)*.6)}
+.slot .goods span{display:block;line-height:0}
+.slot .goods svg{height:calc(var(--cell)*.52);max-width:calc(var(--cell)*.46)}
 svg.pk{display:block;aspect-ratio:40/48;width:auto}
 .hand .em svg{height:42px}.now .big .em svg{height:58px}.cart span svg{height:24px}
-.slot .nm{position:relative;z-index:1;margin:2px 0 1px;font-size:10px;font-weight:700;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  background:#fff;color:#18202C;border-left:3px solid var(--c);border-radius:2px;padding:0 3px}
-.slot .kg{position:absolute;top:3px;right:3px;font-size:9px;font-weight:700;background:#E0A21B;color:#1A1300;border-radius:3px;padding:0 3px;line-height:13px}
-.slot.dim{background:repeating-linear-gradient(135deg,rgba(229,51,42,.28) 0 5px,transparent 5px 11px),linear-gradient(#ECEAE4,#FBFAF7)}
+.slot .nm{position:relative;z-index:1;margin:2px 0 1px;font-size:9.5px;font-weight:700;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  background:#fff;color:#18202C;border-left:2px solid var(--c);border-radius:2px;padding:0 2px}
+.slot .nm .s2{display:none}
+.slot .kg{position:absolute;top:2px;right:1px;font-size:8px;font-weight:700;background:#E0A21B;color:#1A1300;border-radius:3px;padding:0 3px;line-height:13px}
+.slot.dim{background:repeating-linear-gradient(135deg,rgba(229,51,42,.28) 0 5px,transparent 5px 11px)}
 .slot.focus{outline:3px solid var(--r-focus);outline-offset:-3px;animation:pulse 1.2s ease-in-out infinite}
 .slot.look{outline:2px dashed #6B7280;outline-offset:-3px}
 .rack .slot.ok{outline:3px solid var(--r-ok);outline-offset:-3px}
 .rack .slot.bad{outline:3px solid var(--r-bad);outline-offset:-3px}
 .rack .slot.cause{outline:3px dashed var(--r-bad);outline-offset:-3px}
 .rack .slot.hint{outline:3px dashed var(--r-ok);outline-offset:-3px}
-.slot .mk{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;z-index:2}
+.slot .mk{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;z-index:2}
 .slot.ok .mk{background:var(--r-ok)}.slot.bad .mk{background:#E5332A}
 .slot.shake{animation:shake .35s}
 .slot.pop .goods{animation:pop .3s}
@@ -101,7 +105,7 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 @keyframes pop{0%{transform:scale(.7)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.slot.focus,.slot.shake,.slot.pop{animation:none}}
 .rackwrap{overflow-x:auto;padding:10px 2px 4px}
-.rack.mini{--cell:58px}
+.rack.mini{--cell:72px}
 .rack.mini .slot .nm{font-size:9.5px}
 
 /* 진열 과정 */
@@ -140,6 +144,11 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 .now .big{display:flex;align-items:center;gap:14px;margin:10px 0 12px}
 .now .big .em{font-size:52px;line-height:1;overflow:hidden;width:72px;height:72px;display:grid;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--c,#888) 17%,var(--paper));box-shadow:inset 0 4px 0 var(--c,#888)}
 .now .big b{font-size:18px;display:block}
+#nItem{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;border-radius:12px}
+#nItem.lifted{opacity:.45}
+.draghint{font-size:12.5px;margin:-4px 0 10px}
+.dragimg{position:fixed;z-index:50;pointer-events:none;transform:translate(-50%,-75%) rotate(-4deg);filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))}
+.dragimg svg{height:64px}
 .cart{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
 .cart span{font-size:20px;width:30px;height:30px;display:grid;place-items:center;border-radius:6px;background:var(--slot)}
 .msg{border-radius:10px;padding:10px 12px;margin-top:12px;font-size:14px;min-height:46px}
@@ -159,15 +168,21 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 @media (max-width:860px){
   .walk,.game{grid-template-columns:minmax(0,1fr)}
   .rulegrid{grid-template-columns:minmax(0,1fr)}
-  .now{position:static}
+  .now{position:sticky;top:0;z-index:5;box-shadow:0 6px 14px -8px rgba(0,0,0,.35)}
+  .now{padding:10px 14px}.now>small,.now .cartwrap,.draghint{display:none}
+  .now .big{margin:0 0 8px}
+  #nPass{padding:7px 12px;font-size:14px}
 }
 @media (max-width:560px){
   main{padding-top:18px}
   h1{font-size:24px}
   .card{padding:14px}
-  .rack{--cell:min(60px,calc((100vw - 32px - 28px - 34px - 16px) / var(--w)));--beam:11px}
-  .rack.mini{--cell:52px}
-  .slot .nm{font-size:9px;padding:0 2px}
+  .rack{--cell:min(64px,calc((100vw - 32px - 28px - 30px - 16px) / var(--w)));--beam:11px}
+  .rack.mini{--cell:60px}
+  .slot .nm{font-size:8.5px;padding:0 1px;border-left-width:2px}
+  .slot .nm .s1{display:none}.slot .nm .s2{display:inline}
+  .slot .kg{font-size:7px;line-height:10px;padding:0 1px}
+  .bin .tg i{display:none}
   .slot .kg{font-size:8px;line-height:11px;top:2px;right:2px;padding:0 2px}
   .rack .post::after{inset:3px 2px}
   .now .big{margin:6px 0 10px}
@@ -248,12 +263,13 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
     <div class="game">
       <div class="card now">
         <small class="mute">지금 진열할 상품</small>
-        <div class="big" id="nItem"></div>
+        <div class="big" id="nItem" title="끌어서 선반 칸에 놓아요"></div>
+        <p class="mute draghint">상품을 끌어서 선반 빈 칸에 놓아요. 칸을 눌러도 돼요.</p>
         <button type="button" class="ghost" id="nPass" style="width:100%">놓을 칸 없음 (다른 로케이션으로)</button>
-        <div style="margin-top:12px"><small class="mute">카트에 남은 상품</small><div class="cart" id="nCart"></div></div>
+        <div class="cartwrap" style="margin-top:12px"><small class="mute">카트에 남은 상품</small><div class="cart" id="nCart"></div></div>
       </div>
       <div class="card">
-        <div class="row" style="justify-content:space-between"><b id="gLoc"></b><span class="mute" style="font-size:13px">빈 칸을 눌러 진열</span></div>
+        <div class="row" style="justify-content:space-between"><b id="gLoc"></b><span class="mute" style="font-size:13px">끌어다 놓거나 칸을 눌러 진열</span></div>
         <div class="msg info" id="nMsg" role="status" aria-live="polite"></div>
         <div class="rackwrap"><div id="gRack"></div></div>
         <div class="rules">
@@ -317,10 +333,11 @@ const SVGS = {
   cheese:  ART.slice(),
   cheese2: ART.mozz(),
 };
-const NUM = {kimchi:2, kimchi2:2, tofu:2, tofu2:2, cheese:2, cheese2:2, milk:3, milk2:3, pap:2, pap2:2};
-for (const k in CAT){ CAT[k].em = `<svg class="pk" viewBox="0 0 40 48" aria-hidden="true">${SVGS[k]}</svg>`; CAT[k].n = NUM[k] || 2; }
+const SHORT2 = {kimchi:'포기', kimchi2:'총각', milk:'우유', milk2:'저지', tofu:'부침', tofu2:'찌개', pap:'빨강', pap2:'노랑', cheese:'슬라', cheese2:'모짜'};
+for (const k in CAT){ CAT[k].em = `<svg class="pk" viewBox="0 0 40 48" aria-hidden="true">${SVGS[k]}</svg>`; CAT[k].s2 = SHORT2[k] || CAT[k].short; }
 const pad = n => String(n).padStart(2,'0');
-const where = (lv,b) => `${lv+1}단 ${b+1}빈`;
+// 칸 번호 b: 한 빈에 왼쪽(짝수) · 오른쪽(홀수) 두 칸
+const where = (lv,b) => `${lv+1}단 ${Math.floor(b/2)+1}빈 ${b%2?'오른쪽':'왼쪽'}`;
 const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
 
 /* grid[단][빈] — 단 0 = 1단(맨 아래) */
@@ -335,8 +352,9 @@ function check(grid, lv, b, id){
     const L = lv+dl, B = b+db;
     if (L<0 || L>=grid.length || B<0 || B>=grid[0].length) continue;
     const o = grid[L][B]; if (!o) continue;
-    if (o === id) out.push({rule:'same', lv:L, b:B, dir, other:o});
-    else if (CAT[o].g === it.g) out.push({rule:'similar', lv:L, b:B, dir, other:o});
+    const sb = dl===0 && Math.floor(B/2)===Math.floor(b/2);
+    if (o === id) out.push({rule:'same', lv:L, b:B, dir, sb, other:o});
+    else if (CAT[o].g === it.g) out.push({rule:'similar', lv:L, b:B, dir, sb, other:o});
   }
   return out;
 }
@@ -347,14 +365,15 @@ const RULE_TXT = {
 };
 function explain(v, id){
   if (v.rule==='heavy') return `중량물(${CAT[id].short})은 1·2단에만 놓을 수 있어요.`;
-  if (v.rule==='same') return `${v.dir} 칸(${where(v.lv,v.b)})에 같은 상품(${CAT[id].short})이 있어요.`;
-  return `${v.dir} 칸(${where(v.lv,v.b)})에 비슷한 상품(${CAT[v.other].short})이 있어요.`;
+  const at = v.sb ? `같은 빈 ${v.dir} 칸` : `${v.dir} 칸(${where(v.lv,v.b)})`;
+  if (v.rule==='same') return `${at}에 같은 상품(${CAT[id].short})이 있어요.`;
+  return `${at}에 비슷한 상품(${CAT[v.other].short})이 있어요.`;
 }
 
 /* ── 선반 그리기 ── */
 const LVC = ['#E5332A','#F08A1E','#F2D21B','#2EAD4B','#2F8FE0','#2B3A8F','#8E5BD6']; // 빨 주 노 초 파 남 보: 1단 빨강 · 2단 주황 · 3단 노랑 · 4단 초록 · 5단 파랑 · 6단 남색 · 7단 보라
 function drawRack(el, grid, opt={}){
-  const H = grid.length, W = grid[0].length, marks = opt.marks || {}, dimRows = opt.dimRows || [];
+  const H = grid.length, S = grid[0].length, W = Math.ceil(S/2), marks = opt.marks || {}, dimRows = opt.dimRows || [];
   el.className = 'rack' + (opt.mini ? ' mini' : '');
   el.style.gridTemplateColumns = `auto 8px repeat(${W}, auto) 8px`;
   el.style.setProperty('--w', W);
@@ -365,32 +384,36 @@ function drawRack(el, grid, opt={}){
   for (let lv=H-1; lv>=0; lv--){
     const row = H - lv;
     const l = mk('lv'); l.textContent = `${lv+1}단`; put(l, row, 1);
-    for (let b=0; b<W; b++){
-      const id = grid[lv][b], s = document.createElement(opt.onTap ? 'button' : 'div');
-      if (opt.onTap){ s.type='button'; s.addEventListener('click', () => opt.onTap(lv,b,s)); }
-      s.className = 'slot b' + b + ' l' + lv + ' ' + (id ? 'full' : 'empty');
-      s.style.setProperty('--lc', LVC[lv % LVC.length]);
-      s.dataset.k = lv+'-'+b;
-      if (dimRows.includes(lv) && !id) s.classList.add('dim');
-      const m = marks[lv+'-'+b];
-      if (m) s.classList.add(m);
-      const tag = `<span class="tg">${opt.mini ? '' : '<i></i>'}<b>${lv+1}0${b+1}</b><u>↑</u></span>${b ? '<span class="clip"></span>' : ''}`;
-      if (id){
-        const it = CAT[id], n = opt.mini ? 2 : it.n;
-        s.style.setProperty('--c', it.c);
-        s.innerHTML = `<span class="goods">${`<span>${it.em}</span>`.repeat(n)}</span><span class="nm">${it.short}</span>${it.heavy?'<span class="kg">중량</span>':''}${tag}`;
-        s.setAttribute('aria-label', `${where(lv,b)}: ${it.name}`);
-      } else {
-        s.innerHTML = tag;
-        s.setAttribute('aria-label', `${where(lv,b)}: 빈 칸`);
+    for (let bb=0; bb<W; bb++){
+      const bin = mk(`bin b${bb} l${lv}`);
+      bin.style.setProperty('--lc', LVC[lv % LVC.length]);
+      bin.innerHTML = `<span class="tg">${opt.mini ? '' : '<i></i>'}<b>${lv+1}0${bb+1}</b><u>↑</u></span>${bb ? '<span class="clip"></span>' : ''}`;
+      for (let side=0; side<2; side++){
+        const b = bb*2 + side; if (b >= S) continue;
+        const id = grid[lv][b], s = document.createElement(opt.onTap ? 'button' : 'div');
+        if (opt.onTap){ s.type='button'; s.addEventListener('click', () => opt.onTap(lv,b,s)); }
+        s.className = `slot s${side} ` + (id ? 'full' : 'empty');
+        s.dataset.k = lv+'-'+b;
+        if (dimRows.includes(lv) && !id) s.classList.add('dim');
+        const m = marks[lv+'-'+b];
+        if (m) s.classList.add(m);
+        if (id){
+          const it = CAT[id];
+          s.style.setProperty('--c', it.c);
+          s.innerHTML = `<span class="goods"><span>${it.em}</span></span><span class="nm"><span class="s1">${it.short}</span><span class="s2">${it.s2}</span></span>${it.heavy?'<span class="kg">중량</span>':''}`;
+          s.setAttribute('aria-label', `${where(lv,b)}: ${it.name}`);
+        } else {
+          s.setAttribute('aria-label', `${where(lv,b)}: 빈 칸`);
+        }
+        if (m==='ok') s.insertAdjacentHTML('beforeend','<span class="mk">✓</span>');
+        if (m==='bad') s.insertAdjacentHTML('beforeend','<span class="mk">✕</span>');
+        bin.insertBefore(s, bin.querySelector('.tg'));
       }
-      if (m==='ok') s.insertAdjacentHTML('beforeend','<span class="mk">✓</span>');
-      if (m==='bad') s.insertAdjacentHTML('beforeend','<span class="mk">✕</span>');
-      put(s, row, b+3);
+      put(bin, row, bb+3);
     }
   }
   const f = mk('floor'); f.style.gridColumn = `2 / span ${W+2}`; f.style.gridRow = H+1; el.append(f);
-  for (let b=0; b<W; b++){ const d = mk('bay'); d.textContent = (b+1)+'빈'; put(d, H+2, b+3); }
+  for (let bb=0; bb<W; bb++){ const d = mk('bay'); d.textContent = (bb+1)+'빈'; put(d, H+2, bb+3); }
 }
 const handHTML = (id, note) => { const it = CAT[id];
   return `<span class="em">${it.em}</span><div><b>${it.name}</b><small>${it.heavy?'중량물 · ':''}${note||''}</small></div>`; };
@@ -405,25 +428,37 @@ document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showTab
 document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) showTab(g.dataset.go); });
 
 /* ── ① 진열 과정 (단계별 보기) ── */
-const G0 = [ // 1단 ~ 6단, 각 단에 1~6빈
-  ['kimchi2', null, null, 'tofu', null, 'milk'],
-  [null, 'cheese', null, null, 'pap', null],
-  ['milk2', null, 'tofu2', null, null, null],
-  [null, 'pap2', null, null, 'milk', null],
-  [null, null, null, 'tofu', null, null],
-  [null, 'milk', null, null, null, 'cheese'],
+const G0 = [ // 1단 ~ 6단 · 6빈 × 2칸 (빈마다 왼쪽 · 오른쪽)
+  ['kimchi2','milk2', null,null, null,null, 'tofu',null, null,null, 'milk','pap'],
+  [null,null, 'cheese',null, null,null, null,null, 'pap','milk', null,null],
+  ['milk2','tofu', null,null, 'tofu2',null, null,null, null,null, null,null],
+  [null,null, 'pap2','milk', null,null, null,null, 'tofu2',null, null,null],
+  [null,null, null,null, null,null, 'tofu','pap', null,null, null,null],
+  [null,null, 'milk',null, null,null, null,null, null,null, 'cheese','tofu2'],
 ];
 const clone = g => g.map(r => r.slice());
-const G1 = clone(G0); G1[0][2] = 'kimchi';
-const G2 = clone(G1); G2[2][3] = 'cheese2';
+const G1 = clone(G0); G1[0][4] = 'kimchi';
+const G2 = clone(G1); G2[2][6] = 'cheese2';
+// causes 칸 주변에서 이 상품을 놓으면 안 되는 빈 칸을 표시
+function around(g, id, causes, okKey){
+  const m = {};
+  for (const c of causes){
+    const [l,b] = c.split('-').map(Number); m[c] = 'cause';
+    for (const [dl,db] of DIRS){ const L=l+dl, B=b+db;
+      if (L<0||L>=g.length||B<0||B>=g[0].length||g[L][B]) continue;
+      if (check(g,L,B,id).length) m[L+'-'+B] = 'bad'; }
+  }
+  if (okKey) m[okKey] = 'ok';
+  return m;
+}
 const WALK = [
   {t:'카트에서 상품을 하나 꺼내요', p:'상품 바코드를 스캔해서 어떤 상품인지, 수량이 몇 개인지 먼저 확인해요.', hand:'kimchi', note:'5kg 1통', g:G0},
   {t:'무게부터 확인해요', p:'포기김치 5kg는 중량물이에요. 중량물은 1·2단에만 놓아요. 3단 ~ 6단(빗금 칸)에는 놓으면 안 돼요.', hand:'kimchi', g:G0, dim:[2,3,4,5]},
-  {t:'빈 칸을 고르고 주변 4칸을 확인해요', p:'고른 칸의 왼쪽 · 오른쪽 · 위 · 아래를 봐요. 같은 상품이나 비슷한 상품이 없으면 놓아도 돼요. 1단 3빈은 오른쪽에 두부, 위는 빈 칸이라 괜찮아요. (1단 1빈의 총각김치와는 떨어져 있어요.)', hand:'kimchi', g:G0, dim:[2,3,4,5], marks:{'0-2':'focus','0-1':'look','0-3':'look','1-2':'look'}},
-  {t:'로케이션 스캔 → 진열 → 수량 입력', p:'로케이션 바코드를 찍고 상품을 넣은 뒤 수량을 입력하면 한 상품이 끝나요.', hand:'kimchi', note:'진열 완료', g:G1, marks:{'0-2':'ok'}},
-  {t:'비슷한 상품은 붙이면 안 돼요', p:'다음 상품은 모짜렐라치즈. 2단 3빈은 왼쪽(2단 2빈)에 슬라이스치즈가 있어서 안 돼요. 비슷한 상품끼리 붙어 있으면 피킹할 때 잘못 집기 쉬워요. 3단 4빈은 주변에 비슷한 상품이 없어서 OK.', hand:'cheese2', g:G1, marks:{'1-2':'bad','1-1':'cause','2-3':'ok'}},
-  {t:'같은 상품도 가로·세로로 붙이면 안 돼요', p:'이번엔 슬라이스치즈. 2단 2빈에 같은 상품이 있으니 그 위·아래·옆 칸은 안 돼요. 2단 4빈은 위에 모짜렐라치즈(비슷한 상품)가 있어서 안 돼요. 5단 1빈처럼 떨어진 칸에 놓아요. 놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.', hand:'cheese', g:G2, marks:{'2-1':'bad','1-0':'bad','1-2':'bad','0-1':'bad','1-3':'bad','1-1':'cause','2-3':'cause','4-0':'ok'}},
-  {t:'카트가 빌 때까지 반복해요', p:'꺼내기 → 무게 확인 → 주변 4칸 확인 → 스캔 · 진열 · 수량 입력. 이제 규칙 3가지를 정리하고 게임으로 연습해봐요.', g:G2, end:true},
+  {t:'빈 칸을 고르고 주변 칸을 확인해요', p:'한 빈에는 왼쪽 · 오른쪽 두 칸이 있어서 상품(SKU)을 2개까지 넣을 수 있어요. 고른 칸의 왼쪽 · 오른쪽 · 위 · 아래를 보고, 같은 상품이나 비슷한 상품이 없으면 놓아도 돼요. 1단 3빈 왼쪽 칸은 옆과 위가 비어 있어서 괜찮아요.', hand:'kimchi', g:G0, dim:[2,3,4,5], marks:{'0-4':'focus','0-3':'look','0-5':'look','1-4':'look'}},
+  {t:'로케이션 스캔 → 진열 → 수량 입력', p:'로케이션 바코드를 찍고 상품을 넣은 뒤 수량을 입력하면 한 상품이 끝나요.', hand:'kimchi', note:'진열 완료', g:G1, marks:{'0-4':'ok'}},
+  {t:'비슷한 상품은 붙이면 안 돼요', p:'다음 상품은 모짜렐라치즈. 2단 2빈 왼쪽에 슬라이스치즈가 있어서 같은 빈 오른쪽 칸, 그리고 위 · 아래 · 옆 칸은 안 돼요. 한 빈에 2개를 넣을 때도 비슷한 상품끼리는 같이 넣지 않아요. 3단 4빈 왼쪽은 주변에 비슷한 상품이 없어서 OK.', hand:'cheese2', g:G1, marks:around(G1,'cheese2',['1-2'],'2-6')},
+  {t:'같은 상품도 가로·세로로 붙이면 안 돼요', p:'이번엔 슬라이스치즈. 같은 슬라이스치즈(2단 2빈)와 비슷한 모짜렐라치즈(3단 4빈)의 위 · 아래 · 옆 칸은 모두 안 돼요. 5단 1빈 왼쪽처럼 떨어진 칸에 놓아요. 놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.', hand:'cheese', g:G2, marks:around(G2,'cheese',['1-2','2-6'],'4-0')},
+  {t:'카트가 빌 때까지 반복해요', p:'꺼내기 → 무게 확인 → 주변 칸 확인 → 스캔 · 진열 · 수량 입력. 이제 규칙 3가지를 정리하고 게임으로 연습해봐요.', g:G2, end:true},
 ];
 let wi = 0;
 function drawWalk(){
@@ -442,12 +477,12 @@ drawWalk();
 
 /* ── ② 규칙 3가지 ── */
 const RULES = [
-  {n:1, t:'유사상품 붙여서 진열 금지', p:'모양 · 색 · 이름이 비슷한 상품(슬라이스치즈/모짜렐라치즈, 빨강/노랑 파프리카, 우유/저지방우유 등)은 옆이나 위아래 칸에 붙여 놓지 않아요. 피킹할 때 잘못 집는 원인이 돼요.',
-    x:{g:[[ 'cheese','cheese2','tofu']], m:{'0-0':'cause','0-1':'bad'}, why:'슬라이스치즈 바로 옆에 모짜렐라치즈'},
-    o:{g:[[ 'cheese','tofu','cheese2']], m:{'0-2':'ok'}, why:'사이에 다른 상품을 둬요'}},
-  {n:2, t:'동일상품 가로·세로 연속 진열 금지', p:'같은 상품을 옆 칸이나 위아래 칸에 이어서 놓지 않아요. 같은 상품은 떨어진 칸에 놓아요.',
-    x:{g:[[ 'tofu','milk',null],[ 'tofu',null,null]], m:{'0-0':'cause','1-0':'bad'}, why:'부침두부 위에 또 부침두부'},
-    o:{g:[[ 'tofu','milk','tofu'],[ null,'pap',null]], m:{'0-2':'ok'}, why:'한 칸 떨어뜨려 놓아요'}},
+  {n:1, t:'유사상품 붙여서 진열 금지', p:'모양 · 색 · 이름이 비슷한 상품(슬라이스치즈/모짜렐라치즈, 빨강/노랑 파프리카, 우유/저지방우유 등)은 한 빈에 같이 넣거나 옆 · 위아래 칸에 붙여 놓지 않아요. 피킹할 때 잘못 집는 원인이 돼요.',
+    x:{g:[[ 'cheese','cheese2','tofu',null]], m:{'0-0':'cause','0-1':'bad'}, why:'한 빈에 슬라이스치즈와 모짜렐라치즈'},
+    o:{g:[[ 'cheese','tofu','cheese2',null]], m:{'0-2':'ok'}, why:'다른 상품과 짝지어 넣어요'}},
+  {n:2, t:'동일상품 가로·세로 연속 진열 금지', p:'같은 상품을 옆 칸이나 위아래 칸에 이어서 놓지 않아요. 한 빈 안의 왼쪽 · 오른쪽 칸도 마찬가지예요. 같은 상품은 떨어진 칸에 놓아요.',
+    x:{g:[[ 'tofu','milk',null,null],[ 'tofu',null,null,null]], m:{'0-0':'cause','1-0':'bad'}, why:'부침두부 위에 또 부침두부'},
+    o:{g:[[ 'tofu','milk','pap','tofu'],[ null,'cheese',null,null]], m:{'0-3':'ok'}, why:'한 칸 떨어뜨려 놓아요'}},
   {n:3, t:'중량물은 1·2단에만', p:'김치 5kg처럼 무거운 상품(중량 표시)은 1단 · 2단에만 놓아요. 높은 단에 두면 떨어지거나 다칠 수 있어요.',
     x:{g:[[ null,'milk'],[ 'tofu',null],[ null,null],[ 'kimchi','cheese'],[ null,null],[ 'pap',null]], m:{'3-0':'bad'}, why:'김치가 4단에 있어요', dim:[2,3,4,5]},
     o:{g:[[ 'kimchi','milk'],[ 'tofu',null],[ null,'cheese'],[ null,null],[ 'pap',null],[ null,'tofu']], m:{'0-0':'ok'}, why:'김치는 1단에', dim:[2,3,4,5]}},
@@ -461,9 +496,9 @@ for (const r of RULES) for (const k of ['x','o']){
 
 /* ── ③ 연습 게임 ── */
 const STAGES = [
-  {W:6, H:6, pre:8,  q:7,  pool:['kimchi','milk','tofu','pap','cheese','cheese2']},
-  {W:6, H:6, pre:12, q:10, pool:['kimchi','kimchi2','milk','milk2','tofu','tofu2','pap','cheese','cheese2']},
-  {W:6, H:6, pre:16, q:12, pool:Object.keys(CAT)},
+  {W:12, H:6, pre:14, q:8,  pool:['kimchi','milk','tofu','pap','cheese','cheese2']},
+  {W:12, H:6, pre:20, q:12, pool:['kimchi','kimchi2','milk','milk2','tofu','tofu2','pap','cheese','cheese2']},
+  {W:12, H:6, pre:26, q:14, pool:Object.keys(CAT)},
 ];
 // 규칙을 모두 지키는 정답 배치를 먼저 만든 뒤, 일부는 선반에 미리 두고 나머지는 카트에 담아요
 function makeStage(st){
@@ -478,7 +513,7 @@ function makeStage(st){
     while (units.length < T && guard++ < 500){
       const i = st.pool[Math.random()*st.pool.length|0];
       const heavyNow = units.filter(u=>CAT[u].heavy).length;
-      if ((cnt[i]||0) >= 3) continue;
+      if ((cnt[i]||0) >= 6) continue;
       if (CAT[i].heavy && heavyNow >= st.W) continue;
       units.push(i); cnt[i]=(cnt[i]||0)+1;
     }
@@ -533,7 +568,7 @@ function render(opt={}){
   const st = S.st, cur = S.queue[0];
   $('hStage').textContent = `${S.stage+1} / ${STAGES.length}`;
   $('hScore').textContent = S.score; $('hMiss').textContent = S.miss; $('hLeft').textContent = S.queue.length;
-  $('gLoc').textContent = `연습 선반 · ${st.H}단 × ${st.W}빈`;
+  $('gLoc').textContent = `연습 선반 · ${st.H}단 × ${st.W/2}빈 (빈마다 2칸)`;
   if (cur){
     const it = CAT[cur];
     $('nItem').style.setProperty('--c', it.c);
@@ -616,5 +651,36 @@ function weakest(){
   return `가장 많이 틀린 부분: ${txt[top[0]]} 한 번 더 확인하는 습관을 들여요.`;
 }
 $('gStart').onclick = startGame;
+
+/* ── 끌어서 진열 (마우스 · 터치) — 칸을 눌러도 진열돼요 ── */
+let drag = null;
+function dragMove(e){
+  if (!drag) return;
+  drag.g.style.left = e.clientX+'px'; drag.g.style.top = e.clientY+'px';
+  const hit = document.elementFromPoint(e.clientX, e.clientY);
+  const sl = hit && hit.closest('#gRack .slot.empty');
+  if (drag.over && drag.over !== sl) drag.over.classList.remove('over');
+  if (sl) sl.classList.add('over');
+  drag.over = sl;
+  if (e.clientY > innerHeight-48) scrollBy(0,14); else if (e.clientY < 40) scrollBy(0,-14);
+}
+function dragEnd(e, drop){
+  if (!drag) return;
+  const sl = drop ? drag.over : null;
+  drag.g.remove(); if (drag.over) drag.over.classList.remove('over');
+  removeEventListener('pointermove', dragMove); drag = null;
+  $('nItem').classList.remove('lifted');
+  if (sl){ const [lv,b] = sl.dataset.k.split('-').map(Number); tap(lv,b); }
+}
+$('nItem').addEventListener('pointerdown', e => {
+  const id = S.queue[0]; if (!id || drag) return;
+  e.preventDefault();
+  const g = document.createElement('div'); g.className = 'dragimg'; g.innerHTML = CAT[id].em; document.body.append(g);
+  drag = {g, over:null}; $('nItem').classList.add('lifted');
+  dragMove(e);
+  addEventListener('pointermove', dragMove);
+  addEventListener('pointerup', ev => dragEnd(ev, true), {once:true});
+  addEventListener('pointercancel', ev => dragEnd(ev, false), {once:true});
+});
 </script>
 </body></html>
