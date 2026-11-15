@@ -247,7 +247,7 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
   <div class="rulegrid" id="ruleGrid"></div>
   <div class="card" style="margin-top:14px">
     <h2>유사상품 더 알아보기</h2>
-    <p class="mute" style="margin:4px 0 0;font-size:14px">신선센터에서 자주 헷갈리는 짝이에요. 생김새가 거의 같아서, 붙어 있으면 피킹할 때 잘못 집기 쉬워요.</p>
+    <p class="mute" style="margin:4px 0 0;font-size:14px">신선센터에서 자주 헷갈리는 짝이에요. 생김새가 거의 같아서 한 빈에 같이 있으면 피킹할 때 잘못 집기 쉬워요. <b>같은 빈에만 같이 넣지 않으면 되고, 옆 빈 · 위아래 빈은 괜찮아요.</b></p>
     <div class="pairs" id="pairList"></div>
     <h3 class="simh x">✕ 이럴 땐 안 돼요</h3>
     <div class="simgrid" id="simBad"></div>
@@ -255,8 +255,8 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
     <div class="simgrid" id="simGood"></div>
   </div>
   <div class="card" style="margin-top:14px">
-    <b>붙어 있다는 건?</b>
-    <p class="mute" style="margin:4px 0 0">빈 단위로 봐요. <b>같은 빈의 옆 칸, 바로 왼쪽 · 오른쪽 빈, 바로 위 · 아래 빈</b>이에요. 같은 상품이나 비슷한 상품이 이 중 한 곳이라도 있으면 놓으면 안 돼요. 단, 같은 상품은 같은 빈의 두 칸에 함께 넣어도 돼요. 놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.</p>
+    <b>한눈에 정리</b>
+    <p class="mute" style="margin:4px 0 0"><b>유사상품</b>: 같은 빈(왼쪽 · 오른쪽 칸)에 같이 넣지 않아요. 옆 빈 · 위아래 빈은 괜찮아요.<br><b>동일상품</b>: 바로 옆 빈 · 바로 위아래 빈에 놓지 않아요. 같은 빈의 두 칸에는 함께 넣어도 돼요.<br><b>중량물</b>: 1단 · 2단에만 놓아요.<br>놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.</p>
     <div class="row" style="margin-top:12px"><button type="button" class="btn" data-go="game">게임으로 연습하기</button></div>
   </div>
 </section>
@@ -390,7 +390,7 @@ function check(grid, lv, b, id){
     const o = grid[L][B]; if (!o) continue;
     if (o === id && sb) continue; // 같은 빈의 두 칸에는 같은 상품을 함께 넣어도 돼요
     if (o === id) out.push({rule:'same', lv:L, b:B, dir, sb, other:o});
-    else if (CAT[o].g === it.g) out.push({rule:'similar', lv:L, b:B, dir, sb, other:o});
+    else if (sb && CAT[o].g === it.g) out.push({rule:'similar', lv:L, b:B, dir, sb, other:o});
   }
   return out;
 }
@@ -474,7 +474,7 @@ const G0 = [ // 1단 ~ 6단 · 6빈 × 2칸 (빈마다 왼쪽 · 오른쪽)
 ];
 const clone = g => g.map(r => r.slice());
 const G1 = clone(G0); G1[0][4] = 'kimchi';
-const G2 = clone(G1); G2[2][6] = 'cheese2';
+const G2 = clone(G1); G2[1][4] = 'cheese2';
 // causes 칸 주변에서 이 상품을 놓으면 안 되는 빈 칸을 표시
 function around(g, id, causes, okKey){
   const m = {};
@@ -492,8 +492,8 @@ const WALK = [
   {t:'무게부터 확인해요', p:'포기김치 5kg는 중량물이에요. 중량물은 1·2단에만 놓아요. 3단 ~ 6단(빗금 칸)에는 놓으면 안 돼요.', hand:'kimchi', g:G0, dim:[2,3,4,5]},
   {t:'빈 칸을 고르고 주변 칸을 확인해요', p:'한 빈에는 왼쪽 · 오른쪽 두 칸이 있어서 상품(SKU)을 2개까지 넣을 수 있어요. 같은 빈의 옆 칸, 왼쪽 · 오른쪽 빈, 위 · 아래 빈을 보고 같은 상품이나 비슷한 상품이 없으면 놓아도 돼요. 1단 3빈은 옆 2빈 · 위 2단 3빈이 비어 있고 4빈은 두부라 괜찮아요.', hand:'kimchi', g:G0, dim:[2,3,4,5], marks:{'0-4':'focus','0-5':'look','0-2':'look','0-3':'look','0-6':'look','0-7':'look','1-4':'look','1-5':'look'}},
   {t:'로케이션 스캔 → 진열 → 수량 입력', p:'로케이션 바코드를 찍고 상품을 넣은 뒤 수량을 입력하면 한 상품이 끝나요.', hand:'kimchi', note:'진열 완료', g:G1, marks:{'0-4':'ok'}},
-  {t:'비슷한 상품은 붙이면 안 돼요', p:'다음 상품은 모짜렐라치즈. 2단 2빈에 슬라이스치즈가 있어서 같은 빈의 옆 칸, 옆 빈(2단 1빈 · 3빈), 위 · 아래 빈(3단 · 1단 2빈)은 안 돼요. 한 빈에 2개를 넣을 때도 비슷한 상품끼리는 같이 넣지 않아요. 3단 4빈 왼쪽은 주변에 비슷한 상품이 없어서 OK.', hand:'cheese2', g:G1, marks:around(G1,'cheese2',['1-2'],'2-6')},
-  {t:'같은 상품도 옆 빈 · 위아래 빈엔 안 돼요', p:'이번엔 슬라이스치즈. 같은 상품은 같은 빈의 옆 칸(2단 2빈 오른쪽)에 함께 넣어도 돼요. 하지만 2단 2빈의 옆 빈 · 위아래 빈과, 비슷한 모짜렐라치즈(3단 4빈) 주변 빈은 안 돼요. 놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.', hand:'cheese', g:G2, marks:around(G2,'cheese',['1-2','2-6'],'1-3')},
+  {t:'비슷한 상품은 한 빈에 같이 넣지 않아요', p:'다음 상품은 모짜렐라치즈. 2단 2빈 왼쪽에 슬라이스치즈가 있어서 같은 빈 오른쪽 칸은 안 돼요. 옆 빈이나 위아래 빈은 괜찮아서, 바로 옆 2단 3빈에 놓았어요.', hand:'cheese2', g:G1, marks:{'1-2':'cause','1-3':'bad','1-4':'ok'}},
+  {t:'같은 상품도 옆 빈 · 위아래 빈엔 안 돼요', p:'이번엔 슬라이스치즈. 같은 상품은 같은 빈의 옆 칸(2단 2빈 오른쪽)에 함께 넣어도 돼요. 하지만 2단 2빈의 바로 옆 빈 · 위아래 빈에는 놓으면 안 돼요. 놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.', hand:'cheese', g:G2, marks:around(G2,'cheese',['1-2'],'1-3')},
   {t:'카트가 빌 때까지 반복해요', p:'꺼내기 → 무게 확인 → 주변 빈 확인 → 스캔 · 진열 · 수량 입력. 이제 규칙 3가지를 정리하고 게임으로 연습해봐요.', g:G2, end:true},
 ];
 let wi = 0;
@@ -513,9 +513,9 @@ drawWalk();
 
 /* ── ② 규칙 3가지 ── */
 const RULES = [
-  {n:1, t:'유사상품 붙여서 진열 금지', p:'모양 · 색 · 이름이 비슷한 상품(슬라이스치즈/모짜렐라치즈, 빨강/노랑 파프리카, 우유/저지방우유 등)은 같은 빈, 옆 빈, 위 · 아래 빈에 붙여 놓지 않아요. 피킹할 때 잘못 집는 원인이 돼요.',
+  {n:1, t:'유사상품 같은 빈 진열 금지', p:'모양 · 색 · 이름이 비슷한 상품(슬라이스치즈/모짜렐라치즈, 빨강/노랑 파프리카, 우유/저지방우유 등)은 한 빈에 같이 넣지 않아요. 피킹할 때 잘못 집는 원인이 돼요. 옆 빈 · 위아래 빈은 괜찮아요.',
     x:{g:[[ 'cheese','cheese2','tofu',null]], m:{'0-0':'cause','0-1':'bad'}, why:'한 빈에 슬라이스치즈와 모짜렐라치즈'},
-    o:{g:[[ 'cheese','tofu','milk',null,'cheese2',null]], m:{'0-4':'ok'}, why:'빈 하나 이상 떨어뜨려요'}},
+    o:{g:[[ 'cheese','tofu','cheese2','milk']], m:{'0-2':'ok'}, why:'옆 빈에 놓는 건 괜찮아요'}},
   {n:2, t:'동일상품 가로·세로 연속 진열 금지', p:'같은 상품을 바로 옆 빈이나 바로 위 · 아래 빈에 놓지 않아요. 같은 빈의 두 칸에는 같은 상품을 함께 넣어도 돼요.',
     x:{g:[[ 'tofu','milk',null,null],[ 'tofu',null,null,null]], m:{'0-0':'cause','1-0':'bad'}, why:'부침두부 위에 또 부침두부'},
     o:{g:[[ 'tofu','tofu','milk',null,'tofu',null],[ null,null,'cheese',null,null,null]], m:{'0-1':'ok','0-4':'ok'}, why:'같은 빈엔 함께 OK, 다른 빈은 떨어뜨려요'}},
@@ -540,17 +540,13 @@ const PAIRS = [
 $('pairList').innerHTML = PAIRS.map(([a,b,t]) => `<div class="pair"><div class="pics"><div>${CAT[a].em}${CAT[a].short}</div><div>${CAT[b].em}${CAT[b].short}</div></div><p>${t}</p></div>`).join('');
 const N6 = () => [null,null,null,null,null,null];
 const row = (...a) => { const r = N6(); a.forEach(([i,id]) => r[i] = id); return r; };
-const SIM_BAD = [
-  {t:'같은 빈에 같이', why:'우유와 저지방우유를 한 빈의 두 칸에 넣었어요.', g:[row([0,'milk'],[1,'milk2'],[2,'tofu'],[4,'pap']), row([3,'cheese'])], m:{'0-0':'cause','0-1':'bad'}},
-  {t:'바로 옆 빈', why:'부침두부(1빈) 바로 옆 2빈에 찌개두부가 있어요.', g:[row([1,'tofu'],[2,'tofu2'],[4,'milk']), row([5,'pap'])], m:{'0-1':'cause','0-2':'bad'}},
-  {t:'옆 빈이면 칸이 떨어져도 안 돼요', why:'1빈 왼쪽 칸과 2빈 오른쪽 칸이라도 옆 빈이라 안 돼요.', g:[row([0,'cheese'],[3,'cheese2'],[4,'tofu']), row([2,'milk'])], m:{'0-0':'cause','0-3':'bad'}},
-  {t:'바로 위 빈', why:'빨강 파프리카(1단 2빈) 바로 위 2단 2빈에 노랑 파프리카.', g:[row([2,'pap'],[4,'milk']), row([2,'pap2'],[0,'tofu'])], m:{'0-2':'cause','1-2':'bad'}},
-  {t:'중량물끼리도 마찬가지', why:'포기김치 바로 위 빈에 총각김치를 올렸어요.', g:[row([0,'kimchi'],[4,'tofu']), row([1,'kimchi2'],[3,'milk'])], m:{'0-0':'cause','1-1':'bad'}},
-];
+const SIM_BAD = PAIRS.map(([a,b]) => ({
+  t:`${CAT[a].short} + ${CAT[b].short}`, why:`${CAT[a].short}, ${CAT[b].short} 두 상품을 한 빈에 같이 넣었어요.`,
+  g:[row([0, CAT[a].heavy ? 'tofu' : 'milk'===a ? 'tofu' : 'milk'],[2,a],[3,b],[4, a==='tofu'?'pap':'tofu']), N6()], m:{'0-2':'cause','0-3':'bad'}}));
 const SIM_GOOD = [
-  {t:'빈 하나 띄우기', why:'우유(1빈)와 저지방우유(3빈) 사이에 두부 빈을 뒀어요.', g:[row([0,'milk'],[2,'tofu'],[4,'milk2']), N6()], m:{'0-0':'ok','0-4':'ok'}},
-  {t:'다른 상품과 짝지어 넣기', why:'한 빈에는 서로 다른 종류(두부+파프리카)를 넣고, 비슷한 짝은 빈을 띄워요.', g:[row([0,'tofu'],[1,'pap'],[2,'cheese'],[3,'milk'],[4,'tofu2'],[5,'pap2']), N6()], m:{'0-4':'ok','0-5':'ok'}},
-  {t:'위아래는 한 단 띄우기', why:'슬라이스치즈(1단)와 모짜렐라치즈(3단) 사이에 우유 단이 있어요.', g:[row([2,'cheese']), row([2,'milk']), row([2,'cheese2'])], m:{'0-2':'ok','2-2':'ok'}},
+  {t:'옆 빈은 괜찮아요', why:'우유(1빈)와 저지방우유(2빈)가 옆 빈에 있어도 돼요.', g:[row([0,'milk'],[2,'milk2'],[4,'tofu']), N6()], m:{'0-0':'ok','0-2':'ok'}},
+  {t:'위아래 빈도 괜찮아요', why:'빨강 파프리카(1단 2빈) 위 2단 2빈에 노랑 파프리카.', g:[row([2,'pap'],[4,'milk']), row([2,'pap2'],[0,'tofu'])], m:{'0-2':'ok','1-2':'ok'}},
+  {t:'한 빈엔 다른 종류끼리', why:'한 빈에는 두부+파프리카처럼 서로 다른 종류를 넣어요.', g:[row([0,'tofu'],[1,'pap'],[2,'tofu2'],[3,'milk'],[4,'pap2'],[5,'cheese']), N6()], m:{'0-0':'ok','0-1':'ok'}},
 ];
 const simCard = (c, k, i) => `<div><b>${c.t}</b><div class="rackwrap"><div data-sim="${k}${i}"></div></div><div class="why">${c.why}</div></div>`;
 $('simBad').innerHTML = SIM_BAD.map((c,i) => simCard(c,'x',i)).join('');
@@ -625,7 +621,7 @@ function startStage(){
   S.grid = m.grid; S.queue = m.queue; S.stageMiss = 0; S.stageScore = 0;
   S.snap = {score:S.score, miss:S.miss, total:S.total, tally:{...S.tally}};
   $('gIntro').hidden = true; $('gDone').hidden = true; $('gPlay').hidden = false;
-  setMsg('info', `<b>스테이지 ${S.stage+1}</b>${S.stage===0?'첫 상품부터 시작해요. 놓을 빈 칸을 눌러주세요.':'상품이 더 많아졌어요. 같은 빈 · 옆 빈 · 위아래 빈을 꼭 확인해요.'}`);
+  setMsg('info', `<b>스테이지 ${S.stage+1}</b>${S.stage===0?'첫 상품부터 시작해요. 놓을 빈 칸을 눌러주세요.':'상품이 더 많아졌어요. 같은 빈에 비슷한 상품이 없는지, 옆 · 위아래 빈에 같은 상품이 없는지 확인해요.'}`);
   render();
   $('gPlay').scrollIntoView({block:'start'});
 }
@@ -713,7 +709,7 @@ function endStage(){
 function weakest(){
   const t = S.tally, top = Object.entries(t).sort((a,b)=>b[1]-a[1])[0];
   if (!top[1]) return '실수 없이 끝냈어요. 실제 진열도 이렇게 하면 돼요!';
-  const txt = {similar:'비슷한 상품(같은 모양·색)이 같은 빈 · 옆 빈 · 위아래 빈에 있는지', same:'같은 상품이 옆 빈 · 위아래 빈에 있는지', heavy:'중량물을 3단 이상에 올리지 않는지', pass:'놓을 칸이 정말 없는지'};
+  const txt = {similar:'같은 빈에 비슷한 상품(같은 모양·색)이 있는지', same:'같은 상품이 옆 빈 · 위아래 빈에 있는지', heavy:'중량물을 3단 이상에 올리지 않는지', pass:'놓을 칸이 정말 없는지'};
   return `가장 많이 틀린 부분: ${txt[top[0]]} 한 번 더 확인하는 습관을 들여요.`;
 }
 $('gStart').onclick = startGame;
