@@ -44,37 +44,61 @@ h2{font-size:19px;margin:0 0 4px}
 .chip.heavy{background:var(--warn-soft);color:var(--warn)}
 
 /* 선반 */
-.rack{display:grid;gap:0;--cell:64px;width:max-content;max-width:100%}
-.rack .lv{font-size:12px;color:var(--mute);font-weight:600;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;white-space:nowrap}
-.rack .bay{font-size:12px;color:var(--mute);font-weight:600;text-align:center;padding-top:4px}
-.slot{width:var(--cell);height:var(--cell);border:0;border-bottom:4px solid var(--shelf);background:var(--slot);margin:0 2px;padding:3px 2px 2px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;font:inherit;color:var(--ink);border-radius:6px 6px 0 0}
+/* 선반: 실제 랙처럼 — 파란 기둥, 주황 빔, 빔 위 로케이션 라벨(단+0+빈), 상품이 여러 개 서 있는 모습 */
+.rack{display:grid;gap:0;--cell:70px;width:max-content;max-width:100%;
+  --r-ok:#12B862;--r-bad:#1A1A1A;--r-focus:#2557A7;--beam:12px}
+.rack .lv{font-size:12px;color:var(--mute);font-weight:600;display:flex;align-items:center;justify-content:flex-end;padding:0 6px var(--beam) 0;white-space:nowrap}
+.rack .bay{font-size:12px;color:var(--mute);font-weight:600;text-align:center;padding-top:6px}
+.rack .post{background:linear-gradient(90deg,#D9D6CC,#F4F2EC 45%,#CFCBC0);position:relative;border-radius:2px 2px 0 0;box-shadow:0 0 0 1px #BDB8AC}
+.rack .post::after{content:"";position:absolute;inset:4px 2px;background:repeating-linear-gradient(to bottom,transparent 0 8px,#9E998C 8px 11px);opacity:.55}
+.rack .top{height:10px;background:linear-gradient(#F4F2EC,#D9D6CC);box-shadow:0 0 0 1px #BDB8AC}
+.rack .floor{height:8px;background:linear-gradient(#9AA1AB,#C5CAD1);border-radius:0 0 3px 3px}
+.slot{width:var(--cell);height:var(--cell);border:0;margin:0;padding:0 2px var(--beam);position:relative;font:inherit;color:var(--ink);
+  /* 분홍 뒤판 + 흰 철망 */
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 1px,transparent 1px 9px),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.55) 0 1px,transparent 1px 9px),
+    linear-gradient(#D93B5C,#EE4D6E 60%,#F1607E);
+  box-shadow:inset 0 6px 8px -4px rgba(0,0,0,.35);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+/* 흰 선반 앞판 */
+.slot::after{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--beam);background:linear-gradient(#FFFFFF,#F1EFE9 60%,#D8D4CA);box-shadow:0 -2px 0 rgba(0,0,0,.18)}
+/* 칸막이(주황 철망) — 빈 사이마다, 앞판 위 주황 클립 */
+.slot:not(.b0)::before{content:"";position:absolute;left:-1px;top:6px;bottom:var(--beam);width:3px;z-index:1;
+  background:repeating-linear-gradient(to bottom,#F07A2A 0 2px,rgba(240,122,42,.35) 2px 7px);border-left:1px solid #F07A2A}
+.slot .clip{position:absolute;left:-4px;bottom:1px;width:8px;height:calc(var(--beam) - 2px);background:#E8732A;z-index:2;border-radius:1px}
+/* 로케이션 라벨: QR · 번호(검은 칸) · 단별 색 화살표 */
+.slot .tg{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);z-index:1;display:flex;align-items:center;gap:1px;font-size:7.5px;line-height:1;font-weight:700;white-space:nowrap}
+.slot .tg i{width:7px;height:7px;background:conic-gradient(#000 0 25%,#fff 0 50%,#000 0 75%,#fff 0) 0 0/3.5px 3.5px;outline:1px solid #000}
+.slot .tg b{background:#000;color:#fff;padding:1px 2px}
+.slot .tg u{text-decoration:none;width:8px;height:8px;display:grid;place-items:center;font-size:7px;color:#000;background:var(--lc)}
 button.slot{cursor:pointer}
-@media (hover:hover){button.slot.empty:not(.bad):not(.hint):hover{outline:2px dashed var(--accent);outline-offset:-3px}}
-button.slot:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
-.slot.full{background:color-mix(in srgb,var(--c) 17%,var(--paper));box-shadow:inset 0 3px 0 var(--c)}
-.slot .em{font-size:calc(var(--cell)*.38);line-height:1}
-.slot .nm{font-size:11px;font-weight:600;line-height:1.15;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 1px}
-.slot .kg{position:absolute;top:3px;right:3px;font-size:9.5px;font-weight:700;background:var(--warn);color:var(--paper);border-radius:4px;padding:0 3px;line-height:14px}
-.slot.empty .nm{color:var(--mute);font-weight:500}
-.slot.dim{background:repeating-linear-gradient(135deg,var(--bad-soft) 0 6px,transparent 6px 12px),var(--slot)}
-.slot.focus{outline:3px solid var(--accent);outline-offset:-3px;animation:pulse 1.2s ease-in-out infinite}
-.slot.look{outline:2px dashed var(--mute);outline-offset:-3px}
-.rack .slot.ok{outline:3px solid var(--ok);outline-offset:-3px}
-.rack .slot.bad{outline:3px solid var(--bad);outline-offset:-3px}
-.rack .slot.cause{outline:3px dashed var(--bad);outline-offset:-3px}
-.rack .slot.hint{outline:3px dashed var(--ok);outline-offset:-3px}
-.slot .mk{position:absolute;top:-8px;left:-6px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff;z-index:1}
-.slot.ok .mk{background:var(--ok)}.slot.bad .mk{background:var(--bad)}
+@media (hover:hover){button.slot.empty:not(.bad):not(.hint):hover{outline:2px dashed var(--r-focus);outline-offset:-3px}}
+button.slot:focus-visible{outline:3px solid var(--r-focus);outline-offset:-3px}
+.slot .goods{display:flex;align-items:flex-end;justify-content:center;width:100%;filter:drop-shadow(0 2px 1px rgba(0,0,0,.5))}
+.slot .goods span{font-size:calc(var(--cell)*.36);line-height:1;margin:0 calc(var(--cell)*-.06)}
+.slot .goods span:nth-child(2){transform:translateY(1px)}
+.slot .nm{position:relative;z-index:1;margin:2px 0 1px;font-size:10px;font-weight:700;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  background:#fff;color:#18202C;border-left:3px solid var(--c);border-radius:2px;padding:0 3px}
+.slot .kg{position:absolute;top:3px;right:3px;font-size:9px;font-weight:700;background:#E0A21B;color:#1A1300;border-radius:3px;padding:0 3px;line-height:13px}
+.slot.dim{background:repeating-linear-gradient(135deg,rgba(40,20,30,.45) 0 5px,transparent 5px 11px),linear-gradient(#D93B5C,#F1607E)}
+.slot.focus{outline:3px solid var(--r-focus);outline-offset:-3px;animation:pulse 1.2s ease-in-out infinite}
+.slot.look{outline:2px dashed #fff;outline-offset:-3px}
+.rack .slot.ok{outline:3px solid var(--r-ok);outline-offset:-3px}
+.rack .slot.bad{outline:3px solid var(--r-bad);outline-offset:-3px}
+.rack .slot.cause{outline:3px dashed var(--r-bad);outline-offset:-3px}
+.rack .slot.hint{outline:3px dashed var(--r-ok);outline-offset:-3px}
+.slot .mk{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;z-index:2}
+.slot.ok .mk{background:var(--r-ok)}.slot.bad .mk{background:#E5332A}
 .slot.shake{animation:shake .35s}
-.slot.pop{animation:pop .3s}
+.slot.pop .goods{animation:pop .3s}
 @keyframes pulse{50%{outline-color:transparent}}
 @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 @keyframes pop{0%{transform:scale(.7)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.slot.focus,.slot.shake,.slot.pop{animation:none}}
 .rackwrap{overflow-x:auto;padding:10px 2px 4px}
-.rack.mini{--cell:52px}
-.rack.mini .slot .nm{font-size:10px}
+.rack.mini{--cell:58px}
+.rack.mini .slot .nm{font-size:9.5px}
 
 /* 진열 과정 */
 .walk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:20px;align-items:start}
@@ -137,10 +161,11 @@ button.slot:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
   main{padding-top:18px}
   h1{font-size:24px}
   .card{padding:14px}
-  .rack{--cell:min(56px,calc((100vw - 32px - 28px - 40px) / var(--w) - 4px))}
-  .rack.mini{--cell:46px}
-  .slot .nm{font-size:10px}
-  .slot .kg{font-size:8.5px;line-height:12px;top:2px;right:2px;padding:0 2px}
+  .rack{--cell:min(60px,calc((100vw - 32px - 28px - 34px - 16px) / var(--w)));--beam:11px}
+  .rack.mini{--cell:52px}
+  .slot .nm{font-size:9px;padding:0 2px}
+  .slot .kg{font-size:8px;line-height:11px;top:2px;right:2px;padding:0 2px}
+  .rack .post::after{inset:3px 2px}
   .now .big{margin:6px 0 10px}
   .now .big .em{font-size:40px;width:58px;height:58px}
   .tally{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -294,37 +319,45 @@ function explain(v, id){
 }
 
 /* ── 선반 그리기 ── */
+const LVC = ['#E5332A','#F08A1E','#F2D21B','#2EAD4B','#2F8FE0','#8E5BD6']; // 1단 빨강 · 2단 주황 · 3단 노랑 · 4단 초록 · 5단 파랑 · 6단 보라
 function drawRack(el, grid, opt={}){
   const H = grid.length, W = grid[0].length, marks = opt.marks || {}, dimRows = opt.dimRows || [];
   el.className = 'rack' + (opt.mini ? ' mini' : '');
-  el.style.gridTemplateColumns = `auto repeat(${W}, auto)`;
+  el.style.gridTemplateColumns = `auto 8px repeat(${W}, auto) 8px`;
   el.style.setProperty('--w', W);
   el.innerHTML = '';
+  const put = (node, row, col, rowSpan) => { node.style.gridRow = rowSpan ? `${row} / span ${rowSpan}` : row; node.style.gridColumn = col; el.append(node); return node; };
+  const mk = cls => { const d = document.createElement('div'); d.className = cls; return d; };
+  put(mk('post'), 1, 2, H); put(mk('post'), 1, W+3, H);
   for (let lv=H-1; lv>=0; lv--){
-    const l = document.createElement('div'); l.className='lv'; l.textContent = `${lv+1}단`; el.append(l);
+    const row = H - lv;
+    const l = mk('lv'); l.textContent = `${lv+1}단`; put(l, row, 1);
     for (let b=0; b<W; b++){
       const id = grid[lv][b], s = document.createElement(opt.onTap ? 'button' : 'div');
       if (opt.onTap){ s.type='button'; s.addEventListener('click', () => opt.onTap(lv,b,s)); }
-      s.className = 'slot ' + (id ? 'full' : 'empty');
+      s.className = 'slot b' + b + ' ' + (id ? 'full' : 'empty');
+      s.style.setProperty('--lc', LVC[lv % LVC.length]);
       s.dataset.k = lv+'-'+b;
       if (dimRows.includes(lv) && !id) s.classList.add('dim');
       const m = marks[lv+'-'+b];
       if (m) s.classList.add(m);
+      const tag = `<span class="tg">${opt.mini ? '' : '<i></i>'}<b>${lv+1}0${b+1}</b><u>↑</u></span>${b ? '<span class="clip"></span>' : ''}`;
       if (id){
-        const it = CAT[id]; s.style.setProperty('--c', it.c);
-        s.innerHTML = `<span class="em">${it.em}</span><span class="nm">${it.short}</span>${it.heavy?'<span class="kg">중량</span>':''}`;
+        const it = CAT[id], n = opt.mini ? 2 : (it.heavy ? 2 : 3);
+        s.style.setProperty('--c', it.c);
+        s.innerHTML = `<span class="goods">${`<span>${it.em}</span>`.repeat(n)}</span><span class="nm">${it.short}</span>${it.heavy?'<span class="kg">중량</span>':''}${tag}`;
         s.setAttribute('aria-label', `${where(lv,b)}: ${it.name}`);
       } else {
-        s.innerHTML = `<span class="nm">빈 칸</span>`;
+        s.innerHTML = tag;
         s.setAttribute('aria-label', `${where(lv,b)}: 빈 칸`);
       }
       if (m==='ok') s.insertAdjacentHTML('beforeend','<span class="mk">✓</span>');
       if (m==='bad') s.insertAdjacentHTML('beforeend','<span class="mk">✕</span>');
-      el.append(s);
+      put(s, row, b+3);
     }
   }
-  el.append(document.createElement('div'));
-  for (let b=0; b<W; b++){ const d=document.createElement('div'); d.className='bay'; d.textContent = (b+1)+'빈'; el.append(d); }
+  const f = mk('floor'); f.style.gridColumn = `2 / span ${W+2}`; f.style.gridRow = H+1; el.append(f);
+  for (let b=0; b<W; b++){ const d = mk('bay'); d.textContent = (b+1)+'빈'; put(d, H+2, b+3); }
 }
 const handHTML = (id, note) => { const it = CAT[id];
   return `<span class="em">${it.em}</span><div><b>${it.name}</b><small>${it.heavy?'중량물 · ':''}${note||''}</small></div>`; };
