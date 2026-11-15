@@ -76,6 +76,8 @@ h2{font-size:19px;margin:0 0 4px}
 .slot{flex:1 1 0;min-width:0;height:100%;border:0;margin:0;padding:0 1px;position:relative;font:inherit;color:var(--ink);background:transparent;
   display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
 .slot.s1{border-left:1px dashed rgba(120,115,105,.35)}
+.slot{padding-bottom:3px}
+.rack.mini .bin .tg{transform:translateX(-50%) scale(.82);transform-origin:50% 100%}
 .slot.over{background:rgba(37,87,167,.16);outline:2px solid var(--r-focus);outline-offset:-2px}
 button.slot{cursor:pointer}
 @media (hover:hover){button.slot.empty:not(.bad):not(.hint):hover{outline:2px dashed var(--r-focus);outline-offset:-3px}}
@@ -105,7 +107,7 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 @keyframes pop{0%{transform:scale(.7)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.slot.focus,.slot.shake,.slot.pop{animation:none}}
 .rackwrap{overflow-x:auto;padding:10px 2px 4px}
-.rack.mini{--cell:72px}
+.rack.mini{--cell:64px}
 .rack.mini .slot .nm{font-size:9.5px}
 
 /* 진열 과정 */
@@ -126,6 +128,16 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 
 /* 규칙 3가지 */
 .rulegrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:12px}
+.pair{background:var(--slot);border-radius:10px;padding:10px 12px}
+.pair .pics{display:flex;gap:14px;align-items:flex-end}
+.pair .pics div{text-align:center;font-size:12px;font-weight:700}
+.pair .pics svg{height:54px;margin:0 auto 3px}
+.pair p{margin:6px 0 0;font-size:12.5px;color:var(--mute)}
+.simh{font-size:15px;margin:18px 0 6px}.simh.x{color:var(--bad)}.simh.o{color:var(--ok)}
+.simgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:12px}
+.simgrid>div{background:var(--slot);border-radius:10px;padding:8px 10px}
+.simgrid b{font-size:13.5px}.simgrid .why{font-size:12.5px;color:var(--mute);margin-top:2px}
 .rulegrid .card{margin:0}
 .rulegrid .num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--paper);font-weight:700;font-size:14px;margin-bottom:6px}
 .ex{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
@@ -233,6 +245,15 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 <!-- ② 규칙 3가지 -->
 <section id="tab-rules" hidden>
   <div class="rulegrid" id="ruleGrid"></div>
+  <div class="card" style="margin-top:14px">
+    <h2>유사상품 더 알아보기</h2>
+    <p class="mute" style="margin:4px 0 0;font-size:14px">신선센터에서 자주 헷갈리는 짝이에요. 생김새가 거의 같아서, 붙어 있으면 피킹할 때 잘못 집기 쉬워요.</p>
+    <div class="pairs" id="pairList"></div>
+    <h3 class="simh x">✕ 이럴 땐 안 돼요</h3>
+    <div class="simgrid" id="simBad"></div>
+    <h3 class="simh o">○ 이렇게 놓아요</h3>
+    <div class="simgrid" id="simGood"></div>
+  </div>
   <div class="card" style="margin-top:14px">
     <b>붙어 있다는 건?</b>
     <p class="mute" style="margin:4px 0 0">빈 단위로 봐요. <b>같은 빈의 옆 칸, 바로 왼쪽 · 오른쪽 빈, 바로 위 · 아래 빈</b>이에요. 같은 상품이나 비슷한 상품이 이 중 한 곳이라도 있으면 놓으면 안 돼요. 단, 같은 상품은 같은 빈의 두 칸에 함께 넣어도 돼요. 놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.</p>
@@ -508,12 +529,40 @@ $('ruleGrid').innerHTML = RULES.map(r => `<div class="card"><span class="num">${
 for (const r of RULES) for (const k of ['x','o']){
   const e = r[k]; drawRack(document.querySelector(`[data-ex="${r.n}${k}"]`), e.g, {mini:true, marks:e.m, dimRows:e.dim});
 }
+/* 유사상품 예시: 짝별 차이 + 상황별 안 돼요 / 좋아요 (g[0] = 1단) */
+const PAIRS = [
+  ['milk','milk2','팩 모양이 같고 띠 색(파랑 / 하늘색)만 달라요.'],
+  ['tofu','tofu2','용기가 똑같고 라벨 글자만 달라요.'],
+  ['pap','pap2','모양이 같고 색만 달라요. 빛에 따라 더 헷갈려요.'],
+  ['cheese','cheese2','둘 다 노란 포장에 파란 띠예요.'],
+  ['kimchi','kimchi2','같은 통에 라벨만 달라요. 둘 다 중량물이에요.'],
+];
+$('pairList').innerHTML = PAIRS.map(([a,b,t]) => `<div class="pair"><div class="pics"><div>${CAT[a].em}${CAT[a].short}</div><div>${CAT[b].em}${CAT[b].short}</div></div><p>${t}</p></div>`).join('');
+const N6 = () => [null,null,null,null,null,null];
+const row = (...a) => { const r = N6(); a.forEach(([i,id]) => r[i] = id); return r; };
+const SIM_BAD = [
+  {t:'같은 빈에 같이', why:'우유와 저지방우유를 한 빈의 두 칸에 넣었어요.', g:[row([0,'milk'],[1,'milk2'],[2,'tofu'],[4,'pap']), row([3,'cheese'])], m:{'0-0':'cause','0-1':'bad'}},
+  {t:'바로 옆 빈', why:'부침두부(1빈) 바로 옆 2빈에 찌개두부가 있어요.', g:[row([1,'tofu'],[2,'tofu2'],[4,'milk']), row([5,'pap'])], m:{'0-1':'cause','0-2':'bad'}},
+  {t:'옆 빈이면 칸이 떨어져도 안 돼요', why:'1빈 왼쪽 칸과 2빈 오른쪽 칸이라도 옆 빈이라 안 돼요.', g:[row([0,'cheese'],[3,'cheese2'],[4,'tofu']), row([2,'milk'])], m:{'0-0':'cause','0-3':'bad'}},
+  {t:'바로 위 빈', why:'빨강 파프리카(1단 2빈) 바로 위 2단 2빈에 노랑 파프리카.', g:[row([2,'pap'],[4,'milk']), row([2,'pap2'],[0,'tofu'])], m:{'0-2':'cause','1-2':'bad'}},
+  {t:'중량물끼리도 마찬가지', why:'포기김치 바로 위 빈에 총각김치를 올렸어요.', g:[row([0,'kimchi'],[4,'tofu']), row([1,'kimchi2'],[3,'milk'])], m:{'0-0':'cause','1-1':'bad'}},
+];
+const SIM_GOOD = [
+  {t:'빈 하나 띄우기', why:'우유(1빈)와 저지방우유(3빈) 사이에 두부 빈을 뒀어요.', g:[row([0,'milk'],[2,'tofu'],[4,'milk2']), N6()], m:{'0-0':'ok','0-4':'ok'}},
+  {t:'다른 상품과 짝지어 넣기', why:'한 빈에는 서로 다른 종류(두부+파프리카)를 넣고, 비슷한 짝은 빈을 띄워요.', g:[row([0,'tofu'],[1,'pap'],[2,'cheese'],[3,'milk'],[4,'tofu2'],[5,'pap2']), N6()], m:{'0-4':'ok','0-5':'ok'}},
+  {t:'위아래는 한 단 띄우기', why:'슬라이스치즈(1단)와 모짜렐라치즈(3단) 사이에 우유 단이 있어요.', g:[row([2,'cheese']), row([2,'milk']), row([2,'cheese2'])], m:{'0-2':'ok','2-2':'ok'}},
+];
+const simCard = (c, k, i) => `<div><b>${c.t}</b><div class="rackwrap"><div data-sim="${k}${i}"></div></div><div class="why">${c.why}</div></div>`;
+$('simBad').innerHTML = SIM_BAD.map((c,i) => simCard(c,'x',i)).join('');
+$('simGood').innerHTML = SIM_GOOD.map((c,i) => simCard(c,'o',i)).join('');
+SIM_BAD.forEach((c,i) => drawRack(document.querySelector(`[data-sim="x${i}"]`), c.g, {mini:true, marks:c.m}));
+SIM_GOOD.forEach((c,i) => drawRack(document.querySelector(`[data-sim="o${i}"]`), c.g, {mini:true, marks:c.m}));
 
 /* ── ③ 연습 게임 ── */
 const STAGES = [
-  {W:12, H:6, pre:14, q:8,  pool:['kimchi','milk','tofu','pap','cheese','cheese2']},
+  {W:12, H:6, pre:14, q:8,  pool:['kimchi','milk','milk2','tofu','pap','pap2','cheese','cheese2']},
   {W:12, H:6, pre:16, q:10, pool:['kimchi','kimchi2','milk','milk2','tofu','tofu2','pap','cheese','cheese2']},
-  {W:12, H:6, pre:20, q:12, pool:Object.keys(CAT)},
+  {W:12, H:6, pre:20, q:12, pool:Object.keys(CAT), pairs:3},
 ];
 // 규칙을 모두 지키는 정답 배치를 먼저 만든 뒤, 일부는 선반에 미리 두고 나머지는 카트에 담아요
 function makeStage(st){
@@ -521,8 +570,9 @@ function makeStage(st){
     const T = st.pre + st.q, units = [], cnt = {};
     const heavyIds = st.pool.filter(i => CAT[i].heavy);
     // 중량물 2개 이상, 유사상품 한 쌍 이상은 꼭 넣어요
-    const pairG = shuffle([...new Set(st.pool.map(i=>CAT[i].g))].filter(g => st.pool.filter(i=>CAT[i].g===g).length>1))[0];
-    const seed = [...shuffle(heavyIds.slice()).slice(0,2), ...st.pool.filter(i=>CAT[i].g===pairG).slice(0,2)];
+    // 유사상품 짝을 2쌍 이상 꼭 넣어요 (스테이지 3은 3쌍)
+    const pairGs = shuffle([...new Set(st.pool.map(i=>CAT[i].g))].filter(g => st.pool.filter(i=>CAT[i].g===g).length>1)).slice(0, st.pairs || 2);
+    const seed = [...shuffle(heavyIds.slice()).slice(0,2), ...pairGs.flatMap(g => st.pool.filter(i=>CAT[i].g===g).slice(0,2))];
     for (const i of seed){ units.push(i); cnt[i]=(cnt[i]||0)+1; }
     let guard = 0;
     while (units.length < T && guard++ < 500){
