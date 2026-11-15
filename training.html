@@ -54,12 +54,12 @@ h2{font-size:19px;margin:0 0 4px}
 .rack .top{height:10px;background:linear-gradient(#F4F2EC,#D9D6CC);box-shadow:0 0 0 1px #BDB8AC}
 .rack .floor{height:8px;background:linear-gradient(#9AA1AB,#C5CAD1);border-radius:0 0 3px 3px}
 .slot{width:var(--cell);height:var(--cell);border:0;margin:0;padding:0 2px var(--beam);position:relative;font:inherit;color:var(--ink);
-  /* 분홍 뒤판 + 흰 철망 */
+  /* 흰 뒤판 + 철망 */
   background:
-    repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 1px,transparent 1px 9px),
-    repeating-linear-gradient(0deg,rgba(255,255,255,.55) 0 1px,transparent 1px 9px),
-    linear-gradient(#D93B5C,#EE4D6E 60%,#F1607E);
-  box-shadow:inset 0 6px 8px -4px rgba(0,0,0,.35);
+    repeating-linear-gradient(90deg,rgba(150,145,135,.35) 0 1px,transparent 1px 9px),
+    repeating-linear-gradient(0deg,rgba(150,145,135,.35) 0 1px,transparent 1px 9px),
+    linear-gradient(#ECEAE4,#F7F6F2 60%,#FBFAF7);
+  box-shadow:inset 0 6px 8px -4px rgba(0,0,0,.18);
   display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
 /* 흰 선반 앞판 */
 .slot::after{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--beam);background:linear-gradient(#FFFFFF,#F1EFE9 60%,#D8D4CA);box-shadow:0 -2px 0 rgba(0,0,0,.18)}
@@ -72,6 +72,7 @@ h2{font-size:19px;margin:0 0 4px}
 .slot .tg i{width:7px;height:7px;background:conic-gradient(#000 0 25%,#fff 0 50%,#000 0 75%,#fff 0) 0 0/3.5px 3.5px;outline:1px solid #000}
 .slot .tg b{background:#000;color:#fff;padding:1px 2px}
 .slot .tg u{text-decoration:none;width:8px;height:8px;display:grid;place-items:center;font-size:7px;color:#000;background:var(--lc)}
+.slot.l5 .tg u,.slot.l6 .tg u{color:#fff}
 button.slot{cursor:pointer}
 @media (hover:hover){button.slot.empty:not(.bad):not(.hint):hover{outline:2px dashed var(--r-focus);outline-offset:-3px}}
 button.slot:focus-visible{outline:3px solid var(--r-focus);outline-offset:-3px}
@@ -81,9 +82,9 @@ button.slot:focus-visible{outline:3px solid var(--r-focus);outline-offset:-3px}
 .slot .nm{position:relative;z-index:1;margin:2px 0 1px;font-size:10px;font-weight:700;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   background:#fff;color:#18202C;border-left:3px solid var(--c);border-radius:2px;padding:0 3px}
 .slot .kg{position:absolute;top:3px;right:3px;font-size:9px;font-weight:700;background:#E0A21B;color:#1A1300;border-radius:3px;padding:0 3px;line-height:13px}
-.slot.dim{background:repeating-linear-gradient(135deg,rgba(40,20,30,.45) 0 5px,transparent 5px 11px),linear-gradient(#D93B5C,#F1607E)}
+.slot.dim{background:repeating-linear-gradient(135deg,rgba(229,51,42,.28) 0 5px,transparent 5px 11px),linear-gradient(#ECEAE4,#FBFAF7)}
 .slot.focus{outline:3px solid var(--r-focus);outline-offset:-3px;animation:pulse 1.2s ease-in-out infinite}
-.slot.look{outline:2px dashed #fff;outline-offset:-3px}
+.slot.look{outline:2px dashed #6B7280;outline-offset:-3px}
 .rack .slot.ok{outline:3px solid var(--r-ok);outline-offset:-3px}
 .rack .slot.bad{outline:3px solid var(--r-bad);outline-offset:-3px}
 .rack .slot.cause{outline:3px dashed var(--r-bad);outline-offset:-3px}
@@ -319,7 +320,7 @@ function explain(v, id){
 }
 
 /* ── 선반 그리기 ── */
-const LVC = ['#E5332A','#F08A1E','#F2D21B','#2EAD4B','#2F8FE0','#8E5BD6']; // 1단 빨강 · 2단 주황 · 3단 노랑 · 4단 초록 · 5단 파랑 · 6단 보라
+const LVC = ['#E5332A','#F08A1E','#F2D21B','#2EAD4B','#2F8FE0','#2B3A8F','#8E5BD6']; // 빨 주 노 초 파 남 보: 1단 빨강 · 2단 주황 · 3단 노랑 · 4단 초록 · 5단 파랑 · 6단 남색 · 7단 보라
 function drawRack(el, grid, opt={}){
   const H = grid.length, W = grid[0].length, marks = opt.marks || {}, dimRows = opt.dimRows || [];
   el.className = 'rack' + (opt.mini ? ' mini' : '');
@@ -335,7 +336,7 @@ function drawRack(el, grid, opt={}){
     for (let b=0; b<W; b++){
       const id = grid[lv][b], s = document.createElement(opt.onTap ? 'button' : 'div');
       if (opt.onTap){ s.type='button'; s.addEventListener('click', () => opt.onTap(lv,b,s)); }
-      s.className = 'slot b' + b + ' ' + (id ? 'full' : 'empty');
+      s.className = 'slot b' + b + ' l' + lv + ' ' + (id ? 'full' : 'empty');
       s.style.setProperty('--lc', LVC[lv % LVC.length]);
       s.dataset.k = lv+'-'+b;
       if (dimRows.includes(lv) && !id) s.classList.add('dim');
