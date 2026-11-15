@@ -77,8 +77,11 @@ button.slot{cursor:pointer}
 @media (hover:hover){button.slot.empty:not(.bad):not(.hint):hover{outline:2px dashed var(--r-focus);outline-offset:-3px}}
 button.slot:focus-visible{outline:3px solid var(--r-focus);outline-offset:-3px}
 .slot .goods{display:flex;align-items:flex-end;justify-content:center;width:100%;filter:drop-shadow(0 2px 1px rgba(0,0,0,.5))}
-.slot .goods span{font-size:calc(var(--cell)*.36);line-height:1;margin:0 calc(var(--cell)*-.06)}
+.slot .goods span{display:block;line-height:0;margin:0 calc(var(--cell)*-.07)}
 .slot .goods span:nth-child(2){transform:translateY(1px)}
+.slot .goods svg{height:calc(var(--cell)*.6)}
+svg.pk{display:block;aspect-ratio:40/48;width:auto}
+.hand .em svg{height:42px}.now .big .em svg{height:58px}.cart span svg{height:24px}
 .slot .nm{position:relative;z-index:1;margin:2px 0 1px;font-size:10px;font-weight:700;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   background:#fff;color:#18202C;border-left:3px solid var(--c);border-radius:2px;padding:0 3px}
 .slot .kg{position:absolute;top:3px;right:3px;font-size:9px;font-weight:700;background:#E0A21B;color:#1A1300;border-radius:3px;padding:0 3px;line-height:13px}
@@ -135,7 +138,7 @@ button.slot:focus-visible{outline:3px solid var(--r-focus);outline-offset:-3px}
 .game{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;align-items:start}
 .now{position:sticky;top:10px}
 .now .big{display:flex;align-items:center;gap:14px;margin:10px 0 12px}
-.now .big .em{font-size:52px;line-height:1;width:72px;height:72px;display:grid;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--c,#888) 17%,var(--paper));box-shadow:inset 0 4px 0 var(--c,#888)}
+.now .big .em{font-size:52px;line-height:1;overflow:hidden;width:72px;height:72px;display:grid;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--c,#888) 17%,var(--paper));box-shadow:inset 0 4px 0 var(--c,#888)}
 .now .big b{font-size:18px;display:block}
 .cart{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
 .cart span{font-size:20px;width:30px;height:30px;display:grid;place-items:center;border-radius:6px;background:var(--slot)}
@@ -169,6 +172,7 @@ button.slot:focus-visible{outline:3px solid var(--r-focus);outline-offset:-3px}
   .rack .post::after{inset:3px 2px}
   .now .big{margin:6px 0 10px}
   .now .big .em{font-size:40px;width:58px;height:58px}
+  .now .big .em svg{height:46px}
   .tally{grid-template-columns:repeat(2,minmax(0,1fr))}
   .hud div{min-width:0;flex:1;padding:6px 10px}
   .hud b{font-size:17px}
@@ -280,6 +284,41 @@ const CAT = {
   cheese: {name:'슬라이스치즈 10매',short:'슬라이스',em:'🧀', g:'cheese',c:'#E7B416'},
   cheese2:{name:'모짜렐라치즈 200g',short:'모짜렐라',   em:'🧀', g:'cheese', c:'#E7B416'},
 };
+/* ── 상품 그림 (포장 모양 SVG) ── */
+const T = (x,y,sz,txt,fill='#fff') => `<text x="${x}" y="${y}" font-size="${sz}" font-weight="800" fill="${fill}" text-anchor="middle" font-family="sans-serif">${txt}</text>`;
+const ART = {
+  kimchi: (lid, band, label) => `<rect x="3" y="13" width="34" height="34" rx="3" fill="#F8F5EF" stroke="#BDB5A6"/><rect x="5" y="15" width="3" height="30" rx="1.5" fill="#fff" opacity=".8"/>
+    <rect x="1.5" y="8" width="37" height="7" rx="2.5" fill="${lid}"/><rect x="1.5" y="13" width="37" height="2" fill="rgba(0,0,0,.18)"/>
+    <rect x="3" y="20" width="34" height="15" fill="${band}"/>${T(20,27,6.3,label)}${T(20,33.5,5.5,'5kg','#FFE9A8')}
+    <path d="M13 44c2-6 12-6 14 0z" fill="#8DBF4F"/><path d="M15 44c2-4 8-4 10 0z" fill="#E4553A"/>`,
+  milk: (band, label) => `<path d="M10 14 L13 5 H27 L30 14 Z" fill="#EEF2F8" stroke="#A9BBD3"/><rect x="12.5" y="2" width="15" height="3.4" rx=".6" fill="#DCE4F0" stroke="#A9BBD3" stroke-width=".6"/>
+    <rect x="10" y="14" width="20" height="33" fill="#fff" stroke="#A9BBD3"/><rect x="26" y="14" width="4" height="33" fill="#E3EAF4"/>
+    <rect x="10" y="21" width="20" height="13" fill="${band}"/>${T(18.5,29.6,label.length>2?4.6:6.4,label)}${T(18.5,42,5,'1L','#2F5E9E')}`,
+  tofu: (film, label) => `<rect x="2" y="19" width="36" height="28" rx="3" fill="#F3F1EA" stroke="#C4BDA9"/><rect x="5" y="22" width="30" height="22" rx="2" fill="#FFFEF8" stroke="#E2DBC6"/><path d="M5 22l30 22" stroke="#EFE9D8" stroke-width=".8"/>
+    <rect x="2" y="27" width="36" height="9" fill="${film}"/>${T(20,33.6,5.8,label)}<rect x="4" y="20.5" width="32" height="1.4" fill="#fff" opacity=".9"/>`,
+  pap: (body, shade) => `<path d="M20 14C10 11 4.5 20 6 31c1.5 10 7 16.5 14 15.5C27 47.5 32.5 41 34 31 35.5 20 30 11 20 14z" fill="${body}"/>
+    <path d="M14 17c-3 9-2.5 19 1 28M26 17c3 9 2.5 19-1 28" stroke="${shade}" stroke-width="1.6" fill="none" opacity=".55"/>
+    <ellipse cx="12" cy="25" rx="2.4" ry="6.5" fill="#fff" opacity=".35"/>
+    <ellipse cx="20" cy="14.5" rx="6.5" ry="2.6" fill="#3F8A2C"/><path d="M20 14c0-5 2-8 5.5-9" stroke="#3F8A2C" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+  slice: () => `<rect x="4" y="11" width="32" height="36" rx="2" fill="#FFD43B" stroke="#D2A10E"/><rect x="4" y="11" width="32" height="9" fill="#1E5BB0"/>${T(20,17.8,5.6,'치즈')}
+    <path d="M9 24h22v15H9z" fill="#FFE98C" stroke="#E6BE2C" stroke-width=".8"/><circle cx="14" cy="29" r="1.6" fill="#F2C94C"/><circle cx="24" cy="33" r="2" fill="#F2C94C"/><circle cx="19" cy="36" r="1.2" fill="#F2C94C"/>${T(20,45,4.4,'슬라이스','#1E5BB0')}`,
+  mozz: () => `<path d="M7 10h26l2.5 37h-31z" fill="#FFF4C8" stroke="#D7B647"/><rect x="7" y="10" width="26" height="8" fill="#1E5BB0"/>${T(20,16.4,5.6,'치즈')}
+    <g stroke="#F2CC4A" stroke-width="1.6" stroke-linecap="round"><path d="M12 26l5 4M20 24l4 5M14 33l6 2M24 32l3 5M11 39l5 1M21 38l5 2"/></g>${T(20,45,4.4,'모짜렐라','#1E5BB0')}`,
+};
+const SVGS = {
+  kimchi:  ART.kimchi('#C8321F', '#D9472F', '포기김치'),
+  kimchi2: ART.kimchi('#C8321F', '#B83A2A', '총각김치'),
+  milk:    ART.milk('#2E6CCB', '우유'),
+  milk2:   ART.milk('#62A6E3', '저지방'),
+  tofu:    ART.tofu('#2F8F5B', '부침두부'),
+  tofu2:   ART.tofu('#3F9A68', '찌개두부'),
+  pap:     ART.pap('#D8261C', '#8E120C'),
+  pap2:    ART.pap('#F4BF14', '#B5860A'),
+  cheese:  ART.slice(),
+  cheese2: ART.mozz(),
+};
+const NUM = {kimchi:2, kimchi2:2, tofu:2, tofu2:2, cheese:2, cheese2:2, milk:3, milk2:3, pap:2, pap2:2};
+for (const k in CAT){ CAT[k].em = `<svg class="pk" viewBox="0 0 40 48" aria-hidden="true">${SVGS[k]}</svg>`; CAT[k].n = NUM[k] || 2; }
 const pad = n => String(n).padStart(2,'0');
 const where = (lv,b) => `${lv+1}단 ${b+1}빈`;
 const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
@@ -337,7 +376,7 @@ function drawRack(el, grid, opt={}){
       if (m) s.classList.add(m);
       const tag = `<span class="tg">${opt.mini ? '' : '<i></i>'}<b>${lv+1}0${b+1}</b><u>↑</u></span>${b ? '<span class="clip"></span>' : ''}`;
       if (id){
-        const it = CAT[id], n = opt.mini ? 2 : (it.heavy ? 2 : 3);
+        const it = CAT[id], n = opt.mini ? 2 : it.n;
         s.style.setProperty('--c', it.c);
         s.innerHTML = `<span class="goods">${`<span>${it.em}</span>`.repeat(n)}</span><span class="nm">${it.short}</span>${it.heavy?'<span class="kg">중량</span>':''}${tag}`;
         s.setAttribute('aria-label', `${where(lv,b)}: ${it.name}`);
