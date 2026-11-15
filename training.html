@@ -262,10 +262,10 @@ const CAT = {
   litter:{name:'고양이모래 5kg',  short:'고양이모래',em:'🐈', g:'litter', c:'#8F8F8F', heavy:1},
 };
 const pad = n => String(n).padStart(2,'0');
-const where = (lv,b) => `${pad(b+1)}베이 ${lv+1}단`;
+const where = (lv,b) => `${lv+1}단 ${b+1}빈`;
 const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
 
-/* grid[단][베이] — 단 0 = 1단(맨 아래) */
+/* grid[단][빈] — 단 0 = 1단(맨 아래) */
 const emptyGrid = (W,H) => Array.from({length:H},()=>Array(W).fill(null));
 const DIRS = [[0,-1,'왼쪽'],[0,1,'오른쪽'],[1,0,'위'],[-1,0,'아래']];
 
@@ -324,7 +324,7 @@ function drawRack(el, grid, opt={}){
     }
   }
   el.append(document.createElement('div'));
-  for (let b=0; b<W; b++){ const d=document.createElement('div'); d.className='bay'; d.textContent = pad(b+1)+'베이'; el.append(d); }
+  for (let b=0; b<W; b++){ const d=document.createElement('div'); d.className='bay'; d.textContent = (b+1)+'빈'; el.append(d); }
 }
 const handHTML = (id, note) => { const it = CAT[id];
   return `<span class="em">${it.em}</span><div><b>${it.name}</b><small>${it.heavy?'중량물 · ':''}${note||''}</small></div>`; };
@@ -339,21 +339,24 @@ document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showTab
 document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) showTab(g.dataset.go); });
 
 /* ── ① 진열 과정 (단계별 보기) ── */
-const G0 = [ // 1단, 2단, 3단
-  ['rice', null, null, 'tissue'],
-  [null, 'cola', null, null],
-  ['choco', null, 'ramen', null],
+const G0 = [ // 1단 ~ 6단, 각 단에 1~6빈
+  ['rice', null, null, 'tissue', null, 'deterg'],
+  [null, 'cola', null, null, 'milk', null],
+  ['choco', null, 'ramen', null, null, null],
+  [null, 'shamp', null, null, 'snack', null],
+  [null, null, null, 'milk2', null, null],
+  [null, 'tissue', null, null, null, 'choco'],
 ];
 const clone = g => g.map(r => r.slice());
 const G1 = clone(G0); G1[0][2] = 'water';
 const G2 = clone(G1); G2[2][3] = 'zcola';
 const WALK = [
   {t:'카트에서 상품을 하나 꺼내요', p:'상품 바코드를 스캔해서 어떤 상품인지, 수량이 몇 개인지 먼저 확인해요.', hand:'water', note:'6개입 1묶음', g:G0},
-  {t:'무게부터 확인해요', p:'생수 2L×6은 중량물이에요. 중량물은 1·2단에만 놓아요. 3단 이상(빗금 칸)에는 놓으면 안 돼요.', hand:'water', g:G0, dim:[2]},
-  {t:'빈 칸을 고르고 주변 4칸을 확인해요', p:'고른 칸의 왼쪽 · 오른쪽 · 위 · 아래를 봐요. 같은 상품이나 비슷한 상품이 없으면 놓아도 돼요. 03베이 1단은 옆에 휴지, 위는 빈 칸이라 괜찮아요.', hand:'water', g:G0, dim:[2], marks:{'0-2':'focus','0-1':'look','0-3':'look','1-2':'look'}},
+  {t:'무게부터 확인해요', p:'생수 2L×6은 중량물이에요. 중량물은 1·2단에만 놓아요. 3단 ~ 6단(빗금 칸)에는 놓으면 안 돼요.', hand:'water', g:G0, dim:[2,3,4,5]},
+  {t:'빈 칸을 고르고 주변 4칸을 확인해요', p:'고른 칸의 왼쪽 · 오른쪽 · 위 · 아래를 봐요. 같은 상품이나 비슷한 상품이 없으면 놓아도 돼요. 1단 3빈은 오른쪽에 휴지, 위는 빈 칸이라 괜찮아요.', hand:'water', g:G0, dim:[2,3,4,5], marks:{'0-2':'focus','0-1':'look','0-3':'look','1-2':'look'}},
   {t:'로케이션 스캔 → 진열 → 수량 입력', p:'로케이션 바코드를 찍고 상품을 넣은 뒤 수량을 입력하면 한 상품이 끝나요.', hand:'water', note:'진열 완료', g:G1, marks:{'0-2':'ok'}},
-  {t:'비슷한 상품은 붙이면 안 돼요', p:'다음 상품은 제로콜라. 03베이 2단은 왼쪽(02베이 2단)에 콜라가 있어서 안 돼요. 비슷한 상품끼리 붙어 있으면 피킹할 때 잘못 집기 쉬워요. 04베이 3단은 주변에 비슷한 상품이 없어서 OK.', hand:'zcola', g:G1, marks:{'1-2':'bad','1-1':'cause','2-3':'ok'}},
-  {t:'같은 상품도 가로·세로로 붙이면 안 돼요', p:'이번엔 콜라. 02베이 2단에 콜라가 있으니 그 위·아래·옆 칸은 안 돼요. 04베이 2단은 위에 제로콜라(비슷한 상품)가 있어서 안 돼요. 이 선반엔 놓을 칸이 없으니 억지로 넣지 말고 다른 로케이션을 찾아요.', hand:'cola', g:G2, marks:{'2-1':'bad','1-0':'bad','1-2':'bad','0-1':'bad','1-3':'bad','1-1':'cause','2-3':'cause'}},
+  {t:'비슷한 상품은 붙이면 안 돼요', p:'다음 상품은 제로콜라. 2단 3빈은 왼쪽(2단 2빈)에 콜라가 있어서 안 돼요. 비슷한 상품끼리 붙어 있으면 피킹할 때 잘못 집기 쉬워요. 3단 4빈은 주변에 비슷한 상품이 없어서 OK.', hand:'zcola', g:G1, marks:{'1-2':'bad','1-1':'cause','2-3':'ok'}},
+  {t:'같은 상품도 가로·세로로 붙이면 안 돼요', p:'이번엔 콜라. 2단 2빈에 콜라가 있으니 그 위·아래·옆 칸은 안 돼요. 2단 4빈은 위에 제로콜라(비슷한 상품)가 있어서 안 돼요. 5단 1빈처럼 떨어진 칸에 놓아요. 놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.', hand:'cola', g:G2, marks:{'2-1':'bad','1-0':'bad','1-2':'bad','0-1':'bad','1-3':'bad','1-1':'cause','2-3':'cause','4-0':'ok'}},
   {t:'카트가 빌 때까지 반복해요', p:'꺼내기 → 무게 확인 → 주변 4칸 확인 → 스캔 · 진열 · 수량 입력. 이제 규칙 3가지를 정리하고 게임으로 연습해봐요.', g:G2, end:true},
 ];
 let wi = 0;
@@ -380,8 +383,8 @@ const RULES = [
     x:{g:[[ 'ramen','choco',null],[ 'ramen',null,null]], m:{'0-0':'cause','1-0':'bad'}, why:'매운라면 위에 또 매운라면'},
     o:{g:[[ 'ramen','choco','ramen'],[ null,'tissue',null]], m:{'0-2':'ok'}, why:'한 칸 떨어뜨려 놓아요'}},
   {n:3, t:'중량물은 1·2단에만', p:'생수 묶음, 쌀, 세제처럼 무거운 상품(중량 표시)은 1단 · 2단에만 놓아요. 높은 단에 두면 떨어지거나 다칠 수 있어요. 휴지처럼 크지만 가벼운 건 중량물이 아니에요.',
-    x:{g:[[ null,'choco'],[ 'tissue',null],[ 'water',null]], m:{'2-0':'bad'}, why:'생수가 3단에 있어요', dim:[2]},
-    o:{g:[[ 'water','choco'],[ 'tissue',null],[ null,'ramen']], m:{'0-0':'ok'}, why:'생수는 1단에', dim:[2]}},
+    x:{g:[[ null,'choco'],[ 'tissue',null],[ null,null],[ 'water','ramen'],[ null,null],[ 'choco',null]], m:{'3-0':'bad'}, why:'생수가 4단에 있어요', dim:[2,3,4,5]},
+    o:{g:[[ 'water','choco'],[ 'tissue',null],[ null,'ramen'],[ null,null],[ 'choco',null],[ null,'tissue']], m:{'0-0':'ok'}, why:'생수는 1단에', dim:[2,3,4,5]}},
 ];
 $('ruleGrid').innerHTML = RULES.map(r => `<div class="card"><span class="num">${r.n}</span><h2>${r.t}</h2><p class="mute" style="margin:4px 0 0;font-size:14px">${r.p}</p>
   <div class="ex"><div><span class="tag x">✕ 안 돼요</span><div class="rackwrap"><div data-ex="${r.n}x"></div></div><div class="why">${r.x.why}</div></div>
@@ -392,9 +395,9 @@ for (const r of RULES) for (const k of ['x','o']){
 
 /* ── ③ 연습 게임 ── */
 const STAGES = [
-  {W:4, H:3, pre:3, q:6, pool:['cola','zcola','ramen','choco','water','rice','tissue']},
-  {W:5, H:4, pre:6, q:9, pool:['cola','zcola','ramen','ramen2','milk','milk2','choco','tissue','water','rice','deterg']},
-  {W:6, H:4, pre:8, q:11, pool:Object.keys(CAT)},
+  {W:6, H:6, pre:8,  q:7,  pool:['cola','zcola','ramen','choco','water','rice','tissue']},
+  {W:6, H:6, pre:12, q:10, pool:['cola','zcola','ramen','ramen2','milk','milk2','choco','tissue','water','rice','deterg']},
+  {W:6, H:6, pre:16, q:12, pool:Object.keys(CAT)},
 ];
 // 규칙을 모두 지키는 정답 배치를 먼저 만든 뒤, 일부는 선반에 미리 두고 나머지는 카트에 담아요
 function makeStage(st){
@@ -455,7 +458,7 @@ function startStage(){
   S.grid = m.grid; S.queue = m.queue; S.stageMiss = 0; S.stageScore = 0;
   S.snap = {score:S.score, miss:S.miss, total:S.total, tally:{...S.tally}};
   $('gIntro').hidden = true; $('gDone').hidden = true; $('gPlay').hidden = false;
-  setMsg('info', `<b>스테이지 ${S.stage+1}</b>${S.stage===0?'첫 상품부터 시작해요. 놓을 빈 칸을 눌러주세요.':'선반이 커졌어요. 주변 4칸을 꼭 확인해요.'}`);
+  setMsg('info', `<b>스테이지 ${S.stage+1}</b>${S.stage===0?'첫 상품부터 시작해요. 놓을 빈 칸을 눌러주세요.':'상품이 더 많아졌어요. 주변 4칸을 꼭 확인해요.'}`);
   render();
   $('gPlay').scrollIntoView({block:'start'});
 }
@@ -464,7 +467,7 @@ function render(opt={}){
   const st = S.st, cur = S.queue[0];
   $('hStage').textContent = `${S.stage+1} / ${STAGES.length}`;
   $('hScore').textContent = S.score; $('hMiss').textContent = S.miss; $('hLeft').textContent = S.queue.length;
-  $('gLoc').textContent = `연습 선반 · ${st.W}베이 × ${st.H}단`;
+  $('gLoc').textContent = `연습 선반 · ${st.H}단 × ${st.W}빈`;
   if (cur){
     const it = CAT[cur];
     $('nItem').style.setProperty('--c', it.c);
