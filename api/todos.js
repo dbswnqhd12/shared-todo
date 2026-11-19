@@ -1,7 +1,7 @@
 // 할 일 API
 //   GET    /api/todos              → 전체 목록
-//   POST   /api/todos              → 추가   { text, prio, due }
-//   PATCH  /api/todos?id=ID        → 수정   { text?, prio?, due?, done? }
+//   POST   /api/todos              → 추가   { text, prio, due, time?, note? }
+//   PATCH  /api/todos?id=ID        → 수정   { text?, prio?, due?, done?, time?, note? }
 //   DELETE /api/todos?id=ID        → 삭제
 //   DELETE /api/todos?done=1       → 완료 항목 모두 삭제
 //   POST   /api/todos?id=ID&seen=1 → '확인' 체크 켜기/끄기 { on, name? }  (보기 전용 계정도 돼요)
@@ -29,6 +29,8 @@ function clean(input, base = {}) {
   if ('prio' in input) out.prio = PRIOS.includes(input.prio) ? input.prio : 'mid';
   if ('due' in input) out.due = /^\d{4}-\d{2}-\d{2}$/.test(input.due || '') ? input.due : '';
   if ('done' in input) out.done = Boolean(input.done);
+  if ('note' in input) out.note = String(input.note ?? '').replace(/\r\n?/g, '\n').trim().slice(0, 1000);
+  if ('time' in input) out.time = /^([01]\d|2[0-3]):[0-5]\d$/.test(input.time || '') ? input.time : '';
   return out;
 }
 
@@ -79,7 +81,7 @@ export default async function handler(req, res) {
       if (!raw) return res.status(404).json({ error: '이미 삭제된 항목이에요.' });
       const b = body(req);
       const patch = {};
-      for (const k of ['text', 'prio', 'due', 'done']) if (k in b) patch[k] = b[k];
+      for (const k of ['text', 'prio', 'due', 'done', 'time', 'note']) if (k in b) patch[k] = b[k];
       const item = clean(patch, JSON.parse(raw));
       await pipeline([['HSET', K.todos, id, JSON.stringify(item)], ['INCR', K.rev]]);
       return res.status(200).json({ item });

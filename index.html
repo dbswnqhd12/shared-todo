@@ -409,6 +409,23 @@ ul.todos li:hover .del,.del:focus-visible{opacity:1}
 .seen-name p small{display:block;font-weight:400;color:var(--muted);font-size:12px}
 .seen-name div{display:flex;gap:6px;flex-wrap:wrap}
 .seen-name input{flex:1 1 120px;min-width:0;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit;font-size:14px}
+#newNote{flex-basis:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit;font-size:14px;resize:vertical}
+input[type=time]{font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.td-time{font-family:var(--mono);font-weight:700;color:var(--accent);margin-right:8px;font-variant-numeric:tabular-nums}
+.td-note{margin:4px 0 0;font-size:13.5px;color:var(--ink);opacity:.85;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;padding-left:10px;border-left:2px solid var(--line)}
+.td-edit-btn{border:0;background:none;color:var(--muted);font:inherit;font-size:11.5px;padding:0 4px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.td-edit-btn:hover{color:var(--accent)}
+.td-edit{display:flex;flex-direction:column;gap:8px}
+.td-edit-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.td-edit-row .edit{flex:1 1 200px;width:auto}
+.td-note-in{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit;font-size:14px;resize:vertical}
+.left-n{font-style:normal;font-weight:600;color:var(--high)}
+.seen-list li.seen-h{font-size:12px;font-weight:700;color:var(--muted);margin-top:4px}
+.seen-list li.nope{opacity:.6}
+.seen-list li.nope small{color:var(--high)}
+.day{position:relative}
+.unseen-dot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--high);box-shadow:0 0 0 2px var(--paper)}
+.ev-t{font-family:var(--mono);font-weight:700;margin-right:3px;font-size:.92em}
 .add-photo{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer;white-space:nowrap}
 .add-photo:hover{border-color:var(--accent)}
 .add-photo b{font-weight:700;color:var(--accent)}
@@ -1242,9 +1259,12 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
         <option value="high">높음</option>
       </select>
       <input type="date" id="newDue" aria-label="마감일">
+      <input type="time" id="newTime" aria-label="시간 (선택)" title="시간 (선택)">
+      <button type="button" class="add-photo" id="newNoteBtn" aria-expanded="false">＋ 설명</button>
       <label class="add-photo" title="사진 붙이기"><input type="file" id="newImgs" accept="image/*" multiple hidden>📷 사진<b id="newImgsN"></b></label>
       <button class="btn" type="submit">추가</button>
     </div>
+    <textarea id="newNote" rows="3" maxlength="1000" placeholder="설명 (선택) · 자세한 내용, 장소, 준비물 등" aria-label="설명" hidden></textarea>
   </form>
 
   <div class="toolbar">
@@ -1279,7 +1299,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   const prioLabel = {high:'높음', mid:'보통', low:'낮음'};
   const prioOrder = {high:0, mid:1, low:2};
 
-  let items = [], templates = [], checks = {};
+  let items = [], templates = [], checks = {}, people = [];
   let rev = -1, loadedMonths = '';
   let loaded = false, pending = 0, editing = false, editMode = false;
   const store = {
@@ -1392,7 +1412,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       const data = await request('GET', '/api/state?months=' + months);
       if (pending || editing) return;
       if (data.me) setAuth(authToken, data.me);
-      items = data.todos || []; templates = data.templates || []; checks = data.checks || {};
+      items = data.todos || []; templates = data.templates || []; checks = data.checks || {}; people = data.people || [];
       rev = data.rev; loadedMonths = months; loaded = true;
       render();
       if (view === 'ho' && hoRev !== rev && !hoFocused()) loadHandover();
@@ -1606,12 +1626,14 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   }
 
   // ---------- 달력 ----------
+  // 일정 순서: 안 끝난 것 먼저 → 시간 순(시간 없는 건 뒤) → 중요도 → 만든 순
+  const byTime = (a, b) => (a.done-b.done) || (a.time||'99').localeCompare(b.time||'99') || (prioOrder[a.prio]-prioOrder[b.prio]) || String(a.createdAt||'').localeCompare(String(b.createdAt||''));
   function renderCal(){
     const y = calMonth.getFullYear(), m = calMonth.getMonth();
     $('#calTitle').textContent = `${y}년 ${m+1}월`;
     const byDate = {};
     for (const t of items) if (t.due) (byDate[t.due] = byDate[t.due] || []).push(t);
-    for (const k in byDate) byDate[k].sort((a,b) => (a.done-b.done) || (prioOrder[a.prio]-prioOrder[b.prio]));
+    for (const k in byDate) byDate[k].sort(byTime);
 
     const grid = $('#calGrid');
     grid.innerHTML = '';
@@ -1640,11 +1662,14 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
         ck.textContent = `✓${cl.doneN}/${cl.total}`;
         top.appendChild(ck);
       }
+      const unseenN = dayTodos.filter(t => !t.done && !iSaw(t)).length;
+      if (unseenN){ top.append(el('span', { class:'unseen-dot', title:`내가 미확인 ${unseenN}건`, 'aria-label':`미확인 ${unseenN}건` })); cell.setAttribute('aria-label', cell.getAttribute('aria-label') + `, 미확인 ${unseenN}건`); }
       cell.appendChild(top);
       dayTodos.slice(0, 3).forEach(t => {
         const ev = document.createElement('span');
         ev.className = 'ev ' + (prioLabel[t.prio] ? t.prio : 'mid') + (t.done ? ' done' : (iso < todayIso ? ' late' : ''));
         if (t.imgs && t.imgs.length) ev.append(el('i', { class:'cam', text:'📷', 'aria-hidden':'true' }));
+        if (t.time) ev.append(el('b', { class:'ev-t', text: t.time }));
         ev.append(t.text); cell.appendChild(ev);
       });
       if (dayTodos.length > 3){ const more = document.createElement('span'); more.className = 'more'; more.textContent = `+${dayTodos.length - 3}건 더`; cell.appendChild(more); }
@@ -1758,7 +1783,32 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     const [bg, fg] = AV_COL[h % AV_COL.length];
     return el('i', { style:`background:var(${bg});color:var(${fg})`, title: n, text: [...String(n).trim()][0] || '?' });
   }
-  const iSaw = t => !!(t.seen && t.seen[seenKey()]);
+  const iSaw = t => !!(t.seen && t.seen[seenKey()]) || !!(me && me.id !== '_team' && t.by && t.by.id === me.id);
+  // 아직 확인 안 한 개인 계정 (쓴 사람은 빼요)
+  const unseenPeople = t => people.filter(p => !(t.seen && t.seen[p.id]) && !(t.by && t.by.id === p.id));
+  let tdEditing = null;   // 고치는 중인 일정
+  function todoEditForm(t){
+    const tx = el('input', { type:'text', class:'edit', value: t.text, maxlength:'200', 'aria-label':'제목' });
+    const tm = el('input', { type:'time', class:'td-time-in', value: t.time || '', 'aria-label':'시간' });
+    const nt = el('textarea', { class:'td-note-in', rows:'3', maxlength:'1000', placeholder:'설명 (선택)', 'aria-label':'설명' }); nt.value = t.note || '';
+    const close = () => { tdEditing = null; editing = false; render(); };
+    const save = () => {
+      const v = { text: tx.value.trim(), time: tm.value, note: nt.value.trim() };
+      if (!v.text) return tx.focus();
+      tdEditing = null; editing = false;
+      if (v.text === t.text && v.time === (t.time||'') && v.note === (t.note||'')) return render();
+      mutate(() => Object.assign(t, v), () => api('PATCH', '/api/todos?id='+encodeURIComponent(t.id), v));
+    };
+    editing = true;
+    const f = el('form', { class:'td-edit', onsubmit: e => { e.preventDefault(); save(); } },
+      el('div', { class:'td-edit-row' }, tm, tx), nt,
+      el('div', { class:'td-edit-row' },
+        el('button', { type:'submit', class:'seen-btn', text:'저장' }),
+        el('button', { type:'button', class:'seen-btn ghost2', text:'취소', onclick: close })));
+    f.onkeydown = e => { if (e.key === 'Escape') close(); };
+    setTimeout(() => tx.focus(), 0);
+    return f;
+  }
   function toggleSeen(t){
     if (String(t.id).startsWith('temp-')) return toast('저장 중이에요. 잠시 후 다시 해 주세요.');
     const team = me && me.id === '_team', name = store.get('seen-name', '');
@@ -1786,19 +1836,22 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     }
     const seen = Object.entries(t.seen || {}).sort((a, b) => String(a[1].at).localeCompare(String(b[1].at)));
     const mineV = t.seen && t.seen[seenKey()], mine = !!mineV, open = seenOpen.has(t.id);
-    const names = seen.map(([, v]) => v.n);
-    const sum = el('button', { type:'button', class:'seen-sum', 'aria-expanded': open ? 'true' : 'false', disabled: !seen.length,
+    const names = seen.map(([, v]) => v.n), left = unseenPeople(t);
+    const sum = el('button', { type:'button', class:'seen-sum', 'aria-expanded': open ? 'true' : 'false', disabled: !seen.length && !left.length,
         onclick: () => { open ? seenOpen.delete(t.id) : seenOpen.add(t.id); render(); } },
       el('span', { class:'seen-av', 'aria-hidden':'true' }, ...seen.slice(0, 4).map(([, v]) => avatar(v.n)), seen.length > 4 ? el('i', { class:'more', text:'+' + (seen.length - 4) }) : null),
       el('span', { class:'seen-txt' },
-        el('b', { text: seen.length ? `${seen.length}명 확인` : '아직 아무도 확인 안 했어요' }),
-        el('span', { text: seen.length ? (names.length > 3 ? names.slice(0, 3).join(', ') + ` 외 ${names.length - 3}명` : names.join(', ')) : '확인하면 여기에 이름이 보여요' })),
-      seen.length ? el('span', { class:'chev', 'aria-hidden':'true', text:'▾' }) : null);
+        el('b', {}, seen.length || left.length ? `${seen.length}명 확인` : '아직 아무도 확인 안 했어요', left.length ? el('em', { class:'left-n', text: ` · ${left.length}명 남음` }) : ''),
+        el('span', { text: left.length ? '미확인: ' + (left.length > 3 ? left.slice(0, 3).map(p => p.name).join(', ') + ` 외 ${left.length - 3}명` : left.map(p => p.name).join(', '))
+          : seen.length ? (names.length > 3 ? names.slice(0, 3).join(', ') + ` 외 ${names.length - 3}명` : names.join(', ')) : '확인하면 여기에 이름이 보여요' })),
+      seen.length || left.length ? el('span', { class:'chev', 'aria-hidden':'true', text:'▾' }) : null);
     const btn = el('button', { type:'button', class:'seen-btn' + (mine ? ' on' : ''), 'aria-pressed': mine ? 'true' : 'false', title: mine ? '다시 누르면 확인이 취소돼요' : '', onclick: () => toggleSeen(t) });
     btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
     btn.append(mine ? `확인 완료 · ${shortAt(mineV.at).split(' ')[1] || ''}` : '확인했어요');
     const box = el('div', { class:'td-seen' + (mine ? ' mine' : '') }, sum, btn);
-    if (open && seen.length) box.append(el('ul', { class:'seen-list' }, ...seen.map(([, v]) => el('li', {}, avatar(v.n), el('span', { text: v.n }), el('small', { text: shortAt(v.at) })))));
+    if (open && (seen.length || left.length)) box.append(el('ul', { class:'seen-list' },
+      ...seen.map(([, v]) => el('li', {}, avatar(v.n), el('span', { text: v.n }), el('small', { text: shortAt(v.at) + ' 확인' }))),
+      ...(left.length ? [el('li', { class:'seen-h', text:`아직 확인 안 함 · ${left.length}명` }), ...left.map(p => el('li', { class:'nope' }, avatar(p.name), el('span', { text: p.name }), el('small', { text:'미확인' })))] : [])));
     out.push(box);
     if (askNameFor === t.id){
       const inp = el('input', { type:'text', id:'seenName', maxlength:'20', placeholder:'예: 김민수', 'data-ro-ok':'', 'aria-label':'내 이름' });
@@ -1817,7 +1870,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     const shown = items
       .filter(t => view !== 'cal' || t.due === selDate)
       .filter(t => filter==='all' || (filter==='done' ? t.done : !t.done))
-      .sort((a,b) => (a.done-b.done) || (prioOrder[a.prio]-prioOrder[b.prio]) || ((a.due||'9999').localeCompare(b.due||'9999')) || String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
+      .sort((a,b) => ((a.due||'9999').localeCompare(b.due||'9999')) || byTime(a, b));
     list.innerHTML = '';
     if (!shown.length){
       const li = document.createElement('li'); li.className = 'empty';
@@ -1837,8 +1890,10 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       chk.setAttribute('aria-label', t.done ? '완료 취소' : '완료로 표시');
       chk.onclick = () => { const v = !t.done; mutate(() => { t.done = v; }, () => api('PATCH', '/api/todos?id='+encodeURIComponent(t.id), {done:v})); };
       const body = document.createElement('div'); body.className='body';
-      const text = document.createElement('span'); text.className='text'; text.textContent=t.text; text.title='더블클릭해서 수정';
-      text.ondblclick = () => startEdit(t, body, text);
+      const text = document.createElement('span'); text.className='text'; text.title='더블클릭해서 수정';
+      if (t.time) text.append(el('b', { class:'td-time', text: t.time }));
+      text.append(t.text);
+      text.ondblclick = () => { if (isAdmin()) { tdEditing = t.id; render(); } };
       const meta = document.createElement('div'); meta.className='meta';
       const p = prioLabel[t.prio] ? t.prio : 'mid';
       const chip = document.createElement('span'); chip.className = 'chip ' + p; chip.textContent = prioLabel[p];
@@ -1847,7 +1902,9 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       if (d){ const s = document.createElement('span'); s.className = 'due' + (!t.done && t.due < todayIso ? ' late' : ''); s.textContent = d; meta.appendChild(s); }
       if (!t.done && !iSaw(t) && !String(t.id).startsWith('temp-')) meta.prepend(el('span', { class:'unseen', text:'미확인' }));
       if (t.by && t.by.n) meta.append(el('span', { class:'by' }, '작성 ', el('b', { text: t.by.n }), t.createdAt ? ' · ' + shortAt(t.createdAt) : ''));
-      body.append(text, meta, ...todoExtras(t));
+      if (isAdmin() && !String(t.id).startsWith('temp-')) meta.append(el('button', { type:'button', class:'td-edit-btn', text:'고치기', onclick: () => { tdEditing = t.id; render(); } }));
+      if (tdEditing === t.id) body.append(todoEditForm(t));
+      else body.append(text, meta, ...(t.note ? [el('p', { class:'td-note', text: t.note })] : []), ...todoExtras(t));
       const del = document.createElement('button');
       del.type='button'; del.className='del'; del.textContent='×'; del.setAttribute('aria-label','삭제');
       del.onclick = () => mutate(() => { items = items.filter(x => x.id !== t.id); }, () => api('DELETE', '/api/todos?id='+encodeURIComponent(t.id)));
@@ -5302,7 +5359,8 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     e.preventDefault();
     const v = $('#newText').value.trim();
     if (!v) { $('#newText').focus(); return; }
-    const payload = {text:v, prio:$('#newPrio').value, due:$('#newDue').value};
+    const payload = {text:v, prio:$('#newPrio').value, due:$('#newDue').value, time:$('#newTime').value, note:$('#newNote').value.trim()};
+    $('#newTime').value = ''; $('#newNote').value = ''; $('#newNote').hidden = true; $('#newNoteBtn').setAttribute('aria-expanded', 'false');
     const temp = {...payload, id:'temp-'+Date.now(), done:false, createdAt:new Date().toISOString(), by: me ? { id: me.id, n: me.name } : undefined};
     const pics = [...($('#newImgs').files || [])]; $('#newImgs').value = ''; $('#newImgsN').textContent = '';
     $('#newText').value=''; $('#newDue').value = view==='cal' ? selDate : '';
@@ -5318,6 +5376,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     $('#newText').focus();
   });
 
+  $('#newNoteBtn').addEventListener('click', () => { const n = $('#newNote'); n.hidden = !n.hidden; $('#newNoteBtn').setAttribute('aria-expanded', String(!n.hidden)); if (!n.hidden) n.focus(); });
   $('#newImgs').addEventListener('change', e => { const n = e.target.files.length; $('#newImgsN').textContent = n ? ` ${n}장` : ''; });
   document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { filter = b.dataset.f; store.set('todo-filter', filter); render(); });
   document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
