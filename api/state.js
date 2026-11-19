@@ -1,7 +1,8 @@
 // 화면이 쓰는 전체 상태 조회
 //   /api/state?auth=1...                          → 로그인 · 사람 관리 (lib/auth-api.js)
 //   GET /api/state?only=rev                       → { rev }  (변경 확인용, Redis 명령 1개 · 계정 확인도 같이 해요)
-//   GET /api/state?months=2026-08,2026-09,2026-10 → { rev, todos, templates, checks, today }
+//   GET /api/state?months=2026-08,2026-09,2026-10 → { rev, todos, templates, checks, today, people }
+//     people = 개인 계정 [{ id, name }] (관리자 · 일반만, 꺼진 계정 제외) — 일정 '미확인 사람' 표시용
 import { K, redis, pipeline, parseHash, guard, fail, kstToday } from '../lib/store.js';
 import { AK, MASTER, stillValid, publicUser } from '../lib/auth.js';
 import authHandler from '../lib/auth-api.js';
@@ -31,14 +32,23 @@ export default async function handler(req, res) {
       .split(',')
       .filter(m => /^\d{4}-\d{2}$/.test(m))
       .slice(0, 3);
-    const [userRaw, rev, todos, templates, ...monthChecks] = await pipeline([
+    const [userRaw, ids, rev, todos, templates, ...monthChecks] = await pipeline([
       ['GET', AK.user(req.user.id)],
+      ['SMEMBERS', AK.ids],
       ['GET', K.rev],
       ['HGETALL', K.todos],
       ['HGETALL', K.templates],
       ...months.map(m => ['HGETALL', K.checks(m)]),
     ]);
     if (kicked(req, res, req.user.id === MASTER ? null : userRaw)) return;
+    let people = [];
+    if (ids && ids.length) {
+      people = (await redis('MGET', ...ids.map(AK.user)))
+        .map(r => { try { return JSON.parse(r); } catch { return null; } })
+        .filter(u => u && !u.off && (u.role === 'admin' || u.role === 'member'))
+        .map(u => ({ id: u.id, name: u.name || u.id }))
+        .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+    }
     const checks = {};
     for (const flat of monthChecks) {
       for (let i = 0; i < (flat || []).length; i += 2) {
@@ -54,6 +64,7 @@ export default async function handler(req, res) {
       months,
       today: kstToday(),
       me: publicUser(req.user),
+      people,
     });
   } catch (e) {
     return fail(res, e);
