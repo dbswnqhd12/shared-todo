@@ -379,15 +379,36 @@ ul.todos li:hover .del,.del:focus-visible{opacity:1}
 .td-img.add{display:grid;place-items:center;color:var(--muted);font-size:12px;cursor:pointer;border-style:dashed;text-align:center;line-height:1.25}
 .td-img.add:hover{border-color:var(--accent);color:var(--accent)}
 .td-img.busy{display:grid;place-items:center;color:var(--muted);font-size:11px;cursor:default}
-.td-seen{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}
-.seen-btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 11px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
-.seen-btn:hover{border-color:var(--accent);color:var(--accent)}
-.seen-btn.on{background:var(--accent);border-color:var(--accent);color:var(--paper)}
-.seen-who{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:1px 8px;white-space:nowrap}
-.seen-who small{font-family:var(--mono);font-size:10.5px;opacity:.8}
-.seen-none{font-size:11.5px;color:var(--muted)}
-.seen-name{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12.5px;margin-top:6px}
-.seen-name input{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:4px 8px;width:110px;font:inherit;font-size:13px}
+.td-seen{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 8px 8px 10px;background:var(--bg);border-radius:10px;flex-wrap:wrap}
+.td-seen.mine{background:var(--paper);box-shadow:inset 0 0 0 1.5px var(--accent-soft)}
+.seen-sum{display:flex;align-items:center;gap:8px;flex:1 1 180px;min-width:0;border:0;background:none;padding:0;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
+.seen-sum:disabled{cursor:default}
+.seen-av{display:flex;flex-shrink:0}
+.seen-av i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11.5px;font-weight:700;border:2px solid var(--paper);margin-left:-7px}
+.seen-av i:first-child{margin-left:0}
+.td-seen.mine .seen-av i{border-color:var(--paper)}
+.seen-av i.more{background:var(--line);color:var(--muted)}
+.seen-txt{min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.seen-txt b{font-size:13px;font-weight:700}
+.seen-txt span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seen-sum .chev{font-size:11px;color:var(--muted);transition:transform .15s}
+.seen-sum[aria-expanded=true] .chev{transform:rotate(180deg)}
+.seen-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;border:0;background:var(--accent);color:#fff;border-radius:999px;padding:8px 16px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;min-height:36px}
+.seen-btn:hover{filter:brightness(1.08)}
+.seen-btn.on{background:var(--paper);color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.seen-btn.ghost2{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.seen-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.seen-list{flex-basis:100%;list-style:none;margin:2px 0 0;padding:6px 0 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.seen-list li{display:flex;align-items:center;gap:8px;font-size:13px;padding:0!important;border:0!important;box-shadow:none!important}
+.seen-list li i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:10.5px;font-weight:700}
+.seen-list li small{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.unseen{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--high);background:var(--high-soft);border-radius:999px;padding:1px 8px}
+.unseen::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--high)}
+.seen-name{margin-top:8px;padding:12px;border-radius:10px;background:var(--accent-soft);display:flex;flex-direction:column;gap:8px}
+.seen-name p{margin:0;font-size:13px;font-weight:600}
+.seen-name p small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.seen-name div{display:flex;gap:6px;flex-wrap:wrap}
+.seen-name input{flex:1 1 120px;min-width:0;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit;font-size:14px}
 .add-photo{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer;white-space:nowrap}
 .add-photo:hover{border-color:var(--accent)}
 .add-photo b{font-weight:700;color:var(--accent)}
@@ -1730,6 +1751,14 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   // 공용 비밀번호로 들어온 사람은 이름을 한 번 적어야 확인할 수 있어요 (이 기기에 기억)
   const seenKey = () => me && me.id === '_team' ? '_team:' + store.get('seen-name', '') : me && me.id;
   let askNameFor = null;
+  const seenOpen = new Set();   // 확인한 사람 목록을 펼친 일정
+  const AV_COL = [['--accent-soft','--accent'],['--vio-soft','--vio'],['--eve-soft','--eve'],['--day-soft','--day'],['--high-soft','--high'],['--night-soft','--night']];
+  function avatar(n){
+    let h = 0; for (const c of String(n)) h = (h * 31 + c.codePointAt(0)) >>> 0;
+    const [bg, fg] = AV_COL[h % AV_COL.length];
+    return el('i', { style:`background:var(${bg});color:var(${fg})`, title: n, text: [...String(n).trim()][0] || '?' });
+  }
+  const iSaw = t => !!(t.seen && t.seen[seenKey()]);
   function toggleSeen(t){
     if (String(t.id).startsWith('temp-')) return toast('저장 중이에요. 잠시 후 다시 해 주세요.');
     const team = me && me.id === '_team', name = store.get('seen-name', '');
@@ -1756,18 +1785,30 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       if (row.children.length) out.push(row);
     }
     const seen = Object.entries(t.seen || {}).sort((a, b) => String(a[1].at).localeCompare(String(b[1].at)));
-    const mine = !!(t.seen && t.seen[seenKey()]);
-    out.push(el('div', { class:'td-seen' },
-      el('button', { type:'button', class:'seen-btn' + (mine ? ' on' : ''), 'aria-pressed': mine ? 'true' : 'false', text: mine ? '✓ 확인함' : '확인', onclick: () => toggleSeen(t) }),
-      ...(seen.length ? seen.map(([, v]) => el('span', { class:'seen-who', title: shortAt(v.at) + ' 확인' }, '✓ ' + v.n, el('small', { text: shortAt(v.at) })))
-        : [el('span', { class:'seen-none', text:'아직 확인한 사람이 없어요' })])));
+    const mineV = t.seen && t.seen[seenKey()], mine = !!mineV, open = seenOpen.has(t.id);
+    const names = seen.map(([, v]) => v.n);
+    const sum = el('button', { type:'button', class:'seen-sum', 'aria-expanded': open ? 'true' : 'false', disabled: !seen.length,
+        onclick: () => { open ? seenOpen.delete(t.id) : seenOpen.add(t.id); render(); } },
+      el('span', { class:'seen-av', 'aria-hidden':'true' }, ...seen.slice(0, 4).map(([, v]) => avatar(v.n)), seen.length > 4 ? el('i', { class:'more', text:'+' + (seen.length - 4) }) : null),
+      el('span', { class:'seen-txt' },
+        el('b', { text: seen.length ? `${seen.length}명 확인` : '아직 아무도 확인 안 했어요' }),
+        el('span', { text: seen.length ? (names.length > 3 ? names.slice(0, 3).join(', ') + ` 외 ${names.length - 3}명` : names.join(', ')) : '확인하면 여기에 이름이 보여요' })),
+      seen.length ? el('span', { class:'chev', 'aria-hidden':'true', text:'▾' }) : null);
+    const btn = el('button', { type:'button', class:'seen-btn' + (mine ? ' on' : ''), 'aria-pressed': mine ? 'true' : 'false', title: mine ? '다시 누르면 확인이 취소돼요' : '', onclick: () => toggleSeen(t) });
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    btn.append(mine ? `확인 완료 · ${shortAt(mineV.at).split(' ')[1] || ''}` : '확인했어요');
+    const box = el('div', { class:'td-seen' + (mine ? ' mine' : '') }, sum, btn);
+    if (open && seen.length) box.append(el('ul', { class:'seen-list' }, ...seen.map(([, v]) => el('li', {}, avatar(v.n), el('span', { text: v.n }), el('small', { text: shortAt(v.at) })))));
+    out.push(box);
     if (askNameFor === t.id){
-      const inp = el('input', { type:'text', id:'seenName', maxlength:'20', placeholder:'이름', 'data-ro-ok':'', 'aria-label':'확인할 사람 이름' });
+      const inp = el('input', { type:'text', id:'seenName', maxlength:'20', placeholder:'예: 김민수', 'data-ro-ok':'', 'aria-label':'내 이름' });
       const ok = () => { const v = inp.value.trim(); if (!v) return inp.focus(); store.set('seen-name', v); askNameFor = null; toggleSeen(t); };
       inp.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); ok(); } if (e.key === 'Escape'){ askNameFor = null; render(); } };
-      out.push(el('div', { class:'seen-name' }, el('span', { text:'공용 계정이라 이름을 한 번만 적어 주세요:' }), inp,
-        el('button', { type:'button', class:'seen-btn on', text:'확인', onclick: ok }),
-        el('button', { type:'button', class:'seen-btn', text:'취소', onclick: () => { askNameFor = null; render(); } })));
+      out.push(el('div', { class:'seen-name' },
+        el('p', {}, '이름을 적어 주세요', el('small', { text:'공용 계정이라 누가 확인했는지 알 수 있게 한 번만 적어요. 이 기기에서는 기억해요.' })),
+        el('div', {}, inp,
+          el('button', { type:'button', class:'seen-btn', text:'확인했어요', onclick: ok }),
+          el('button', { type:'button', class:'seen-btn ghost2', text:'취소', onclick: () => { askNameFor = null; render(); } }))));
     }
     return out;
   }
@@ -1804,6 +1845,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       meta.appendChild(chip);
       const d = fmtDue(t.due);
       if (d){ const s = document.createElement('span'); s.className = 'due' + (!t.done && t.due < todayIso ? ' late' : ''); s.textContent = d; meta.appendChild(s); }
+      if (!t.done && !iSaw(t) && !String(t.id).startsWith('temp-')) meta.prepend(el('span', { class:'unseen', text:'미확인' }));
       if (t.by && t.by.n) meta.append(el('span', { class:'by' }, '작성 ', el('b', { text: t.by.n }), t.createdAt ? ' · ' + shortAt(t.createdAt) : ''));
       body.append(text, meta, ...todoExtras(t));
       const del = document.createElement('button');
@@ -1859,7 +1901,8 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       $('#daySub').textContent = editMode ? '매일 반복할 항목을 조별로 관리해요'
         : cl.total ? `체크리스트 ${cl.doneN} / ${cl.total} 완료` : '';
       const dayT = items.filter(t => t.due === selDate), openT = dayT.filter(t => !t.done).length;
-      $('#todoLabel').textContent = dayT.length ? `이날 마감인 할 일 · ${dayT.length}건 중 ${openT}건 남음` : '이날 마감인 할 일';
+      const unseenT = dayT.filter(t => !t.done && !iSaw(t)).length;
+      $('#todoLabel').textContent = (dayT.length ? `이날 마감인 할 일 · ${dayT.length}건 중 ${openT}건 남음` : '이날 마감인 할 일') + (unseenT ? ` · 내가 미확인 ${unseenT}건` : '');
     }
     renderTodos();
   }
