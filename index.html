@@ -1902,7 +1902,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
         : cl.total ? `체크리스트 ${cl.doneN} / ${cl.total} 완료` : '';
       const dayT = items.filter(t => t.due === selDate), openT = dayT.filter(t => !t.done).length;
       const unseenT = dayT.filter(t => !t.done && !iSaw(t)).length;
-      $('#todoLabel').textContent = (dayT.length ? `이날 마감인 할 일 · ${dayT.length}건 중 ${openT}건 남음` : '이날 마감인 할 일') + (unseenT ? ` · 내가 미확인 ${unseenT}건` : '');
+      $('#todoLabel').textContent = (dayT.length ? `이날 마감인 할 일 · ${dayT.length}건 중 ${openT}건 남음` : '이날 마감인 할 일') + (unseenT ? ` · 미확인 ${unseenT}` : '');
     }
     renderTodos();
   }
