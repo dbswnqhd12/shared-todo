@@ -9,8 +9,8 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" href="/icons/favicon-64.png?v=2">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=2">
-<meta name="theme-color" content="#E8ECF2" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E121A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#08090B" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#08090B" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="GWJ3 IB">
@@ -1120,6 +1120,50 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   .seg button[aria-pressed=true] .seg-ic{background:var(--ink);color:var(--paper);stroke:var(--paper)}
   .cal{padding:12px}
   .cal-title,.dayhead h2{font-size:24px}
+}
+
+/* ===== 블랙 · 코발트 · 애쉬라임 테마 (시안) =====
+   바탕은 검정, 주색은 코발트 블루, 포인트는 애쉬 라임.
+   라임은 "지금 · 오늘 · 다 끝남"에만 써서 눈이 먼저 가게 하고, 나머지 강조는 코발트로 해요. */
+:root:root:root{
+  --bg:#08090B; --paper:#131519; --ink:#ECEEF2; --muted:#8C93A0; --line:#262A31;
+  --tone:color-mix(in srgb,#fff 6%,transparent); --tone-2:color-mix(in srgb,#fff 11%,transparent);
+  --cobalt:#2F5BE0; --accent:#5A84FF; --accent-soft:#16224A; --focus:#C4D48C;
+  --lime:#C4D48C; --lime-ink:#15180D; --lime-soft:#2A2F1C;
+  --high:#F0806A; --high-soft:#3A201B; --mid:#E2B65C; --mid-soft:#332918;
+  --sat:#7A9BF5; --sat-soft:#18213C; --vio:#B9A5F0; --vio-soft:#2A2340;
+  --day:#E2B65C; --day-soft:#332918; --eve:#EE9A74; --eve-soft:#3A251B; --night:#7A9BF5; --night-soft:#18213C;
+  --ch-shade:rgba(255,255,255,.06); --ch-line:#4A5160;
+  color-scheme:dark;
+}
+@media screen{
+  body{background:var(--bg)}
+  /* 코발트로 채우는 버튼은 진한 코발트 + 흰 글씨 */
+  .btn,.me-chip .role.admin{background:var(--cobalt);color:#fff}
+  .btn:hover{background:color-mix(in srgb,var(--cobalt) 85%,#fff)}
+  ul.todos li.done .check{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+  /* 포인트(애쉬 라임): 오늘, 고른 메뉴, 다 끝난 것, 진행 막대, 정상 표시 */
+  .today .num{background:var(--lime);color:var(--lime-ink);font-weight:700}
+  .tabs button[aria-pressed=true],.seg button[aria-pressed=true]{background:var(--lime);color:var(--lime-ink)}
+  .ist-sub button[aria-pressed=true]{border-bottom-color:var(--lime)}
+  .bar i{background:var(--lime)}
+  .ret-chip.on{background:var(--lime);color:var(--lime-ink)}
+  .ret-chip.on b{color:#8A2E1C}
+  .sync i{background:var(--lime)}
+  .shift-count.full,.ck.full{color:var(--lime)}
+  .day.sel{border-color:var(--cobalt);background:var(--accent-soft)}
+  :focus-visible{outline-color:var(--lime)}
+  header .ghost{background:var(--paper)}
+  header .ghost:hover{background:var(--accent-soft);color:var(--accent)}
+  /* 밝은색으로 박혀 있던 칩 · 줄은 어두운 바탕용으로 */
+  .ret-temp.CH{background:#18213C;color:#8FB0FF}.ret-temp.AM{background:#332918;color:#E2B65C}.ret-temp.FR{background:#272143;color:#B9A5F0}
+  .ret-table tr.editing td,.ret-item.editing{background:#2A2614}
+  .ret-rs,.ret-meta .rs,.ret-ptable .warn{color:#E2B65C}
+}
+@media screen and (max-width:760px){
+  .seg{background:#0E1013}
+  .seg button[aria-pressed=true]{background:none!important;color:var(--ink)}
+  .seg button[aria-pressed=true] .seg-ic{background:var(--lime);color:var(--lime-ink);stroke:var(--lime-ink)}
 }
 </style>
 </head>
@@ -2982,7 +3026,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
       stat('오늘 입력', `${today.length}건`, '', retUi.only === 'today' ? 'on' : '', pick('today')),
       el('div', { class:'ist-charts' },
         istBar('대기 기간 (하차일부터)', istAge(wait.map(t => retOldDays(t)))),
-        istBar('온도별 대기', [{ label:'냉장', n: wait.filter(t => t.temp === 'CH').length, c: IST_C[1] }, { label:'냉동', n: wait.filter(t => t.temp === 'FR').length, c: '#1B3F7A' }, { label:'상온', n: wait.filter(t => t.temp === 'AM').length, c: IST_C[2] }, { label:'미정', n: wait.filter(t => !['CH', 'FR', 'AM'].includes(t.temp)).length, c: 'var(--muted)' }])),
+        istBar('온도별 대기', [{ label:'냉장', n: wait.filter(t => t.temp === 'CH').length, c: IST_C[1] }, { label:'냉동', n: wait.filter(t => t.temp === 'FR').length, c: '#3A5FD0' }, { label:'상온', n: wait.filter(t => t.temp === 'AM').length, c: IST_C[2] }, { label:'미정', n: wait.filter(t => !['CH', 'FR', 'AM'].includes(t.temp)).length, c: 'var(--muted)' }])),
       el('div', { class:'ret-top-btns' },
         el('button', { type:'button', class:'ret-btn' + (retUi.formOpen && retUi.mode === 'paste' ? ' solid' : ''), onclick: () => retUi.formOpen && retUi.mode === 'paste' ? retOpenForm(false) : retOpenForm(true, 'paste') }, '📋 여러 건 붙여넣기'),
         el('button', { type:'button', class:'ret-btn solid ret-add', onclick: () => retUi.formOpen && retUi.mode !== 'paste' ? retOpenForm(false) : retOpenForm(true, 'single') }, retUi.formOpen && retUi.mode !== 'paste' ? '입력 닫기' : '+ 회송 입력')));
@@ -5442,7 +5486,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
       istStat('오늘 기한', `${dueToday.length}건`, '', dueToday.length ? 'late' : ''),
       istStat('오늘 생성', `${[...groups.values()].filter(g => g.cdate === todayIso).length}건`, ''),
       el('div', { class:'ist-charts' },
-        istBar('진행 단계', [{ label:'생성', n: open.filter(g => g.stage === 1).length, c: IST_C[0] }, { label:'포장', n: open.filter(g => g.stage === 2).length, c: IST_C[1] }, { label:'택배접수', n: open.filter(g => g.stage === 3).length, c: '#1B3F7A' }]),
+        istBar('진행 단계', [{ label:'생성', n: open.filter(g => g.stage === 1).length, c: IST_C[0] }, { label:'포장', n: open.filter(g => g.stage === 2).length, c: IST_C[1] }, { label:'택배접수', n: open.filter(g => g.stage === 3).length, c: '#3A5FD0' }]),
         istBar('반출 기한', [
           { label:'지남', n: over.length, c: IST_C[3] }, { label:'오늘', n: dueToday.length, c: IST_C[2] },
           { label:'3일 안', n: open.filter(g => g.due > todayIso && (Date.parse(g.due) - Date.parse(todayIso)) / 864e5 <= 3).length, c: IST_C[1] },
