@@ -204,20 +204,34 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
   .hud div{min-width:0;flex:1;padding:6px 10px}
   .hud b{font-size:17px}
 }
+.vid{display:block;width:100%;aspect-ratio:16/9;background:#000;border-radius:10px}
 </style></head>
 <body><main>
 <a class="top" href="/">← GWJ3 IB</a>
 <h1>진열 교육</h1>
-<p class="sub">신규 사원용 · 진열 과정을 보고, 3가지 규칙을 익힌 뒤 게임으로 연습해요.</p>
+<p class="sub">신규 사원용 · 교육 영상과 진열 과정을 보고, 3가지 규칙을 익힌 뒤 게임으로 연습해요.</p>
 
 <div class="tabs" role="tablist">
-  <button type="button" data-tab="walk" aria-pressed="true">① 진열 과정</button>
+  <button type="button" data-tab="video" aria-pressed="true">▶ 교육 영상</button>
+  <button type="button" data-tab="walk" aria-pressed="false">① 진열 과정</button>
   <button type="button" data-tab="rules" aria-pressed="false">② 규칙 3가지</button>
   <button type="button" data-tab="game" aria-pressed="false">③ 연습 게임</button>
 </div>
 
+<!-- ▶ 교육 영상 -->
+<section id="tab-video">
+  <div class="card">
+    <video class="vid" controls playsinline preload="metadata" poster="/media/stow-training-poster.jpg">
+      <source src="/media/stow-training.mp4" type="video/mp4">
+      이 브라우저에서는 영상을 재생할 수 없어요.
+    </video>
+    <p class="mute" style="margin:10px 0 0;font-size:14px">약 2분 · 소리가 나와요(자막 포함). 영상을 본 뒤 진열 과정과 규칙을 한 번 더 확인하고 게임으로 연습해요.</p>
+    <div class="row" style="margin-top:12px"><button type="button" class="btn" data-go="walk">진열 과정 보기</button></div>
+  </div>
+</section>
+
 <!-- ① 진열 과정 -->
-<section id="tab-walk">
+<section id="tab-walk" hidden>
   <div class="card walk">
     <div>
       <div class="step-n" id="wStepN"></div>
@@ -457,7 +471,8 @@ const handHTML = (id, note) => { const it = CAT[id];
 /* ── 탭 ── */
 function showTab(t){
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab===t));
-  ['walk','rules','game'].forEach(k => $('tab-'+k).hidden = k!==t);
+  ['video','walk','rules','game'].forEach(k => $('tab-'+k).hidden = k!==t);
+  if (t !== 'video') { const v = document.querySelector('#tab-video video'); if (v) v.pause(); }
   window.scrollTo({top:0});
 }
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
