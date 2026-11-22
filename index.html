@@ -1164,6 +1164,21 @@ header.hd{padding-bottom:4px}
   .hd-tools-list{overflow-x:auto;scrollbar-width:none;max-width:100%}
   .hd-tool{padding:7px 12px;font-size:12.5px}
 }
+/* ---------- PC 넓은 화면: 탭을 왼쪽 사이드바로 (폰 · 좁은 창은 그대로) ---------- */
+@media screen and (min-width:1100px){
+  body{padding-left:232px}
+  html body .seg{position:fixed;top:0;left:0;bottom:0;height:100vh;height:100dvh;box-sizing:border-box;width:232px;max-width:none;z-index:45;display:flex;flex-direction:column;align-items:stretch;gap:2px;margin:0;padding:28px 14px 20px;border:0;border-radius:0;background:var(--paper);box-shadow:1px 0 0 var(--line);overflow-y:auto}
+  html body .seg::before{content:"GWJ3 IB";display:block;font-weight:700;font-size:22px;letter-spacing:-.03em;color:var(--ink);padding:0 12px 22px}
+  html body .seg button{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border-radius:10px;font-size:14.5px;font-weight:500;color:var(--muted);background:transparent;text-align:left;white-space:nowrap}
+  html body .seg button:hover{background:var(--tone);color:var(--ink)}
+  html body .seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  html body .seg .seg-ic{display:block;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  html body .seg button[aria-pressed=true] .seg-ic{stroke-width:2.1}
+  html body .seg .seg-badge{margin-left:auto}
+  /* 이름은 사이드바 위에 있으니 머리에서는 날짜만 */
+  .hd h1{display:none}
+  .hd .date{font-size:15px;color:var(--ink);font-weight:600}
+}
 </style>
 </head>
 <body>
