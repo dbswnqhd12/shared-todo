@@ -67,9 +67,6 @@ input,select{font:inherit}
 .btn:hover{filter:brightness(1.08)}
 .ghost{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:5px 12px;font-size:13px}
 .ghost:hover{border-color:var(--accent)}
-.ext-dl{display:inline-block;margin-top:8px;text-decoration:none}
-.app-inst:not([hidden]) + .ext-dl,.ext-dl + .lbl-dl{margin-left:6px}
-@media (max-width:760px){.ext-dl{display:none}}
 .ghost[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
 .sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);border:1px solid var(--line);background:var(--paper);border-radius:20px;padding:4px 11px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--accent)}
@@ -89,7 +86,6 @@ input,select{font:inherit}
 .lock.setup{margin:0 auto 20px}
 .lock-setup summary{cursor:pointer;font-size:13px;color:var(--accent)}
 .lock-setup form{margin-top:10px}
-.me-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
 .me-chip{font-size:13px;color:var(--muted)}
 .me-chip b{color:var(--ink);font-weight:600}
 .me-chip .role{margin-left:6px;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--tone,#E6EBF2);color:var(--muted)}
@@ -869,7 +865,6 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 /* 버퍼 */
 .bf-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.bf-st{border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--paper)}.bf-st small{font-size:12px;color:var(--muted)}.bf-st b{display:block;font-family:var(--mono);font-size:19px;font-weight:800;margin-top:2px}.bf-st.on{border:2px solid var(--accent);padding:8px 11px;background:var(--accent-soft)}
 .offbar{position:sticky;top:8px;z-index:60;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;background:var(--mid-soft);color:var(--mid);border:1px solid var(--mid);border-radius:10px;padding:8px 12px;font-size:13.5px;line-height:1.45}.offbar span{font-weight:500}
-.app-inst{margin-top:8px;font-weight:600;border-color:var(--accent);color:var(--accent)}
 .bf-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.bf-fw{margin-left:auto;display:flex;gap:6px;align-items:center;min-width:0;max-width:100%}.bf-fw .bf-find{margin-left:0}.bf-cam{white-space:nowrap;background:var(--accent);color:var(--paper);border-color:var(--accent);font-weight:700}
 .scan-hit{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-soft);color:var(--accent);border-radius:10px;padding:9px 12px;font-size:13.5px;font-weight:600}.scan-hit.miss{background:var(--high-soft);color:var(--high)}.scan-hit code{font-family:var(--mono);font-weight:700}.scan-hit .sp{flex:1}.scan-hit button{white-space:nowrap}
 .scan-ov{position:fixed;inset:0;z-index:1000;background:#000;color:#fff;overflow:hidden}.scan-ov video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -1121,6 +1116,54 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
   .cal{padding:12px}
   .cal-title,.dayhead h2{font-size:24px}
 }
+/* ---------- 머리 (날짜 · 이름 · 바로가기 · 계정) ---------- */
+header.hd{display:grid;align-items:center;gap:10px 16px;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"brand tools acct"}
+.hd-brand{grid-area:brand;min-width:0}
+.hd-tools{grid-area:tools;position:relative;display:flex;align-items:center}
+.hd-acct{grid-area:acct;display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:0}
+.hd svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.hd svg.caret{width:14px;height:14px;opacity:.6}
+.hd-btn{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:7px 12px 7px 14px;font-size:13px;font-weight:500;cursor:pointer}
+.hd-btn:hover,.hd-btn[aria-expanded=true]{background:var(--accent-soft);color:var(--accent)}
+.acct-btn .me-chip{display:inline-flex;align-items:center;font-size:13px}
+.acct-btn .me-chip:empty{display:none}
+.acct-btn .me-chip:empty + .caret{display:none}
+.acct{position:relative}
+.hd-tools-list{display:flex;align-items:center;gap:6px}
+.hd-tool{display:inline-flex;align-items:center;gap:7px;border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap;cursor:pointer}
+.hd-tool:hover{background:var(--accent-soft);color:var(--accent)}
+.hd-tool svg{color:var(--accent)}
+.hd-tool.app-inst{color:var(--accent);margin:0}
+/* 계정 펼침 메뉴 */
+.hd-item{justify-content:flex-start;background:transparent;border:0;border-radius:8px;padding:9px 12px;font-size:13.5px;text-align:left;color:var(--ink);width:100%;cursor:pointer}
+.hd-item:hover{background:var(--accent-soft);color:var(--accent)}
+.hd-item[hidden],.hd-tool[hidden]{display:none!important}
+#acctMenu{position:absolute;top:calc(100% + 6px);right:0;z-index:60;display:none;flex-direction:column;gap:2px;min-width:150px;background:var(--paper);border-radius:12px;padding:6px;box-shadow:0 10px 30px rgba(15,22,34,.16),0 0 0 1px var(--line)}
+.acct.open #acctMenu{display:flex}
+
+/* 한 줄 상단바: 이름을 작게, 오른쪽에 바로가기 · 동기화 · 계정 */
+header.hd{padding-bottom:4px}
+.hd-brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.hd h1{font-size:34px;letter-spacing:-.035em;line-height:1;margin:0}
+.hd .date{order:2}
+.hd-tools{border-right:1px solid var(--line);padding-right:16px}
+
+/* 폰: 1줄 = 이름 + 동기화 시간 + 계정, 2줄 = 바로가기 */
+@media (max-width:760px){
+  header.hd{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand acct" "tools tools";align-items:center;gap:10px 10px}
+  .hd h1{font-size:30px;letter-spacing:-.035em;line-height:1;margin:2px 0 0}
+  .hd-brand{display:block}
+  .hd .date{font-size:12.5px}
+  .hd h1,.hd .date{white-space:nowrap}
+  .hd-tools{border:0;padding:0}
+  .hd-acct{gap:6px}
+  header.hd .sync{padding:6px 10px;font-size:11.5px;max-width:40vw}
+  header.hd .sync .sy-l{display:none}
+  .acct-btn .me-chip .role{display:none}
+  .acct-btn{padding:7px 10px 7px 13px}
+  .hd-tools-list{overflow-x:auto;scrollbar-width:none;max-width:100%}
+  .hd-tool{padding:7px 12px;font-size:12.5px}
+}
 </style>
 </head>
 <body>
@@ -1177,24 +1220,29 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
     <div class="err" id="setupErr" role="alert"></div>
   </section>
   <div class="offbar" id="offBar" hidden role="status"><b>인터넷 연결 없음</b><span></span></div>
-  <header>
-    <div>
-      <div class="date" id="today"></div>
-      <h1>GWJ3 IB</h1>
-      <button type="button" class="ghost app-inst" id="installBtn" hidden>앱으로 설치</button>
-      <a class="ghost ext-dl lbl-dl" href="/labels.html" target="_blank" rel="noopener" title="로케이션 QR · 바코드 라벨 한꺼번에 인쇄">로케이션 바코드 출력</a>
-      <a class="ghost ext-dl lbl-dl" href="/training.html" target="_blank" rel="noopener" title="신규 사원 진열 과정 · 규칙 교육과 진열 실습">진열 교육</a>
-      <div class="me-row">
-        <span class="me-chip" id="meChip"></span>
-        <button type="button" class="ghost" id="usersBtn" hidden>사람 관리</button>
-        <button type="button" class="ghost" id="logoutBtn">로그아웃</button>
+  <header class="hd">
+    <div class="hd-brand"><div class="date" id="today"></div><h1>GWJ3 IB</h1></div>
+    <nav class="hd-tools" aria-label="바로가기">
+      <div class="hd-tools-list" id="toolsList">
+        <a class="hd-tool" href="/labels.html" target="_blank" rel="noopener" title="로케이션 QR · 바코드 라벨 한꺼번에 인쇄"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M17 6v12M20 6v12"/></svg><span>바코드 출력</span></a>
+        <a class="hd-tool" href="/training.html" target="_blank" rel="noopener" title="신규 사원 진열 과정 · 규칙 교육과 진열 실습"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-4 9 4-9 4z"/><path d="M7 11v4.5c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V11"/></svg><span>진열 교육</span></a>
+        <button type="button" class="hd-tool app-inst" id="installBtn" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>앱으로 설치</span></button>
+      </div>
+    </nav>
+    <div class="hd-acct">
+      <span class="sync" id="sync" aria-live="polite"><i></i><span id="syncText">불러오는 중…</span></span>
+      <div class="acct">
+        <button type="button" class="hd-btn acct-btn" id="acctBtn" aria-expanded="false" aria-controls="acctMenu"><span class="me-chip" id="meChip"></span><svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+        <div class="acct-menu" id="acctMenu">
+          <button type="button" class="hd-item" id="usersBtn" hidden>사람 관리</button>
+          <button type="button" class="hd-item" id="logoutBtn">로그아웃</button>
+        </div>
       </div>
     </div>
     <div class="progress" hidden>
       <span class="progress-num" id="progressNum">0 / 0 완료</span>
       <div class="bar"><i id="barFill" style="width:0"></i></div>
     </div>
-    <span class="sync" id="sync" aria-live="polite"><i></i><span id="syncText">불러오는 중…</span></span>
   </header>
 
   <div class="seg" role="group" aria-label="화면">
@@ -1327,7 +1375,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 
   $('#today').textContent = now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
 
-  function setSync(state, text){ if (offAt && !state){ state = 'err'; text = '오프라인 · 받아둔 내용'; } text = String(text || '').replace(/(\d{1,2}:\d{2}):\d{2}/, '$1'); $('#sync').className = 'sync' + (state ? ' ' + state : ''); $('#syncText').textContent = text; }
+  function setSync(state, text){ if (offAt && !state){ state = 'err'; text = '오프라인 · 받아둔 내용'; } text = String(text || '').replace(/(\d{1,2}:\d{2}):\d{2}/, '$1'); $('#sync').className = 'sync' + (state ? ' ' + state : ''); const st = $('#syncText'), m = /^(동기화됨 · )(.+)$/.exec(text); if (m){ st.textContent = ''; st.append(el('span', { class: 'sy-l', text: m[1] }), m[2]); } else st.textContent = text; $('#sync').title = text; }
   let toastTimer;
   function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 4000); }
 
@@ -5553,7 +5601,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     document.body.classList.toggle('ro', ro);
     $('#meChip').innerHTML = '';
     if (me) $('#meChip').append(el('b', { text: me.name }), el('span', { class: 'role' + (isAdmin() ? ' admin' : ''), text: isAdmin() ? '관리자' : '보기 전용' }));
-    $('#logoutBtn').hidden = !me;
+    $('#logoutBtn').hidden = !me; $('#acctBtn').hidden = !me;
     if (ro){ editMode = false; askEdit = false; lockControls(document); }
     // 공용으로 들어왔고 관리자가 아직 없으면 '첫 관리자 만들기'를, 관리 담당 관리자면 '사람 관리'를 보여줘요 (로그인마다 한 번 확인)
     if (me?.id !== '_team') $('#setup').hidden = true;
@@ -5667,6 +5715,14 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   // ---------- 홈 화면 앱 설치 ----------
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
   let instEvt = null;
+  // ---------- 머리: 계정 펼침 메뉴 (사람 관리 · 로그아웃) ----------
+  (function(){
+    const btn = $('#acctBtn'), box = $('.acct');
+    const close = () => { box.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); };
+    btn.addEventListener('click', e => { e.stopPropagation(); const on = !box.classList.contains('open'); box.classList.toggle('open', on); btn.setAttribute('aria-expanded', String(on)); });
+    document.addEventListener('click', e => { if (!e.target.closest('.acct-menu') || e.target.closest('button')) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instEvt = e; $('#installBtn').hidden = false; });
   window.addEventListener('appinstalled', () => { instEvt = null; $('#installBtn').hidden = true; toast('홈 화면에 GWJ3 IB 앱이 생겼어요.'); });
   $('#installBtn').onclick = async () => {
