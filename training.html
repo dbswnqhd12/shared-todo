@@ -52,6 +52,13 @@ h2{font-size:19px;margin:0 0 4px}
 .steps button.past i{background:var(--ok);color:#fff}
 /* 규칙: 한 줄에 하나씩 */
 .rulegrid{display:grid;gap:14px}
+.ctn{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;padding:6px 0 2px}
+.ctn .col{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--mute)}
+.ctn .bin2{position:relative;display:grid;grid-template-columns:repeat(2,52px);gap:6px;background:#F5F1EA;border:2px solid #E07B1F;border-radius:8px;padding:8px}
+.ctn .bx{width:52px;height:40px;border-radius:6px;background:#fff;border:2px solid var(--c);display:grid;place-items:center}
+.ctn .bx svg{height:32px}
+.ctn .bx.hide{background:#E7EAEF;border-color:#B9C0CB;opacity:.5}
+.ctn .front b{font-size:12px;color:var(--ink)}
 .rrow{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:start}
 :root[data-theme="dark"] .tabs button[aria-pressed=true]{color:#10141B}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabs button[aria-pressed=true]{color:#10141B}}
@@ -242,7 +249,7 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 <div class="tabs" role="tablist">
   <button type="button" data-tab="video" aria-pressed="true"><span class="n"><span>1</span></span><span><b>교육 영상</b><small>약 2분</small></span></button>
   <button type="button" data-tab="walk" aria-pressed="false"><span class="n"><span>2</span></span><span><b>진열 순서</b><small>6단계</small></span></button>
-  <button type="button" data-tab="rules" aria-pressed="false"><span class="n"><span>3</span></span><span><b>규칙</b><small>3가지 + 예시</small></span></button>
+  <button type="button" data-tab="rules" aria-pressed="false"><span class="n"><span>3</span></span><span><b>규칙</b><small>4가지 + 예시</small></span></button>
   <button type="button" data-tab="game" aria-pressed="false"><span class="n"><span>4</span></span><span><b>진열 실습</b><small>3스테이지</small></span></button>
 </div>
 
@@ -309,7 +316,7 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
   </div>
   <div class="card" style="margin-top:14px">
     <b>한눈에 정리</b>
-    <p class="mute" style="margin:4px 0 0"><b>유사상품</b>: 같은 빈(왼쪽 · 오른쪽 칸)에 같이 넣지 않아요. 옆 빈 · 위아래 빈은 괜찮아요.<br><b>동일상품</b>: 바로 옆 빈 · 바로 위아래 빈에 놓지 않아요. 같은 빈의 두 칸에는 함께 넣어도 돼요.<br><b>중량물</b>: 1단 · 2단에만 놓아요.<br>놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.</p>
+    <p class="mute" style="margin:4px 0 0"><b>유사상품</b>: 같은 빈(왼쪽 · 오른쪽 칸)에 같이 넣지 않아요. 옆 빈 · 위아래 빈은 괜찮아요.<br><b>동일상품</b>: 바로 옆 빈 · 바로 위아래 빈에 놓지 않아요. 같은 빈의 두 칸에는 함께 넣어도 돼요.<br><b>중량물</b>: 1단 · 2단에만 놓아요.<br><b>커튼 진열</b>: 앞에서 뒤로 세로 줄로 넣어서, 뒤에 있는 상품도 앞에서 보이게 해요.<br>놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.</p>
   </div>
   <div class="nextbar"><span>규칙을 다 봤으면 직접 진열해 봐요.</span><button type="button" class="btn" data-go="game">4 진열 실습 하기 →</button></div>
 </section>
@@ -323,6 +330,7 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
       <span class="chip">유사상품 같은 빈 금지</span>
       <span class="chip">동일상품 옆 · 위아래 빈 금지</span>
       <span class="chip heavy">중량물은 1·2단에만</span>
+      <span class="chip">커튼 진열 금지</span>
     </div>
     <div class="row" style="margin-top:16px"><button type="button" class="btn" id="gStart">시작하기</button><span class="mute" id="gBest"></span></div>
   </div>
@@ -592,6 +600,16 @@ const RULES = [
 $('ruleGrid').innerHTML = RULES.map(r => `<div class="card rrow"><div><span class="num">${r.n}</span><h2>${r.t}</h2><p class="mute" style="margin:4px 0 0;font-size:14px">${r.p}</p></div>
   <div class="ex"><div><span class="tag x">✕ 안 돼요</span><div class="rackwrap"><div data-ex="${r.n}x"></div></div><div class="why">${r.x.why}</div></div>
   <div><span class="tag o">○ 좋아요</span><div class="rackwrap"><div data-ex="${r.n}o"></div></div><div class="why">${r.o.why}</div></div></div></div>`).join('');
+/* 규칙 4: 커튼 진열 (위에서 본 빈 + 앞에서 본 모습) */
+{
+  const bx = (id, hide) => `<span class="bx${hide?' hide':''}" style="--c:${CAT[id].c}">${CAT[id].em}</span>`;
+  const view = (rows, hide, front, lab) => `<div class="ctn">
+    <div class="col">위에서 본 빈 (뒤)<div class="bin2">${rows.map((row,r) => row.map(id => bx(id, hide && r===0)).join('')).join('')}</div>▲ 앞 (피킹하는 쪽)</div>
+    <div class="col front">앞에서 보면<div class="bin2">${front.map(id => bx(id)).join('')}</div><b>${lab}</b></div></div>`;
+  $('ruleGrid').insertAdjacentHTML('beforeend', `<div class="card rrow"><div><span class="num">4</span><h2>커튼 진열 금지</h2><p class="mute" style="margin:4px 0 0;font-size:14px">상품은 앞에서 뒤로 세로 줄로 넣어요. 한 상품이 앞을 가로로 막으면 뒤에 있는 다른 상품이 안 보여요. 이걸 커튼 진열이라고 해요. 피킹할 때 상품을 못 찾게 만들어요.</p></div>
+  <div class="ex"><div><span class="tag x">✕ 안 돼요</span>${view([['tofu','tofu'],['milk','milk'],['milk','milk']], true, ['milk','milk'], '우유만 보이고 두부는 안 보여요')}</div>
+  <div><span class="tag o">○ 좋아요</span>${view([['milk','tofu'],['milk','tofu'],['milk','tofu']], false, ['milk','tofu'], '우유, 두부 둘 다 보여요')}</div></div></div>`);
+}
 for (const r of RULES) for (const k of ['x','o']){
   const e = r[k]; drawRack(document.querySelector(`[data-ex="${r.n}${k}"]`), e.g, {mini:true, marks:e.m, dimRows:e.dim});
 }
