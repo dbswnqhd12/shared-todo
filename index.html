@@ -1134,45 +1134,28 @@ header.hd{display:grid;align-items:center;gap:10px 16px;grid-template-columns:mi
 .hd-tool:hover{background:var(--accent-soft);color:var(--accent)}
 .hd-tool svg{color:var(--accent)}
 .hd-tool.app-inst{color:var(--accent);margin:0}
-.tools-btn{display:none}
-/* 펼침 메뉴 */
-.hd-pop.pop{position:absolute;top:calc(100% + 6px);right:0;z-index:60;display:none;flex-direction:column;align-items:stretch;gap:2px;min-width:170px;background:var(--paper);border-radius:12px;padding:6px;box-shadow:0 10px 30px rgba(15,22,34,.16),0 0 0 1px var(--line)}
-.open > .hd-pop.pop{display:flex}
-.hd-pop.pop .hd-tool,.hd-item{justify-content:flex-start;background:transparent;border:0;border-radius:8px;padding:9px 12px;font-size:13.5px;text-align:left;color:var(--ink);width:100%;cursor:pointer}
-.hd-pop.pop .hd-tool:hover,.hd-item:hover{background:var(--accent-soft);color:var(--accent)}
+/* 계정 펼침 메뉴 */
+.hd-item{justify-content:flex-start;background:transparent;border:0;border-radius:8px;padding:9px 12px;font-size:13.5px;text-align:left;color:var(--ink);width:100%;cursor:pointer}
+.hd-item:hover{background:var(--accent-soft);color:var(--accent)}
 .hd-item[hidden],.hd-tool[hidden]{display:none!important}
 #acctMenu{position:absolute;top:calc(100% + 6px);right:0;z-index:60;display:none;flex-direction:column;gap:2px;min-width:150px;background:var(--paper);border-radius:12px;padding:6px;box-shadow:0 10px 30px rgba(15,22,34,.16),0 0 0 1px var(--line)}
 .acct.open #acctMenu{display:flex}
 
-/* 시안 A · 한 줄 상단바: 이름을 작게, 오른쪽에 바로가기 · 동기화 · 계정 */
-body[data-hdr=a] header.hd{padding-bottom:4px}
-body[data-hdr=a] .hd-brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-body[data-hdr=a] .hd h1{font-size:34px;letter-spacing:-.035em;line-height:1;margin:0}
-body[data-hdr=a] .hd .date{order:2}
-body[data-hdr=a] .hd-tools{border-right:1px solid var(--line);padding-right:16px}
+/* 한 줄 상단바: 이름을 작게, 오른쪽에 바로가기 · 동기화 · 계정 */
+header.hd{padding-bottom:4px}
+.hd-brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.hd h1{font-size:34px;letter-spacing:-.035em;line-height:1;margin:0}
+.hd .date{order:2}
+.hd-tools{border-right:1px solid var(--line);padding-right:16px}
 
-/* 시안 B · 큰 이름은 그대로, 계정은 오른쪽 위, 바로가기는 이름 밑 한 줄 */
-body[data-hdr=b] header.hd{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand acct" "tools tools";align-items:start}
-body[data-hdr=b] .hd-acct{padding-top:4px}
-body[data-hdr=b] .hd h1{margin-bottom:4px}
-
-/* 시안 C · 큰 이름 + 오른쪽 아래에 [바로가기 ▾] [동기화] [계정 ▾] */
-body[data-hdr=c] header.hd{align-items:end}
-body[data-hdr=c] .hd h1{margin-bottom:0}
-body[data-hdr=c] .tools-btn{display:inline-flex}
-body[data-hdr=c] .hd-tools-list{position:absolute;top:calc(100% + 6px);right:0;z-index:60;display:none;flex-direction:column;align-items:stretch;gap:2px;min-width:180px;background:var(--paper);border-radius:12px;padding:6px;box-shadow:0 10px 30px rgba(15,22,34,.16),0 0 0 1px var(--line)}
-body[data-hdr=c] .hd-tools.open .hd-tools-list{display:flex}
-body[data-hdr=c] .hd-tools-list .hd-tool{background:transparent;border-radius:8px;padding:9px 12px;font-size:13.5px}
-body[data-hdr=c] .hd-tools-list .hd-tool:hover{background:var(--accent-soft)}
-
-/* 폰: 1줄 = 이름 + 동기화 점 + 계정, 2줄 = 바로가기 (C는 메뉴) */
+/* 폰: 1줄 = 이름 + 동기화 시간 + 계정, 2줄 = 바로가기 */
 @media (max-width:760px){
-  header.hd,body[data-hdr] header.hd{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand acct" "tools tools";align-items:center;gap:10px 10px}
-  body[data-hdr] .hd h1{font-size:30px;letter-spacing:-.035em;line-height:1;margin:2px 0 0}
-  body[data-hdr=a] .hd-brand{display:block}
-  body[data-hdr] .hd .date{font-size:12.5px}
-  body[data-hdr] .hd h1,body[data-hdr] .hd .date{white-space:nowrap}
-  body[data-hdr=a] .hd-tools{border:0;padding:0}
+  header.hd{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand acct" "tools tools";align-items:center;gap:10px 10px}
+  .hd h1{font-size:30px;letter-spacing:-.035em;line-height:1;margin:2px 0 0}
+  .hd-brand{display:block}
+  .hd .date{font-size:12.5px}
+  .hd h1,.hd .date{white-space:nowrap}
+  .hd-tools{border:0;padding:0}
   .hd-acct{gap:6px}
   header.hd .sync{padding:6px 10px;font-size:11.5px;max-width:40vw}
   header.hd .sync .sy-l{display:none}
@@ -1180,17 +1163,7 @@ body[data-hdr=c] .hd-tools-list .hd-tool:hover{background:var(--accent-soft)}
   .acct-btn{padding:7px 10px 7px 13px}
   .hd-tools-list{overflow-x:auto;scrollbar-width:none;max-width:100%}
   .hd-tool{padding:7px 12px;font-size:12.5px}
-  body[data-hdr=c] header.hd{grid-template-areas:"brand acct";grid-template-columns:minmax(0,1fr) auto auto}
-  body[data-hdr=c] header.hd{grid-template-areas:"brand tools acct"}
-  body[data-hdr=c] .tools-btn span{display:none}
-  body[data-hdr=c] .tools-btn{padding:7px 10px}
-  body[data-hdr=c] .hd-tools-list{right:auto;left:auto}
 }
-/* 시안 미리보기용 바꾸기 버튼 (고르면 지워요) */
-.hd-pick{position:fixed;left:12px;bottom:12px;z-index:200;display:flex;gap:4px;background:var(--ink);color:var(--paper);border-radius:999px;padding:4px 4px 4px 12px;align-items:center;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
-.hd-pick button{border:0;border-radius:999px;background:transparent;color:inherit;padding:5px 11px;font-weight:600;cursor:pointer}
-.hd-pick button[aria-pressed=true]{background:var(--accent);color:#fff}
-@media (max-width:760px){.hd-pick{bottom:calc(84px + env(safe-area-inset-bottom,0px));left:auto;right:10px}}
 </style>
 </head>
 <body>
@@ -1250,8 +1223,7 @@ body[data-hdr=c] .hd-tools-list .hd-tool:hover{background:var(--accent-soft)}
   <header class="hd">
     <div class="hd-brand"><div class="date" id="today"></div><h1>GWJ3 IB</h1></div>
     <nav class="hd-tools" aria-label="바로가기">
-      <button type="button" class="hd-btn tools-btn" id="toolsBtn" aria-expanded="false" aria-controls="toolsList"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></svg><span>바로가기</span><svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
-      <div class="hd-tools-list hd-pop" id="toolsList">
+      <div class="hd-tools-list" id="toolsList">
         <a class="hd-tool" href="/labels.html" target="_blank" rel="noopener" title="로케이션 QR · 바코드 라벨 한꺼번에 인쇄"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M17 6v12M20 6v12"/></svg><span>바코드 출력</span></a>
         <a class="hd-tool" href="/training.html" target="_blank" rel="noopener" title="신규 사원 진열 과정 · 규칙 교육과 진열 실습"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-4 9 4-9 4z"/><path d="M7 11v4.5c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V11"/></svg><span>진열 교육</span></a>
         <button type="button" class="hd-tool app-inst" id="installBtn" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>앱으로 설치</span></button>
@@ -1261,7 +1233,7 @@ body[data-hdr=c] .hd-tools-list .hd-tool:hover{background:var(--accent-soft)}
       <span class="sync" id="sync" aria-live="polite"><i></i><span id="syncText">불러오는 중…</span></span>
       <div class="acct">
         <button type="button" class="hd-btn acct-btn" id="acctBtn" aria-expanded="false" aria-controls="acctMenu"><span class="me-chip" id="meChip"></span><svg class="caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
-        <div class="acct-menu hd-pop" id="acctMenu">
+        <div class="acct-menu" id="acctMenu">
           <button type="button" class="hd-item" id="usersBtn" hidden>사람 관리</button>
           <button type="button" class="hd-item" id="logoutBtn">로그아웃</button>
         </div>
@@ -5743,20 +5715,12 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   // ---------- 홈 화면 앱 설치 ----------
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
   let instEvt = null;
-  // ---------- 머리: 바로가기 · 계정 펼침 메뉴 ----------
+  // ---------- 머리: 계정 펼침 메뉴 (사람 관리 · 로그아웃) ----------
   (function(){
-    const q = new URLSearchParams(location.search).get('hdr');
-    if (/^[abc]$/.test(q || '')) store.set('hdr', q);
-    const setHdr = v => { document.body.dataset.hdr = v; store.set('hdr', v); document.querySelectorAll('.hd-pick button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.h === v))); };
-    const pick = document.createElement('div'); pick.className = 'hd-pick';
-    pick.innerHTML = '<span>시안</span><button type="button" data-h="a">A</button><button type="button" data-h="b">B</button><button type="button" data-h="c">C</button>';
-    document.body.append(pick);
-    pick.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setHdr(b.dataset.h); });
-    setHdr(store.get('hdr', 'a'));
-    const menus = [[$('#toolsBtn'), $('.hd-tools')], [$('#acctBtn'), $('.acct')]];
-    const close = except => menus.forEach(([b, box]) => { if (box !== except){ box.classList.remove('open'); b.setAttribute('aria-expanded', 'false'); } });
-    menus.forEach(([b, box]) => b.addEventListener('click', e => { e.stopPropagation(); const on = !box.classList.contains('open'); close(box); box.classList.toggle('open', on); b.setAttribute('aria-expanded', String(on)); }));
-    document.addEventListener('click', e => { if (!e.target.closest('.hd-tools.open .hd-tools-list, .acct.open .acct-menu') || e.target.closest('a, button')) close(); });
+    const btn = $('#acctBtn'), box = $('.acct');
+    const close = () => { box.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); };
+    btn.addEventListener('click', e => { e.stopPropagation(); const on = !box.classList.contains('open'); box.classList.toggle('open', on); btn.setAttribute('aria-expanded', String(on)); });
+    document.addEventListener('click', e => { if (!e.target.closest('.acct-menu') || e.target.closest('button')) close(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
   })();
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instEvt = e; $('#installBtn').hidden = false; });
