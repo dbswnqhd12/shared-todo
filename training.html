@@ -26,9 +26,33 @@ h1{font-size:28px;margin:6px 0 2px;letter-spacing:-.01em}
 .sub{color:var(--mute);margin:0 0 18px}
 h2{font-size:19px;margin:0 0 4px}
 .card{background:var(--paper);border-radius:12px;padding:18px 20px;margin-bottom:14px}
-.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.tabs button{background:var(--paper);border:1px solid var(--line);color:var(--mute);border-radius:999px;padding:8px 16px;font:inherit;font-weight:600;cursor:pointer}
-.tabs button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px}
+.tabs button{position:relative;display:flex;align-items:center;gap:10px;text-align:left;background:var(--paper);border:1.5px solid transparent;color:var(--ink);border-radius:12px;padding:10px 12px;font:inherit;cursor:pointer}
+.tabs button .n{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;background:var(--slot);color:var(--mute)}
+.tabs button b{display:block;font-size:15px;line-height:1.25}
+.tabs button small{display:block;font-size:12px;color:var(--mute);line-height:1.3}
+.tabs button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+.tabs button[aria-pressed=true] .n{background:var(--accent);color:#fff}
+.tabs button.done .n{background:var(--ok);color:#fff}
+.tabs button.done .n::before{content:"✓"}.tabs button.done .n span{display:none}
+.nextbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--paper);border-radius:12px;padding:14px 20px;margin-top:2px}
+.nextbar span{color:var(--mute);font-size:14px}
+/* 영상 */
+.vidwrap{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:18px;align-items:start}
+.keys{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.keys li{background:var(--slot);border-radius:10px;padding:9px 12px;font-size:14px}
+.keys li b{display:block;font-size:14.5px}
+.keys li span{color:var(--mute);font-size:13px}
+/* 진열 과정: 단계 목록 */
+.steps{list-style:none;margin:16px 0 0;padding:12px 0 0;border-top:1px solid var(--line);display:grid;gap:2px}
+.steps button{width:100%;display:flex;gap:10px;align-items:center;text-align:left;background:none;border:0;border-radius:8px;padding:6px 8px;font:inherit;font-size:14px;color:var(--mute);cursor:pointer}
+.steps button i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:700;background:var(--slot)}
+.steps button.on{background:var(--accent-soft);color:var(--ink);font-weight:600}
+.steps button.on i{background:var(--accent);color:#fff}
+.steps button.past i{background:var(--ok);color:#fff}
+/* 규칙: 한 줄에 하나씩 */
+.rulegrid{display:grid;gap:14px}
+.rrow{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:start}
 :root[data-theme="dark"] .tabs button[aria-pressed=true]{color:#10141B}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabs button[aria-pressed=true]{color:#10141B}}
 .btn{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:11px 20px;font:inherit;font-weight:700;cursor:pointer}
@@ -127,7 +151,6 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 .legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
 
 /* 규칙 3가지 */
-.rulegrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:12px}
 .pair{background:var(--slot);border-radius:10px;padding:10px 12px}
 .pair .pics{display:flex;gap:14px;align-items:flex-end}
@@ -141,7 +164,7 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 .rulegrid .card{margin:0}
 .rulegrid .num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--paper);font-weight:700;font-size:14px;margin-bottom:6px}
 .ex{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
-.ex>div{flex:1 1 150px}
+.ex{margin-top:0}.ex .rackwrap{display:flex;justify-content:center}.ex>div{flex:1 1 220px;background:var(--slot);border-radius:10px;padding:10px 12px}
 .ex .tag{font-size:13px;font-weight:700}
 .ex .tag.o{color:var(--ok)}.ex .tag.x{color:var(--bad)}
 .ex .why{font-size:12.5px;color:var(--mute);margin-top:4px}
@@ -179,7 +202,9 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 
 @media (max-width:860px){
   .walk,.game{grid-template-columns:minmax(0,1fr)}
-  .rulegrid{grid-template-columns:minmax(0,1fr)}
+  .rrow,.vidwrap{grid-template-columns:minmax(0,1fr)}
+  .rrow{gap:10px}
+  .steps{display:none}
   .now{position:sticky;top:0;z-index:5;box-shadow:0 6px 14px -8px rgba(0,0,0,.35)}
   .now{padding:10px 14px}.now>small,.now .cartwrap,.draghint{display:none}
   .now .big{margin:0 0 8px}
@@ -187,6 +212,9 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 }
 @media (max-width:560px){
   main{padding-top:18px}
+  .tabs{gap:5px}
+  .tabs button{flex-direction:column;align-items:center;text-align:center;gap:4px;padding:8px 2px}
+  .tabs button b{font-size:12.5px}.tabs button small{display:none}
   h1{font-size:24px}
   .card{padding:14px}
   .rack{--cell:min(64px,calc((100vw - 32px - 28px - 30px - 16px) / var(--w)));--beam:11px}
@@ -209,25 +237,36 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
 <body><main>
 <a class="top" href="/">← GWJ3 IB</a>
 <h1>진열 교육</h1>
-<p class="sub">신규 사원용 · 교육 영상과 진열 과정을 보고, 3가지 규칙을 익힌 뒤 진열 실습으로 직접 해 봐요.</p>
+<p class="sub">신규 사원용 · 1번부터 순서대로 따라오면 돼요.</p>
 
 <div class="tabs" role="tablist">
-  <button type="button" data-tab="video" aria-pressed="true">▶ 교육 영상</button>
-  <button type="button" data-tab="walk" aria-pressed="false">① 진열 과정</button>
-  <button type="button" data-tab="rules" aria-pressed="false">② 규칙 3가지</button>
-  <button type="button" data-tab="game" aria-pressed="false">③ 진열 실습</button>
+  <button type="button" data-tab="video" aria-pressed="true"><span class="n"><span>1</span></span><span><b>교육 영상</b><small>약 2분</small></span></button>
+  <button type="button" data-tab="walk" aria-pressed="false"><span class="n"><span>2</span></span><span><b>진열 순서</b><small>6단계</small></span></button>
+  <button type="button" data-tab="rules" aria-pressed="false"><span class="n"><span>3</span></span><span><b>규칙</b><small>3가지 + 예시</small></span></button>
+  <button type="button" data-tab="game" aria-pressed="false"><span class="n"><span>4</span></span><span><b>진열 실습</b><small>3스테이지</small></span></button>
 </div>
 
 <!-- ▶ 교육 영상 -->
 <section id="tab-video">
-  <div class="card">
-    <video class="vid" controls playsinline preload="metadata" poster="/media/stow-training-poster.jpg">
-      <source src="/media/stow-training.mp4" type="video/mp4">
-      이 브라우저에서는 영상을 재생할 수 없어요.
-    </video>
-    <p class="mute" style="margin:10px 0 0;font-size:14px">약 2분 · 소리가 나와요(자막 포함). 영상을 본 뒤 진열 과정과 규칙을 한 번 더 확인하고 진열 실습으로 직접 해 봐요.</p>
-    <div class="row" style="margin-top:12px"><button type="button" class="btn" data-go="walk">진열 과정 보기</button></div>
+  <div class="card vidwrap">
+    <div>
+      <video class="vid" controls playsinline preload="metadata" poster="/media/stow-training-poster.jpg">
+        <source src="/media/stow-training.mp4" type="video/mp4">
+        이 브라우저에서는 영상을 재생할 수 없어요.
+      </video>
+      <p class="mute" style="margin:8px 0 0;font-size:13.5px">약 2분 · 소리가 나와요(자막 포함)</p>
+    </div>
+    <div>
+      <h2 style="font-size:16px;margin-bottom:8px">영상에서 배우는 것</h2>
+      <ul class="keys">
+        <li><b>유사상품</b><span>한 빈에 같이 넣지 않기</span></li>
+        <li><b>동일상품</b><span>바로 옆 빈 · 위아래 빈 피하기</span></li>
+        <li><b>중량물</b><span>1단 · 2단에만</span></li>
+        <li><b>커튼 진열</b><span>앞에서 뒤로 세로 줄로, 뒤 상품도 보이게</span></li>
+      </ul>
+    </div>
   </div>
+  <div class="nextbar"><span>다음은 실제 진열 순서를 한 단계씩 봐요.</span><button type="button" class="btn" data-go="walk">2 진열 순서 보기 →</button></div>
 </section>
 
 <!-- ① 진열 과정 -->
@@ -238,11 +277,11 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
       <h2 id="wTitle"></h2>
       <p id="wBody"></p>
       <div class="hand" id="wHand"></div>
-      <div class="dots" id="wDots"></div>
-      <div class="row">
+      <div class="row" style="margin-top:16px">
         <button type="button" class="ghost" id="wPrev">이전</button>
         <button type="button" class="btn" id="wNext">다음</button>
       </div>
+      <ol class="steps" id="wDots"></ol>
     </div>
     <div>
       <div class="rackwrap"><div id="wRack"></div></div>
@@ -271,8 +310,8 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
   <div class="card" style="margin-top:14px">
     <b>한눈에 정리</b>
     <p class="mute" style="margin:4px 0 0"><b>유사상품</b>: 같은 빈(왼쪽 · 오른쪽 칸)에 같이 넣지 않아요. 옆 빈 · 위아래 빈은 괜찮아요.<br><b>동일상품</b>: 바로 옆 빈 · 바로 위아래 빈에 놓지 않아요. 같은 빈의 두 칸에는 함께 넣어도 돼요.<br><b>중량물</b>: 1단 · 2단에만 놓아요.<br>놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.</p>
-    <div class="row" style="margin-top:12px"><button type="button" class="btn" data-go="game">진열 실습 하기</button></div>
   </div>
+  <div class="nextbar"><span>규칙을 다 봤으면 직접 진열해 봐요.</span><button type="button" class="btn" data-go="game">4 진열 실습 하기 →</button></div>
 </section>
 
 <!-- ③ 진열 실습 -->
@@ -281,8 +320,8 @@ svg.pk{display:block;aspect-ratio:40/48;width:auto}
     <h2>진열 실습</h2>
     <p class="mute" style="margin:4px 0 0">카트에서 나오는 상품을 하나씩 선반 빈 칸에 눌러서 진열해요. 규칙을 어기면 바로 알려줘요. 놓을 칸이 없을 땐 <b>"놓을 칸 없음"</b>을 눌러요. 스테이지는 3개, 갈수록 선반이 커지고 상품이 많아져요.</p>
     <div class="rules">
-      <span class="chip">유사상품 붙여서 진열 금지</span>
-      <span class="chip">동일상품 가로·세로 연속 진열 금지</span>
+      <span class="chip">유사상품 같은 빈 금지</span>
+      <span class="chip">동일상품 옆 · 위아래 빈 금지</span>
       <span class="chip heavy">중량물은 1·2단에만</span>
     </div>
     <div class="row" style="margin-top:16px"><button type="button" class="btn" id="gStart">시작하기</button><span class="mute" id="gBest"></span></div>
@@ -469,7 +508,15 @@ const handHTML = (id, note) => { const it = CAT[id];
   return `<span class="em">${it.em}</span><div><b>${it.name}</b><small>${it.heavy?'중량물 · ':''}${note||''}</small></div>`; };
 
 /* ── 탭 ── */
+/* 단계 완료 표시(이 기기에만 저장) */
+const DONE_KEY = 'stowTrainDone';
+let done = {}; try { done = JSON.parse(localStorage.getItem(DONE_KEY)) || {}; } catch {}
+function paintDone(){ document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('done', !!done[b.dataset.tab])); }
+function markDone(k){ if (done[k]) return; done[k] = 1; try { localStorage.setItem(DONE_KEY, JSON.stringify(done)); } catch {} paintDone(); }
 function showTab(t){
+  const cur = document.querySelector('.tabs button[aria-pressed=true]');
+  if (cur && cur.dataset.tab === 'rules' && t !== 'rules') markDone('rules');
+  if (cur && cur.dataset.tab === 'video' && t === 'walk') markDone('video');
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab===t));
   ['video','walk','rules','game'].forEach(k => $('tab-'+k).hidden = k!==t);
   if (t !== 'video') { const v = document.querySelector('#tab-video video'); if (v) v.pause(); }
@@ -477,6 +524,8 @@ function showTab(t){
 }
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) showTab(g.dataset.go); });
+document.querySelector('#tab-video video').addEventListener('ended', () => markDone('video'));
+paintDone();
 
 /* ── ① 진열 과정 (단계별 보기) ── */
 const G0 = [ // 1단 ~ 6단 · 6빈 × 2칸 (빈마다 왼쪽 · 오른쪽)
@@ -517,12 +566,14 @@ function drawWalk(){
   $('wStepN').textContent = s.end ? '정리' : `단계 ${wi+1} / ${WALK.length-1}`;
   $('wTitle').textContent = s.t; $('wBody').textContent = s.p;
   $('wHand').hidden = !s.hand; if (s.hand) $('wHand').innerHTML = handHTML(s.hand, s.note || '손에 든 상품');
-  $('wDots').innerHTML = WALK.map((_,i) => `<i class="${i===wi?'on':''}"></i>`).join('');
+  $('wDots').innerHTML = WALK.map((w,i) => `<li><button type="button" data-wi="${i}" class="${i===wi?'on':i<wi?'past':''}"><i>${w.end?'✓':i+1}</i>${w.t}</button></li>`).join('');
+  if (s.end) markDone('walk');
   $('wPrev').disabled = wi===0;
-  $('wNext').textContent = s.end ? '규칙 3가지 보기' : '다음';
+  $('wNext').textContent = s.end ? '3 규칙 보기 →' : '다음';
   drawRack($('wRack'), s.g, {marks:s.marks, dimRows:s.dim});
 }
 $('wPrev').onclick = () => { if (wi>0){ wi--; drawWalk(); } };
+$('wDots').onclick = e => { const b = e.target.closest('[data-wi]'); if (b){ wi = +b.dataset.wi; drawWalk(); } };
 $('wNext').onclick = () => { if (WALK[wi].end){ showTab('rules'); return; } wi++; drawWalk(); };
 drawWalk();
 
@@ -538,7 +589,7 @@ const RULES = [
     x:{g:[[ null,'milk'],[ 'tofu',null],[ null,null],[ 'kimchi','cheese'],[ null,null],[ 'pap',null]], m:{'3-0':'bad'}, why:'김치가 4단에 있어요', dim:[2,3,4,5]},
     o:{g:[[ 'kimchi','milk'],[ 'tofu',null],[ null,'cheese'],[ null,null],[ 'pap',null],[ null,'tofu']], m:{'0-0':'ok'}, why:'김치는 1단에', dim:[2,3,4,5]}},
 ];
-$('ruleGrid').innerHTML = RULES.map(r => `<div class="card"><span class="num">${r.n}</span><h2>${r.t}</h2><p class="mute" style="margin:4px 0 0;font-size:14px">${r.p}</p>
+$('ruleGrid').innerHTML = RULES.map(r => `<div class="card rrow"><div><span class="num">${r.n}</span><h2>${r.t}</h2><p class="mute" style="margin:4px 0 0;font-size:14px">${r.p}</p></div>
   <div class="ex"><div><span class="tag x">✕ 안 돼요</span><div class="rackwrap"><div data-ex="${r.n}x"></div></div><div class="why">${r.x.why}</div></div>
   <div><span class="tag o">○ 좋아요</span><div class="rackwrap"><div data-ex="${r.n}o"></div></div><div class="why">${r.o.why}</div></div></div></div>`).join('');
 for (const r of RULES) for (const k of ['x','o']){
@@ -700,6 +751,7 @@ $('nPass').onclick = () => {
 function stars(miss){ return miss===0 ? 3 : miss<=2 ? 2 : 1; }
 function endStage(){
   const last = S.stage === STAGES.length-1;
+  if (last) markDone('game');
   const n = last ? (S.miss===0 ? 3 : S.miss<=3 ? 2 : 1) : stars(S.stageMiss);
   if (last && S.score > best){ best = S.score; try { localStorage.setItem('gwj3-stow-best', best); } catch(e){} showBest(); }
   const acc = S.total + S.miss ? Math.round(S.total/(S.total+S.miss)*100) : 100;
