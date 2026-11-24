@@ -888,7 +888,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .bf-g.on{border:2px solid var(--high)}
 .bf-gn .bc b.bf-ex{color:var(--ink);font-family:var(--mono)}.bf-gn .bc .pp-dd{margin-left:6px;min-width:0;font-size:10.5px;padding:1px 6px}
 .bf-do{font-size:11.5px;font-weight:800;border-radius:6px;padding:2px 7px;white-space:nowrap;justify-self:start}.bf-do.tg{background:#DDF3E6;color:#14774A}.bf-do.mv{background:var(--high-soft);color:var(--high)}
-.bf-rw.tg .loc{color:#14774A}.fp-r.tg .loc{color:#14774A}.fp-none{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.bf-act{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;justify-self:start}.bf-set{font:inherit;font-size:11.5px;font-weight:700;color:var(--accent);background:none;border:1px solid var(--line);border-radius:6px;padding:1px 7px;cursor:pointer;white-space:nowrap}.bf-set:hover{background:var(--accent-soft,#E6EEFA)}.fp-r .bf-act{flex-direction:column;align-items:flex-start;gap:3px}@media (max-width:760px){.fp-r .bf-act{flex-direction:row}}.bf-rw.tg .loc{color:#14774A}.fp-r.tg .loc{color:#14774A}.fp-none{font-size:11.5px;color:var(--muted);white-space:nowrap}
 .bf-split{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,1fr);gap:12px;align-items:start}
 .bf-side{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper)}.bf-side-h{padding:9px 12px;font-weight:700;font-size:14px;border-bottom:1px solid var(--line);background:var(--bg)}
 .bf-split .bf-list{max-height:min(78vh,860px);border:0}
@@ -920,7 +920,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .fp-leg i{display:inline-block;width:14px;height:14px;border-radius:3px;background:var(--accent-soft);border:1px solid var(--line)}.fp-leg i.lg-s{background:conic-gradient(var(--accent) 0 50%,var(--accent-soft) 50%);border:1px solid var(--accent)}.fp-leg i.lg-tg{border:2px solid #1E9E5A;background:var(--paper);border-radius:50%}.fp-leg i.lg-split{border:0;background:radial-gradient(circle at 50% 50%,#E8820C 45%,transparent 50%)}.fp-leg i.lg-old{border:2px solid var(--mid)}.fp-leg i.lg-hit{border:2px solid var(--high);background:var(--paper)}
 .fp-leg .fp-off{margin-left:auto}
 .fp-info{border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:4px 12px 8px}.fp-ih{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:6px 0;font-size:14px}.fp-ih b{font-family:var(--mono)}.fp-ih span{color:var(--muted);font-size:13px}.fp-ih button{margin-left:auto}
-.fp-r{display:grid;grid-template-columns:minmax(0,1fr) 150px 70px 120px 92px;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line);font-size:13px}
+.fp-r{display:grid;grid-template-columns:minmax(0,1fr) 150px 70px 120px 112px;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line);font-size:13px}
 .fp-r .nm{font-weight:600;overflow-wrap:anywhere}.fp-r .nm small{font-family:var(--mono);color:var(--muted);font-weight:400}.fp-r .loc{font-family:var(--mono);font-weight:700}.fp-r .q{text-align:right;color:var(--muted);font-size:12px}.fp-r .q b{font-family:var(--mono);color:var(--ink);font-size:13.5px}
 .fp-pop{position:fixed;z-index:96;width:min(480px,calc(100vw - 48px));max-height:min(62vh,600px);overflow:auto;box-shadow:0 14px 40px rgba(15,25,45,.24);border-radius:14px;animation:fpUp .16s ease-out}
 .fp-pop .fp-r{grid-template-columns:minmax(0,1fr) auto auto auto;gap:4px 12px}.fp-pop .fp-r .nm{grid-column:1/-1;font-size:13.5px}.fp-pop .fp-r .fp-go{justify-self:end}
@@ -4965,13 +4965,15 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
   const bfName = s => { let t = String(s || '').trim(), tag = ''; const m = t.match(/^(Box|Pack|Bundle)_/i); if (m){ tag = m[1]; t = t.slice(m[0].length); } return { tag, name: t.replace(/\[로켓프레시\]\s*/g, '').trim() }; };
   // 콘솔(합치기) 단위: 같은 상품(바코드) + 같은 유통기한. 유통기한이 다르면 합치지 않아요
   const bfKey = r => (r.bc || ('#' + r.name)) + '|' + (r.exp || '');
-  // 모을 곳: 그 묶음에서 수량이 가장 많은 로케이션 (같으면 로케이션 순서가 앞인 곳)
-  function bfTarget(rows){ const q = new Map(); for (const r of rows) q.set(r.loc, (q.get(r.loc) || 0) + (r.q || 0)); return [...q.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] || ''; }
+  // 모을 곳: 관리자가 직접 고른 곳(팀 공용 저장)이 있으면 그곳, 없으면 수량이 가장 많은 로케이션 (같으면 로케이션 순서가 앞인 곳)
+  let bfTg = {};
+  const bfManual = (key, rows) => { const l = bfTg[key]; return l && rows.some(r => r.loc === l) ? l : ''; };
+  function bfTarget(rows, key){ const m = key ? bfManual(key, rows) : ''; if (m) return m; const q = new Map(); for (const r of rows) q.set(r.loc, (q.get(r.loc) || 0) + (r.q || 0)); return [...q.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] || ''; }
   function bfGroups(){
     const map = new Map();
     for (const r of bfData.rows){ const k = bfKey(r); if (!map.has(k)) map.set(k, { key: k, bc: r.bc, name: r.name, exp: r.exp, rows: [] }); map.get(k).rows.push(r); }
-    return [...map.values()].map(g => { const locs = new Set(g.rows.map(r => r.loc)).size, tg = locs > 1 ? bfTarget(g.rows) : '';
-      return { ...g, tg, locs, q: g.rows.reduce((s, r) => s + (r.q || 0), 0), rows: g.rows.sort((a, b) => (b.loc === tg) - (a.loc === tg) || a.loc.localeCompare(b.loc)) }; })
+    return [...map.values()].map(g => { const locs = new Set(g.rows.map(r => r.loc)).size, tg = locs > 1 ? bfTarget(g.rows, g.key) : '', man = locs > 1 && !!bfManual(g.key, g.rows);
+      return { ...g, tg, man, locs, q: g.rows.reduce((s, r) => s + (r.q || 0), 0), rows: g.rows.sort((a, b) => (b.loc === tg) - (a.loc === tg) || a.loc.localeCompare(b.loc)) }; })
       .sort((a, b) => (b.locs > 1) - (a.locs > 1) || b.locs - a.locs || (a.exp || '9999').localeCompare(b.exp || '9999') || a.name.localeCompare(b.name, 'ko'));
   }
   function bfVisible(G){
@@ -4985,11 +4987,39 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     try {
       const d = await request('GET', '/api/prepack?kind=buffer');
       bfRev = d.rev;
+      const t = d.tg && typeof d.tg === 'object' ? d.tg : {};
+      if (JSON.stringify(t) !== JSON.stringify(bfTg)){ bfTg = t; fpIdx = null; if (view === 'buf' && bfData && !(d.snap && d.snap.at !== bfData.at)) renderBuffer(); }
       if (d.snap && d.snap.at !== bfData?.at){ bfData = ppDecode(d.snap); if (view === 'buf') renderBuffer(); }
       else if (!d.snap && view === 'buf' && !$('#buf').hasChildNodes()) renderBuffer();
     } catch(e) {
       if (e instanceof Locked) return showLock(e.message);
     } finally { bfLoading = false; }
+  }
+  // 모을 곳 직접 지정 (loc = '' 이면 자동으로 되돌리기). 관리자만, 팀 모두에게 공유돼요
+  async function bfSetTg(key, loc){
+    if (!isAdmin()) return toast('보기 전용 계정이라 모을 곳을 바꿀 수 없어요.');
+    const old = bfTg;
+    bfTg = { ...bfTg }; if (loc) bfTg[key] = loc; else delete bfTg[key];
+    fpIdx = null; fpPopClose(); renderBuffer();
+    try {
+      const r = await api('PATCH', '/api/prepack?kind=buffer', { key, loc });
+      if (r && r.tg) bfTg = r.tg;
+      setSync('', '저장됨');
+      toast(loc ? `${loc} 를 모을 곳으로 정했어요.` : '모을 곳을 자동(수량 가장 많은 곳)으로 되돌렸어요.');
+    } catch(e) {
+      bfTg = old; fpIdx = null; renderBuffer();
+      if (e instanceof Locked) return showLock(e.message);
+      toast('모을 곳을 저장하지 못했어요: ' + (e.message || ''));
+    }
+  }
+  // 할 일 표시 + (관리자) 모을 곳 바꾸기 버튼
+  function bfAct(t, key, loc, man){
+    if (!t) return el('span');
+    const b = el('span', { class:'bf-do ' + t, text: t === 'tg' ? (man ? '📌 여기로 모으기' : '여기로 모으기') : '→ 옮기기', title: t === 'tg' ? (man ? '직접 정한 모을 곳' : '자동: 수량이 가장 많은 곳') : '' });
+    const btn = !isAdmin() ? null : t === 'mv'
+      ? el('button', { type:'button', class:'bf-set', title:'이 로케이션을 모을 곳으로 정해요', onclick: e => { e.stopPropagation(); bfSetTg(key, loc); } }, '여기로 정하기')
+      : man ? el('button', { type:'button', class:'bf-set', title:'자동(수량이 가장 많은 곳)으로 되돌려요', onclick: e => { e.stopPropagation(); bfSetTg(key, ''); } }, '자동으로') : null;
+    return el('span', { class:'bf-act' }, b, btn);
   }
   function bfPick(){
     const inp = el('input', { type:'file', accept:'.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -5116,7 +5146,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     let on = 0, off = 0;
     const byG = new Map();
     for (const r of bfData.rows){ const g = bfKey(r); if (!grp.has(g)){ grp.set(g, new Set()); byG.set(g, []); } grp.get(g).add(r.loc); byG.get(g).push(r); }
-    const tg = new Map(); for (const [g, L] of grp) if (L.size > 1) tg.set(g, bfTarget(byG.get(g)));
+    const tg = new Map(); for (const [g, L] of grp) if (L.size > 1) tg.set(g, bfTarget(byG.get(g), g));
     for (const r of bfData.rows){
       const k = fpKey(r.loc);
       if (!k || !lay.byK.has(k)){ off++; continue; }
@@ -5236,7 +5266,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
       el('div', { class:'nm' }, nm.tag ? el('span', { class:'bf-tag', text: nm.tag }) : null, nm.name, el('small', { text: ' ' + (r.bc || '') })),
       el('code', { class:'loc', text: r.loc }), el('span', { class:'q' }, el('b', { text: retNum(r.q) }), '개'),
       el('span', { class:'ddc' }, r.exp ? el('span', { class:'pp-dd' + ppLvl(d), text: ppMD(r.exp) + ' ' + ppDD(d) }) : null),
-      opt.noPick ? (t ? el('span', { class:'bf-do ' + t, text: t === 'tg' ? '여기로 모으기' : '→ 옮기기' }) : el('span'))
+      opt.noPick ? bfAct(t, g, r.loc, !!bfTg[g] && bfTg[g] === I.tg.get(g))
         : n > 1 ? el('button', { type:'button', class:'ret-btn sm fp-go', onclick: () => { fpPopClose(); fpPick(g); } }, `합치기 ${n}곳 ↗`) : el('span', { class:'fp-none', text:'합칠 것 없음' }));
   }
   let fpPopEl = null;
@@ -5313,7 +5343,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
           multi && g.rows.some(r => fpLayout().byK.has(fpKey(r.loc))) ? el('button', { type:'button', class:'ret-btn sm bf-map' + (on ? ' on' : ''), title:'평면도에서 모을 곳 · 옮길 곳 보기', 'aria-pressed': on ? 'true' : 'false', onclick: () => fpPick(gk) }, on ? '📍 표시 중' : '📍 위치') : null)),
       el('div', { class:'bf-rows' }, el('div', { class:'bf-rh' }, el('span', { text:'로케이션' }), el('span', { class:'r', text:'수량' }), el('span', { text:'제조일자' }), el('span', { text:'할 일' }), el('span')),
         ...g.rows.map(r => { const t = multi ? (r.loc === g.tg ? 'tg' : 'mv') : ''; return el('div', { class:'bf-rw' + (t ? ' ' + t : '') }, el('span', { class:'loc', text: r.loc || '-' }), el('span', { class:'q' }, el('b', { text: retNum(r.q) }), '개'),
-          el('span', { class:'mf', text: ppMD(r.mfg) }), t ? el('span', { class:'bf-do ' + t, text: t === 'tg' ? '여기로 모으기' : '→ 옮기기' }) : el('span'), el('span')); }))); };
+          el('span', { class:'mf', text: ppMD(r.mfg) }), bfAct(t, gk, r.loc, g.man), el('span')); }))); };
     const list = V.length ? el('div', { class:'pp-scroll bf-list' }, el('div', { class:'bf-grid' }, ...V.map(card)))
       : el('p', { class:'ret-help pp-none', text: bfUi.q ? '찾는 상품이 없어요.' : '같은 상품 · 같은 유통기한이 여러 곳에 나뉜 게 없어요. 합칠 게 없네요!' });
     const hitG = bfUi.scan && bfUi.hit ? V.find(g => g.bc === bfUi.hit) : null;
