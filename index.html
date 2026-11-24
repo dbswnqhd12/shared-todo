@@ -886,6 +886,9 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 /* 1층 평면도 */
 .bf-map{margin-left:8px;padding:2px 8px;font-size:12px;white-space:nowrap}.bf-map.on{background:var(--high);border-color:var(--high);color:#fff}
 .bf-g.on{border:2px solid var(--high)}
+.bf-gn .bc b.bf-ex{color:var(--ink);font-family:var(--mono)}.bf-gn .bc .pp-dd{margin-left:6px;min-width:0;font-size:10.5px;padding:1px 6px}
+.bf-do{font-size:11.5px;font-weight:800;border-radius:6px;padding:2px 7px;white-space:nowrap;justify-self:start}.bf-do.tg{background:#DDF3E6;color:#14774A}.bf-do.mv{background:var(--high-soft);color:var(--high)}
+.bf-rw.tg .loc{color:#14774A}.fp-r.tg .loc{color:#14774A}.fp-none{font-size:11.5px;color:var(--muted);white-space:nowrap}
 .bf-split{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,1fr);gap:12px;align-items:start}
 .bf-side{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper)}.bf-side-h{padding:9px 12px;font-weight:700;font-size:14px;border-bottom:1px solid var(--line);background:var(--bg)}
 .bf-split .bf-list{max-height:min(78vh,860px);border:0}
@@ -911,9 +914,10 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .fp-chips button span{font-size:12px;opacity:.85}.fp-chips button[aria-pressed=true]{background:var(--t);border-color:var(--t);color:#fff}
 .fp-chips button em{font-style:normal;font-size:11.5px;font-weight:800;background:var(--high);color:#fff;border-radius:9px;padding:0 6px}
 .fp-svg .fp-ai{font-size:1.9px;font-weight:800;fill:var(--ink);opacity:.75}
-.fp-svg .fp-ring{fill:none;stroke:var(--high);stroke-width:.8;pointer-events:none}.fp-svg .fp-tag{font-size:2.2px;fill:var(--muted)}
+.fp-svg .fp-ring{fill:none;stroke:var(--high);stroke-width:.8;pointer-events:none}.fp-svg .fp-ring.tg{stroke:#1E9E5A;stroke-width:1.1}
+.fp-svg .fp-arw{stroke:var(--high);stroke-width:.45;stroke-dasharray:1 .6;pointer-events:none}.fp-svg .fp-arh{fill:var(--high)}.fp-svg .fp-tgl{font-size:2px;font-weight:800;fill:#1E9E5A;paint-order:stroke;stroke:var(--paper);stroke-width:.6}.fp-svg .fp-tag{font-size:2.2px;fill:var(--muted)}
 .fp-leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);align-items:center}.fp-leg span{display:inline-flex;align-items:center;gap:6px}
-.fp-leg i{display:inline-block;width:14px;height:14px;border-radius:3px;background:var(--accent-soft);border:1px solid var(--line)}.fp-leg i.lg-s{background:conic-gradient(var(--accent) 0 50%,var(--accent-soft) 50%);border:1px solid var(--accent)}.fp-leg i.lg-split{border:0;background:radial-gradient(circle at 50% 50%,#E8820C 45%,transparent 50%)}.fp-leg i.lg-old{border:2px solid var(--mid)}.fp-leg i.lg-hit{border:2px solid var(--high);background:var(--paper)}
+.fp-leg i{display:inline-block;width:14px;height:14px;border-radius:3px;background:var(--accent-soft);border:1px solid var(--line)}.fp-leg i.lg-s{background:conic-gradient(var(--accent) 0 50%,var(--accent-soft) 50%);border:1px solid var(--accent)}.fp-leg i.lg-tg{border:2px solid #1E9E5A;background:var(--paper);border-radius:50%}.fp-leg i.lg-split{border:0;background:radial-gradient(circle at 50% 50%,#E8820C 45%,transparent 50%)}.fp-leg i.lg-old{border:2px solid var(--mid)}.fp-leg i.lg-hit{border:2px solid var(--high);background:var(--paper)}
 .fp-leg .fp-off{margin-left:auto}
 .fp-info{border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:4px 12px 8px}.fp-ih{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:6px 0;font-size:14px}.fp-ih b{font-family:var(--mono)}.fp-ih span{color:var(--muted);font-size:13px}.fp-ih button{margin-left:auto}
 .fp-r{display:grid;grid-template-columns:minmax(0,1fr) 150px 70px 120px 92px;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line);font-size:13px}
@@ -4953,22 +4957,26 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
   }
 
-  // ---- 버퍼: 같은 바코드가 여러 줄(로케이션)에 나뉜 상품끼리 묶기 (유통기한은 달라도 같이) ----
+  // ---- Consolidation: 같은 상품 · 같은 유통기한이 여러 로케이션에 나뉜 것끼리 묶어서 한 곳으로 모으기 ----
   let bfData = null, bfRev = -1, bfLoading = false;
   const bfUi = { mode: store.get('bf-mode', 'dup') === 'all' ? 'all' : 'dup', q: '', scan: '', hit: '',
     ch: store.get('fp-ch', '1'), only: store.get('fp-only', '1') !== '0', zoom: 0, sel: '', pick: '' };
   // 'Box_[로켓프레시] 빙그레 …' → { tag:'Box', name:'빙그레 …' }
   const bfName = s => { let t = String(s || '').trim(), tag = ''; const m = t.match(/^(Box|Pack|Bundle)_/i); if (m){ tag = m[1]; t = t.slice(m[0].length); } return { tag, name: t.replace(/\[로켓프레시\]\s*/g, '').trim() }; };
+  // 콘솔(합치기) 단위: 같은 상품(바코드) + 같은 유통기한. 유통기한이 다르면 합치지 않아요
+  const bfKey = r => (r.bc || ('#' + r.name)) + '|' + (r.exp || '');
+  // 모을 곳: 그 묶음에서 수량이 가장 많은 로케이션 (같으면 로케이션 순서가 앞인 곳)
+  function bfTarget(rows){ const q = new Map(); for (const r of rows) q.set(r.loc, (q.get(r.loc) || 0) + (r.q || 0)); return [...q.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] || ''; }
   function bfGroups(){
     const map = new Map();
-    for (const r of bfData.rows){ const k = r.bc || ('#' + r.name); if (!map.has(k)) map.set(k, { bc: r.bc, name: r.name, rows: [] }); map.get(k).rows.push(r); }
-    return [...map.values()].map(g => ({ ...g, rows: g.rows.sort((a, b) => (a.exp || '9999').localeCompare(b.exp || '9999') || a.loc.localeCompare(b.loc)),
-      locs: new Set(g.rows.map(r => r.loc)).size, q: g.rows.reduce((s, r) => s + (r.q || 0), 0) }))
-      .sort((a, b) => b.locs - a.locs || b.rows.length - a.rows.length || b.q - a.q || a.name.localeCompare(b.name, 'ko'));
+    for (const r of bfData.rows){ const k = bfKey(r); if (!map.has(k)) map.set(k, { key: k, bc: r.bc, name: r.name, exp: r.exp, rows: [] }); map.get(k).rows.push(r); }
+    return [...map.values()].map(g => { const locs = new Set(g.rows.map(r => r.loc)).size, tg = locs > 1 ? bfTarget(g.rows) : '';
+      return { ...g, tg, locs, q: g.rows.reduce((s, r) => s + (r.q || 0), 0), rows: g.rows.sort((a, b) => (b.loc === tg) - (a.loc === tg) || a.loc.localeCompare(b.loc)) }; })
+      .sort((a, b) => (b.locs > 1) - (a.locs > 1) || b.locs - a.locs || (a.exp || '9999').localeCompare(b.exp || '9999') || a.name.localeCompare(b.name, 'ko'));
   }
   function bfVisible(G){
     const q = bfUi.q.trim().toLowerCase().replace(/\s+/g, '');
-    return G.filter(g => (bfUi.mode === 'all' || g.rows.length > 1 || bfUi.scan) &&
+    return G.filter(g => (bfUi.mode === 'all' || g.locs > 1 || bfUi.scan) &&
       (!q || [g.bc, g.name, ...g.rows.map(r => r.loc)].some(v => String(v || '').toLowerCase().replace(/\s+/g, '').includes(q))));
   }
   async function bfLoad(){
@@ -5106,16 +5114,18 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     if (fpIdx && fpIdx.src === bfData) return fpIdx;
     const lay = fpLayout(), cells = new Map(), grp = new Map();
     let on = 0, off = 0;
-    for (const r of bfData.rows){ const g = r.bc || ('#' + r.name); if (!grp.has(g)) grp.set(g, new Set()); grp.get(g).add(r.loc); }
+    const byG = new Map();
+    for (const r of bfData.rows){ const g = bfKey(r); if (!grp.has(g)){ grp.set(g, new Set()); byG.set(g, []); } grp.get(g).add(r.loc); byG.get(g).push(r); }
+    const tg = new Map(); for (const [g, L] of grp) if (L.size > 1) tg.set(g, bfTarget(byG.get(g)));
     for (const r of bfData.rows){
       const k = fpKey(r.loc);
       if (!k || !lay.byK.has(k)){ off++; continue; }
       on++;
-      if (!cells.has(k)) cells.set(k, { rows: [], sk: new Set(), split: false });
-      const c = cells.get(k), g = r.bc || ('#' + r.name);
-      c.rows.push(r); c.sk.add(g); if (grp.get(g).size > 1) c.split = true;
+      if (!cells.has(k)) cells.set(k, { rows: [], sk: new Set(), pr: new Set(), split: false });
+      const c = cells.get(k), g = bfKey(r);
+      c.rows.push(r); c.sk.add(g); c.pr.add(r.bc || r.name); if (grp.get(g).size > 1) c.split = true;
     }
-    return fpIdx = { src: bfData, cells, grp, on, off };
+    return fpIdx = { src: bfData, cells, grp, tg, on, off };
   }
   const fpAttr = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   // 상품(바코드)이 있는 칸들
@@ -5124,6 +5134,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     const lay = fpLayout(), I = fpIndex(), ui = bfUi;
     const q = ui.q.trim().toLowerCase().replace(/\s+/g, '');
     const hit = new Set();
+    const tgK = ui.pick ? fpKey(I.tg.get(ui.pick) || '') : '';
     if (ui.pick) fpCellsOf(I, ui.pick).forEach(k => hit.add(k));
     else if (q) for (const [k, c] of I.cells) if (k.toLowerCase().includes(q) || c.rows.some(r => [r.bc, r.name, r.sku, r.loc].some(v => String(v || '').toLowerCase().replace(/\s+/g, '').includes(q)))) hit.add(k);
     // 올린 재고 파일에 있는 구역(예: 21M)만 보여줘요. '챔버 전체'를 고르면 모든 칸
@@ -5144,15 +5155,15 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
       const x0 = Math.min(...B.map(b => b.x)), y0 = Math.min(...B.map(b => b.y)), x1 = Math.max(...B.map(b => b.x + b.W)), y1 = Math.max(...B.map(b => b.y + b.H));
       const pad = 1.5, X = x0 - pad, Y = y0 - pad - 2.6, W = x1 - x0 + pad * 2, H = y1 - y0 + pad * 2 + 2.6;
       const st = big ? `width:${FP_ZOOM[ui.zoom] * 100}%${ui.zoom ? '' : ';max-height:min(70vh,760px)'}` : `width:100%;max-width:${Math.round(W * 11)}px;max-height:240px`;
-      let svg = `<svg class="fp-svg${hit.size ? ' dim' : ''}" viewBox="${X} ${Y} ${W} ${H}" style="${st}" role="img" aria-label="${fpAttr(P.title)}">`;
+      let svg = `<svg class="fp-svg${hit.size ? ' dim' : ''}" viewBox="${X} ${Y} ${W} ${H}" style="${st}" role="img" aria-label="${fpAttr(P.title)}"><defs><marker id="fpArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z" class="fp-arh"/></marker></defs>`;
       // 통로 이름: 그 통로 맨 위 칸 위에
       const top = new Map(); for (const b of B){ const a = b.k.split('-')[0], o = top.get(a); if (!o || b.y < o.y || (b.y === o.y && b.x < o.x)) top.set(a, b); }
       for (const [a, b] of top) svg += `<text class="fp-ai" x="${(b.x + b.W / 2).toFixed(2)}" y="${(b.y - .8).toFixed(2)}" text-anchor="middle">${a.replace(/^\d\d/, '')}</text>`;
       for (const b of B){
-        const c = I.cells.get(b.k), n = c ? Math.min(c.sk.size, 4) : 0;
+        const c = I.cells.get(b.k), n = c ? Math.min(c.pr.size, 4) : 0;
         const cls = 'fp-b' + (c ? ' has' : '') + (c && c.split ? ' split' : '') + (hit.has(b.k) ? ' hit' : '');
         const iw = b.W - .45, ih = b.H - .45, bx = b.x, by = b.y;
-        let g = `<g class="${cls}" data-k="${b.k}"><title>${b.k}${c ? ` · ${c.sk.size}종 · ${c.rows.length}줄` : ' · 비어 있음'}</title><rect class="fp-bg" x="${bx.toFixed(2)}" y="${by.toFixed(2)}" width="${iw.toFixed(2)}" height="${ih.toFixed(2)}" rx=".35"/>`;
+        let g = `<g class="${cls}" data-k="${b.k}"><title>${b.k}${c ? ` · ${c.pr.size}종 · ${c.rows.length}줄${c.split ? ' · 합칠 상품 있음' : ''}` : ' · 비어 있음'}</title><rect class="fp-bg" x="${bx.toFixed(2)}" y="${by.toFixed(2)}" width="${iw.toFixed(2)}" height="${ih.toFixed(2)}" rx=".35"/>`;
         if (c){
           // 상품 수만큼 칸 채우기: 네모난 칸은 2×2, 길쭉한 칸은 한 줄 4칸
           const sq = Math.max(iw, ih) / Math.min(iw, ih) < 1.7, m = .45, gap = .3;
@@ -5168,10 +5179,15 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
         svg += g + '</g>';
       }
       // 찾은 칸은 멀리서도 보이게 동그라미
-      for (const b of B) if (hit.has(b.k)) svg += `<circle class="fp-ring" cx="${(b.x + b.W / 2).toFixed(2)}" cy="${(b.y + b.H / 2).toFixed(2)}" r="${(Math.max(b.W, b.H) / 2 + 1.3).toFixed(2)}"/>`;
+      // 고른 묶음: 옮길 곳(빨강) → 모을 곳(초록) 화살표
+      const tb = tgK && B.find(b => b.k === tgK), ctr = b => [b.x + b.W / 2, b.y + b.H / 2];
+      if (tb) for (const b of B) if (hit.has(b.k) && b.k !== tgK){ const [x1, y1] = ctr(b), [x2, y2] = ctr(tb), dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy) || 1, r = Math.max(tb.W, tb.H) / 2 + 1.6;
+        svg += `<line class="fp-arw" x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${(x2 - dx / L * r).toFixed(2)}" y2="${(y2 - dy / L * r).toFixed(2)}" marker-end="url(#fpArr)"/>`; }
+      for (const b of B) if (hit.has(b.k)) svg += `<circle class="fp-ring${b.k === tgK ? ' tg' : ''}" cx="${(b.x + b.W / 2).toFixed(2)}" cy="${(b.y + b.H / 2).toFixed(2)}" r="${(Math.max(b.W, b.H) / 2 + 1.3).toFixed(2)}"/>`;
+      if (tb) svg += `<text class="fp-tgl" x="${(tb.x + tb.W / 2).toFixed(2)}" y="${(tb.y - 2).toFixed(2)}" text-anchor="middle">모을 곳</text>`;
       const used = P.bays.filter(b => I.cells.has(b.k)).length, sp = P.bays.filter(b => I.cells.get(b.k)?.split).length, h = P.bays.filter(b => hit.has(b.k)).length;
       const card = el('div', { class:'fp-card ' + tOf(P.bays[0].ch) },
-        el('div', { class:'fp-ch' }, el('b', { text: P.title }), el('span', { text: `${[...new Set(P.bays.map(b => b.z))].join(' · ')} · ${P.bays.length}칸 · 재고 ${used}칸 · 나뉜 상품 ${sp}칸` }), h ? el('em', { text: `찾은 칸 ${h}` }) : null));
+        el('div', { class:'fp-ch' }, el('b', { text: P.title }), el('span', { text: `${[...new Set(P.bays.map(b => b.z))].join(' · ')} · ${P.bays.length}칸 · 재고 ${used}칸 · 합칠 칸 ${sp}` }), h ? el('em', { text: `찾은 칸 ${h}` }) : null));
       const w = el('div', { class:'fp-wrap' + (big ? '' : ' sm') });
       w.innerHTML = svg + '</svg>';
       // 칸을 누르면 화면을 다시 그리지 않고 그 자리에 바로 상품 창을 띄워요
@@ -5193,34 +5209,35 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
       el('button', { type:'button', class:'ret-btn sm ghost', 'aria-label':'크게', disabled: ui.zoom === FP_ZOOM.length - 1, onclick: () => { ui.zoom++; renderBuffer(); } }, '＋'));
     const legend = el('div', { class:'fp-leg' },
       el('span', {}, el('i', { class:'lg-s' }), '파란 칸 수 = 상품 종류 수 (최대 4)'),
-      el('span', {}, el('i', { class:'lg-split' }), '다른 로케이션에도 있는 상품 있음'),
-      hit.size ? el('span', {}, el('i', { class:'lg-hit' }), ui.pick ? '고른 상품 위치' : '찾은 칸') : null,
-      el('span', { class:'fp-off', text: `1층 칸에 맞춘 재고 ${retNum(I.on)}줄${I.off ? ` · 1층 도면 밖 ${retNum(I.off)}줄` : ''} · 나뉜 상품 있는 칸 ${splitCells}` }));
+      el('span', {}, el('i', { class:'lg-split' }), '합칠 상품 있음 (같은 상품 · 같은 유통기한이 다른 곳에도)'),
+      ui.pick ? el('span', {}, el('i', { class:'lg-tg' }), '모을 곳') : null, hit.size ? el('span', {}, el('i', { class:'lg-hit' }), ui.pick ? '옮길 곳' : '찾은 칸') : null,
+      el('span', { class:'fp-off', text: `1층 칸에 맞춘 재고 ${retNum(I.on)}줄${I.off ? ` · 1층 도면 밖 ${retNum(I.off)}줄` : ''} · 합칠 상품 있는 칸 ${splitCells}` }));
     const wrap = maps;
 
     // 아래 설명 칸: 고른 상품 → 그 상품의 로케이션들 / 고른 칸 → 그 칸의 상품들
     let info = null;
     const row = (r, opt) => fpRow(r, I, opt);
     if (ui.pick){
-      const rows = bfData.rows.filter(r => (r.bc || ('#' + r.name)) === ui.pick).sort((a, b) => a.loc.localeCompare(b.loc));
+      const tl = I.tg.get(ui.pick) || '', rows = bfData.rows.filter(r => bfKey(r) === ui.pick).sort((a, b) => (b.loc === tl) - (a.loc === tl) || a.loc.localeCompare(b.loc));
       const nm = rows[0] ? bfName(rows[0].name) : { name: '' };
-      info = el('div', { class:'fp-info', role:'region', 'aria-label':'고른 상품 위치' }, el('div', { class:'fp-ih' }, el('b', { text: nm.name }), el('span', { text: ` · ${new Set(rows.map(r => r.loc)).size}곳 · ${retNum(rows.reduce((s, r) => s + (r.q || 0), 0))}개 · 1층 도면에 ${hit.size}칸` }),
+      info = el('div', { class:'fp-info', role:'region', 'aria-label':'합칠 묶음' }, el('div', { class:'fp-ih' }, el('b', { text: nm.name }), el('span', { text: ` · 유통 ${rows[0] ? ppMD(rows[0].exp) : ''} · ${new Set(rows.map(r => r.loc)).size}곳 · ${retNum(rows.reduce((s, r) => s + (r.q || 0), 0))}개 → ${tl} 로 모으기` }),
         el('button', { type:'button', class:'ret-btn sm ghost', onclick: () => { ui.pick = ''; renderBuffer(); } }, '✕ 고른 상품 해제')),
         ...rows.map(r => { const x = row(r, { noPick: true }); const k = fpKey(r.loc); if (k && lay.byK.has(k)){ x.classList.add('lnk'); x.onclick = () => { const g = $(`#buf g[data-k="${k}"]`); if (g) fpBayPop(k, g); }; } else x.classList.add('off'); return x; }));
     }
-    if (!info) info = el('p', { class:'ret-help fp-hint', text: '칸을 누르면 그 로케이션에 있는 상품이 바로 떠요. 주황 점은 다른 로케이션에도 있는 상품이 있다는 뜻이에요.' });
+    if (!info) info = el('p', { class:'ret-help fp-hint', text: '주황 점 칸에는 합칠 상품(같은 상품 · 같은 유통기한이 다른 곳에도)이 있어요. 칸을 누르거나 목록의 📍 위치를 누르면 모을 곳과 옮길 곳이 보여요.' });
     const out = el('div', { class:'fp' }, el('div', { class:'fp-top' }, chips, onlyTog, zoom), wrap, legend, info);
     // 고른 칸·상품이 보이게 스크롤
     requestAnimationFrame(() => { const w = maps.querySelector('.fp-wrap'), t = w && (w.querySelector('.sel') || w.querySelector('.hit')); if (t && ui.zoom > 0){ const a = w.getBoundingClientRect(), b = t.getBoundingClientRect(); w.scrollLeft += b.left - a.left - a.width / 2; } });
     return out;
   }
   function fpRow(r, I, opt = {}){
-    const d = ppDays(r.exp), nm = bfName(r.name), g = r.bc || ('#' + r.name), n = I.grp.get(g).size;
-    return el('div', { class:'fp-r' },
+    const d = ppDays(r.exp), nm = bfName(r.name), g = bfKey(r), n = I.grp.get(g).size, t = n > 1 ? (I.tg.get(g) === r.loc ? 'tg' : 'mv') : '';
+    return el('div', { class:'fp-r' + (t ? ' ' + t : '') },
       el('div', { class:'nm' }, nm.tag ? el('span', { class:'bf-tag', text: nm.tag }) : null, nm.name, el('small', { text: ' ' + (r.bc || '') })),
       el('code', { class:'loc', text: r.loc }), el('span', { class:'q' }, el('b', { text: retNum(r.q) }), '개'),
       el('span', { class:'ddc' }, r.exp ? el('span', { class:'pp-dd' + ppLvl(d), text: ppMD(r.exp) + ' ' + ppDD(d) }) : null),
-      opt.noPick ? null : n > 1 ? el('button', { type:'button', class:'ret-btn sm fp-go', onclick: () => { fpPopClose(); fpPick(g); } }, `다른 곳 ${n - 1} ↗`) : el('span'));
+      opt.noPick ? (t ? el('span', { class:'bf-do ' + t, text: t === 'tg' ? '여기로 모으기' : '→ 옮기기' }) : el('span'))
+        : n > 1 ? el('button', { type:'button', class:'ret-btn sm fp-go', onclick: () => { fpPopClose(); fpPick(g); } }, `합치기 ${n}곳 ↗`) : el('span', { class:'fp-none', text:'합칠 것 없음' }));
   }
   let fpPopEl = null;
   function fpPopClose(){ if (fpPopEl){ fpPopEl.remove(); fpPopEl = null; } document.querySelectorAll('#buf g.sel').forEach(n => n.classList.remove('sel')); document.removeEventListener('keydown', fpPopKey); document.removeEventListener('pointerdown', fpPopOut, true); }
@@ -5234,9 +5251,9 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     const lay = fpLayout(), I = fpIndex(), c = I.cells.get(k);
     g.classList.add('sel');
     const pop = el('div', { class:'fp-info fp-pop', role:'dialog', 'aria-label': k + ' 상품' },
-      el('div', { class:'fp-ih' }, el('b', { text: k }), el('span', { text: `${FP_CH[lay.byK.get(k).ch]} · ` + (c ? `${c.sk.size}종 · ${retNum(c.rows.reduce((s, r) => s + (r.q || 0), 0))}개` : '재고 없음') }),
+      el('div', { class:'fp-ih' }, el('b', { text: k }), el('span', { text: `${FP_CH[lay.byK.get(k).ch]} · ` + (c ? `${c.pr.size}종 · ${retNum(c.rows.reduce((s, r) => s + (r.q || 0), 0))}개` : '재고 없음') }),
         el('button', { type:'button', class:'ret-btn sm ghost', 'aria-label':'닫기', onclick: fpPopClose }, '✕')),
-      ...(c ? c.rows.slice().sort((a, b) => a.loc.localeCompare(b.loc)).map(r => fpRow(r, I)) : [el('p', { class:'ret-help fp-hint', text: '올린 재고 파일 기준으로 이 칸에는 상품이 없어요.' })]));
+      ...(c ? c.rows.slice().sort((a, b) => (I.grp.get(bfKey(b)).size > 1) - (I.grp.get(bfKey(a)).size > 1) || a.loc.localeCompare(b.loc)).map(r => fpRow(r, I)) : [el('p', { class:'ret-help fp-hint', text: '올린 재고 파일 기준으로 이 칸에는 상품이 없어요.' })]));
     document.body.append(pop); fpPopEl = pop;
     if (!matchMedia('(max-width:760px)').matches){
       const a = g.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight, vw = innerWidth, vh = innerHeight;
@@ -5262,7 +5279,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     const box = $('#buf');
     const when = bfData?.at ? new Date(bfData.at).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }) + ' 올림' : '';
     const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'Consolidation' }),
-      el('span', { class:'ret-help', text: bfData ? [bfData.file, when].filter(Boolean).join(' · ') : '같은 바코드가 여러 로케이션에 나뉜 상품끼리 묶어서 보여줘요 (유통기한은 달라도 같이)' }),
+      el('span', { class:'ret-help', text: bfData ? [bfData.file, when].filter(Boolean).join(' · ') : '같은 상품 · 같은 유통기한인데 여러 로케이션에 나뉜 것을 찾아서 한 곳으로 모으게 도와줘요' }),
       bfData ? el('span', { class:'pp-up' }, el('button', { type:'button', class:'ret-btn sm ghost', onclick: bfPick, title:'새 WMS 재고 엑셀로 바꾸기' }, '⬆ 새 파일 올리기')) : null);
     const sec = el('section', { class:'ret-sec pp bf' }, head);
     ppDropZone(sec); sec.ondrop = e => { e.preventDefault(); sec.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) bfImportFile(f); };
@@ -5273,39 +5290,39 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
         el('small', { text:'정리한 결과는 팀 모두에게 보이고, 새 파일을 올리면 바뀌어요' }));
       sec.append(drop); box.replaceChildren(sec); return;
     }
-    const G = bfGroups(), dup = G.filter(g => g.rows.length > 1);
+    const G = bfGroups(), dup = G.filter(g => g.locs > 1);
     const free = dup.reduce((s, g) => s + g.locs - 1, 0);
     const stat = (label, val, on) => el('div', { class:'bf-st' + (on ? ' on' : '') }, el('small', { text: label }), el('b', { text: val }));
-    const sum = el('div', { class:'bf-sum' }, stat('같은 바코드가 여러 줄에', `${dup.length}종 · ${dup.reduce((s, g) => s + g.rows.length, 0)}줄`, true),
-      stat('합치면 비는 로케이션', `${free}칸`), stat('전체', `${bfData.total}줄 · ${G.length}종`));
+    const sum = el('div', { class:'bf-sum' }, stat('합칠 묶음 (같은 상품 · 같은 유통기한)', `${dup.length}건`, true),
+      stat('옮길 로케이션', `${free}곳`), stat('전체', `${bfData.total}줄 · ${new Set(bfData.rows.map(r => r.bc || r.name)).size}종`));
     const V = bfVisible(G);
     const search = el('input', { type:'search', class:'bf-find', placeholder:'바코드 · 상품명 · 로케이션 찾기', 'aria-label':'찾기', autocomplete:'off' });
     search.value = bfUi.q;
     search.oninput = () => { bfUi.q = search.value; bfUi.scan = ''; bfUi.hit = ''; bfUi.pick = ''; const pos = search.selectionStart; renderBuffer(); const s = $('#buf .bf-find'); if (s){ s.focus(); try { s.setSelectionRange(pos, pos); } catch {} } };
     const bar = el('div', { class:'bf-bar' },
-      el('span', { class:'ov-tog', role:'group', 'aria-label':'보기' }, ...[['dup', '겹치는 것만'], ['all', '전체']].map(([v, l]) => el('button', { type:'button', 'aria-pressed': bfUi.mode === v ? 'true' : 'false',
+      el('span', { class:'ov-tog', role:'group', 'aria-label':'보기' }, ...[['dup', '합칠 것만'], ['all', '전체']].map(([v, l]) => el('button', { type:'button', 'aria-pressed': bfUi.mode === v ? 'true' : 'false',
         onclick: () => { bfUi.mode = v; store.set('bf-mode', v); renderBuffer(); } }, l))),
       el('div', { class:'bf-fw' }, search, el('button', { type:'button', class:'ret-btn sm bf-cam', title:'폰 카메라로 바코드 찍어서 찾기', onclick: bfScan }, '📷 찍기')),
       el('button', { type:'button', class:'ret-btn sm ghost', disabled: !V.length, title:'보이는 목록 인쇄', onclick: () => bfPrint(V) }, '🖨 인쇄'),
       el('button', { type:'button', class:'ret-btn sm ghost', disabled: !V.length, title:'보이는 목록을 엑셀로 받기', onclick: () => bfExport(V) }, '⬇ 엑셀'));
-    const card = g => { const nm = bfName(g.name), gk = g.bc || ('#' + g.name); return el('div', { class:'bf-g' + (g.rows.length > 1 ? ' dup' : '') + (bfUi.pick === gk ? ' on' : '') },
+    const card = g => { const nm = bfName(g.name), gk = g.key, d0 = ppDays(g.exp), on = bfUi.pick === gk, multi = g.locs > 1;
+      return el('div', { class:'bf-g' + (multi ? ' dup' : '') + (on ? ' on' : '') },
       el('div', { class:'bf-gh' }, el('div', { class:'bf-gn' }, el('div', { class:'nm', title: g.name }, nm.tag ? el('span', { class:'bf-tag', text: nm.tag }) : null, nm.name),
-        el('div', { class:'bc', text: g.bc || '바코드 없음' })),
-        el('div', { class:'bf-cnt' }, el('b', { text: String(g.locs) }), '곳', g.rows.length !== g.locs ? ` (${g.rows.length}줄)` : '', ' · ', el('b', { text: retNum(g.q) }), '개',
-          g.rows.some(r => fpLayout().byK.has(fpKey(r.loc))) ? el('button', { type:'button', class:'ret-btn sm bf-map' + (bfUi.pick === gk ? ' on' : ''), title:'평면도에서 위치 보기', 'aria-pressed': bfUi.pick === gk ? 'true' : 'false', onclick: () => fpPick(gk) }, bfUi.pick === gk ? '📍 표시 중' : '📍 위치') : null)),
-      el('div', { class:'bf-rows' }, el('div', { class:'bf-rh' }, el('span', { text:'로케이션' }), el('span', { class:'r', text:'수량' }), el('span', { text:'제조일자' }), el('span', { text:'유통기한' }), el('span')),
-        ...g.rows.map(r => { const d = ppDays(r.exp); return el('div', { class:'bf-rw' }, el('span', { class:'loc', text: r.loc || '-' }), el('span', { class:'q' }, el('b', { text: retNum(r.q) }), '개'),
-          el('span', { class:'mf', text: ppMD(r.mfg) }), el('b', { class:'ex', text: ppMD(r.exp) }),
-          el('span', { class:'ddc' }, r.exp ? el('span', { class:'pp-dd' + ppLvl(d), text: ppDD(d) }) : null)); }))); };
+        el('div', { class:'bc' }, g.bc || '바코드 없음', ' · 유통 ', el('b', { class:'bf-ex', text: g.exp ? ppMD(g.exp) : '없음' }), g.exp ? el('span', { class:'pp-dd' + ppLvl(d0), text: ppDD(d0) }) : null)),
+        el('div', { class:'bf-cnt' }, el('b', { text: String(g.locs) }), '곳 · ', el('b', { text: retNum(g.q) }), '개',
+          multi && g.rows.some(r => fpLayout().byK.has(fpKey(r.loc))) ? el('button', { type:'button', class:'ret-btn sm bf-map' + (on ? ' on' : ''), title:'평면도에서 모을 곳 · 옮길 곳 보기', 'aria-pressed': on ? 'true' : 'false', onclick: () => fpPick(gk) }, on ? '📍 표시 중' : '📍 위치') : null)),
+      el('div', { class:'bf-rows' }, el('div', { class:'bf-rh' }, el('span', { text:'로케이션' }), el('span', { class:'r', text:'수량' }), el('span', { text:'제조일자' }), el('span', { text:'할 일' }), el('span')),
+        ...g.rows.map(r => { const t = multi ? (r.loc === g.tg ? 'tg' : 'mv') : ''; return el('div', { class:'bf-rw' + (t ? ' ' + t : '') }, el('span', { class:'loc', text: r.loc || '-' }), el('span', { class:'q' }, el('b', { text: retNum(r.q) }), '개'),
+          el('span', { class:'mf', text: ppMD(r.mfg) }), t ? el('span', { class:'bf-do ' + t, text: t === 'tg' ? '여기로 모으기' : '→ 옮기기' }) : el('span'), el('span')); }))); };
     const list = V.length ? el('div', { class:'pp-scroll bf-list' }, el('div', { class:'bf-grid' }, ...V.map(card)))
-      : el('p', { class:'ret-help pp-none', text: bfUi.q ? '찾는 상품이 없어요.' : '같은 바코드가 여러 줄에 있는 상품이 없어요. 정리할 게 없네요!' });
+      : el('p', { class:'ret-help pp-none', text: bfUi.q ? '찾는 상품이 없어요.' : '같은 상품 · 같은 유통기한이 여러 곳에 나뉜 게 없어요. 합칠 게 없네요!' });
     const hitG = bfUi.scan && bfUi.hit ? V.find(g => g.bc === bfUi.hit) : null;
     const clearScan = () => { bfUi.scan = ''; bfUi.hit = ''; bfUi.q = ''; renderBuffer(); };
     const scanBox = bfUi.scan ? el('div', { class:'scan-hit' + (hitG ? '' : ' miss'), role:'status' }, el('span', { text:'📷' }),
       el('span', { class:'sp' }, el('code', { text: bfUi.scan }), hitG ? ` · 찾았어요 · ${hitG.locs}곳에 ${retNum(hitG.q)}개` : ' · Consolidation 목록에 없는 상품이에요'),
       el('button', { type:'button', class:'ret-btn sm', onclick: bfScan }, '다음 찍기'),
       el('button', { type:'button', class:'ret-btn sm ghost', 'aria-label':'찾기 지우기', onclick: clearScan }, '✕')) : null;
-    if (bfUi.scan && hitG && bfUi.pick !== (hitG.bc || ('#' + hitG.name))) bfUi.pick = hitG.bc || ('#' + hitG.name);
+    if (bfUi.scan && hitG && hitG.locs > 1 && bfUi.pick !== hitG.key) bfUi.pick = hitG.key;
     sec.append(sum, bar, ...(scanBox ? [scanBox] : []), el('div', { class:'bf-split' }, fpView(), el('div', { class:'bf-side' }, el('div', { class:'bf-side-h', text: `목록 · ${V.length}종` }), list)));
     // 고른 상품 카드가 목록에 보이게
     requestAnimationFrame(() => { const on = box.querySelector('.bf-list .bf-g.on'), L = box.querySelector('.bf-list'); if (on && L){ const a = L.getBoundingClientRect(), b = on.getBoundingClientRect(); if (b.top < a.top || b.bottom > a.bottom) L.scrollTop += b.top - a.top - 8; } });
@@ -5332,11 +5349,11 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
   }
   function bfExport(V){
     // 상품(묶음)마다 흰색 · 연초록을 번갈아 칠하고, 상품이 바뀌는 곳에 진한 선
-    const rows = [['묶음', '상품 바코드', '상품명', '로케이션', '수량', '제조일자', '유통기한', 'D-day', '묶음 합계', 'SKU ID', 'LPN']];
+    const rows = [['묶음', '상품 바코드', '상품명', '로케이션', '할 일', '수량', '제조일자', '유통기한', 'D-day', '묶음 합계', 'SKU ID', 'LPN']];
     V.forEach((g, i) => g.rows.forEach((r, j) => {
       const base = { border:1, fill: i % 2 ? 'EAF3EF' : '', top: i > 0 && j === 0 };
       const C = (v, o) => ({ v, s: { ...base, ...o } }), d = ppDays(r.exp);
-      rows.push([C(i + 1, { align:'center' }), C(g.bc), C(g.name), C(r.loc, { b:1 }), C(r.q, { b:1, num:1 }), C(r.mfg, { align:'center' }), C(r.exp, { b:1, align:'center' }),
+      rows.push([C(i + 1, { align:'center' }), C(g.bc), C(g.name), C(r.loc, { b:1 }), C(g.locs > 1 ? (r.loc === g.tg ? '여기로 모으기' : '옮기기') : '', { b: r.loc === g.tg ? 1 : 0 }), C(r.q, { b:1, num:1 }), C(r.mfg, { align:'center' }), C(r.exp, { b:1, align:'center' }),
         C(r.exp ? ppDD(d) : '', { align:'center', ...(d != null && d <= 14 ? { b:1, color: d <= 7 ? 'C0392B' : 'B8661A' } : {}) }),
         C(g.q, { num:1 }), C(r.sku), C(r.lpn)]);
     }));
