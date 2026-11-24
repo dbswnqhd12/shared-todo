@@ -12,7 +12,7 @@ import { K, redis, pipeline, parseHash, body, guard, fail, newId, kstToday, isDa
 const KEY = 'out:items';
 const MAX_ITEMS = 5000;
 const KEEP_DONE_DAYS = 180;
-const TEXT = { grp: 40, ext: 40, vendor: 80, addr: 200, phone: 40, name: 150, barcode: 40, tote: 40, note: 300 };
+const TEXT = { grp: 40, ext: 40, vendor: 80, addr: 200, phone: 40, name: 150, barcode: 40, tote: 200, note: 300 };
 const DATES = ['cdate', 'due'];
 
 function clean(input, base) {
