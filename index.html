@@ -895,13 +895,13 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .fp{display:flex;flex-direction:column;gap:8px}.fp-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.fp-zoom{margin-left:auto;display:flex;gap:4px}.fp-zoom button{min-width:34px;font-size:15px}
 .fp-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--paper);max-height:min(70vh,760px);-webkit-overflow-scrolling:touch}
 .fp-svg{display:block;height:auto;margin:0 auto}
-.fp-svg .fp-bg{fill:var(--bg);stroke:var(--line);stroke-width:.25}
-.fp-svg .fp-s{fill:transparent}.fp-svg .fp-s.on{fill:var(--accent)}
-.fp-svg .has .fp-bg{fill:var(--accent-soft)}
-.fp-svg .split .fp-bg{stroke:var(--mid);stroke-width:.7}
+.fp-svg .fp-bg{fill:var(--paper);stroke:color-mix(in srgb,var(--ink) 28%,transparent);stroke-width:.2}
+.fp-svg .fp-s{fill:color-mix(in srgb,var(--accent) 14%,transparent)}.fp-svg .fp-s.on{fill:var(--accent)}
+.fp-svg .has .fp-bg{fill:var(--paper);stroke:var(--accent);stroke-width:.3}
+.fp-svg .fp-dot{fill:#E8820C;stroke:var(--paper);stroke-width:.3}
 .fp-svg g[data-k]{cursor:pointer}.fp-svg g[data-k]:hover .fp-bg{stroke:var(--ink);stroke-width:.5}
-.fp-svg.dim g[data-k]:not(.hit){opacity:.28}
-.fp-svg .hit .fp-bg{stroke:var(--high);stroke-width:.9}.fp-svg .sel .fp-bg{stroke:var(--ink);stroke-width:1.1}
+.fp-svg.dim g[data-k]:not(.hit){opacity:.25}
+.fp-svg .hit .fp-bg{stroke:var(--high);stroke-width:.6}.fp-svg .sel .fp-bg{stroke:var(--ink);stroke-width:.8;fill:var(--mid-soft)}
 .fp-maps{display:flex;flex-direction:column;gap:10px}.fp-subs{display:flex;flex-wrap:wrap;gap:10px}.fp-subs .fp-card{flex:1 1 260px;min-width:0}
 .fp-card{--t:#2557A7;border:1px solid color-mix(in srgb,var(--t) 45%,var(--line));border-radius:12px;overflow:hidden;background:color-mix(in srgb,var(--t) 5%,var(--paper))}
 .fp-card.amb,.fp-chips .amb{--t:#B86E0C}.fp-card.chl,.fp-chips .chl{--t:#14819A}.fp-card.frz,.fp-chips .frz{--t:#5050C8}
@@ -910,15 +910,15 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .fp-chips{display:flex;gap:5px;flex-wrap:wrap}.fp-chips button{display:inline-flex;align-items:center;gap:6px;border:1.5px solid color-mix(in srgb,var(--t) 40%,var(--line));background:var(--paper);color:var(--t);border-radius:10px;padding:5px 10px;font:inherit;font-size:13px}
 .fp-chips button span{font-size:12px;opacity:.85}.fp-chips button[aria-pressed=true]{background:var(--t);border-color:var(--t);color:#fff}
 .fp-chips button em{font-style:normal;font-size:11.5px;font-weight:800;background:var(--high);color:#fff;border-radius:9px;padding:0 6px}
-.fp-svg .fp-ai{font-size:1.7px;font-weight:700;fill:var(--muted)}
+.fp-svg .fp-ai{font-size:1.9px;font-weight:800;fill:var(--ink);opacity:.75}
 .fp-svg .fp-ring{fill:none;stroke:var(--high);stroke-width:.8;pointer-events:none}.fp-svg .fp-tag{font-size:2.2px;fill:var(--muted)}
 .fp-leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);align-items:center}.fp-leg span{display:inline-flex;align-items:center;gap:6px}
-.fp-leg i{display:inline-block;width:14px;height:14px;border-radius:3px;background:var(--accent-soft);border:1px solid var(--line)}.fp-leg i.lg-s{background:linear-gradient(90deg,var(--accent) 0 45%,transparent 45%) var(--accent-soft)}.fp-leg i.lg-split{border:2px solid var(--mid)}.fp-leg i.lg-hit{border:2px solid var(--high);background:var(--paper)}
+.fp-leg i{display:inline-block;width:14px;height:14px;border-radius:3px;background:var(--accent-soft);border:1px solid var(--line)}.fp-leg i.lg-s{background:conic-gradient(var(--accent) 0 50%,var(--accent-soft) 50%);border:1px solid var(--accent)}.fp-leg i.lg-split{border:0;background:radial-gradient(circle at 50% 50%,#E8820C 45%,transparent 50%)}.fp-leg i.lg-old{border:2px solid var(--mid)}.fp-leg i.lg-hit{border:2px solid var(--high);background:var(--paper)}
 .fp-leg .fp-off{margin-left:auto}
 .fp-info{border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:4px 12px 8px}.fp-ih{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:6px 0;font-size:14px}.fp-ih b{font-family:var(--mono)}.fp-ih span{color:var(--muted);font-size:13px}.fp-ih button{margin-left:auto}
 .fp-r{display:grid;grid-template-columns:minmax(0,1fr) 150px 70px 120px 92px;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line);font-size:13px}
 .fp-r .nm{font-weight:600;overflow-wrap:anywhere}.fp-r .nm small{font-family:var(--mono);color:var(--muted);font-weight:400}.fp-r .loc{font-family:var(--mono);font-weight:700}.fp-r .q{text-align:right;color:var(--muted);font-size:12px}.fp-r .q b{font-family:var(--mono);color:var(--ink);font-size:13.5px}
-.fp-pop{position:fixed;left:24px;bottom:24px;z-index:96;width:min(560px,calc(100vw - 48px));max-height:min(62vh,600px);overflow:auto;box-shadow:0 14px 40px rgba(15,25,45,.24);border-radius:14px;animation:fpUp .16s ease-out}
+.fp-pop{position:fixed;z-index:96;width:min(480px,calc(100vw - 48px));max-height:min(62vh,600px);overflow:auto;box-shadow:0 14px 40px rgba(15,25,45,.24);border-radius:14px;animation:fpUp .16s ease-out}
 .fp-pop .fp-r{grid-template-columns:minmax(0,1fr) auto auto auto;gap:4px 12px}.fp-pop .fp-r .nm{grid-column:1/-1;font-size:13.5px}.fp-pop .fp-r .fp-go{justify-self:end}
 .fp-pop .fp-ih{position:sticky;top:0;background:var(--paper);z-index:1;border-bottom:1px solid var(--line);margin:0 -12px;padding:10px 12px}
 @keyframes fpUp{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
@@ -5130,36 +5130,48 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     const tOf = n => n === '1' ? 'amb' : n < '5' ? 'chl' : 'frz';
     const hitBy = {}; for (const k of hit){ const c = lay.byK.get(k).ch; hitBy[c] = (hitBy[c] || 0) + 1; }
     // 도면 하나 (챔버 본체 또는 본체에서 떨어진 버퍼 구역)
+    // 엑셀 도면의 넓은 빈 공간을 줄여서 칸을 크게 보여줘요 (통로 간격은 남겨요)
+    const squeeze = (L, cap) => { const iv = L.slice().sort((a, b) => a[0] - b[0]), gaps = []; let end = -Infinity;
+      for (const [a, b] of iv){ if (end > -Infinity && a - end > cap) gaps.push([end, a]); end = Math.max(end, b); }
+      return v => { let d = 0; for (const [g0, g1] of gaps){ if (v >= g1) d += g1 - g0 - cap; else if (v > g0) d += Math.max(0, v - g0 - cap); } return v - d; }; };
     const draw = (P, big) => {
-      const vb = P.box, pad = 2.5, X = vb.x - pad, Y = vb.y - pad - 2.5, W = vb.w + pad * 2, H = vb.h + pad * 2 + 2.5;
-      const st = big ? `width:${FP_ZOOM[ui.zoom] * 100}%${ui.zoom ? '' : ';max-height:min(64vh,700px)'}` : `width:100%;max-width:${Math.round(W * 9)}px;max-height:260px`;
+      const mx = squeeze(P.bays.map(b => [b.c, b.c + b.w]), 2.2), my = squeeze(P.bays.map(b => [b.r, b.r + b.h]), 3.2);
+      const B = P.bays.map(b => { const x = mx(b.c), y = my(b.r); return { ...b, x, y, W: mx(b.c + b.w) - x, H: my(b.r + b.h) - y }; });
+      const x0 = Math.min(...B.map(b => b.x)), y0 = Math.min(...B.map(b => b.y)), x1 = Math.max(...B.map(b => b.x + b.W)), y1 = Math.max(...B.map(b => b.y + b.H));
+      const pad = 1.5, X = x0 - pad, Y = y0 - pad - 2.6, W = x1 - x0 + pad * 2, H = y1 - y0 + pad * 2 + 2.6;
+      const st = big ? `width:${FP_ZOOM[ui.zoom] * 100}%${ui.zoom ? '' : ';max-height:min(70vh,760px)'}` : `width:100%;max-width:${Math.round(W * 11)}px;max-height:240px`;
       let svg = `<svg class="fp-svg${hit.size ? ' dim' : ''}" viewBox="${X} ${Y} ${W} ${H}" style="${st}" role="img" aria-label="${fpAttr(P.title)}">`;
-      if (big) for (const t of lay.tags) if (t.c >= X && t.c <= X + W && t.r >= Y && t.r <= Y + H) svg += `<text class="fp-tag" x="${t.c}" y="${t.r + 2.6}">${fpAttr(t.t)}</text>`;
       // 통로 이름: 그 통로 맨 위 칸 위에
-      const top = new Map(); for (const b of P.bays){ const a = b.k.split('-')[0], o = top.get(a); if (!o || b.r < o.r || (b.r === o.r && b.c < o.c)) top.set(a, b); }
-      for (const [a, b] of top) svg += `<text class="fp-ai" x="${b.c + (b.w - .5) / 2}" y="${b.r - .7}" text-anchor="middle">${a}</text>`;
-      for (const b of P.bays){
+      const top = new Map(); for (const b of B){ const a = b.k.split('-')[0], o = top.get(a); if (!o || b.y < o.y || (b.y === o.y && b.x < o.x)) top.set(a, b); }
+      for (const [a, b] of top) svg += `<text class="fp-ai" x="${(b.x + b.W / 2).toFixed(2)}" y="${(b.y - .8).toFixed(2)}" text-anchor="middle">${a.replace(/^\d\d/, '')}</text>`;
+      for (const b of B){
         const c = I.cells.get(b.k), n = c ? Math.min(c.sk.size, 4) : 0;
-        const cls = 'fp-b' + (c ? ' has' : '') + (c && c.split ? ' split' : '') + (hit.has(b.k) ? ' hit' : '') + (ui.sel === b.k ? ' sel' : '');
-        const iw = b.w - .5, ih = b.h - .5;
-        let g = `<g class="${cls}" data-k="${b.k}" tabindex="-1"><title>${b.k}${c ? ` · ${c.sk.size}종 · ${c.rows.length}줄` : ' · 비어 있음'}${c && c.split ? ' · 나뉜 상품 있음' : ''}</title><rect class="fp-bg" x="${b.c}" y="${b.r}" width="${iw}" height="${ih}" rx=".4"/>`;
-        // 4칸: 긴 쪽으로 나눠서 상품 수만큼 채워요
-        const vert = ih > iw;
-        for (let i = 0; i < 4; i++){
-          const sx = vert ? b.c + .35 : b.c + .35 + i * (iw - .7) / 4, sy = vert ? b.r + .35 + i * (ih - .7) / 4 : b.r + .35;
-          const sw = vert ? iw - .7 : (iw - .7) / 4 - .25, sh = vert ? (ih - .7) / 4 - .25 : ih - .7;
-          g += `<rect class="fp-s${i < n ? ' on' : ''}" x="${sx.toFixed(2)}" y="${sy.toFixed(2)}" width="${Math.max(sw, .2).toFixed(2)}" height="${Math.max(sh, .2).toFixed(2)}" rx=".2"/>`;
+        const cls = 'fp-b' + (c ? ' has' : '') + (c && c.split ? ' split' : '') + (hit.has(b.k) ? ' hit' : '');
+        const iw = b.W - .45, ih = b.H - .45, bx = b.x, by = b.y;
+        let g = `<g class="${cls}" data-k="${b.k}"><title>${b.k}${c ? ` · ${c.sk.size}종 · ${c.rows.length}줄` : ' · 비어 있음'}</title><rect class="fp-bg" x="${bx.toFixed(2)}" y="${by.toFixed(2)}" width="${iw.toFixed(2)}" height="${ih.toFixed(2)}" rx=".35"/>`;
+        if (c){
+          // 상품 수만큼 칸 채우기: 네모난 칸은 2×2, 길쭉한 칸은 한 줄 4칸
+          const sq = Math.max(iw, ih) / Math.min(iw, ih) < 1.7, m = .45, gap = .3;
+          for (let i = 0; i < 4; i++){
+            let sx, sy, sw, sh;
+            if (sq){ sw = (iw - m * 2 - gap) / 2; sh = (ih - m * 2 - gap) / 2; sx = bx + m + (i % 2) * (sw + gap); sy = by + m + Math.floor(i / 2) * (sh + gap); }
+            else if (ih > iw){ sw = iw - m * 2; sh = (ih - m * 2 - gap * 3) / 4; sx = bx + m; sy = by + m + i * (sh + gap); }
+            else { sh = ih - m * 2; sw = (iw - m * 2 - gap * 3) / 4; sy = by + m; sx = bx + m + i * (sw + gap); }
+            g += `<rect class="fp-s${i < n ? ' on' : ''}" x="${sx.toFixed(2)}" y="${sy.toFixed(2)}" width="${Math.max(sw, .2).toFixed(2)}" height="${Math.max(sh, .2).toFixed(2)}" rx=".15"/>`;
+          }
+          if (c.split) g += `<circle class="fp-dot" cx="${(bx + iw - .1).toFixed(2)}" cy="${(by + .1).toFixed(2)}" r=".8"/>`;
         }
         svg += g + '</g>';
       }
       // 찾은 칸은 멀리서도 보이게 동그라미
-      for (const b of P.bays) if (hit.has(b.k)) svg += `<circle class="fp-ring" cx="${b.c + b.w / 2}" cy="${b.r + b.h / 2}" r="${Math.max(b.w, b.h) / 2 + 1.6}"/>`;
+      for (const b of B) if (hit.has(b.k)) svg += `<circle class="fp-ring" cx="${(b.x + b.W / 2).toFixed(2)}" cy="${(b.y + b.H / 2).toFixed(2)}" r="${(Math.max(b.W, b.H) / 2 + 1.3).toFixed(2)}"/>`;
       const used = P.bays.filter(b => I.cells.has(b.k)).length, sp = P.bays.filter(b => I.cells.get(b.k)?.split).length, h = P.bays.filter(b => hit.has(b.k)).length;
       const card = el('div', { class:'fp-card ' + tOf(P.bays[0].ch) },
         el('div', { class:'fp-ch' }, el('b', { text: P.title }), el('span', { text: `${P.bays.length}칸 · 재고 ${used}칸 · 나뉜 상품 ${sp}칸` }), h ? el('em', { text: `찾은 칸 ${h}` }) : null));
       const w = el('div', { class:'fp-wrap' + (big ? '' : ' sm') });
       w.innerHTML = svg + '</svg>';
-      w.onclick = e => { const g = e.target.closest('g[data-k]'); if (!g) return; ui.sel = ui.sel === g.dataset.k ? '' : g.dataset.k; renderBuffer(); };
+      // 칸을 누르면 화면을 다시 그리지 않고 그 자리에 바로 상품 창을 띄워요
+      w.onclick = e => { const g = e.target.closest('g[data-k]'); if (!g) return; fpBayPop(g.dataset.k, g); };
       card.append(w);
       return card;
     };
@@ -5174,41 +5186,60 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
       el('button', { type:'button', class:'ret-btn sm ghost', 'aria-label':'작게', disabled: ui.zoom === 0, onclick: () => { ui.zoom--; renderBuffer(); } }, '－'),
       el('button', { type:'button', class:'ret-btn sm ghost', 'aria-label':'크게', disabled: ui.zoom === FP_ZOOM.length - 1, onclick: () => { ui.zoom++; renderBuffer(); } }, '＋'));
     const legend = el('div', { class:'fp-leg' },
-      el('span', {}, el('i', { class:'lg-s' }), '칸 안 막대 = 상품 종류 수 (최대 4)'),
-      el('span', {}, el('i', { class:'lg-split' }), '같은 상품이 다른 곳에도 있음'),
+      el('span', {}, el('i', { class:'lg-s' }), '파란 칸 수 = 상품 종류 수 (최대 4)'),
+      el('span', {}, el('i', { class:'lg-split' }), '다른 로케이션에도 있는 상품 있음'),
       hit.size ? el('span', {}, el('i', { class:'lg-hit' }), ui.pick ? '고른 상품 위치' : '찾은 칸') : null,
       el('span', { class:'fp-off', text: `1층 칸에 맞춘 재고 ${retNum(I.on)}줄${I.off ? ` · 1층 도면 밖 ${retNum(I.off)}줄` : ''} · 나뉜 상품 있는 칸 ${splitCells}` }));
     const wrap = maps;
 
     // 아래 설명 칸: 고른 상품 → 그 상품의 로케이션들 / 고른 칸 → 그 칸의 상품들
     let info = null;
-    const row = (r, opt = {}) => { const d = ppDays(r.exp), nm = bfName(r.name), g = r.bc || ('#' + r.name), n = I.grp.get(g).size;
-      return el('div', { class:'fp-r' },
-        el('div', { class:'nm' }, nm.tag ? el('span', { class:'bf-tag', text: nm.tag }) : null, nm.name, el('small', { text: ' ' + (r.bc || '') })),
-        el('code', { class:'loc', text: r.loc }), el('span', { class:'q' }, el('b', { text: retNum(r.q) }), '개'),
-        el('span', { class:'ddc' }, r.exp ? el('span', { class:'pp-dd' + ppLvl(d), text: ppMD(r.exp) + ' ' + ppDD(d) }) : null),
-        opt.noPick ? null : n > 1 ? el('button', { type:'button', class:'ret-btn sm fp-go', onclick: () => fpPick(g) }, `다른 곳 ${n - 1} ↗`) : el('span')); };
+    const row = (r, opt) => fpRow(r, I, opt);
     if (ui.pick){
       const rows = bfData.rows.filter(r => (r.bc || ('#' + r.name)) === ui.pick).sort((a, b) => a.loc.localeCompare(b.loc));
       const nm = rows[0] ? bfName(rows[0].name) : { name: '' };
       info = el('div', { class:'fp-info', role:'region', 'aria-label':'고른 상품 위치' }, el('div', { class:'fp-ih' }, el('b', { text: nm.name }), el('span', { text: ` · ${new Set(rows.map(r => r.loc)).size}곳 · ${retNum(rows.reduce((s, r) => s + (r.q || 0), 0))}개 · 1층 도면에 ${hit.size}칸` }),
         el('button', { type:'button', class:'ret-btn sm ghost', onclick: () => { ui.pick = ''; renderBuffer(); } }, '✕ 고른 상품 해제')),
-        ...rows.map(r => { const x = row(r, { noPick: true }); const k = fpKey(r.loc); if (k && lay.byK.has(k)){ x.classList.add('lnk'); x.onclick = () => { ui.sel = k; renderBuffer(); }; } else x.classList.add('off'); return x; }));
+        ...rows.map(r => { const x = row(r, { noPick: true }); const k = fpKey(r.loc); if (k && lay.byK.has(k)){ x.classList.add('lnk'); x.onclick = () => { const g = $(`#buf g[data-k="${k}"]`); if (g) fpBayPop(k, g); }; } else x.classList.add('off'); return x; }));
     }
-    if (ui.sel && !ui.pick){
-      const c = I.cells.get(ui.sel);
-      info = el('div', { class:'fp-info fp-pop', role:'dialog', 'aria-label':'로케이션 상품' }, el('div', { class:'fp-ih' }, el('b', { text: ui.sel }), el('span', { text: `${FP_CH[lay.byK.get(ui.sel).ch]} · ` + (c ? `${c.sk.size}종 · ${c.rows.length}줄 · ${retNum(c.rows.reduce((s, r) => s + (r.q || 0), 0))}개` : '재고 없음') }),
-        el('button', { type:'button', class:'ret-btn sm ghost', onclick: () => { ui.sel = ''; renderBuffer(); } }, '✕')),
-        ...(c ? c.rows.slice().sort((a, b) => a.loc.localeCompare(b.loc)).map(r => row(r)) : []));
-    }
-    if (ui.sel && !ui.pick && !I.cells.get(ui.sel)) info.append(el('p', { class:'ret-help fp-hint', text: '이 칸에는 올린 재고 파일 기준으로 상품이 없어요.' }));
-    if (!info) info = el('p', { class:'ret-help fp-hint', text: '칸을 누르면 그 로케이션에 있는 상품 정보가 떠요. 주황 테두리 칸에는 다른 로케이션에도 있는 상품이 있어요.' });
-    else { const close = () => { ui.sel = ''; ui.pick = ''; document.removeEventListener('keydown', esc); renderBuffer(); }, esc = e => { if (e.key === 'Escape' && document.body.contains(info)) close(); };
-      document.addEventListener('keydown', esc, { once: true }); }
+    if (!info) info = el('p', { class:'ret-help fp-hint', text: '칸을 누르면 그 로케이션에 있는 상품이 바로 떠요. 주황 점은 다른 로케이션에도 있는 상품이 있다는 뜻이에요.' });
     const out = el('div', { class:'fp' }, el('div', { class:'fp-top' }, chips, zoom), wrap, legend, info);
     // 고른 칸·상품이 보이게 스크롤
     requestAnimationFrame(() => { const w = maps.querySelector('.fp-wrap'), t = w && (w.querySelector('.sel') || w.querySelector('.hit')); if (t && ui.zoom > 0){ const a = w.getBoundingClientRect(), b = t.getBoundingClientRect(); w.scrollLeft += b.left - a.left - a.width / 2; } });
     return out;
+  }
+  function fpRow(r, I, opt = {}){
+    const d = ppDays(r.exp), nm = bfName(r.name), g = r.bc || ('#' + r.name), n = I.grp.get(g).size;
+    return el('div', { class:'fp-r' },
+      el('div', { class:'nm' }, nm.tag ? el('span', { class:'bf-tag', text: nm.tag }) : null, nm.name, el('small', { text: ' ' + (r.bc || '') })),
+      el('code', { class:'loc', text: r.loc }), el('span', { class:'q' }, el('b', { text: retNum(r.q) }), '개'),
+      el('span', { class:'ddc' }, r.exp ? el('span', { class:'pp-dd' + ppLvl(d), text: ppMD(r.exp) + ' ' + ppDD(d) }) : null),
+      opt.noPick ? null : n > 1 ? el('button', { type:'button', class:'ret-btn sm fp-go', onclick: () => { fpPopClose(); fpPick(g); } }, `다른 곳 ${n - 1} ↗`) : el('span'));
+  }
+  let fpPopEl = null;
+  function fpPopClose(){ if (fpPopEl){ fpPopEl.remove(); fpPopEl = null; } document.querySelectorAll('#buf g.sel').forEach(n => n.classList.remove('sel')); document.removeEventListener('keydown', fpPopKey); document.removeEventListener('pointerdown', fpPopOut, true); }
+  const fpPopKey = e => { if (e.key === 'Escape') fpPopClose(); };
+  const fpPopOut = e => { if (fpPopEl && !fpPopEl.contains(e.target) && !e.target.closest?.('#buf g[data-k]')) fpPopClose(); };
+  // 누른 칸 옆에 상품 창 (폰은 아래에서 올라와요)
+  function fpBayPop(k, g){
+    const was = g.classList.contains('sel');
+    fpPopClose();
+    if (was) return;
+    const lay = fpLayout(), I = fpIndex(), c = I.cells.get(k);
+    g.classList.add('sel');
+    const pop = el('div', { class:'fp-info fp-pop', role:'dialog', 'aria-label': k + ' 상품' },
+      el('div', { class:'fp-ih' }, el('b', { text: k }), el('span', { text: `${FP_CH[lay.byK.get(k).ch]} · ` + (c ? `${c.sk.size}종 · ${retNum(c.rows.reduce((s, r) => s + (r.q || 0), 0))}개` : '재고 없음') }),
+        el('button', { type:'button', class:'ret-btn sm ghost', 'aria-label':'닫기', onclick: fpPopClose }, '✕')),
+      ...(c ? c.rows.slice().sort((a, b) => a.loc.localeCompare(b.loc)).map(r => fpRow(r, I)) : [el('p', { class:'ret-help fp-hint', text: '올린 재고 파일 기준으로 이 칸에는 상품이 없어요.' })]));
+    document.body.append(pop); fpPopEl = pop;
+    if (!matchMedia('(max-width:760px)').matches){
+      const a = g.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight, vw = innerWidth, vh = innerHeight;
+      let x = a.right + 10; if (x + pw > vw - 12) x = a.left - pw - 10; if (x < 12) x = Math.max(12, Math.min(vw - pw - 12, a.left));
+      let y = a.top - 20; if (y + ph > vh - 12) y = vh - ph - 12; if (y < 12) y = 12;
+      pop.style.left = x + 'px'; pop.style.top = y + 'px';
+    }
+    document.addEventListener('keydown', fpPopKey);
+    setTimeout(() => document.addEventListener('pointerdown', fpPopOut, true), 0);
   }
   // 상품 하나를 평면도에서 보기 (Consolidation 목록·칸 설명에서)
   function fpPick(g){
@@ -5221,6 +5252,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     if (bfUi.pick && matchMedia('(max-width:900px)').matches){ const s = $('#buf .fp'); if (s) s.scrollIntoView({ block:'start', behavior:'smooth' }); }
   }
   function renderBuffer(){
+    fpPopClose();
     const box = $('#buf');
     const when = bfData?.at ? new Date(bfData.at).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }) + ' 올림' : '';
     const head = el('div', { class:'ret-sec-head' }, el('h3', { text:'Consolidation' }),
