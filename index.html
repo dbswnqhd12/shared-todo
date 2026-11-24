@@ -895,7 +895,16 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .fp-svg g[data-k]{cursor:pointer}.fp-svg g[data-k]:hover .fp-bg{stroke:var(--ink);stroke-width:.5}
 .fp-svg.dim g[data-k]:not(.hit){opacity:.28}
 .fp-svg .hit .fp-bg{stroke:var(--high);stroke-width:.9}.fp-svg .sel .fp-bg{stroke:var(--ink);stroke-width:1.1}
-.fp-svg .fp-ring{fill:none;stroke:var(--high);stroke-width:.8;pointer-events:none}.fp-svg .fp-ch{font-size:3.4px;font-weight:800;fill:var(--ink)}.fp-svg .fp-tag{font-size:2.2px;fill:var(--muted)}
+.fp-maps{display:flex;flex-direction:column;gap:10px}.fp-subs{display:flex;flex-wrap:wrap;gap:10px}.fp-subs .fp-card{flex:1 1 260px;min-width:0}
+.fp-card{--t:#2557A7;border:1px solid color-mix(in srgb,var(--t) 45%,var(--line));border-radius:12px;overflow:hidden;background:color-mix(in srgb,var(--t) 5%,var(--paper))}
+.fp-card.amb,.fp-chips .amb{--t:#B86E0C}.fp-card.chl,.fp-chips .chl{--t:#14819A}.fp-card.frz,.fp-chips .frz{--t:#5050C8}
+.fp-card .fp-ch{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;background:var(--t);color:#fff;padding:7px 12px}.fp-card .fp-ch b{font-size:15px}.fp-card .fp-ch span{font-size:12px;opacity:.9}.fp-card .fp-ch em{font-style:normal;font-size:12px;font-weight:800;background:#fff;color:var(--high);border-radius:10px;padding:1px 8px;margin-left:auto}
+.fp-card .fp-wrap{border:0;border-radius:0;background:transparent}.fp-card .fp-wrap.sm{max-height:none}
+.fp-chips{display:flex;gap:6px;flex-wrap:wrap}.fp-chips button{display:inline-flex;align-items:center;gap:6px;border:1.5px solid color-mix(in srgb,var(--t) 40%,var(--line));background:var(--paper);color:var(--t);border-radius:10px;padding:6px 12px;font:inherit;font-size:13.5px}
+.fp-chips button span{font-size:12px;opacity:.85}.fp-chips button[aria-pressed=true]{background:var(--t);border-color:var(--t);color:#fff}
+.fp-chips button em{font-style:normal;font-size:11.5px;font-weight:800;background:var(--high);color:#fff;border-radius:9px;padding:0 6px}
+.fp-svg .fp-ai{font-size:1.7px;font-weight:700;fill:var(--muted)}
+.fp-svg .fp-ring{fill:none;stroke:var(--high);stroke-width:.8;pointer-events:none}.fp-svg .fp-tag{font-size:2.2px;fill:var(--muted)}
 .fp-leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);align-items:center}.fp-leg span{display:inline-flex;align-items:center;gap:6px}
 .fp-leg i{display:inline-block;width:14px;height:14px;border-radius:3px;background:var(--accent-soft);border:1px solid var(--line)}.fp-leg i.lg-s{background:linear-gradient(90deg,var(--accent) 0 45%,transparent 45%) var(--accent-soft)}.fp-leg i.lg-split{border:2px solid var(--mid)}.fp-leg i.lg-hit{border:2px solid var(--high);background:var(--paper)}
 .fp-leg .fp-off{margin-left:auto}
@@ -4935,7 +4944,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
   // ---- 버퍼: 같은 바코드가 여러 줄(로케이션)에 나뉜 상품끼리 묶기 (유통기한은 달라도 같이) ----
   let bfData = null, bfRev = -1, bfLoading = false;
   const bfUi = { mode: store.get('bf-mode', 'dup') === 'all' ? 'all' : 'dup', q: '', scan: '', hit: '',
-    view: store.get('bf-view', 'list') === 'map' ? 'map' : 'list', ch: store.get('fp-ch', 'all'), zoom: 0, sel: '', pick: '' };
+    view: store.get('bf-view', 'list') === 'map' ? 'map' : 'list', ch: store.get('fp-ch', '1'), zoom: 0, sel: '', pick: '' };
   // 'Box_[로켓프레시] 빙그레 …' → { tag:'Box', name:'빙그레 …' }
   const bfName = s => { let t = String(s || '').trim(), tag = ''; const m = t.match(/^(Box|Pack|Bundle)_/i); if (m){ tag = m[1]; t = t.slice(m[0].length); } return { tag, name: t.replace(/\[로켓프레시\]\s*/g, '').trim() }; };
   function bfGroups(){
@@ -5069,7 +5078,15 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     if (g1 - g0 > 14){ const d = g1 - g0 - 10; for (const o of [...bays, ...tags]) if (o.c >= g1 - 2) o.c -= d; }
     const box = L => { const x0 = Math.min(...L.map(b => b.c)), y0 = Math.min(...L.map(b => b.r)); return { x: x0, y: y0, w: Math.max(...L.map(b => b.c + b.w)) - x0, h: Math.max(...L.map(b => b.r + b.h)) - y0 }; };
     const ch = {};
-    for (const n of Object.keys(FP_CH)){ const L = bays.filter(b => b.ch === n); const main = L.filter(b => !/Z/.test(b.z)); ch[n] = { all: box(L), main: box(main.length ? main : L) }; }
+    const inBox = (b, m, e) => b.c >= m.x - e && b.r >= m.y - e && b.c + b.w <= m.x + m.w + e && b.r + b.h <= m.y + m.h + e;
+    for (const n of Object.keys(FP_CH)){
+      const L = bays.filter(b => b.ch === n), core = L.filter(b => !/Z/.test(b.z)), m0 = box(core.length ? core : L);
+      // 챔버 본체 + 본체 밖에 떨어진 버퍼(Z) 구역은 따로 작은 도면으로
+      const main = L.filter(b => !/Z/.test(b.z) || inBox(b, m0, 2)), parts = [{ title: FP_CH[n], bays: main, box: box(main) }];
+      const out = L.filter(b => !main.includes(b));
+      for (const z of [...new Set(out.map(b => b.z))]){ const B = out.filter(b => b.z === z); parts.push({ title: z + ' 버퍼', bays: B, box: box(B) }); }
+      ch[n] = { main: m0, parts };
+    }
     return fpLay = { bays, tags, ch, byK: new Map(bays.map(b => [b.k, b])), all: box(bays) };
   }
   const fpKey = loc => { const m = String(loc || '').toUpperCase().replace(/\s/g, '').match(/(?:^|-)(\d1[A-Z]{1,2}\d+)-0*(\d+)/); return m ? m[1] + '-' + m[2] : ''; };
@@ -5097,33 +5114,50 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     const hit = new Set();
     if (ui.pick) fpCellsOf(I, ui.pick).forEach(k => hit.add(k));
     else if (q) for (const [k, c] of I.cells) if (k.toLowerCase().includes(q) || c.rows.some(r => [r.bc, r.name, r.sku, r.loc].some(v => String(v || '').toLowerCase().replace(/\s+/g, '').includes(q)))) hit.add(k);
-    if (ui.ch !== 'all' && !lay.ch[ui.ch]) ui.ch = 'all';
-    const vb = ui.ch === 'all' ? lay.all : lay.ch[ui.ch].main;
-    const pad = 3, X = vb.x - pad, Y = vb.y - pad - 4, W = vb.w + pad * 2, H = vb.h + pad * 2 + 4;
-    let svg = `<svg class="fp-svg${hit.size ? ' dim' : ''}" viewBox="${X} ${Y} ${W} ${H}" style="width:${FP_ZOOM[ui.zoom] * 100}%${ui.zoom ? '' : ';max-height:min(64vh,700px)'}" role="img" aria-label="1층 평면도">`;
-    for (const t of lay.tags) svg += `<text class="fp-tag" x="${t.c}" y="${t.r + 2.6}">${fpAttr(t.t)}</text>`;
-    for (const n of Object.keys(FP_CH)){ const m = lay.ch[n].main; svg += `<text class="fp-ch" x="${m.x}" y="${m.y - 1.4}">${FP_CH[n]}</text>`; }
-    for (const b of lay.bays){
-      const c = I.cells.get(b.k), n = c ? Math.min(c.sk.size, 4) : 0;
-      const cls = 'fp-b' + (c ? ' has' : '') + (c && c.split ? ' split' : '') + (hit.has(b.k) ? ' hit' : '') + (ui.sel === b.k ? ' sel' : '');
-      const iw = b.w - .5, ih = b.h - .5;
-      let g = `<g class="${cls}" data-k="${b.k}" tabindex="-1"><title>${b.k}${c ? ` · ${c.sk.size}종 · ${c.rows.length}줄` : ' · 비어 있음'}${c && c.split ? ' · 나뉜 상품 있음' : ''}</title><rect class="fp-bg" x="${b.c}" y="${b.r}" width="${iw}" height="${ih}" rx=".4"/>`;
-      // 4칸: 긴 쪽으로 나눠서 상품 수만큼 채워요
-      const vert = ih > iw;
-      for (let i = 0; i < 4; i++){
-        const sx = vert ? b.c + .35 : b.c + .35 + i * (iw - .7) / 4, sy = vert ? b.r + .35 + i * (ih - .7) / 4 : b.r + .35;
-        const sw = vert ? iw - .7 : (iw - .7) / 4 - .25, sh = vert ? (ih - .7) / 4 - .25 : ih - .7;
-        g += `<rect class="fp-s${i < n ? ' on' : ''}" x="${sx.toFixed(2)}" y="${sy.toFixed(2)}" width="${Math.max(sw, .2).toFixed(2)}" height="${Math.max(sh, .2).toFixed(2)}" rx=".2"/>`;
+    if (!lay.ch[ui.ch]) ui.ch = '1';
+    const tOf = n => n === '1' ? 'amb' : n < '5' ? 'chl' : 'frz';
+    const hitBy = {}; for (const k of hit){ const c = lay.byK.get(k).ch; hitBy[c] = (hitBy[c] || 0) + 1; }
+    // 도면 하나 (챔버 본체 또는 본체에서 떨어진 버퍼 구역)
+    const draw = (P, big) => {
+      const vb = P.box, pad = 2.5, X = vb.x - pad, Y = vb.y - pad - 2.5, W = vb.w + pad * 2, H = vb.h + pad * 2 + 2.5;
+      const st = big ? `width:${FP_ZOOM[ui.zoom] * 100}%${ui.zoom ? '' : ';max-height:min(64vh,700px)'}` : `width:100%;max-width:${Math.round(W * 9)}px;max-height:260px`;
+      let svg = `<svg class="fp-svg${hit.size ? ' dim' : ''}" viewBox="${X} ${Y} ${W} ${H}" style="${st}" role="img" aria-label="${fpAttr(P.title)}">`;
+      if (big) for (const t of lay.tags) if (t.c >= X && t.c <= X + W && t.r >= Y && t.r <= Y + H) svg += `<text class="fp-tag" x="${t.c}" y="${t.r + 2.6}">${fpAttr(t.t)}</text>`;
+      // 통로 이름: 그 통로 맨 위 칸 위에
+      const top = new Map(); for (const b of P.bays){ const a = b.k.split('-')[0], o = top.get(a); if (!o || b.r < o.r || (b.r === o.r && b.c < o.c)) top.set(a, b); }
+      for (const [a, b] of top) svg += `<text class="fp-ai" x="${b.c + (b.w - .5) / 2}" y="${b.r - .7}" text-anchor="middle">${a}</text>`;
+      for (const b of P.bays){
+        const c = I.cells.get(b.k), n = c ? Math.min(c.sk.size, 4) : 0;
+        const cls = 'fp-b' + (c ? ' has' : '') + (c && c.split ? ' split' : '') + (hit.has(b.k) ? ' hit' : '') + (ui.sel === b.k ? ' sel' : '');
+        const iw = b.w - .5, ih = b.h - .5;
+        let g = `<g class="${cls}" data-k="${b.k}" tabindex="-1"><title>${b.k}${c ? ` · ${c.sk.size}종 · ${c.rows.length}줄` : ' · 비어 있음'}${c && c.split ? ' · 나뉜 상품 있음' : ''}</title><rect class="fp-bg" x="${b.c}" y="${b.r}" width="${iw}" height="${ih}" rx=".4"/>`;
+        // 4칸: 긴 쪽으로 나눠서 상품 수만큼 채워요
+        const vert = ih > iw;
+        for (let i = 0; i < 4; i++){
+          const sx = vert ? b.c + .35 : b.c + .35 + i * (iw - .7) / 4, sy = vert ? b.r + .35 + i * (ih - .7) / 4 : b.r + .35;
+          const sw = vert ? iw - .7 : (iw - .7) / 4 - .25, sh = vert ? (ih - .7) / 4 - .25 : ih - .7;
+          g += `<rect class="fp-s${i < n ? ' on' : ''}" x="${sx.toFixed(2)}" y="${sy.toFixed(2)}" width="${Math.max(sw, .2).toFixed(2)}" height="${Math.max(sh, .2).toFixed(2)}" rx=".2"/>`;
+        }
+        svg += g + '</g>';
       }
-      svg += g + '</g>';
-    }
-    // 찾은 칸은 멀리서도 보이게 동그라미
-    for (const k of hit){ const b = lay.byK.get(k); svg += `<circle class="fp-ring" cx="${b.c + b.w / 2}" cy="${b.r + b.h / 2}" r="${Math.max(b.w, b.h) / 2 + 2.2}"/>`; }
-    svg += '</svg>';
+      // 찾은 칸은 멀리서도 보이게 동그라미
+      for (const b of P.bays) if (hit.has(b.k)) svg += `<circle class="fp-ring" cx="${b.c + b.w / 2}" cy="${b.r + b.h / 2}" r="${Math.max(b.w, b.h) / 2 + 1.6}"/>`;
+      const used = P.bays.filter(b => I.cells.has(b.k)).length, sp = P.bays.filter(b => I.cells.get(b.k)?.split).length, h = P.bays.filter(b => hit.has(b.k)).length;
+      const card = el('div', { class:'fp-card ' + tOf(P.bays[0].ch) },
+        el('div', { class:'fp-ch' }, el('b', { text: P.title }), el('span', { text: `${P.bays.length}칸 · 재고 ${used}칸 · 나뉜 상품 ${sp}칸` }), h ? el('em', { text: `찾은 칸 ${h}` }) : null));
+      const w = el('div', { class:'fp-wrap' + (big ? '' : ' sm') });
+      w.innerHTML = svg + '</svg>';
+      w.onclick = e => { const g = e.target.closest('g[data-k]'); if (!g) return; ui.sel = ui.sel === g.dataset.k ? '' : g.dataset.k; renderBuffer(); };
+      card.append(w);
+      return card;
+    };
+    const C = lay.ch[ui.ch];
+    const maps = el('div', { class:'fp-maps' }, draw(C.parts[0], true), C.parts.length > 1 ? el('div', { class:'fp-subs' }, ...C.parts.slice(1).map(P => draw(P, false))) : null);
 
     const splitCells = [...I.cells.values()].filter(c => c.split).length;
-    const chips = el('span', { class:'ov-tog fp-chips', role:'group', 'aria-label':'챔버' }, ...[['all', '전체'], ...Object.keys(FP_CH).map(n => [n, n + '챔버'])].map(([v, l]) =>
-      el('button', { type:'button', 'aria-pressed': ui.ch === v ? 'true' : 'false', onclick: () => { ui.ch = v; store.set('fp-ch', v); renderBuffer(); } }, l)));
+    const chips = el('div', { class:'fp-chips', role:'group', 'aria-label':'챔버' }, ...Object.keys(FP_CH).map(n =>
+      el('button', { type:'button', class: tOf(n), 'aria-pressed': ui.ch === n ? 'true' : 'false', onclick: () => { ui.ch = n; ui.sel = ''; store.set('fp-ch', n); renderBuffer(); } },
+        el('b', { text: n + '챔버' }), el('span', { text: FP_CH[n].split(' ')[1] }), hitBy[n] ? el('em', { text: String(hitBy[n]) }) : null)));
     const zoom = el('span', { class:'fp-zoom' },
       el('button', { type:'button', class:'ret-btn sm ghost', 'aria-label':'작게', disabled: ui.zoom === 0, onclick: () => { ui.zoom--; renderBuffer(); } }, '－'),
       el('button', { type:'button', class:'ret-btn sm ghost', 'aria-label':'크게', disabled: ui.zoom === FP_ZOOM.length - 1, onclick: () => { ui.zoom++; renderBuffer(); } }, '＋'));
@@ -5132,9 +5166,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
       el('span', {}, el('i', { class:'lg-split' }), '같은 상품이 다른 곳에도 있음'),
       hit.size ? el('span', {}, el('i', { class:'lg-hit' }), ui.pick ? '고른 상품 위치' : '찾은 칸') : null,
       el('span', { class:'fp-off', text: `1층 칸에 맞춘 재고 ${retNum(I.on)}줄${I.off ? ` · 1층 도면 밖 ${retNum(I.off)}줄` : ''} · 나뉜 상품 있는 칸 ${splitCells}` }));
-    const wrap = el('div', { class:'fp-wrap' });
-    wrap.innerHTML = svg;
-    wrap.onclick = e => { const g = e.target.closest('g[data-k]'); if (!g) return; ui.sel = ui.sel === g.dataset.k ? '' : g.dataset.k; renderBuffer(); };
+    const wrap = maps;
 
     // 아래 설명 칸: 고른 상품 → 그 상품의 로케이션들 / 고른 칸 → 그 칸의 상품들
     let info = null;
@@ -5160,15 +5192,15 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     if (!info) info = el('p', { class:'ret-help fp-hint', text: '칸을 누르면 그 로케이션의 상품이 보여요. 주황 테두리 칸에는 다른 로케이션에도 있는 상품이 있어요.' });
     const out = el('div', { class:'fp' }, el('div', { class:'fp-top' }, chips, zoom), wrap, legend, info);
     // 고른 칸·상품이 보이게 스크롤
-    requestAnimationFrame(() => { const t = wrap.querySelector('.sel') || wrap.querySelector('.hit'); if (t && ui.zoom > 0){ const a = wrap.getBoundingClientRect(), b = t.getBoundingClientRect(); wrap.scrollLeft += b.left - a.left - a.width / 2; } });
+    requestAnimationFrame(() => { const w = maps.querySelector('.fp-wrap'), t = w && (w.querySelector('.sel') || w.querySelector('.hit')); if (t && ui.zoom > 0){ const a = w.getBoundingClientRect(), b = t.getBoundingClientRect(); w.scrollLeft += b.left - a.left - a.width / 2; } });
     return out;
   }
   // 상품 하나를 평면도에서 보기 (Consolidation 목록·칸 설명에서)
   function fpPick(g){
     const lay = fpLayout(), I = fpIndex(), ks = fpCellsOf(I, g);
-    const chs = new Set(ks.map(k => lay.byK.get(k).ch));
     bfUi.view = 'map'; store.set('bf-view', 'map'); bfUi.pick = g; bfUi.sel = '';
-    bfUi.ch = chs.size === 1 ? [...chs][0] : 'all';
+    const cnt = {}; for (const k of ks){ const c = lay.byK.get(k).ch; cnt[c] = (cnt[c] || 0) + 1; }
+    if (ks.length && !cnt[bfUi.ch]) bfUi.ch = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || a.localeCompare(b))[0];
     renderBuffer();
     const s = $('#buf .fp'); if (s) s.scrollIntoView({ block:'start', behavior:'smooth' });
   }
