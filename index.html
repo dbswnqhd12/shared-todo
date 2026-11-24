@@ -911,6 +911,11 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .fp-info{border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:4px 12px 8px}.fp-ih{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:6px 0;font-size:14px}.fp-ih b{font-family:var(--mono)}.fp-ih span{color:var(--muted);font-size:13px}.fp-ih button{margin-left:auto}
 .fp-r{display:grid;grid-template-columns:minmax(0,1fr) 150px 70px 120px 92px;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line);font-size:13px}
 .fp-r .nm{font-weight:600;overflow-wrap:anywhere}.fp-r .nm small{font-family:var(--mono);color:var(--muted);font-weight:400}.fp-r .loc{font-family:var(--mono);font-weight:700}.fp-r .q{text-align:right;color:var(--muted);font-size:12px}.fp-r .q b{font-family:var(--mono);color:var(--ink);font-size:13.5px}
+.fp-pop{position:fixed;right:24px;bottom:24px;z-index:96;width:min(560px,calc(100vw - 48px));max-height:min(62vh,600px);overflow:auto;box-shadow:0 14px 40px rgba(15,25,45,.24);border-radius:14px;animation:fpUp .16s ease-out}
+.fp-pop .fp-r{grid-template-columns:minmax(0,1fr) auto auto auto;gap:4px 12px}.fp-pop .fp-r .nm{grid-column:1/-1;font-size:13.5px}.fp-pop .fp-r .fp-go{justify-self:end}
+.fp-pop .fp-ih{position:sticky;top:0;background:var(--paper);z-index:1;border-bottom:1px solid var(--line);margin:0 -12px;padding:10px 12px}
+@keyframes fpUp{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+@media (max-width:760px){.fp-pop{left:0;right:0;width:auto;bottom:calc(68px + env(safe-area-inset-bottom,0px));max-height:58vh;border-radius:16px 16px 0 0}}
 .fp-r.lnk{cursor:pointer}.fp-r.lnk:hover{background:var(--bg)}.fp-r.off{opacity:.6}.fp-go{white-space:nowrap}.fp-hint{margin:0}
 @media (max-width:760px){.fp-r{grid-template-columns:auto auto minmax(0,1fr);gap:4px 10px}.fp-r .nm{grid-column:1/-1}.fp-r .ddc{text-align:right}.fp-r .fp-go,.fp-r>span:last-child{grid-column:1/-1;justify-self:start}.fp-leg .fp-off{margin-left:0}.fp-wrap{max-height:62vh}}
 @media (max-width:760px){.bf-grid{grid-template-columns:1fr}.bf-sum{grid-template-columns:1fr 1fr}.bf-sum .bf-st:last-child{grid-column:1/-1}.bf-find{width:100%;margin-left:0;order:9}.bf-fw{width:100%;margin-left:0;order:9}.bf-fw .bf-find{flex:1;width:auto;order:0}.bf-cam{padding:9px 14px;font-size:14px}}
@@ -5179,17 +5184,20 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     if (ui.pick){
       const rows = bfData.rows.filter(r => (r.bc || ('#' + r.name)) === ui.pick).sort((a, b) => a.loc.localeCompare(b.loc));
       const nm = rows[0] ? bfName(rows[0].name) : { name: '' };
-      info = el('div', { class:'fp-info' }, el('div', { class:'fp-ih' }, el('b', { text: nm.name }), el('span', { text: ` · ${new Set(rows.map(r => r.loc)).size}곳 · ${retNum(rows.reduce((s, r) => s + (r.q || 0), 0))}개 · 1층 도면에 ${hit.size}칸` }),
+      info = el('div', { class:'fp-info fp-pop', role:'dialog', 'aria-label':'고른 상품 위치' }, el('div', { class:'fp-ih' }, el('b', { text: nm.name }), el('span', { text: ` · ${new Set(rows.map(r => r.loc)).size}곳 · ${retNum(rows.reduce((s, r) => s + (r.q || 0), 0))}개 · 1층 도면에 ${hit.size}칸` }),
         el('button', { type:'button', class:'ret-btn sm ghost', onclick: () => { ui.pick = ''; renderBuffer(); } }, '✕ 고른 상품 해제')),
         ...rows.map(r => { const x = row(r, { noPick: true }); const k = fpKey(r.loc); if (k && lay.byK.has(k)){ x.classList.add('lnk'); x.onclick = () => { ui.sel = k; renderBuffer(); }; } else x.classList.add('off'); return x; }));
     }
     if (ui.sel && !ui.pick){
       const c = I.cells.get(ui.sel);
-      info = el('div', { class:'fp-info' }, el('div', { class:'fp-ih' }, el('b', { text: ui.sel }), el('span', { text: c ? ` · ${c.sk.size}종 · ${c.rows.length}줄` : ' · 비어 있어요' }),
+      info = el('div', { class:'fp-info fp-pop', role:'dialog', 'aria-label':'로케이션 상품' }, el('div', { class:'fp-ih' }, el('b', { text: ui.sel }), el('span', { text: `${FP_CH[lay.byK.get(ui.sel).ch]} · ` + (c ? `${c.sk.size}종 · ${c.rows.length}줄 · ${retNum(c.rows.reduce((s, r) => s + (r.q || 0), 0))}개` : '재고 없음') }),
         el('button', { type:'button', class:'ret-btn sm ghost', onclick: () => { ui.sel = ''; renderBuffer(); } }, '✕')),
         ...(c ? c.rows.slice().sort((a, b) => a.loc.localeCompare(b.loc)).map(r => row(r)) : []));
     }
-    if (!info) info = el('p', { class:'ret-help fp-hint', text: '칸을 누르면 그 로케이션의 상품이 보여요. 주황 테두리 칸에는 다른 로케이션에도 있는 상품이 있어요.' });
+    if (ui.sel && !ui.pick && !I.cells.get(ui.sel)) info.append(el('p', { class:'ret-help fp-hint', text: '이 칸에는 올린 재고 파일 기준으로 상품이 없어요.' }));
+    if (!info) info = el('p', { class:'ret-help fp-hint', text: '칸을 누르면 그 로케이션에 있는 상품 정보가 떠요. 주황 테두리 칸에는 다른 로케이션에도 있는 상품이 있어요.' });
+    else { const close = () => { ui.sel = ''; ui.pick = ''; document.removeEventListener('keydown', esc); renderBuffer(); }, esc = e => { if (e.key === 'Escape' && document.body.contains(info)) close(); };
+      document.addEventListener('keydown', esc, { once: true }); }
     const out = el('div', { class:'fp' }, el('div', { class:'fp-top' }, chips, zoom), wrap, legend, info);
     // 고른 칸·상품이 보이게 스크롤
     requestAnimationFrame(() => { const w = maps.querySelector('.fp-wrap'), t = w && (w.querySelector('.sel') || w.querySelector('.hit')); if (t && ui.zoom > 0){ const a = w.getBoundingClientRect(), b = t.getBoundingClientRect(); w.scrollLeft += b.left - a.left - a.width / 2; } });
