@@ -907,7 +907,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .fp-card.amb,.fp-chips .amb{--t:#B86E0C}.fp-card.chl,.fp-chips .chl{--t:#14819A}.fp-card.frz,.fp-chips .frz{--t:#5050C8}
 .fp-card .fp-ch{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;background:var(--t);color:#fff;padding:7px 12px}.fp-card .fp-ch b{font-size:15px}.fp-card .fp-ch span{font-size:12px;opacity:.9}.fp-card .fp-ch em{font-style:normal;font-size:12px;font-weight:800;background:#fff;color:var(--high);border-radius:10px;padding:1px 8px;margin-left:auto}
 .fp-card .fp-wrap{border:0;border-radius:0;background:transparent}.fp-card .fp-wrap.sm{max-height:none}
-.fp-chips{display:flex;gap:5px;flex-wrap:wrap}.fp-chips button{display:inline-flex;align-items:center;gap:6px;border:1.5px solid color-mix(in srgb,var(--t) 40%,var(--line));background:var(--paper);color:var(--t);border-radius:10px;padding:5px 10px;font:inherit;font-size:13px}
+.fp-chips{display:flex;gap:5px;flex-wrap:wrap}.fp-only button{padding:5px 11px;font-size:12.5px}.fp-chips button{display:inline-flex;align-items:center;gap:6px;border:1.5px solid color-mix(in srgb,var(--t) 40%,var(--line));background:var(--paper);color:var(--t);border-radius:10px;padding:5px 10px;font:inherit;font-size:13px}
 .fp-chips button span{font-size:12px;opacity:.85}.fp-chips button[aria-pressed=true]{background:var(--t);border-color:var(--t);color:#fff}
 .fp-chips button em{font-style:normal;font-size:11.5px;font-weight:800;background:var(--high);color:#fff;border-radius:9px;padding:0 6px}
 .fp-svg .fp-ai{font-size:1.9px;font-weight:800;fill:var(--ink);opacity:.75}
@@ -4956,7 +4956,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
   // ---- 버퍼: 같은 바코드가 여러 줄(로케이션)에 나뉜 상품끼리 묶기 (유통기한은 달라도 같이) ----
   let bfData = null, bfRev = -1, bfLoading = false;
   const bfUi = { mode: store.get('bf-mode', 'dup') === 'all' ? 'all' : 'dup', q: '', scan: '', hit: '',
-    ch: store.get('fp-ch', '1'), zoom: 0, sel: '', pick: '' };
+    ch: store.get('fp-ch', '1'), only: store.get('fp-only', '1') !== '0', zoom: 0, sel: '', pick: '' };
   // 'Box_[로켓프레시] 빙그레 …' → { tag:'Box', name:'빙그레 …' }
   const bfName = s => { let t = String(s || '').trim(), tag = ''; const m = t.match(/^(Box|Pack|Bundle)_/i); if (m){ tag = m[1]; t = t.slice(m[0].length); } return { tag, name: t.replace(/\[로켓프레시\]\s*/g, '').trim() }; };
   function bfGroups(){
@@ -5126,7 +5126,11 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     const hit = new Set();
     if (ui.pick) fpCellsOf(I, ui.pick).forEach(k => hit.add(k));
     else if (q) for (const [k, c] of I.cells) if (k.toLowerCase().includes(q) || c.rows.some(r => [r.bc, r.name, r.sku, r.loc].some(v => String(v || '').toLowerCase().replace(/\s+/g, '').includes(q)))) hit.add(k);
-    if (!lay.ch[ui.ch]) ui.ch = '1';
+    // 올린 재고 파일에 있는 구역(예: 21M)만 보여줘요. '챔버 전체'를 고르면 모든 칸
+    const upZ = new Set([...I.cells.keys()].map(k => lay.byK.get(k).z));
+    const only = ui.only && upZ.size > 0, keep = b => !only || upZ.has(b.z);
+    const chs = Object.keys(FP_CH).filter(n => !only || lay.ch[n].parts.some(P => P.bays.some(keep)));
+    if (!chs.includes(ui.ch)) ui.ch = chs[0] || '1';
     const tOf = n => n === '1' ? 'amb' : n < '5' ? 'chl' : 'frz';
     const hitBy = {}; for (const k of hit){ const c = lay.byK.get(k).ch; hitBy[c] = (hitBy[c] || 0) + 1; }
     // 도면 하나 (챔버 본체 또는 본체에서 떨어진 버퍼 구역)
@@ -5167,7 +5171,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
       for (const b of B) if (hit.has(b.k)) svg += `<circle class="fp-ring" cx="${(b.x + b.W / 2).toFixed(2)}" cy="${(b.y + b.H / 2).toFixed(2)}" r="${(Math.max(b.W, b.H) / 2 + 1.3).toFixed(2)}"/>`;
       const used = P.bays.filter(b => I.cells.has(b.k)).length, sp = P.bays.filter(b => I.cells.get(b.k)?.split).length, h = P.bays.filter(b => hit.has(b.k)).length;
       const card = el('div', { class:'fp-card ' + tOf(P.bays[0].ch) },
-        el('div', { class:'fp-ch' }, el('b', { text: P.title }), el('span', { text: `${P.bays.length}칸 · 재고 ${used}칸 · 나뉜 상품 ${sp}칸` }), h ? el('em', { text: `찾은 칸 ${h}` }) : null));
+        el('div', { class:'fp-ch' }, el('b', { text: P.title }), el('span', { text: `${[...new Set(P.bays.map(b => b.z))].join(' · ')} · ${P.bays.length}칸 · 재고 ${used}칸 · 나뉜 상품 ${sp}칸` }), h ? el('em', { text: `찾은 칸 ${h}` }) : null));
       const w = el('div', { class:'fp-wrap' + (big ? '' : ' sm') });
       w.innerHTML = svg + '</svg>';
       // 칸을 누르면 화면을 다시 그리지 않고 그 자리에 바로 상품 창을 띄워요
@@ -5175,11 +5179,13 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
       card.append(w);
       return card;
     };
-    const C = lay.ch[ui.ch];
-    const maps = el('div', { class:'fp-maps' }, draw(C.parts[0], true), C.parts.length > 1 ? el('div', { class:'fp-subs' }, ...C.parts.slice(1).map(P => draw(P, false))) : null);
+    const parts = lay.ch[ui.ch].parts.map(P => ({ ...P, bays: P.bays.filter(keep) })).filter(P => P.bays.length);
+    const maps = el('div', { class:'fp-maps' }, parts[0] ? draw(parts[0], true) : null, parts.length > 1 ? el('div', { class:'fp-subs' }, ...parts.slice(1).map(P => draw(P, false))) : null);
 
     const splitCells = [...I.cells.values()].filter(c => c.split).length;
-    const chips = el('div', { class:'fp-chips', role:'group', 'aria-label':'챔버' }, ...Object.keys(FP_CH).map(n =>
+    const onlyTog = upZ.size ? el('span', { class:'ov-tog fp-only', role:'group', 'aria-label':'보일 칸' }, ...[[true, '올린 구역만'], [false, '챔버 전체']].map(([v, l]) =>
+      el('button', { type:'button', 'aria-pressed': ui.only === v ? 'true' : 'false', onclick: () => { ui.only = v; store.set('fp-only', v ? '1' : '0'); renderBuffer(); } }, l))) : null;
+    const chips = el('div', { class:'fp-chips', role:'group', 'aria-label':'챔버' }, ...chs.map(n =>
       el('button', { type:'button', class: tOf(n), 'aria-pressed': ui.ch === n ? 'true' : 'false', onclick: () => { ui.ch = n; ui.sel = ''; store.set('fp-ch', n); renderBuffer(); } },
         el('b', { text: n + '챔버' }), el('span', { text: FP_CH[n].split(' ')[1] }), hitBy[n] ? el('em', { text: String(hitBy[n]) }) : null)));
     const zoom = el('span', { class:'fp-zoom' },
@@ -5203,7 +5209,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
         ...rows.map(r => { const x = row(r, { noPick: true }); const k = fpKey(r.loc); if (k && lay.byK.has(k)){ x.classList.add('lnk'); x.onclick = () => { const g = $(`#buf g[data-k="${k}"]`); if (g) fpBayPop(k, g); }; } else x.classList.add('off'); return x; }));
     }
     if (!info) info = el('p', { class:'ret-help fp-hint', text: '칸을 누르면 그 로케이션에 있는 상품이 바로 떠요. 주황 점은 다른 로케이션에도 있는 상품이 있다는 뜻이에요.' });
-    const out = el('div', { class:'fp' }, el('div', { class:'fp-top' }, chips, zoom), wrap, legend, info);
+    const out = el('div', { class:'fp' }, el('div', { class:'fp-top' }, chips, onlyTog, zoom), wrap, legend, info);
     // 고른 칸·상품이 보이게 스크롤
     requestAnimationFrame(() => { const w = maps.querySelector('.fp-wrap'), t = w && (w.querySelector('.sel') || w.querySelector('.hit')); if (t && ui.zoom > 0){ const a = w.getBoundingClientRect(), b = t.getBoundingClientRect(); w.scrollLeft += b.left - a.left - a.width / 2; } });
     return out;
