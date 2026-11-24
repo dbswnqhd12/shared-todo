@@ -884,7 +884,14 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .bf-rw .mf,.bf-rw .ex{font-family:var(--mono);white-space:nowrap}.bf-rw .mf{color:var(--muted)}.bf-rw .ex{font-weight:800}.bf-rw .pp-dd{min-width:0;font-size:10.5px;padding:1px 6px}
 @media (max-width:560px){.bf-rows{padding:2px 12px 8px}.bf-rh{display:none}.bf-rw{grid-template-columns:auto auto minmax(0,1fr);gap:3px 12px}.bf-rw .loc{grid-column:1/3}.bf-rw .q{grid-column:3;grid-row:1}.bf-rw .mf,.bf-rw .ex{grid-row:2;font-size:12px}.bf-rw .mf::before{content:'제조 ';font-family:var(--body);font-weight:500}.bf-rw .ex::before{content:'유통 ';font-family:var(--body);font-weight:500;color:var(--muted)}.bf-rw .ddc{grid-column:3;grid-row:2;text-align:right}}
 /* 1층 평면도 */
-.bf-map{margin-left:8px;padding:2px 8px;font-size:12px}
+.bf-map{margin-left:8px;padding:2px 8px;font-size:12px;white-space:nowrap}.bf-map.on{background:var(--high);border-color:var(--high);color:#fff}
+.bf-g.on{border:2px solid var(--high)}
+.bf-split{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,1fr);gap:12px;align-items:start}
+.bf-side{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper)}.bf-side-h{padding:9px 12px;font-weight:700;font-size:14px;border-bottom:1px solid var(--line);background:var(--bg)}
+.bf-split .bf-list{max-height:min(78vh,860px);border:0}
+.bf-split .bf-rows{padding:2px 12px 8px}.bf-split .bf-rh{display:none}.bf-split .bf-rw{grid-template-columns:auto auto minmax(0,1fr);gap:3px 12px}.bf-split .bf-rw .loc{grid-column:1/3}.bf-split .bf-rw .q{grid-column:3;grid-row:1}.bf-split .bf-rw .mf,.bf-split .bf-rw .ex{grid-row:2;font-size:12px}.bf-split .bf-rw .mf::before{content:'제조 ';font-family:var(--body);font-weight:500}.bf-split .bf-rw .ex::before{content:'유통 ';font-family:var(--body);font-weight:500;color:var(--muted)}.bf-split .bf-rw .ddc{grid-column:3;grid-row:2;text-align:right}
+.bf-split .bf-gh{flex-wrap:wrap}
+@media (max-width:900px){.bf-split{grid-template-columns:1fr}.bf-split .bf-list{max-height:70vh}}
 .fp{display:flex;flex-direction:column;gap:8px}.fp-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.fp-zoom{margin-left:auto;display:flex;gap:4px}.fp-zoom button{min-width:34px;font-size:15px}
 .fp-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--paper);max-height:min(70vh,760px);-webkit-overflow-scrolling:touch}
 .fp-svg{display:block;height:auto;margin:0 auto}
@@ -900,7 +907,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .fp-card.amb,.fp-chips .amb{--t:#B86E0C}.fp-card.chl,.fp-chips .chl{--t:#14819A}.fp-card.frz,.fp-chips .frz{--t:#5050C8}
 .fp-card .fp-ch{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;background:var(--t);color:#fff;padding:7px 12px}.fp-card .fp-ch b{font-size:15px}.fp-card .fp-ch span{font-size:12px;opacity:.9}.fp-card .fp-ch em{font-style:normal;font-size:12px;font-weight:800;background:#fff;color:var(--high);border-radius:10px;padding:1px 8px;margin-left:auto}
 .fp-card .fp-wrap{border:0;border-radius:0;background:transparent}.fp-card .fp-wrap.sm{max-height:none}
-.fp-chips{display:flex;gap:6px;flex-wrap:wrap}.fp-chips button{display:inline-flex;align-items:center;gap:6px;border:1.5px solid color-mix(in srgb,var(--t) 40%,var(--line));background:var(--paper);color:var(--t);border-radius:10px;padding:6px 12px;font:inherit;font-size:13.5px}
+.fp-chips{display:flex;gap:5px;flex-wrap:wrap}.fp-chips button{display:inline-flex;align-items:center;gap:6px;border:1.5px solid color-mix(in srgb,var(--t) 40%,var(--line));background:var(--paper);color:var(--t);border-radius:10px;padding:5px 10px;font:inherit;font-size:13px}
 .fp-chips button span{font-size:12px;opacity:.85}.fp-chips button[aria-pressed=true]{background:var(--t);border-color:var(--t);color:#fff}
 .fp-chips button em{font-style:normal;font-size:11.5px;font-weight:800;background:var(--high);color:#fff;border-radius:9px;padding:0 6px}
 .fp-svg .fp-ai{font-size:1.7px;font-weight:700;fill:var(--muted)}
@@ -911,7 +918,7 @@ tr.xe-row>td,tr.xe-row:hover>td{padding:2px 4px!important;background:var(--paper
 .fp-info{border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:4px 12px 8px}.fp-ih{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:6px 0;font-size:14px}.fp-ih b{font-family:var(--mono)}.fp-ih span{color:var(--muted);font-size:13px}.fp-ih button{margin-left:auto}
 .fp-r{display:grid;grid-template-columns:minmax(0,1fr) 150px 70px 120px 92px;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line);font-size:13px}
 .fp-r .nm{font-weight:600;overflow-wrap:anywhere}.fp-r .nm small{font-family:var(--mono);color:var(--muted);font-weight:400}.fp-r .loc{font-family:var(--mono);font-weight:700}.fp-r .q{text-align:right;color:var(--muted);font-size:12px}.fp-r .q b{font-family:var(--mono);color:var(--ink);font-size:13.5px}
-.fp-pop{position:fixed;right:24px;bottom:24px;z-index:96;width:min(560px,calc(100vw - 48px));max-height:min(62vh,600px);overflow:auto;box-shadow:0 14px 40px rgba(15,25,45,.24);border-radius:14px;animation:fpUp .16s ease-out}
+.fp-pop{position:fixed;left:24px;bottom:24px;z-index:96;width:min(560px,calc(100vw - 48px));max-height:min(62vh,600px);overflow:auto;box-shadow:0 14px 40px rgba(15,25,45,.24);border-radius:14px;animation:fpUp .16s ease-out}
 .fp-pop .fp-r{grid-template-columns:minmax(0,1fr) auto auto auto;gap:4px 12px}.fp-pop .fp-r .nm{grid-column:1/-1;font-size:13.5px}.fp-pop .fp-r .fp-go{justify-self:end}
 .fp-pop .fp-ih{position:sticky;top:0;background:var(--paper);z-index:1;border-bottom:1px solid var(--line);margin:0 -12px;padding:10px 12px}
 @keyframes fpUp{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
@@ -4949,7 +4956,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
   // ---- 버퍼: 같은 바코드가 여러 줄(로케이션)에 나뉜 상품끼리 묶기 (유통기한은 달라도 같이) ----
   let bfData = null, bfRev = -1, bfLoading = false;
   const bfUi = { mode: store.get('bf-mode', 'dup') === 'all' ? 'all' : 'dup', q: '', scan: '', hit: '',
-    view: store.get('bf-view', 'list') === 'map' ? 'map' : 'list', ch: store.get('fp-ch', '1'), zoom: 0, sel: '', pick: '' };
+    ch: store.get('fp-ch', '1'), zoom: 0, sel: '', pick: '' };
   // 'Box_[로켓프레시] 빙그레 …' → { tag:'Box', name:'빙그레 …' }
   const bfName = s => { let t = String(s || '').trim(), tag = ''; const m = t.match(/^(Box|Pack|Bundle)_/i); if (m){ tag = m[1]; t = t.slice(m[0].length); } return { tag, name: t.replace(/\[로켓프레시\]\s*/g, '').trim() }; };
   function bfGroups(){
@@ -5184,7 +5191,7 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     if (ui.pick){
       const rows = bfData.rows.filter(r => (r.bc || ('#' + r.name)) === ui.pick).sort((a, b) => a.loc.localeCompare(b.loc));
       const nm = rows[0] ? bfName(rows[0].name) : { name: '' };
-      info = el('div', { class:'fp-info fp-pop', role:'dialog', 'aria-label':'고른 상품 위치' }, el('div', { class:'fp-ih' }, el('b', { text: nm.name }), el('span', { text: ` · ${new Set(rows.map(r => r.loc)).size}곳 · ${retNum(rows.reduce((s, r) => s + (r.q || 0), 0))}개 · 1층 도면에 ${hit.size}칸` }),
+      info = el('div', { class:'fp-info', role:'region', 'aria-label':'고른 상품 위치' }, el('div', { class:'fp-ih' }, el('b', { text: nm.name }), el('span', { text: ` · ${new Set(rows.map(r => r.loc)).size}곳 · ${retNum(rows.reduce((s, r) => s + (r.q || 0), 0))}개 · 1층 도면에 ${hit.size}칸` }),
         el('button', { type:'button', class:'ret-btn sm ghost', onclick: () => { ui.pick = ''; renderBuffer(); } }, '✕ 고른 상품 해제')),
         ...rows.map(r => { const x = row(r, { noPick: true }); const k = fpKey(r.loc); if (k && lay.byK.has(k)){ x.classList.add('lnk'); x.onclick = () => { ui.sel = k; renderBuffer(); }; } else x.classList.add('off'); return x; }));
     }
@@ -5206,11 +5213,12 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
   // 상품 하나를 평면도에서 보기 (Consolidation 목록·칸 설명에서)
   function fpPick(g){
     const lay = fpLayout(), I = fpIndex(), ks = fpCellsOf(I, g);
-    bfUi.view = 'map'; store.set('bf-view', 'map'); bfUi.pick = g; bfUi.sel = '';
+    bfUi.pick = bfUi.pick === g ? '' : g; bfUi.sel = '';
     const cnt = {}; for (const k of ks){ const c = lay.byK.get(k).ch; cnt[c] = (cnt[c] || 0) + 1; }
     if (ks.length && !cnt[bfUi.ch]) bfUi.ch = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || a.localeCompare(b))[0];
     renderBuffer();
-    const s = $('#buf .fp'); if (s) s.scrollIntoView({ block:'start', behavior:'smooth' });
+    // 폰에서는 목록이 평면도 아래에 있어서, 고르면 평면도로 올려줘요
+    if (bfUi.pick && matchMedia('(max-width:900px)').matches){ const s = $('#buf .fp'); if (s) s.scrollIntoView({ block:'start', behavior:'smooth' }); }
   }
   function renderBuffer(){
     const box = $('#buf');
@@ -5236,20 +5244,17 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
     const search = el('input', { type:'search', class:'bf-find', placeholder:'바코드 · 상품명 · 로케이션 찾기', 'aria-label':'찾기', autocomplete:'off' });
     search.value = bfUi.q;
     search.oninput = () => { bfUi.q = search.value; bfUi.scan = ''; bfUi.hit = ''; bfUi.pick = ''; const pos = search.selectionStart; renderBuffer(); const s = $('#buf .bf-find'); if (s){ s.focus(); try { s.setSelectionRange(pos, pos); } catch {} } };
-    const isMap = bfUi.view === 'map';
-    const viewTog = el('span', { class:'ov-tog', role:'group', 'aria-label':'목록 또는 평면도' }, ...[['list', '목록'], ['map', '1층 평면도']].map(([v, l]) => el('button', { type:'button', 'aria-pressed': bfUi.view === v ? 'true' : 'false',
-      onclick: () => { bfUi.view = v; store.set('bf-view', v); renderBuffer(); } }, l)));
-    const bar = el('div', { class:'bf-bar' }, viewTog,
-      isMap ? null : el('span', { class:'ov-tog', role:'group', 'aria-label':'보기' }, ...[['dup', '겹치는 것만'], ['all', '전체']].map(([v, l]) => el('button', { type:'button', 'aria-pressed': bfUi.mode === v ? 'true' : 'false',
+    const bar = el('div', { class:'bf-bar' },
+      el('span', { class:'ov-tog', role:'group', 'aria-label':'보기' }, ...[['dup', '겹치는 것만'], ['all', '전체']].map(([v, l]) => el('button', { type:'button', 'aria-pressed': bfUi.mode === v ? 'true' : 'false',
         onclick: () => { bfUi.mode = v; store.set('bf-mode', v); renderBuffer(); } }, l))),
       el('div', { class:'bf-fw' }, search, el('button', { type:'button', class:'ret-btn sm bf-cam', title:'폰 카메라로 바코드 찍어서 찾기', onclick: bfScan }, '📷 찍기')),
       el('button', { type:'button', class:'ret-btn sm ghost', disabled: !V.length, title:'보이는 목록 인쇄', onclick: () => bfPrint(V) }, '🖨 인쇄'),
       el('button', { type:'button', class:'ret-btn sm ghost', disabled: !V.length, title:'보이는 목록을 엑셀로 받기', onclick: () => bfExport(V) }, '⬇ 엑셀'));
-    const card = g => { const nm = bfName(g.name); return el('div', { class:'bf-g' + (g.rows.length > 1 ? ' dup' : '') },
+    const card = g => { const nm = bfName(g.name), gk = g.bc || ('#' + g.name); return el('div', { class:'bf-g' + (g.rows.length > 1 ? ' dup' : '') + (bfUi.pick === gk ? ' on' : '') },
       el('div', { class:'bf-gh' }, el('div', { class:'bf-gn' }, el('div', { class:'nm', title: g.name }, nm.tag ? el('span', { class:'bf-tag', text: nm.tag }) : null, nm.name),
         el('div', { class:'bc', text: g.bc || '바코드 없음' })),
         el('div', { class:'bf-cnt' }, el('b', { text: String(g.locs) }), '곳', g.rows.length !== g.locs ? ` (${g.rows.length}줄)` : '', ' · ', el('b', { text: retNum(g.q) }), '개',
-          g.rows.some(r => fpLayout().byK.has(fpKey(r.loc))) ? el('button', { type:'button', class:'ret-btn sm ghost bf-map', title:'1층 평면도에서 위치 보기', onclick: () => fpPick(g.bc || ('#' + g.name)) }, '📍 평면도') : null)),
+          g.rows.some(r => fpLayout().byK.has(fpKey(r.loc))) ? el('button', { type:'button', class:'ret-btn sm bf-map' + (bfUi.pick === gk ? ' on' : ''), title:'평면도에서 위치 보기', 'aria-pressed': bfUi.pick === gk ? 'true' : 'false', onclick: () => fpPick(gk) }, bfUi.pick === gk ? '📍 표시 중' : '📍 위치') : null)),
       el('div', { class:'bf-rows' }, el('div', { class:'bf-rh' }, el('span', { text:'로케이션' }), el('span', { class:'r', text:'수량' }), el('span', { text:'제조일자' }), el('span', { text:'유통기한' }), el('span')),
         ...g.rows.map(r => { const d = ppDays(r.exp); return el('div', { class:'bf-rw' }, el('span', { class:'loc', text: r.loc || '-' }), el('span', { class:'q' }, el('b', { text: retNum(r.q) }), '개'),
           el('span', { class:'mf', text: ppMD(r.mfg) }), el('b', { class:'ex', text: ppMD(r.exp) }),
@@ -5262,8 +5267,10 @@ td{padding:1.2mm;border-bottom:.2mm solid #ccc;vertical-align:middle}tr{break-in
       el('span', { class:'sp' }, el('code', { text: bfUi.scan }), hitG ? ` · 찾았어요 · ${hitG.locs}곳에 ${retNum(hitG.q)}개` : ' · Consolidation 목록에 없는 상품이에요'),
       el('button', { type:'button', class:'ret-btn sm', onclick: bfScan }, '다음 찍기'),
       el('button', { type:'button', class:'ret-btn sm ghost', 'aria-label':'찾기 지우기', onclick: clearScan }, '✕')) : null;
-    if (isMap && bfUi.scan && hitG && bfUi.pick !== (hitG.bc || ('#' + hitG.name))) bfUi.pick = hitG.bc || ('#' + hitG.name);
-    sec.append(sum, bar, ...(scanBox ? [scanBox] : []), isMap ? fpView() : list);
+    if (bfUi.scan && hitG && bfUi.pick !== (hitG.bc || ('#' + hitG.name))) bfUi.pick = hitG.bc || ('#' + hitG.name);
+    sec.append(sum, bar, ...(scanBox ? [scanBox] : []), el('div', { class:'bf-split' }, fpView(), el('div', { class:'bf-side' }, el('div', { class:'bf-side-h', text: `목록 · ${V.length}종` }), list)));
+    // 고른 상품 카드가 목록에 보이게
+    requestAnimationFrame(() => { const on = box.querySelector('.bf-list .bf-g.on'), L = box.querySelector('.bf-list'); if (on && L){ const a = L.getBoundingClientRect(), b = on.getBoundingClientRect(); if (b.top < a.top || b.bottom > a.bottom) L.scrollTop += b.top - a.top - 8; } });
     box.replaceChildren(sec);
   }
   function bfPrint(V){
