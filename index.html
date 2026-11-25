@@ -1311,6 +1311,25 @@ header.hd{padding-bottom:4px}
   .hd-tools-list{overflow-x:auto;scrollbar-width:none;max-width:100%}
   .hd-tool{padding:7px 12px;font-size:12.5px}
 }
+/* 시간대별 보고 */
+.rb{display:flex;flex-direction:column;gap:16px}
+.rb-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.rb-head h3{margin:0 0 4px;font-size:20px}.rb-head .ret-help{margin:0}
+.rb-copy{white-space:nowrap}
+.rb .rp-kpi{background:var(--tone)}
+.xs-chart.rb-chart{max-width:820px;flex:none}
+.rb-shift td{min-width:80px}
+.rb-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;max-width:820px}
+.rb-grid h4{margin:0 0 8px;font-size:14px}
+.rb-hours td{min-width:110px}.rb-hours td:last-child{min-width:70px;color:var(--muted)}
+.rb-hours tr.rb-zero td,.rb-hours tr.rb-zero th{color:var(--muted);opacity:.55}
+.rb-hours tfoot td,.rb-hours tfoot th{font-weight:700;border-bottom:0}
+.rb-bar{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.rb-track{display:block;width:56px;height:8px;border-radius:4px;background:var(--tone);overflow:hidden;flex:none}
+.rb-track>i{display:block;height:100%;border-radius:4px}
+.rb-bar b{font-weight:500;min-width:44px;text-align:right}
+.rb>*,.rb-grid>div{min-width:0}
+@media (max-width:760px){.rb-track{display:none}.rb-hours td,.rb-shift td{min-width:0}.rp-table.rb-hours th,.rp-table.rb-hours td,.rp-table.rb-shift th,.rp-table.rb-shift td{padding:5px 6px}.rb-hours .rp-l,.rb-shift .rp-l{min-width:0}}
 </style>
 </head>
 <body>
@@ -6198,7 +6217,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
       needRec, eachA, palA, HC, vol, vt, htp, dNys, temps, tAllQ, tAllM, zone: W.zone || {}, sep: W.sep || {}, flr: W.flr || {}, people: W.people || [] };
   }
 
-  const rp = { date:'', dates:[], wh:null, tr:null, plan:null, rev:-1, loading:false, sub:'ps', ppSort:'stow', ppShift:'all', saveT:0 };
+  const rp = { date:'', dates:[], wh:null, tr:null, plan:null, rev:-1, loading:false, sub:'brief', ppSort:'stow', ppShift:'all', saveT:0 };
   const rpF0 = v => v == null || !isFinite(v) ? '' : (Math.round(v) || 0).toLocaleString('ko-KR');
   const rpF1 = v => v == null || !isFinite(v) ? '' : ((Math.round(v * 10) / 10) || 0).toLocaleString('ko-KR', { minimumFractionDigits:1, maximumFractionDigits:1 });
   const rpPct = v => v == null || !isFinite(v) ? '' : Math.round(v * 100) + '%';
@@ -6282,10 +6301,10 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
         rpUpCard('wh', '작업자 이력', 'worker_history 엑셀 · 진열 · 공정별 MH · HTP', rp.wh),
         rpUpCard('tr', '이관현황', 'WMS 이관현황 엑셀 · XD · RC · RM 하차', rp.tr)),
       el('div', { class:'pr-chips rp-tabs', role:'group', 'aria-label':'리포트 보기' },
-        ...[['ps','Production Status'], ['crew','인원 · 차량'], ['temp','온도별 HTP'], ['zone','존별 진열'], ['ppl','개인별'], ['plan','계획 · 인원 입력']].map(([v, l]) =>
+        ...[['brief','시간대별 보고'], ['ps','Production Status'], ['crew','인원 · 차량'], ['temp','온도별 HTP'], ['zone','존별 진열'], ['ppl','개인별'], ['plan','계획 · 인원 입력']].map(([v, l]) =>
           el('button', { type:'button', 'aria-pressed': rp.sub === v ? 'true' : 'false', text: l, onclick: () => { rp.sub = v; renderReport(); } }))));
     const body = rp.sub === 'plan' ? rpPlanView(C) : rp.sub === 'crew' ? rpCrewView(C) : rp.sub === 'temp' ? rpTempView(C) : rp.sub === 'zone' ? rpZoneView(C)
-      : rp.sub === 'ppl' ? rpPeopleView(C) : rpSheetView(C);
+      : rp.sub === 'ppl' ? rpPeopleView(C) : rp.sub === 'brief' ? rpBriefView(C) : rpSheetView(C);
     const keepX = [...box.querySelectorAll('.rp-scroll, .xs-wrap')].map(n => n.scrollLeft);
     const fo = document.activeElement?.closest?.('#rpt') ? document.activeElement.getAttribute('aria-label') : null;   // 다시 그려도 입력하던 칸에 그대로 있게
     box.replaceChildren(head, ...[].concat(body));
@@ -6322,7 +6341,7 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
 
   // 차트 (엑셀 양식의 Unload · Stow · HTP 차트 자리)
   function xsChart(title, series, opt = {}){
-    const W = 360, H = 150, L = 34, B = 18, T = 8, n = 24, cw = (W - L - 6) / n;
+    const W = opt.w || 360, H = opt.h || 150, L = 34, B = 18, T = 8, n = 24, cw = (W - L - 6) / n;
     const vals = series.flatMap(s => s.v.map(v => +v || 0));
     const max = Math.max(1, ...vals), min = Math.min(0, ...vals), y = v => T + (H - T - B) * (1 - ((+v || 0) - min) / (max - min));
     const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg');
@@ -6338,6 +6357,56 @@ tr.gh td{background:#eef1f5;font-weight:800;font-size:10.5pt;border-bottom:.3mm 
     series.filter(s => s.type !== 'bar').forEach(s => add('polyline', { points: s.v.map((v, i) => `${L + cw * (i + .5)},${y(v)}`).join(' '), style:`fill:none;stroke:${s.color};stroke-width:1.6` }));
     return el('div', { class:'xs-chart' }, el('b', { text: title }), svg,
       el('div', { class:'xs-legend' }, ...series.map(s => el('span', {}, el('i', { style:`background:${s.color}` }), s.name))));
+  }
+
+  // ---------- 시간대별 보고 (하차 · 리시브 · 진열만 한눈에) ----------
+  const RB_SERIES = [['unl', '하차', 'var(--mid)'], ['rec', '리시브', 'var(--vio)'], ['stow', '진열', 'var(--accent)']];
+  function rpBriefData(C){
+    const unl = RP_H.map((_, i) => C.unl.direct[i] + C.unl.xd[i] + C.unl.rc[i] + C.unl.rm[i]);
+    const v = { unl, rec: C.receiveAct, stow: C.stowTot };
+    const tot = Object.fromEntries(Object.entries(v).map(([k, a]) => [k, rpSum(a)]));
+    const shifts = RP_SHIFTS.map(s => ({ name: s[1], from: s[3], to: s[4],
+      ...Object.fromEntries(Object.entries(v).map(([k, a]) => [k, a.slice(s[3] - 8, s[4] - 7).reduce((x, y) => x + (+y || 0), 0)])) }));
+    return { v, tot, shifts, htp: C.htp.stow };
+  }
+  function rpBriefText(D){
+    const n = rpF0, lines = [`[GWJ3 IB ${retMD(rp.date)} 시간대별 실적]`,
+      `하차 ${n(D.tot.unl)} · 리시브 ${n(D.tot.rec)} · 진열 ${n(D.tot.stow)}` + (D.htp ? ` (진열 HTP ${rpF1(D.htp)})` : ''), ''];
+    D.shifts.forEach(s => lines.push(`${s.name} ${pad(s.from % 24)}~${pad((s.to + 1) % 24)}시: 하차 ${n(s.unl)} / 리시브 ${n(s.rec)} / 진열 ${n(s.stow)}`));
+    lines.push('');
+    RP_H.forEach((h, i) => { const a = D.v.unl[i], b = D.v.rec[i], c = D.v.stow[i];
+      if (a || b || c) lines.push(`${pad(h % 24)}시  하차 ${n(a)} / 리시브 ${n(b)} / 진열 ${n(c)}`); });
+    return lines.join('\n');
+  }
+  function rpBriefView(C){
+    if (!rp.wh && !rp.tr) return el('section', { class:'ret-sec' }, el('p', { class:'ret-help', text:'위에 작업자 이력(worker_history)과 이관현황 엑셀을 올리면 시간대별 하차 · 리시브 · 진열이 바로 나와요.' }));
+    const D = rpBriefData(C), max = Math.max(1, ...RP_H.map((_, i) => Math.max(D.v.unl[i], D.v.rec[i], D.v.stow[i])));
+    const kpi = (label, val, sub) => el('div', { class:'rp-kpi' }, el('span', { text: label }), el('b', { text: val }), sub ? el('small', { text: sub }) : null);
+    const copy = el('button', { type:'button', class:'ghost rb-copy', text:'보고 글로 복사', onclick: async () => {
+      const t = rpBriefText(D);
+      try { await navigator.clipboard.writeText(t); toast('복사했어요. 카톡이나 메일에 붙여 넣으세요.'); }
+      catch { const ta = el('textarea', { class:'rp-ta', rows: 8 }); ta.value = t; copy.after(ta); ta.select(); toast('글을 길게 눌러 복사하세요.'); }
+    } });
+    const head = el('div', { class:'rb-head' }, el('div', {}, el('h3', { text:`${retMD(rp.date)} 시간대별 실적` }),
+      el('p', { class:'ret-help', text:'하차 = 직납 + 이관(XD · RC · RM), 리시브 = RECEIVE, 진열 = STOW 수량이에요.' })), copy);
+    const kpis = el('div', { class:'rp-kpis' }, kpi('하차', rpF0(D.tot.unl)), kpi('리시브', rpF0(D.tot.rec)), kpi('진열', rpF0(D.tot.stow)),
+      kpi('진열 HTP', D.htp ? rpF1(D.htp) : '-', '진열 수량 ÷ 투입 MH'));
+    const chart = xsChart('시간대별 처리량', RB_SERIES.map(([k, name, color]) => ({ name, v: D.v[k], color, type:'bar' })), { w: 820, h: 210 });
+    chart.classList.add('rb-chart');
+    const shiftT = rpTable(['조', '시간', '하차', '리시브', '진열'],
+      [...D.shifts.map(s => ({ label: s.name, cells: [`${pad(s.from % 24)}~${pad((s.to + 1) % 24)}시`, rpF0(s.unl), rpF0(s.rec), rpF0(s.stow)] })),
+        { label:'합계', cls:'rp-tot', cells: ['', rpF0(D.tot.unl), rpF0(D.tot.rec), rpF0(D.tot.stow)] }], 'rb-shift');
+    let cu = 0;
+    const bar = (v, color) => el('span', { class:'rb-bar' }, el('span', { class:'rb-track' }, el('i', { style:`width:${Math.round(v / max * 100)}%;background:${color}` })), el('b', { text: rpF0(v) }));
+    const hourT = el('div', { class:'rp-scroll' }, el('table', { class:'rp-table rb-hours' },
+      el('thead', {}, el('tr', {}, ...['시간', '하차', '리시브', '진열', '진열 누계'].map((c, i) => el('th', { scope:'col', class: i ? '' : 'rp-l', text: c })))),
+      el('tbody', {}, ...RP_H.map((h, i) => { const a = D.v.unl[i], b = D.v.rec[i], c = D.v.stow[i]; cu += c;
+        return el('tr', { class: a || b || c ? '' : 'rb-zero' }, el('th', { scope:'row', class:'rp-l', text:`${pad(h % 24)}:00` + (h >= 24 ? ' (+1)' : '') }),
+          el('td', {}, bar(a, 'var(--mid)')), el('td', {}, bar(b, 'var(--vio)')), el('td', {}, bar(c, 'var(--accent)')), el('td', { text: rpF0(cu) })); })),
+      el('tfoot', {}, el('tr', { class:'rp-tot' }, el('th', { scope:'row', class:'rp-l', text:'합계' }),
+        el('td', { text: rpF0(D.tot.unl) }), el('td', { text: rpF0(D.tot.rec) }), el('td', { text: rpF0(D.tot.stow) }), el('td', { text: '' })))));
+    return el('section', { class:'ret-sec rb' }, head, kpis, chart,
+      el('div', { class:'rb-grid' }, el('div', {}, el('h4', { text:'조별 합계' }), shiftT), el('div', {}, el('h4', { text:'시간대별' }), hourT)));
   }
 
   function rpSheetView(C){
