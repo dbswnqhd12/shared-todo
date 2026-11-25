@@ -1,0 +1,15 @@
+# main이 바뀌면 Cloudflare 주소(shared-todo-7tm.pages.dev)가 보는 브랜치도 main과 똑같이 맞춰요
+name: Sync Cloudflare Pages branch
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: git push --force origin HEAD:refs/heads/claude/project-thread-qo0lga

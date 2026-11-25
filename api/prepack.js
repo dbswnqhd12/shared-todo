@@ -1,11 +1,14 @@
 // 프리팩 · 버퍼존 탭: 마지막으로 올린 WMS 재고 엑셀을 정리한 결과 (팀 공용, 다음 파일이 올라오면 교체)
 //   GET /api/prepack[?kind=buffer] → { snap, rev }  (없으면 snap: null)
 //   PUT /api/prepack[?kind=buffer] → { at, rev }    저장 (이전 것은 덮어씀)
+//   PATCH /api/prepack?kind=buffer {key, loc} → { tg }  콘솔 '모을 곳' 직접 지정 (loc 빈칸 = 자동으로 되돌리기). 새 파일을 올려도 유지돼요
 //   kind 없음 = 프리팩, kind=buffer = 버퍼존 (서버 파일 수를 늘리지 않으려고 같이 써요)
 // snap.rows 한 줄 = [분류, 로케이션, 상품명, 수량, 제조일, 유통기한, SKU ID, 바코드, LPN]
 import { pipeline, body, guard, fail, UserError } from '../lib/store.js';
 
 const KEYS = { prepack: 'prepack-snapshot', buffer: 'buffer-snapshot' };
+const TG_KEY = 'buffer-targets', TG_MAX = 3000;
+const readTg = raw => { try { const o = raw ? JSON.parse(raw) : {}; return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch { return {}; } };
 const CATS = ['bread', 'perilla', 'sr', 'egg', 'etc'];
 const MAX_ROWS = 5000;
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -20,10 +23,22 @@ export default async function handler(req, res) {
     const KEY = Object.hasOwn(KEYS, kind) ? KEYS[kind] : '';
     if (!KEY) throw new UserError('알 수 없는 종류예요.');
     if (req.method === 'GET') {
-      const [raw, rev] = await pipeline([['GET', KEY], ['GET', 'rev']]);
+      const [raw, rev, tgRaw] = await pipeline([['GET', KEY], ['GET', 'rev'], ['GET', kind === 'buffer' ? TG_KEY : 'none']]);
       let snap = null;
       try { snap = raw ? JSON.parse(raw) : null; } catch { snap = null; }
-      return res.status(200).json({ snap, rev: Number(rev) || 0 });
+      return res.status(200).json(kind === 'buffer' ? { snap, rev: Number(rev) || 0, tg: readTg(tgRaw) } : { snap, rev: Number(rev) || 0 });
+    }
+    if (req.method === 'PATCH' && kind === 'buffer') {
+      const b = body(req), key = txt(b.key, 300), loc = txt(b.loc, 60);
+      if (!key) throw new UserError('어떤 상품인지 알 수 없어요.');
+      const [raw] = await pipeline([['GET', TG_KEY]]);
+      const tg = readTg(raw);
+      delete tg[key];
+      if (loc) tg[key] = loc;
+      const ks = Object.keys(tg);
+      for (const k of ks.slice(0, Math.max(0, ks.length - TG_MAX))) delete tg[k];
+      const [, rev] = await pipeline([['SET', TG_KEY, JSON.stringify(tg)], ['INCR', 'rev']]);
+      return res.status(200).json({ ok: true, tg, rev });
     }
     if (req.method === 'PUT') {
       const s = body(req).snap;
@@ -39,7 +54,7 @@ export default async function handler(req, res) {
       const [, rev] = await pipeline([['SET', KEY, JSON.stringify(snap)], ['INCR', 'rev']]);
       return res.status(200).json({ ok: true, at: snap.at, rev });
     }
-    res.setHeader('Allow', 'GET, PUT');
+    res.setHeader('Allow', kind === 'buffer' ? 'GET, PUT, PATCH' : 'GET, PUT');
     return res.status(405).json({ error: '지원하지 않는 요청이에요.' });
   } catch (e) { return fail(res, e); }
 }

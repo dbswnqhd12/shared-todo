@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>진열 교육 · GWJ3 IB</title>
+<link rel="icon" href="/icons/favicon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#EEF1F5;--paper:#fff;--ink:#18202C;--mute:#5E6776;--line:#D5DBE4;--accent:#2557A7;--accent-soft:#DDE6F4;
+  --ok:#1E7B45;--ok-soft:#DDF1E4;--bad:#C0362C;--bad-soft:#F9E0DD;--warn:#9A6A12;--warn-soft:#F4EAD2;
+  --shelf:#A3B0C4;--slot:#F6F8FB;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#10141B;--paper:#171D27;--ink:#E6EAF0;--mute:#939DAD;--line:#29313F;--accent:#7FA9EE;--accent-soft:#1C2A42;
+  --ok:#5CC98A;--ok-soft:#173226;--bad:#F08A73;--bad-soft:#3A2420;--warn:#E0B45A;--warn-soft:#352C1A;--shelf:#4A5568;--slot:#1D2430}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#10141B;--paper:#171D27;--ink:#E6EAF0;--mute:#939DAD;--line:#29313F;--accent:#7FA9EE;--accent-soft:#1C2A42;
+  --ok:#5CC98A;--ok-soft:#173226;--bad:#F08A73;--bad-soft:#3A2420;--warn:#E0B45A;--warn-soft:#352C1A;--shelf:#4A5568;--slot:#1D2430}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;padding:0 16px}
+main{max-width:1080px;margin:0 auto;padding:28px 0 64px}
+a{color:var(--accent)}
+.top{font-size:14px;text-decoration:none}
+h1{font-size:28px;margin:6px 0 2px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 18px}
+h2{font-size:19px;margin:0 0 4px}
+.card{background:var(--paper);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px}
+.tabs button{position:relative;display:flex;align-items:center;gap:10px;text-align:left;background:var(--paper);border:1.5px solid transparent;color:var(--ink);border-radius:12px;padding:10px 12px;font:inherit;cursor:pointer}
+.tabs button .n{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;background:var(--slot);color:var(--mute)}
+.tabs button b{display:block;font-size:15px;line-height:1.25}
+.tabs button small{display:block;font-size:12px;color:var(--mute);line-height:1.3}
+.tabs button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+.tabs button[aria-pressed=true] .n{background:var(--accent);color:#fff}
+.tabs button.done .n{background:var(--ok);color:#fff}
+.tabs button.done .n::before{content:"✓"}.tabs button.done .n span{display:none}
+.nextbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--paper);border-radius:12px;padding:14px 20px;margin-top:2px}
+.nextbar span{color:var(--mute);font-size:14px}
+/* 영상 */
+.vidwrap{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:18px;align-items:start}
+.keys{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.keys li{background:var(--slot);border-radius:10px;padding:9px 12px;font-size:14px}
+.keys li b{display:block;font-size:14.5px}
+.keys li span{color:var(--mute);font-size:13px}
+/* 진열 과정: 단계 목록 */
+.steps{list-style:none;margin:16px 0 0;padding:12px 0 0;border-top:1px solid var(--line);display:grid;gap:2px}
+.steps button{width:100%;display:flex;gap:10px;align-items:center;text-align:left;background:none;border:0;border-radius:8px;padding:6px 8px;font:inherit;font-size:14px;color:var(--mute);cursor:pointer}
+.steps button i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:700;background:var(--slot)}
+.steps button.on{background:var(--accent-soft);color:var(--ink);font-weight:600}
+.steps button.on i{background:var(--accent);color:#fff}
+.steps button.past i{background:var(--ok);color:#fff}
+/* 규칙: 한 줄에 하나씩 */
+.rulegrid{display:grid;gap:14px}
+.ctn{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;padding:6px 0 2px}
+.ctn .col{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--mute)}
+.ctn .bin2{position:relative;display:grid;grid-template-columns:repeat(2,52px);gap:6px;background:#F5F1EA;border:2px solid #E07B1F;border-radius:8px;padding:8px}
+.ctn .bx{width:52px;height:40px;border-radius:6px;background:#fff;border:2px solid var(--c);display:grid;place-items:center}
+.ctn .bx svg{height:32px}
+.ctn .bx.hide{background:#E7EAEF;border-color:#B9C0CB;opacity:.5}
+.ctn .front b{font-size:12px;color:var(--ink)}
+.rrow{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:start}
+:root[data-theme="dark"] .tabs button[aria-pressed=true]{color:#10141B}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabs button[aria-pressed=true]{color:#10141B}}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:11px 20px;font:inherit;font-weight:700;cursor:pointer}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn{color:#10141B}}
+.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent);border-radius:9px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}
+.btn:disabled,.ghost:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mute{color:var(--mute)}
+
+/* 규칙 칩 */
+.rules{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:4px 11px}
+.chip.heavy{background:var(--warn-soft);color:var(--warn)}
+
+/* 선반 */
+/* 선반: 실제 랙처럼 — 파란 기둥, 주황 빔, 빔 위 로케이션 라벨(단+0+빈), 상품이 여러 개 서 있는 모습 */
+.rack{display:grid;gap:0;--cell:86px;width:max-content;max-width:100%;
+  --r-ok:#12B862;--r-bad:#1A1A1A;--r-focus:#2557A7;--beam:12px}
+.rack .lv{font-size:12px;color:var(--mute);font-weight:600;display:flex;align-items:center;justify-content:flex-end;padding:0 6px var(--beam) 0;white-space:nowrap}
+.rack .bay{font-size:12px;color:var(--mute);font-weight:600;text-align:center;padding-top:6px}
+.rack .post{background:linear-gradient(90deg,#D9D6CC,#F4F2EC 45%,#CFCBC0);position:relative;border-radius:2px 2px 0 0;box-shadow:0 0 0 1px #BDB8AC}
+.rack .post::after{content:"";position:absolute;inset:4px 2px;background:repeating-linear-gradient(to bottom,transparent 0 8px,#9E998C 8px 11px);opacity:.55}
+.rack .top{height:10px;background:linear-gradient(#F4F2EC,#D9D6CC);box-shadow:0 0 0 1px #BDB8AC}
+.rack .floor{height:8px;background:linear-gradient(#9AA1AB,#C5CAD1);border-radius:0 0 3px 3px}
+.bin{width:var(--cell);height:var(--cell);position:relative;display:flex;padding-bottom:var(--beam);
+  /* 흰 뒤판 + 철망 */
+  background:
+    repeating-linear-gradient(90deg,rgba(150,145,135,.35) 0 1px,transparent 1px 9px),
+    repeating-linear-gradient(0deg,rgba(150,145,135,.35) 0 1px,transparent 1px 9px),
+    linear-gradient(#ECEAE4,#F7F6F2 60%,#FBFAF7);
+  box-shadow:inset 0 6px 8px -4px rgba(0,0,0,.18)}
+/* 흰 선반 앞판 */
+.bin::after{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--beam);background:linear-gradient(#FFFFFF,#F1EFE9 60%,#D8D4CA);box-shadow:0 -2px 0 rgba(0,0,0,.18)}
+/* 칸막이(주황 철망) — 빈 사이마다, 앞판 위 주황 클립 */
+.bin:not(.b0)::before{content:"";position:absolute;left:-1px;top:6px;bottom:var(--beam);width:3px;z-index:3;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,#F07A2A 0 2px,rgba(240,122,42,.35) 2px 7px);border-left:1px solid #F07A2A}
+.bin .clip{position:absolute;left:-4px;bottom:1px;width:8px;height:calc(var(--beam) - 2px);background:#E8732A;z-index:3;border-radius:1px}
+/* 로케이션 라벨: QR · 번호(검은 칸) · 단별 색 화살표 */
+.bin .tg{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);z-index:2;display:flex;align-items:center;gap:1px;font-size:7.5px;line-height:1;font-weight:700;white-space:nowrap;pointer-events:none}
+.bin .tg i{width:7px;height:7px;background:conic-gradient(#000 0 25%,#fff 0 50%,#000 0 75%,#fff 0) 0 0/3.5px 3.5px;outline:1px solid #000}
+.bin .tg b{background:#000;color:#fff;padding:1px 2px}
+.bin .tg u{text-decoration:none;width:8px;height:8px;display:grid;place-items:center;font-size:7px;color:#000;background:var(--lc)}
+.bin.l5 .tg u,.bin.l6 .tg u{color:#fff}
+/* 한 빈 = 왼쪽 · 오른쪽 두 칸 (SKU 2개까지) */
+.slot{flex:1 1 0;min-width:0;height:100%;border:0;margin:0;padding:0 1px;position:relative;font:inherit;color:var(--ink);background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.slot.s1{border-left:1px dashed rgba(120,115,105,.35)}
+.slot{padding-bottom:3px}
+.rack.mini .bin .tg{transform:translateX(-50%) scale(.82);transform-origin:50% 100%}
+.slot.over{background:rgba(37,87,167,.16);outline:2px solid var(--r-focus);outline-offset:-2px}
+button.slot{cursor:pointer}
+@media (hover:hover){button.slot.empty:not(.bad):not(.hint):hover{outline:2px dashed var(--r-focus);outline-offset:-3px}}
+button.slot:focus-visible{outline:3px solid var(--r-focus);outline-offset:-3px}
+.slot .goods{display:flex;align-items:flex-end;justify-content:center;width:100%;filter:drop-shadow(0 2px 1px rgba(0,0,0,.5))}
+.slot .goods span{display:block;line-height:0}
+.slot .goods svg{height:calc(var(--cell)*.52);max-width:calc(var(--cell)*.46)}
+svg.pk{display:block;aspect-ratio:40/48;width:auto}
+.hand .em svg{height:42px}.now .big .em svg{height:58px}.cart span svg{height:24px}
+.slot .nm{position:relative;z-index:1;margin:2px 0 1px;font-size:9.5px;font-weight:700;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  background:#fff;color:#18202C;border-left:2px solid var(--c);border-radius:2px;padding:0 2px}
+.slot .nm .s2{display:none}
+.slot .kg{position:absolute;top:2px;right:1px;font-size:8px;font-weight:700;background:#E0A21B;color:#1A1300;border-radius:3px;padding:0 3px;line-height:13px}
+.slot.dim{background:repeating-linear-gradient(135deg,rgba(229,51,42,.28) 0 5px,transparent 5px 11px)}
+.slot.focus{outline:3px solid var(--r-focus);outline-offset:-3px;animation:pulse 1.2s ease-in-out infinite}
+.slot.look{outline:2px dashed #6B7280;outline-offset:-3px}
+.rack .slot.ok{outline:3px solid var(--r-ok);outline-offset:-3px}
+.rack .slot.bad{outline:3px solid var(--r-bad);outline-offset:-3px}
+.rack .slot.cause{outline:3px dashed var(--r-bad);outline-offset:-3px}
+.rack .slot.hint{outline:3px dashed var(--r-ok);outline-offset:-3px}
+.slot .mk{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;z-index:2}
+.slot.ok .mk{background:var(--r-ok)}.slot.bad .mk{background:#E5332A}
+.slot.shake{animation:shake .35s}
+.slot.pop .goods{animation:pop .3s}
+@keyframes pulse{50%{outline-color:transparent}}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes pop{0%{transform:scale(.7)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.slot.focus,.slot.shake,.slot.pop{animation:none}}
+.rackwrap{overflow-x:auto;padding:10px 2px 4px}
+.rack.mini{--cell:64px}
+.rack.mini .slot .nm{font-size:9.5px}
+
+/* 진열 과정 */
+.walk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:20px;align-items:start}
+.step-n{font-size:13px;font-weight:700;color:var(--accent)}
+.walk h2{margin-top:2px}
+.walk p{margin:6px 0 0}
+.hand{display:flex;align-items:center;gap:12px;background:var(--slot);border-radius:10px;padding:10px 12px;margin-top:14px}
+.hand .em{font-size:34px;line-height:1}
+.hand b{display:block}
+.hand small{color:var(--mute)}
+.dots{display:flex;gap:5px;margin:16px 0 12px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--accent)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--mute);margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+/* 규칙 3가지 */
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:12px}
+.pair{background:var(--slot);border-radius:10px;padding:10px 12px}
+.pair .pics{display:flex;gap:14px;align-items:flex-end}
+.pair .pics div{text-align:center;font-size:12px;font-weight:700}
+.pair .pics svg{height:54px;margin:0 auto 3px}
+.pair p{margin:6px 0 0;font-size:12.5px;color:var(--mute)}
+.simh{font-size:15px;margin:18px 0 6px}.simh.x{color:var(--bad)}.simh.o{color:var(--ok)}
+.simgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:12px}
+.simgrid>div{background:var(--slot);border-radius:10px;padding:8px 10px}
+.simgrid b{font-size:13.5px}.simgrid .why{font-size:12.5px;color:var(--mute);margin-top:2px}
+.rulegrid .card{margin:0}
+.rulegrid .num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--paper);font-weight:700;font-size:14px;margin-bottom:6px}
+.ex{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.ex{margin-top:0}.ex .rackwrap{display:flex;justify-content:center}.ex>div{flex:1 1 220px;background:var(--slot);border-radius:10px;padding:10px 12px}
+.ex .tag{font-size:13px;font-weight:700}
+.ex .tag.o{color:var(--ok)}.ex .tag.x{color:var(--bad)}
+.ex .why{font-size:12.5px;color:var(--mute);margin-top:4px}
+
+/* 게임 */
+.hud{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.hud div{background:var(--paper);border-radius:10px;padding:8px 14px;min-width:84px}
+.hud small{display:block;font-size:12px;color:var(--mute)}
+.hud b{font-size:20px;font-variant-numeric:tabular-nums}
+.game{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;align-items:start}
+.now{position:sticky;top:10px}
+.now .big{display:flex;align-items:center;gap:14px;margin:10px 0 12px}
+.now .big .em{font-size:52px;line-height:1;overflow:hidden;width:72px;height:72px;display:grid;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--c,#888) 17%,var(--paper));box-shadow:inset 0 4px 0 var(--c,#888)}
+.now .big b{font-size:18px;display:block}
+#nItem{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;border-radius:12px}
+#nItem.lifted{opacity:.45}
+.draghint{font-size:12.5px;margin:-4px 0 10px}
+.dragimg{position:fixed;z-index:50;pointer-events:none;transform:translate(-50%,-75%) rotate(-4deg);filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))}
+.dragimg svg{height:64px}
+.cart{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.cart span{font-size:20px;width:30px;height:30px;display:grid;place-items:center;border-radius:6px;background:var(--slot)}
+.msg{border-radius:10px;padding:10px 12px;margin-top:12px;font-size:14px;min-height:46px}
+.msg.ok{background:var(--ok-soft);color:var(--ok)}
+.msg.bad{background:var(--bad-soft);color:var(--bad)}
+.msg.info{background:var(--accent-soft);color:var(--accent)}
+.msg b{display:block}
+.msg ul{margin:4px 0 0;padding-left:18px}
+.done{text-align:center;padding:30px 20px}
+.stars{font-size:38px;letter-spacing:6px;color:#E3A81B}
+.stars .off{color:var(--line)}
+.tally{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px auto;max-width:520px}
+.tally div{background:var(--slot);border-radius:10px;padding:8px}
+.tally small{display:block;color:var(--mute);font-size:12px}
+.tally b{font-size:20px}
+
+@media (max-width:860px){
+  .walk,.game{grid-template-columns:minmax(0,1fr)}
+  .rrow,.vidwrap{grid-template-columns:minmax(0,1fr)}
+  .rrow{gap:10px}
+  .steps{display:none}
+  .now{position:sticky;top:0;z-index:5;box-shadow:0 6px 14px -8px rgba(0,0,0,.35)}
+  .now{padding:10px 14px}.now>small,.now .cartwrap,.draghint{display:none}
+  .now .big{margin:0 0 8px}
+  #nPass{padding:7px 12px;font-size:14px}
+}
+@media (max-width:560px){
+  main{padding-top:18px}
+  .tabs{gap:5px}
+  .tabs button{flex-direction:column;align-items:center;text-align:center;gap:4px;padding:8px 2px}
+  .tabs button b{font-size:12.5px}.tabs button small{display:none}
+  h1{font-size:24px}
+  .card{padding:14px}
+  .rack{--cell:min(64px,calc((100vw - 32px - 28px - 30px - 16px) / var(--w)));--beam:11px}
+  .rack.mini{--cell:60px}
+  .slot .nm{font-size:8.5px;padding:0 1px;border-left-width:2px}
+  .slot .nm .s1{display:none}.slot .nm .s2{display:inline}
+  .slot .kg{font-size:7px;line-height:10px;padding:0 1px}
+  .bin .tg i{display:none}
+  .slot .kg{font-size:8px;line-height:11px;top:2px;right:2px;padding:0 2px}
+  .rack .post::after{inset:3px 2px}
+  .now .big{margin:6px 0 10px}
+  .now .big .em{font-size:40px;width:58px;height:58px}
+  .now .big .em svg{height:46px}
+  .tally{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hud div{min-width:0;flex:1;padding:6px 10px}
+  .hud b{font-size:17px}
+}
+.vid{display:block;width:100%;aspect-ratio:16/9;background:#000;border-radius:10px}
+</style></head>
+<body><main>
+<a class="top" href="/">← GWJ3 IB</a>
+<h1>진열 교육</h1>
+<p class="sub">신규 사원용 · 1번부터 순서대로 따라오면 돼요.</p>
+
+<div class="tabs" role="tablist">
+  <button type="button" data-tab="video" aria-pressed="true"><span class="n"><span>1</span></span><span><b>교육 영상</b><small>약 2분</small></span></button>
+  <button type="button" data-tab="walk" aria-pressed="false"><span class="n"><span>2</span></span><span><b>진열 순서</b><small>6단계</small></span></button>
+  <button type="button" data-tab="rules" aria-pressed="false"><span class="n"><span>3</span></span><span><b>규칙</b><small>4가지 + 예시</small></span></button>
+  <button type="button" data-tab="game" aria-pressed="false"><span class="n"><span>4</span></span><span><b>진열 실습</b><small>3스테이지</small></span></button>
+</div>
+
+<!-- ▶ 교육 영상 -->
+<section id="tab-video">
+  <div class="card vidwrap">
+    <div>
+      <video class="vid" controls playsinline preload="metadata" poster="/media/stow-training-poster.jpg">
+        <source src="/media/stow-training.mp4" type="video/mp4">
+        이 브라우저에서는 영상을 재생할 수 없어요.
+      </video>
+      <p class="mute" style="margin:8px 0 0;font-size:13.5px">약 2분 · 소리가 나와요(자막 포함)</p>
+    </div>
+    <div>
+      <h2 style="font-size:16px;margin-bottom:8px">영상에서 배우는 것</h2>
+      <ul class="keys">
+        <li><b>유사상품</b><span>한 빈에 같이 넣지 않기</span></li>
+        <li><b>동일상품</b><span>바로 옆 빈 · 위아래 빈 피하기</span></li>
+        <li><b>중량물</b><span>1단 · 2단에만</span></li>
+        <li><b>커튼 진열</b><span>앞에서 뒤로 세로 줄로, 뒤 상품도 보이게</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="nextbar"><span>다음은 실제 진열 순서를 한 단계씩 봐요.</span><button type="button" class="btn" data-go="walk">2 진열 순서 보기 →</button></div>
+</section>
+
+<!-- ① 진열 과정 -->
+<section id="tab-walk" hidden>
+  <div class="card walk">
+    <div>
+      <div class="step-n" id="wStepN"></div>
+      <h2 id="wTitle"></h2>
+      <p id="wBody"></p>
+      <div class="hand" id="wHand"></div>
+      <div class="row" style="margin-top:16px">
+        <button type="button" class="ghost" id="wPrev">이전</button>
+        <button type="button" class="btn" id="wNext">다음</button>
+      </div>
+      <ol class="steps" id="wDots"></ol>
+    </div>
+    <div>
+      <div class="rackwrap"><div id="wRack"></div></div>
+      <div class="legend">
+        <span><i style="background:var(--accent)"></i>고른 칸</span>
+        <span><i style="background:var(--ok)"></i>놓아도 돼요</span>
+        <span><i style="background:var(--bad)"></i>안 돼요</span>
+        <span><i style="background:repeating-linear-gradient(135deg,var(--bad) 0 3px,transparent 3px 6px)"></i>중량물 금지 단</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ② 규칙 3가지 -->
+<section id="tab-rules" hidden>
+  <div class="rulegrid" id="ruleGrid"></div>
+  <div class="card" style="margin-top:14px">
+    <h2>유사상품 더 알아보기</h2>
+    <p class="mute" style="margin:4px 0 0;font-size:14px">신선센터에서 자주 헷갈리는 짝이에요. 생김새가 거의 같아서 한 빈에 같이 있으면 피킹할 때 잘못 집기 쉬워요. <b>같은 빈에만 같이 넣지 않으면 되고, 옆 빈 · 위아래 빈은 괜찮아요.</b></p>
+    <div class="pairs" id="pairList"></div>
+    <h3 class="simh x">✕ 이럴 땐 안 돼요</h3>
+    <div class="simgrid" id="simBad"></div>
+    <h3 class="simh o">○ 이렇게 놓아요</h3>
+    <div class="simgrid" id="simGood"></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <b>한눈에 정리</b>
+    <p class="mute" style="margin:4px 0 0"><b>유사상품</b>: 같은 빈(왼쪽 · 오른쪽 칸)에 같이 넣지 않아요. 옆 빈 · 위아래 빈은 괜찮아요.<br><b>동일상품</b>: 바로 옆 빈 · 바로 위아래 빈에 놓지 않아요. 같은 빈의 두 칸에는 함께 넣어도 돼요.<br><b>중량물</b>: 1단 · 2단에만 놓아요.<br><b>커튼 진열</b>: 앞에서 뒤로 세로 줄로 넣어서, 뒤에 있는 상품도 앞에서 보이게 해요.<br>놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.</p>
+  </div>
+  <div class="nextbar"><span>규칙을 다 봤으면 직접 진열해 봐요.</span><button type="button" class="btn" data-go="game">4 진열 실습 하기 →</button></div>
+</section>
+
+<!-- ③ 진열 실습 -->
+<section id="tab-game" hidden>
+  <div class="card" id="gIntro">
+    <h2>진열 실습</h2>
+    <p class="mute" style="margin:4px 0 0">카트에서 나오는 상품을 하나씩 선반 빈 칸에 눌러서 진열해요. 규칙을 어기면 바로 알려줘요. 놓을 칸이 없을 땐 <b>"놓을 칸 없음"</b>을 눌러요. 스테이지는 3개, 갈수록 선반이 커지고 상품이 많아져요.</p>
+    <div class="rules">
+      <span class="chip">유사상품 같은 빈 금지</span>
+      <span class="chip">동일상품 옆 · 위아래 빈 금지</span>
+      <span class="chip heavy">중량물은 1·2단에만</span>
+      <span class="chip">커튼 진열 금지</span>
+    </div>
+    <div class="row" style="margin-top:16px"><button type="button" class="btn" id="gStart">시작하기</button><span class="mute" id="gBest"></span></div>
+  </div>
+
+  <div id="gPlay" hidden>
+    <div class="hud">
+      <div><small>스테이지</small><b id="hStage"></b></div>
+      <div><small>점수</small><b id="hScore">0</b></div>
+      <div><small>남은 상품</small><b id="hLeft"></b></div>
+      <div><small>실수</small><b id="hMiss">0</b></div>
+    </div>
+    <div class="game">
+      <div class="card now">
+        <small class="mute">지금 진열할 상품</small>
+        <div class="big" id="nItem" title="끌어서 선반 칸에 놓아요"></div>
+        <p class="mute draghint">상품을 끌어서 선반 빈 칸에 놓아요. 칸을 눌러도 돼요.</p>
+        <button type="button" class="ghost" id="nPass" style="width:100%">놓을 칸 없음 (다른 로케이션으로)</button>
+        <div class="cartwrap" style="margin-top:12px"><small class="mute">카트에 남은 상품</small><div class="cart" id="nCart"></div></div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><b id="gLoc"></b><span class="mute" style="font-size:13px">끌어다 놓거나 칸을 눌러 진열</span></div>
+        <div class="msg info" id="nMsg" role="status" aria-live="polite"></div>
+        <div class="rackwrap"><div id="gRack"></div></div>
+        <div class="rules">
+          <span class="chip">유사상품 X</span><span class="chip">동일상품 연속 X</span><span class="chip heavy">중량물 1·2단</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card done" id="gDone" hidden></div>
+</section>
+</main>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+
+/* ── 상품 목록: 같은 g(그룹)끼리는 '비슷한 상품' (모양 · 색이 비슷해서 헷갈리기 쉬운 상품) ── */
+const CAT = {
+  kimchi: {name:'포기김치 5kg',     short:'포기김치',   em:'🥬', g:'kimchi', c:'#D2412F', heavy:1},
+  kimchi2:{name:'총각김치 5kg',     short:'총각김치',   em:'🥬', g:'kimchi', c:'#D2412F', heavy:1},
+  milk:   {name:'우유 1L',          short:'우유',       em:'🥛', g:'milk',   c:'#3B82C4'},
+  milk2:  {name:'저지방우유 1L',    short:'저지방', em:'🥛', g:'milk',   c:'#3B82C4'},
+  tofu:   {name:'부침두부 300g',    short:'부침두부',   em:'🧈', g:'tofu',   c:'#B8A77A'},
+  tofu2:  {name:'찌개두부 300g',    short:'찌개두부',   em:'🧈', g:'tofu',   c:'#B8A77A'},
+  pap:    {name:'빨강 파프리카 2입',short:'빨강파프',em:'🌶️', g:'pap',  c:'#E0553B'},
+  pap2:   {name:'노랑 파프리카 2입',short:'노랑파프',em:'🌶️', g:'pap',  c:'#E0553B'},
+  cheese: {name:'슬라이스치즈 10매',short:'슬라이스',em:'🧀', g:'cheese',c:'#E7B416'},
+  cheese2:{name:'모짜렐라치즈 200g',short:'모짜렐라',   em:'🧀', g:'cheese', c:'#E7B416'},
+};
+/* ── 상품 그림 (포장 모양 SVG) ── */
+const T = (x,y,sz,txt,fill='#fff') => `<text x="${x}" y="${y}" font-size="${sz}" font-weight="800" fill="${fill}" text-anchor="middle" font-family="sans-serif">${txt}</text>`;
+const ART = {
+  kimchi: (lid, band, label) => `<rect x="3" y="13" width="34" height="34" rx="3" fill="#F8F5EF" stroke="#BDB5A6"/><rect x="5" y="15" width="3" height="30" rx="1.5" fill="#fff" opacity=".8"/>
+    <rect x="1.5" y="8" width="37" height="7" rx="2.5" fill="${lid}"/><rect x="1.5" y="13" width="37" height="2" fill="rgba(0,0,0,.18)"/>
+    <rect x="3" y="20" width="34" height="15" fill="${band}"/>${T(20,27,6.3,label)}${T(20,33.5,5.5,'5kg','#FFE9A8')}
+    <path d="M13 44c2-6 12-6 14 0z" fill="#8DBF4F"/><path d="M15 44c2-4 8-4 10 0z" fill="#E4553A"/>`,
+  milk: (band, label) => `<path d="M10 14 L13 5 H27 L30 14 Z" fill="#EEF2F8" stroke="#A9BBD3"/><rect x="12.5" y="2" width="15" height="3.4" rx=".6" fill="#DCE4F0" stroke="#A9BBD3" stroke-width=".6"/>
+    <rect x="10" y="14" width="20" height="33" fill="#fff" stroke="#A9BBD3"/><rect x="26" y="14" width="4" height="33" fill="#E3EAF4"/>
+    <rect x="10" y="21" width="20" height="13" fill="${band}"/>${T(18.5,29.6,label.length>2?4.6:6.4,label)}${T(18.5,42,5,'1L','#2F5E9E')}`,
+  tofu: (film, label) => `<rect x="2" y="19" width="36" height="28" rx="3" fill="#F3F1EA" stroke="#C4BDA9"/><rect x="5" y="22" width="30" height="22" rx="2" fill="#FFFEF8" stroke="#E2DBC6"/><path d="M5 22l30 22" stroke="#EFE9D8" stroke-width=".8"/>
+    <rect x="2" y="27" width="36" height="9" fill="${film}"/>${T(20,33.6,5.8,label)}<rect x="4" y="20.5" width="32" height="1.4" fill="#fff" opacity=".9"/>`,
+  pap: (body, shade) => `<path d="M20 14C10 11 4.5 20 6 31c1.5 10 7 16.5 14 15.5C27 47.5 32.5 41 34 31 35.5 20 30 11 20 14z" fill="${body}"/>
+    <path d="M14 17c-3 9-2.5 19 1 28M26 17c3 9 2.5 19-1 28" stroke="${shade}" stroke-width="1.6" fill="none" opacity=".55"/>
+    <ellipse cx="12" cy="25" rx="2.4" ry="6.5" fill="#fff" opacity=".35"/>
+    <ellipse cx="20" cy="14.5" rx="6.5" ry="2.6" fill="#3F8A2C"/><path d="M20 14c0-5 2-8 5.5-9" stroke="#3F8A2C" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+  slice: () => `<rect x="4" y="11" width="32" height="36" rx="2" fill="#FFD43B" stroke="#D2A10E"/><rect x="4" y="11" width="32" height="9" fill="#1E5BB0"/>${T(20,17.8,5.6,'치즈')}
+    <path d="M9 24h22v15H9z" fill="#FFE98C" stroke="#E6BE2C" stroke-width=".8"/><circle cx="14" cy="29" r="1.6" fill="#F2C94C"/><circle cx="24" cy="33" r="2" fill="#F2C94C"/><circle cx="19" cy="36" r="1.2" fill="#F2C94C"/>${T(20,45,4.4,'슬라이스','#1E5BB0')}`,
+  mozz: () => `<path d="M7 10h26l2.5 37h-31z" fill="#FFF4C8" stroke="#D7B647"/><rect x="7" y="10" width="26" height="8" fill="#1E5BB0"/>${T(20,16.4,5.6,'치즈')}
+    <g stroke="#F2CC4A" stroke-width="1.6" stroke-linecap="round"><path d="M12 26l5 4M20 24l4 5M14 33l6 2M24 32l3 5M11 39l5 1M21 38l5 2"/></g>${T(20,45,4.4,'모짜렐라','#1E5BB0')}`,
+};
+const SVGS = {
+  kimchi:  ART.kimchi('#C8321F', '#D9472F', '포기김치'),
+  kimchi2: ART.kimchi('#C8321F', '#B83A2A', '총각김치'),
+  milk:    ART.milk('#2E6CCB', '우유'),
+  milk2:   ART.milk('#62A6E3', '저지방'),
+  tofu:    ART.tofu('#2F8F5B', '부침두부'),
+  tofu2:   ART.tofu('#3F9A68', '찌개두부'),
+  pap:     ART.pap('#D8261C', '#8E120C'),
+  pap2:    ART.pap('#F4BF14', '#B5860A'),
+  cheese:  ART.slice(),
+  cheese2: ART.mozz(),
+};
+const SHORT2 = {kimchi:'포기', kimchi2:'총각', milk:'우유', milk2:'저지', tofu:'부침', tofu2:'찌개', pap:'빨강', pap2:'노랑', cheese:'슬라', cheese2:'모짜'};
+for (const k in CAT){ CAT[k].em = `<svg class="pk" viewBox="0 0 40 48" aria-hidden="true">${SVGS[k]}</svg>`; CAT[k].s2 = SHORT2[k] || CAT[k].short; }
+const pad = n => String(n).padStart(2,'0');
+// 칸 번호 b: 한 빈에 왼쪽(짝수) · 오른쪽(홀수) 두 칸
+const where = (lv,b) => `${lv+1}단 ${Math.floor(b/2)+1}빈 ${b%2?'오른쪽':'왼쪽'}`;
+const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
+
+/* grid[단][빈] — 단 0 = 1단(맨 아래) */
+const emptyGrid = (W,H) => Array.from({length:H},()=>Array(W).fill(null));
+// '붙어 있다' = 빈 단위: 같은 빈의 다른 칸, 같은 단 왼쪽 · 오른쪽 빈, 바로 위 · 아래 단의 같은 빈 (빈 안의 두 칸 모두)
+function neighbors(grid, lv, b){
+  const H = grid.length, S = grid[0].length, bin = Math.floor(b/2), out = [];
+  const add = (L, bb, dir, sb) => { if (L<0||L>=H||bb<0) return; for (const B of [bb*2, bb*2+1]) if (B<S && !(L===lv && B===b)) out.push([L,B,dir,sb]); };
+  add(lv, bin, '같은 빈', true);
+  add(lv, bin-1, '왼쪽', false); add(lv, bin+1, '오른쪽', false);
+  add(lv+1, bin, '위', false); add(lv-1, bin, '아래', false);
+  return out;
+}
+
+/* 선반 전체가 규칙에 맞는지 (시작 배치 검사용) */
+function gridOK(grid){
+  for (let lv=0; lv<grid.length; lv++) for (let b=0; b<grid[0].length; b++){
+    const id = grid[lv][b]; if (!id) continue;
+    grid[lv][b] = null; const bad = check(grid, lv, b, id).length; grid[lv][b] = id;
+    if (bad) return false;
+  }
+  return true;
+}
+/* 규칙 검사: 어긴 규칙 목록을 돌려줘요 (빈 배열 = 놓아도 됨) */
+function check(grid, lv, b, id){
+  const it = CAT[id], out = [];
+  if (it.heavy && lv > 1) out.push({rule:'heavy'});
+  for (const [L,B,dir,sb] of neighbors(grid, lv, b)){
+    const o = grid[L][B]; if (!o) continue;
+    if (o === id && sb) continue; // 같은 빈의 두 칸에는 같은 상품을 함께 넣어도 돼요
+    if (o === id) out.push({rule:'same', lv:L, b:B, dir, sb, other:o});
+    else if (sb && CAT[o].g === it.g) out.push({rule:'similar', lv:L, b:B, dir, sb, other:o});
+  }
+  return out;
+}
+const RULE_TXT = {
+  heavy:'중량물은 1·2단에만',
+  same:'동일상품 가로·세로 연속 진열 금지',
+  similar:'유사상품 붙여서 진열 금지',
+};
+function explain(v, id){
+  if (v.rule==='heavy') return `중량물(${CAT[id].short})은 1·2단에만 놓을 수 있어요.`;
+  const at = v.sb ? '같은 빈 옆 칸' : `${v.dir} 빈(${v.lv+1}단 ${Math.floor(v.b/2)+1}빈)`;
+  if (v.rule==='same') return `${at}에 같은 상품(${CAT[id].short})이 있어요.`;
+  return `${at}에 비슷한 상품(${CAT[v.other].short})이 있어요.`;
+}
+
+/* ── 선반 그리기 ── */
+const LVC = ['#E5332A','#F08A1E','#F2D21B','#2EAD4B','#2F8FE0','#2B3A8F','#8E5BD6']; // 빨 주 노 초 파 남 보: 1단 빨강 · 2단 주황 · 3단 노랑 · 4단 초록 · 5단 파랑 · 6단 남색 · 7단 보라
+function drawRack(el, grid, opt={}){
+  const H = grid.length, S = grid[0].length, W = Math.ceil(S/2), marks = opt.marks || {}, dimRows = opt.dimRows || [];
+  el.className = 'rack' + (opt.mini ? ' mini' : '');
+  el.style.gridTemplateColumns = `auto 8px repeat(${W}, auto) 8px`;
+  el.style.setProperty('--w', W);
+  el.innerHTML = '';
+  const put = (node, row, col, rowSpan) => { node.style.gridRow = rowSpan ? `${row} / span ${rowSpan}` : row; node.style.gridColumn = col; el.append(node); return node; };
+  const mk = cls => { const d = document.createElement('div'); d.className = cls; return d; };
+  put(mk('post'), 1, 2, H); put(mk('post'), 1, W+3, H);
+  for (let lv=H-1; lv>=0; lv--){
+    const row = H - lv;
+    const l = mk('lv'); l.textContent = `${lv+1}단`; put(l, row, 1);
+    for (let bb=0; bb<W; bb++){
+      const bin = mk(`bin b${bb} l${lv}`);
+      bin.style.setProperty('--lc', LVC[lv % LVC.length]);
+      bin.innerHTML = `<span class="tg">${opt.mini ? '' : '<i></i>'}<b>${lv+1}0${bb+1}</b><u>↑</u></span>${bb ? '<span class="clip"></span>' : ''}`;
+      for (let side=0; side<2; side++){
+        const b = bb*2 + side; if (b >= S) continue;
+        const id = grid[lv][b], s = document.createElement(opt.onTap ? 'button' : 'div');
+        if (opt.onTap){ s.type='button'; s.addEventListener('click', () => opt.onTap(lv,b,s)); }
+        s.className = `slot s${side} ` + (id ? 'full' : 'empty');
+        s.dataset.k = lv+'-'+b;
+        if (dimRows.includes(lv) && !id) s.classList.add('dim');
+        const m = marks[lv+'-'+b];
+        if (m) s.classList.add(m);
+        if (id){
+          const it = CAT[id];
+          s.style.setProperty('--c', it.c);
+          s.innerHTML = `<span class="goods"><span>${it.em}</span></span><span class="nm"><span class="s1">${it.short}</span><span class="s2">${it.s2}</span></span>${it.heavy?'<span class="kg">중량</span>':''}`;
+          s.setAttribute('aria-label', `${where(lv,b)}: ${it.name}`);
+        } else {
+          s.setAttribute('aria-label', `${where(lv,b)}: 빈 칸`);
+        }
+        if (m==='ok') s.insertAdjacentHTML('beforeend','<span class="mk">✓</span>');
+        if (m==='bad') s.insertAdjacentHTML('beforeend','<span class="mk">✕</span>');
+        bin.insertBefore(s, bin.querySelector('.tg'));
+      }
+      put(bin, row, bb+3);
+    }
+  }
+  const f = mk('floor'); f.style.gridColumn = `2 / span ${W+2}`; f.style.gridRow = H+1; el.append(f);
+  for (let bb=0; bb<W; bb++){ const d = mk('bay'); d.textContent = (bb+1)+'빈'; put(d, H+2, bb+3); }
+}
+const handHTML = (id, note) => { const it = CAT[id];
+  return `<span class="em">${it.em}</span><div><b>${it.name}</b><small>${it.heavy?'중량물 · ':''}${note||''}</small></div>`; };
+
+/* ── 탭 ── */
+/* 단계 완료 표시(이 기기에만 저장) */
+const DONE_KEY = 'stowTrainDone';
+let done = {}; try { done = JSON.parse(localStorage.getItem(DONE_KEY)) || {}; } catch {}
+function paintDone(){ document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('done', !!done[b.dataset.tab])); }
+function markDone(k){ if (done[k]) return; done[k] = 1; try { localStorage.setItem(DONE_KEY, JSON.stringify(done)); } catch {} paintDone(); }
+function showTab(t){
+  const cur = document.querySelector('.tabs button[aria-pressed=true]');
+  if (cur && cur.dataset.tab === 'rules' && t !== 'rules') markDone('rules');
+  if (cur && cur.dataset.tab === 'video' && t === 'walk') markDone('video');
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab===t));
+  ['video','walk','rules','game'].forEach(k => $('tab-'+k).hidden = k!==t);
+  if (t !== 'video') { const v = document.querySelector('#tab-video video'); if (v) v.pause(); }
+  window.scrollTo({top:0});
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) showTab(g.dataset.go); });
+document.querySelector('#tab-video video').addEventListener('ended', () => markDone('video'));
+paintDone();
+
+/* ── ① 진열 과정 (단계별 보기) ── */
+const G0 = [ // 1단 ~ 6단 · 6빈 × 2칸 (빈마다 왼쪽 · 오른쪽)
+  ['kimchi2','milk2', null,null, null,null, 'tofu',null, null,null, 'milk','pap'],
+  [null,null, 'cheese',null, null,null, null,null, 'pap','milk', null,null],
+  ['milk2','tofu', null,null, 'tofu2',null, null,null, null,null, null,null],
+  [null,null, 'pap2','milk', null,null, null,null, 'tofu2',null, null,null],
+  [null,null, null,null, null,null, 'tofu','pap', null,null, null,null],
+  [null,null, 'milk',null, null,null, null,null, null,null, 'cheese','tofu2'],
+];
+const clone = g => g.map(r => r.slice());
+const G1 = clone(G0); G1[0][4] = 'kimchi';
+const G2 = clone(G1); G2[1][4] = 'cheese2';
+// causes 칸 주변에서 이 상품을 놓으면 안 되는 빈 칸을 표시
+function around(g, id, causes, okKey){
+  const m = {};
+  for (const c of causes){
+    const [l,b] = c.split('-').map(Number); m[c] = 'cause';
+    for (const [L,B] of neighbors(g,l,b)){
+      if (g[L][B]) continue;
+      if (check(g,L,B,id).length) m[L+'-'+B] = 'bad'; }
+  }
+  if (okKey) m[okKey] = 'ok';
+  return m;
+}
+const WALK = [
+  {t:'카트에서 상품을 하나 꺼내요', p:'PDA로 상품 바코드를 스캔해서 어떤 상품인지, 수량이 몇 개인지 먼저 확인해요.', hand:'kimchi', note:'5kg 1통', g:G0},
+  {t:'무게부터 확인해요', p:'포기김치 5kg는 중량물이에요. 중량물은 1·2단에만 놓아요. 3단 ~ 6단(빗금 칸)에는 놓으면 안 돼요.', hand:'kimchi', g:G0, dim:[2,3,4,5]},
+  {t:'빈 칸을 고르고 주변 칸을 확인해요', p:'한 빈에는 왼쪽 · 오른쪽 두 칸이 있어서 상품(SKU)을 2개까지 넣을 수 있어요. 같은 빈의 옆 칸, 왼쪽 · 오른쪽 빈, 위 · 아래 빈을 보고 같은 상품이나 비슷한 상품이 없으면 놓아도 돼요. 1단 3빈은 옆 2빈 · 위 2단 3빈이 비어 있고 4빈은 두부라 괜찮아요.', hand:'kimchi', g:G0, dim:[2,3,4,5], marks:{'0-4':'focus','0-5':'look','0-2':'look','0-3':'look','0-6':'look','0-7':'look','1-4':'look','1-5':'look'}},
+  {t:'로케이션 스캔 → 진열 → 수량 입력', p:'로케이션 바코드를 찍고 상품을 넣은 뒤 수량을 입력하면 한 상품이 끝나요.', hand:'kimchi', note:'진열 완료', g:G1, marks:{'0-4':'ok'}},
+  {t:'비슷한 상품은 한 빈에 같이 넣지 않아요', p:'다음 상품은 모짜렐라치즈. 2단 2빈 왼쪽에 슬라이스치즈가 있어서 같은 빈 오른쪽 칸은 안 돼요. 옆 빈이나 위아래 빈은 괜찮아서, 바로 옆 2단 3빈에 놓았어요.', hand:'cheese2', g:G1, marks:{'1-2':'cause','1-3':'bad','1-4':'ok'}},
+  {t:'같은 상품도 옆 빈 · 위아래 빈엔 안 돼요', p:'이번엔 슬라이스치즈. 같은 상품은 같은 빈의 옆 칸(2단 2빈 오른쪽)에 함께 넣어도 돼요. 하지만 2단 2빈의 바로 옆 빈 · 위아래 빈에는 놓으면 안 돼요. 놓을 칸이 하나도 없으면 억지로 넣지 말고 다른 로케이션을 찾아요.', hand:'cheese', g:G2, marks:around(G2,'cheese',['1-2'],'1-3')},
+  {t:'카트가 빌 때까지 반복해요', p:'꺼내기 → 무게 확인 → 주변 빈 확인 → 스캔 · 진열 · 수량 입력. 이제 규칙 3가지를 정리하고 진열 실습으로 직접 해 봐요.', g:G2, end:true},
+];
+let wi = 0;
+function drawWalk(){
+  const s = WALK[wi];
+  $('wStepN').textContent = s.end ? '정리' : `단계 ${wi+1} / ${WALK.length-1}`;
+  $('wTitle').textContent = s.t; $('wBody').textContent = s.p;
+  $('wHand').hidden = !s.hand; if (s.hand) $('wHand').innerHTML = handHTML(s.hand, s.note || '손에 든 상품');
+  $('wDots').innerHTML = WALK.map((w,i) => `<li><button type="button" data-wi="${i}" class="${i===wi?'on':i<wi?'past':''}"><i>${w.end?'✓':i+1}</i>${w.t}</button></li>`).join('');
+  if (s.end) markDone('walk');
+  $('wPrev').disabled = wi===0;
+  $('wNext').textContent = s.end ? '3 규칙 보기 →' : '다음';
+  drawRack($('wRack'), s.g, {marks:s.marks, dimRows:s.dim});
+}
+$('wPrev').onclick = () => { if (wi>0){ wi--; drawWalk(); } };
+$('wDots').onclick = e => { const b = e.target.closest('[data-wi]'); if (b){ wi = +b.dataset.wi; drawWalk(); } };
+$('wNext').onclick = () => { if (WALK[wi].end){ showTab('rules'); return; } wi++; drawWalk(); };
+drawWalk();
+
+/* ── ② 규칙 3가지 ── */
+const RULES = [
+  {n:1, t:'유사상품 같은 빈 진열 금지', p:'모양 · 색 · 이름이 비슷한 상품(슬라이스치즈/모짜렐라치즈, 빨강/노랑 파프리카, 우유/저지방우유 등)은 한 빈에 같이 넣지 않아요. 피킹할 때 잘못 집는 원인이 돼요. 옆 빈 · 위아래 빈은 괜찮아요.',
+    x:{g:[[ 'cheese','cheese2','tofu',null]], m:{'0-0':'cause','0-1':'bad'}, why:'한 빈에 슬라이스치즈와 모짜렐라치즈'},
+    o:{g:[[ 'cheese','tofu','cheese2','milk']], m:{'0-2':'ok'}, why:'옆 빈에 놓는 건 괜찮아요'}},
+  {n:2, t:'동일상품 가로·세로 연속 진열 금지', p:'같은 상품을 바로 옆 빈이나 바로 위 · 아래 빈에 놓지 않아요. 같은 빈의 두 칸에는 같은 상품을 함께 넣어도 돼요.',
+    x:{g:[[ 'tofu','milk',null,null],[ 'tofu',null,null,null]], m:{'0-0':'cause','1-0':'bad'}, why:'부침두부 위에 또 부침두부'},
+    o:{g:[[ 'tofu','tofu','milk',null,'tofu',null],[ null,null,'cheese',null,null,null]], m:{'0-1':'ok','0-4':'ok'}, why:'같은 빈엔 함께 OK, 다른 빈은 떨어뜨려요'}},
+  {n:3, t:'중량물은 1·2단에만', p:'김치 5kg처럼 무거운 상품(중량 표시)은 1단 · 2단에만 놓아요. 높은 단에 두면 떨어지거나 다칠 수 있어요.',
+    x:{g:[[ null,'milk'],[ 'tofu',null],[ null,null],[ 'kimchi','cheese'],[ null,null],[ 'pap',null]], m:{'3-0':'bad'}, why:'김치가 4단에 있어요', dim:[2,3,4,5]},
+    o:{g:[[ 'kimchi','milk'],[ 'tofu',null],[ null,'cheese'],[ null,null],[ 'pap',null],[ null,'tofu']], m:{'0-0':'ok'}, why:'김치는 1단에', dim:[2,3,4,5]}},
+];
+$('ruleGrid').innerHTML = RULES.map(r => `<div class="card rrow"><div><span class="num">${r.n}</span><h2>${r.t}</h2><p class="mute" style="margin:4px 0 0;font-size:14px">${r.p}</p></div>
+  <div class="ex"><div><span class="tag x">✕ 안 돼요</span><div class="rackwrap"><div data-ex="${r.n}x"></div></div><div class="why">${r.x.why}</div></div>
+  <div><span class="tag o">○ 좋아요</span><div class="rackwrap"><div data-ex="${r.n}o"></div></div><div class="why">${r.o.why}</div></div></div></div>`).join('');
+/* 규칙 4: 커튼 진열 (위에서 본 빈 + 앞에서 본 모습) */
+{
+  const bx = (id, hide) => `<span class="bx${hide?' hide':''}" style="--c:${CAT[id].c}">${CAT[id].em}</span>`;
+  const view = (rows, hide, front, lab) => `<div class="ctn">
+    <div class="col">위에서 본 빈 (뒤)<div class="bin2">${rows.map((row,r) => row.map(id => bx(id, hide && r===0)).join('')).join('')}</div>▲ 앞 (피킹하는 쪽)</div>
+    <div class="col front">앞에서 보면<div class="bin2">${front.map(id => bx(id)).join('')}</div><b>${lab}</b></div></div>`;
+  $('ruleGrid').insertAdjacentHTML('beforeend', `<div class="card rrow"><div><span class="num">4</span><h2>커튼 진열 금지</h2><p class="mute" style="margin:4px 0 0;font-size:14px">상품은 앞에서 뒤로 세로 줄로 넣어요. 한 상품이 앞을 가로로 막으면 뒤에 있는 다른 상품이 안 보여요. 이걸 커튼 진열이라고 해요. 피킹할 때 상품을 못 찾게 만들어요.</p></div>
+  <div class="ex"><div><span class="tag x">✕ 안 돼요</span>${view([['tofu','tofu'],['milk','milk'],['milk','milk']], true, ['milk','milk'], '우유만 보이고 두부는 안 보여요')}</div>
+  <div><span class="tag o">○ 좋아요</span>${view([['milk','tofu'],['milk','tofu'],['milk','tofu']], false, ['milk','tofu'], '우유, 두부 둘 다 보여요')}</div></div></div>`);
+}
+for (const r of RULES) for (const k of ['x','o']){
+  const e = r[k]; drawRack(document.querySelector(`[data-ex="${r.n}${k}"]`), e.g, {mini:true, marks:e.m, dimRows:e.dim});
+}
+/* 유사상품 예시: 짝별 차이 + 상황별 안 돼요 / 좋아요 (g[0] = 1단) */
+const PAIRS = [
+  ['milk','milk2','팩 모양이 같고 띠 색(파랑 / 하늘색)만 달라요.'],
+  ['tofu','tofu2','용기가 똑같고 라벨 글자만 달라요.'],
+  ['pap','pap2','모양이 같고 색만 달라요. 빛에 따라 더 헷갈려요.'],
+  ['cheese','cheese2','둘 다 노란 포장에 파란 띠예요.'],
+  ['kimchi','kimchi2','같은 통에 라벨만 달라요. 둘 다 중량물이에요.'],
+];
+$('pairList').innerHTML = PAIRS.map(([a,b,t]) => `<div class="pair"><div class="pics"><div>${CAT[a].em}${CAT[a].short}</div><div>${CAT[b].em}${CAT[b].short}</div></div><p>${t}</p></div>`).join('');
+const N6 = () => [null,null,null,null,null,null];
+const row = (...a) => { const r = N6(); a.forEach(([i,id]) => r[i] = id); return r; };
+const SIM_BAD = PAIRS.map(([a,b]) => ({
+  t:`${CAT[a].short} + ${CAT[b].short}`, why:`${CAT[a].short}, ${CAT[b].short} 두 상품을 한 빈에 같이 넣었어요.`,
+  g:[row([0, CAT[a].heavy ? 'tofu' : 'milk'===a ? 'tofu' : 'milk'],[2,a],[3,b],[4, a==='tofu'?'pap':'tofu']), N6()], m:{'0-2':'cause','0-3':'bad'}}));
+const SIM_GOOD = [
+  {t:'옆 빈은 괜찮아요', why:'우유(1빈)와 저지방우유(2빈)가 옆 빈에 있어도 돼요.', g:[row([0,'milk'],[2,'milk2'],[4,'tofu']), N6()], m:{'0-0':'ok','0-2':'ok'}},
+  {t:'위아래 빈도 괜찮아요', why:'빨강 파프리카(1단 2빈) 위 2단 2빈에 노랑 파프리카.', g:[row([2,'pap'],[4,'milk']), row([2,'pap2'],[0,'tofu'])], m:{'0-2':'ok','1-2':'ok'}},
+  {t:'한 빈엔 다른 종류끼리', why:'한 빈에는 두부+파프리카처럼 서로 다른 종류를 넣어요.', g:[row([0,'tofu'],[1,'pap'],[2,'tofu2'],[3,'milk'],[4,'pap2'],[5,'cheese']), N6()], m:{'0-0':'ok','0-1':'ok'}},
+];
+const simCard = (c, k, i) => `<div><b>${c.t}</b><div class="rackwrap"><div data-sim="${k}${i}"></div></div><div class="why">${c.why}</div></div>`;
+$('simBad').innerHTML = SIM_BAD.map((c,i) => simCard(c,'x',i)).join('');
+$('simGood').innerHTML = SIM_GOOD.map((c,i) => simCard(c,'o',i)).join('');
+SIM_BAD.forEach((c,i) => drawRack(document.querySelector(`[data-sim="x${i}"]`), c.g, {mini:true, marks:c.m}));
+SIM_GOOD.forEach((c,i) => drawRack(document.querySelector(`[data-sim="o${i}"]`), c.g, {mini:true, marks:c.m}));
+
+/* ── ③ 진열 실습 ── */
+const STAGES = [
+  {W:12, H:6, pre:14, q:8,  pool:['kimchi','milk','milk2','tofu','pap','pap2','cheese','cheese2']},
+  {W:12, H:6, pre:16, q:10, pool:['kimchi','kimchi2','milk','milk2','tofu','tofu2','pap','cheese','cheese2']},
+  {W:12, H:6, pre:20, q:12, pool:Object.keys(CAT), pairs:3},
+];
+// 규칙을 모두 지키는 정답 배치를 먼저 만든 뒤, 일부는 선반에 미리 두고 나머지는 카트에 담아요
+function makeStage(st){
+  for (let tries=0; tries<200; tries++){
+    const T = st.pre + st.q, units = [], cnt = {};
+    const heavyIds = st.pool.filter(i => CAT[i].heavy);
+    // 중량물 2개 이상, 유사상품 한 쌍 이상은 꼭 넣어요
+    // 유사상품 짝을 2쌍 이상 꼭 넣어요 (스테이지 3은 3쌍)
+    const pairGs = shuffle([...new Set(st.pool.map(i=>CAT[i].g))].filter(g => st.pool.filter(i=>CAT[i].g===g).length>1)).slice(0, st.pairs || 2);
+    const seed = [...shuffle(heavyIds.slice()).slice(0,2), ...pairGs.flatMap(g => st.pool.filter(i=>CAT[i].g===g).slice(0,2))];
+    for (const i of seed){ units.push(i); cnt[i]=(cnt[i]||0)+1; }
+    let guard = 0;
+    while (units.length < T && guard++ < 500){
+      const i = st.pool[Math.random()*st.pool.length|0];
+      const heavyNow = units.filter(u=>CAT[u].heavy).length;
+      if ((cnt[i]||0) >= 6) continue;
+      if (CAT[i].heavy && heavyNow >= st.W) continue;
+      units.push(i); cnt[i]=(cnt[i]||0)+1;
+    }
+    const grid = emptyGrid(st.W, st.H), placed = [];
+    const order = shuffle(units.slice()).sort((a,b) => (CAT[b].heavy||0)-(CAT[a].heavy||0));
+    let steps = 0;
+    const cells = []; for (let lv=0; lv<st.H; lv++) for (let b=0; b<st.W; b++) cells.push([lv,b]);
+    const solve = k => {
+      if (k === order.length) return true;
+      if (++steps > 4000) return false;
+      for (const [lv,b] of shuffle(cells.slice())){
+        if (grid[lv][b] || check(grid,lv,b,order[k]).length) continue;
+        grid[lv][b] = order[k]; placed.push([lv,b,order[k]]);
+        if (solve(k+1)) return true;
+        grid[lv][b] = null; placed.pop();
+      }
+      return false;
+    };
+    if (!solve(0)) continue;
+    shuffle(placed);
+    // 카트에 중량물 1개 이상
+    const hi = placed.findIndex(p => CAT[p[2]].heavy);
+    if (hi >= 0 && !placed.slice(st.pre).some(p => CAT[p[2]].heavy)){ const j = st.pre + (Math.random()*st.q|0); [placed[hi], placed[j]] = [placed[j], placed[hi]]; }
+    const start = emptyGrid(st.W, st.H);
+    placed.slice(0, st.pre).forEach(([lv,b,i]) => start[lv][b] = i);
+    if (!gridOK(start) || !gridOK(grid)) continue;
+    return {grid:start, queue: placed.slice(st.pre).map(p => p[2])};
+  }
+  return null;
+}
+
+const S = {stage:0, score:0, miss:0, total:0, tally:{heavy:0,same:0,similar:0,pass:0}, st:null, grid:null, queue:[], busy:false};
+let best = 0; try { best = +localStorage.getItem('gwj3-stow-best') || 0; } catch(e){}
+const showBest = () => $('gBest').textContent = best ? `최고 점수 ${best}점` : '';
+showBest();
+
+function startGame(){
+  S.stage = 0; S.score = 0; S.miss = 0; S.total = 0; S.tally = {heavy:0,same:0,similar:0,pass:0};
+  startStage();
+}
+function startStage(){
+  S.st = STAGES[S.stage];
+  const m = makeStage(S.st);
+  S.grid = m.grid; S.queue = m.queue; S.stageMiss = 0; S.stageScore = 0;
+  S.snap = {score:S.score, miss:S.miss, total:S.total, tally:{...S.tally}};
+  $('gIntro').hidden = true; $('gDone').hidden = true; $('gPlay').hidden = false;
+  setMsg('info', `<b>스테이지 ${S.stage+1}</b>${S.stage===0?'첫 상품부터 시작해요. 놓을 빈 칸을 눌러주세요.':'상품이 더 많아졌어요. 같은 빈에 비슷한 상품이 없는지, 옆 · 위아래 빈에 같은 상품이 없는지 확인해요.'}`);
+  render();
+  $('gPlay').scrollIntoView({block:'start'});
+}
+function setMsg(kind, html){ const m = $('nMsg'); m.className = 'msg '+kind; m.innerHTML = html; }
+function render(opt={}){
+  const st = S.st, cur = S.queue[0];
+  $('hStage').textContent = `${S.stage+1} / ${STAGES.length}`;
+  $('hScore').textContent = S.score; $('hMiss').textContent = S.miss; $('hLeft').textContent = S.queue.length;
+  $('gLoc').textContent = `연습 선반 · ${st.H}단 × ${st.W/2}빈 (빈마다 2칸)`;
+  if (cur){
+    const it = CAT[cur];
+    $('nItem').style.setProperty('--c', it.c);
+    $('nItem').innerHTML = `<span class="em">${it.em}</span><div><b>${it.name}</b>${it.heavy?'<span class="chip heavy">중량물 · 1·2단만</span>':'<span class="mute" style="font-size:13px">일반 상품</span>'}</div>`;
+  }
+  $('nCart').innerHTML = S.queue.slice(1).map(i => `<span title="${CAT[i].name}">${CAT[i].em}</span>`).join('') || '<span class="mute" style="font-size:13px;width:auto;background:none">마지막 상품이에요</span>';
+  drawRack($('gRack'), S.grid, {marks:opt.marks, onTap: tap});
+}
+function validCells(id){
+  const out = [];
+  S.grid.forEach((row,lv) => row.forEach((x,b) => { if (!x && !check(S.grid,lv,b,id).length) out.push(lv+'-'+b); }));
+  return out;
+}
+function buzz(){ try { navigator.vibrate && navigator.vibrate(120); } catch(e){} }
+
+function tap(lv, b, el){
+  if (S.busy) return;
+  const id = S.queue[0]; if (!id) return;
+  if (S.grid[lv][b]){ setMsg('info', `<b>${where(lv,b)}에는 이미 상품이 있어요</b>빈 칸을 골라주세요.`); return; }
+  const v = check(S.grid, lv, b, id);
+  if (v.length){
+    S.miss++; S.stageMiss++; S.score = Math.max(0, S.score-5);
+    const rules = [...new Set(v.map(x=>x.rule))]; rules.forEach(r => S.tally[r]++);
+    const marks = {[lv+'-'+b]:'bad'}; v.forEach(x => { if (x.lv!=null) marks[x.lv+'-'+x.b]='cause'; });
+    setMsg('bad', `<b>✕ ${where(lv,b)}에는 놓을 수 없어요 (-5점)</b><ul>${v.map(x=>`<li><b style="display:inline">${RULE_TXT[x.rule]}</b> · ${explain(x,id)}</li>`).join('')}</ul>`);
+    render({marks}); buzz();
+    const s = $('gRack').querySelector(`[data-k="${lv}-${b}"]`); s && s.classList.add('shake');
+    return;
+  }
+  S.grid[lv][b] = id; S.queue.shift(); S.score += 10; S.stageScore += 10; S.total++;
+  setMsg('ok', `<b>✓ ${where(lv,b)}에 진열했어요 (+10점)</b>${CAT[id].name}`);
+  render({marks:{[lv+'-'+b]:'ok'}});
+  const s = $('gRack').querySelector(`[data-k="${lv}-${b}"]`); s && s.classList.add('pop');
+  if (!S.queue.length) setTimeout(endStage, 700);
+}
+$('nPass').onclick = () => {
+  if (S.busy) return;
+  const id = S.queue[0]; if (!id) return;
+  const ok = validCells(id);
+  if (ok.length){
+    S.miss++; S.stageMiss++; S.tally.pass++; S.score = Math.max(0, S.score-5);
+    const marks = {}; ok.forEach(k => marks[k]='hint');
+    setMsg('bad', `<b>아직 놓을 수 있는 칸이 있어요 (-5점)</b>초록 점선 칸 ${ok.length}곳에 놓을 수 있어요. 다시 골라보세요.`);
+    render({marks}); buzz();
+    return;
+  }
+  S.queue.shift(); S.score += 10; S.stageScore += 10; S.total++;
+  setMsg('ok', `<b>✓ 맞아요, 이 선반엔 놓을 칸이 없어요 (+10점)</b>규칙을 어기며 억지로 넣지 않고 다른 로케이션으로 보내는 게 정답이에요.`);
+  render();
+  if (!S.queue.length) setTimeout(endStage, 700);
+};
+function stars(miss){ return miss===0 ? 3 : miss<=2 ? 2 : 1; }
+function endStage(){
+  const last = S.stage === STAGES.length-1;
+  if (last) markDone('game');
+  const n = last ? (S.miss===0 ? 3 : S.miss<=3 ? 2 : 1) : stars(S.stageMiss);
+  if (last && S.score > best){ best = S.score; try { localStorage.setItem('gwj3-stow-best', best); } catch(e){} showBest(); }
+  const acc = S.total + S.miss ? Math.round(S.total/(S.total+S.miss)*100) : 100;
+  $('gPlay').hidden = true; $('gDone').hidden = false;
+  $('gDone').innerHTML = `
+    <div class="stars">${'★'.repeat(n)}<span class="off">${'★'.repeat(3-n)}</span></div>
+    <h2>${last ? '교육 완료!' : `스테이지 ${S.stage+1} 완료`}</h2>
+    <p class="mute" style="margin:4px 0 0">${last ? `총 점수 <b style="color:var(--ink)">${S.score}점</b> · 정확도 ${acc}%` : `이번 스테이지 실수 ${S.stageMiss}번 · 지금까지 ${S.score}점`}</p>
+    ${last ? `<div class="tally">
+      <div><small>유사상품</small><b>${S.tally.similar}</b></div>
+      <div><small>동일상품 연속</small><b>${S.tally.same}</b></div>
+      <div><small>중량물 단</small><b>${S.tally.heavy}</b></div>
+      <div><small>칸 있는데 패스</small><b>${S.tally.pass}</b></div></div>
+      <p class="mute" style="font-size:14px">${weakest()}</p>` : ''}
+    <div class="row" style="justify-content:center;margin-top:16px">
+      ${last ? `<button type="button" class="btn" id="dAgain">처음부터 다시</button><button type="button" class="ghost" data-go="rules">규칙 다시 보기</button>`
+             : `<button type="button" class="btn" id="dNext">다음 스테이지</button><button type="button" class="ghost" id="dRetry">이 스테이지 다시</button>`}
+    </div>`;
+  if (last) $('dAgain').onclick = startGame;
+  else { $('dNext').onclick = () => { S.stage++; startStage(); }; $('dRetry').onclick = () => { Object.assign(S, {score:S.snap.score, miss:S.snap.miss, total:S.snap.total, tally:{...S.snap.tally}}); startStage(); }; }
+}
+function weakest(){
+  const t = S.tally, top = Object.entries(t).sort((a,b)=>b[1]-a[1])[0];
+  if (!top[1]) return '실수 없이 끝냈어요. 실제 진열도 이렇게 하면 돼요!';
+  const txt = {similar:'같은 빈에 비슷한 상품(같은 모양·색)이 있는지', same:'같은 상품이 옆 빈 · 위아래 빈에 있는지', heavy:'중량물을 3단 이상에 올리지 않는지', pass:'놓을 칸이 정말 없는지'};
+  return `가장 많이 틀린 부분: ${txt[top[0]]} 한 번 더 확인하는 습관을 들여요.`;
+}
+$('gStart').onclick = startGame;
+
+/* ── 끌어서 진열 (마우스 · 터치) — 칸을 눌러도 진열돼요 ── */
+let drag = null;
+function dragMove(e){
+  if (!drag) return;
+  drag.g.style.left = e.clientX+'px'; drag.g.style.top = e.clientY+'px';
+  const hit = document.elementFromPoint(e.clientX, e.clientY);
+  const sl = hit && hit.closest('#gRack .slot.empty');
+  if (drag.over && drag.over !== sl) drag.over.classList.remove('over');
+  if (sl) sl.classList.add('over');
+  drag.over = sl;
+  if (e.clientY > innerHeight-48) scrollBy(0,14); else if (e.clientY < 40) scrollBy(0,-14);
+}
+function dragEnd(e, drop){
+  if (!drag) return;
+  const sl = drop ? drag.over : null;
+  drag.g.remove(); if (drag.over) drag.over.classList.remove('over');
+  removeEventListener('pointermove', dragMove); drag = null;
+  $('nItem').classList.remove('lifted');
+  if (sl){ const [lv,b] = sl.dataset.k.split('-').map(Number); tap(lv,b); }
+}
+$('nItem').addEventListener('pointerdown', e => {
+  const id = S.queue[0]; if (!id || drag) return;
+  e.preventDefault();
+  const g = document.createElement('div'); g.className = 'dragimg'; g.innerHTML = CAT[id].em; document.body.append(g);
+  drag = {g, over:null}; $('nItem').classList.add('lifted');
+  dragMove(e);
+  addEventListener('pointermove', dragMove);
+  addEventListener('pointerup', ev => dragEnd(ev, true), {once:true});
+  addEventListener('pointercancel', ev => dragEnd(ev, false), {once:true});
+});
+</script>
+</body></html>

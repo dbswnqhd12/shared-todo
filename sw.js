@@ -29,8 +29,8 @@ self.addEventListener('fetch', e => {
     e.respondWith((async () => {
       try {
         const r = await fetch(req);
-        // 화면(HTML)만 받아둬요. zip 같은 다운로드 파일이 '/' 자리에 저장되지 않게 해요
-        if (r.ok && url.origin === self.location.origin && !url.pathname.startsWith('/api/') && (r.headers.get('content-type') || '').includes('text/html')){
+        // 메인 화면(HTML)만 받아둬요. 라벨 · WMS 같은 다른 페이지나 다운로드 파일이 '/' 자리에 저장되지 않게 해요
+        if (r.ok && url.origin === self.location.origin && (url.pathname === '/' || url.pathname === '/index.html') && (r.headers.get('content-type') || '').includes('text/html')){
           const c = await caches.open(SHELL); c.put('/', r.clone()).catch(() => {});
         }
         return r;

@@ -1,9 +1,21 @@
 // 화면이 쓰는 전체 상태 조회
-//   GET /api/state?only=rev                       → { rev }  (변경 확인용, Redis 명령 1개)
-//   GET /api/state?months=2026-08,2026-09,2026-10 → { rev, todos, templates, checks, today }
+//   /api/state?auth=1...                          → 로그인 · 사람 관리 (lib/auth-api.js)
+//   GET /api/state?only=rev                       → { rev }  (변경 확인용, Redis 명령 1개 · 계정 확인도 같이 해요)
+//   GET /api/state?months=2026-08,2026-09,2026-10 → { rev, todos, templates, checks, today, people }
+//     people = 개인 계정 [{ id, name }] (관리자 · 일반만, 꺼진 계정 제외) — 일정 '미확인 사람' 표시용
 import { K, redis, pipeline, parseHash, guard, fail, kstToday } from '../lib/store.js';
+import { AK, MASTER, stillValid, publicUser } from '../lib/auth.js';
+import authHandler from '../lib/auth-api.js';
+
+// 지운 계정 · 등급이 바뀐 계정은 여기서 걸러서 다시 로그인하게 해요
+function kicked(req, res, raw) {
+  if (stillValid(req.user, raw)) return false;
+  res.status(401).json({ error: '계정 정보가 바뀌었어요. 다시 로그인하세요.', locked: true });
+  return true;
+}
 
 export default async function handler(req, res) {
+  if (req.query?.auth) return authHandler(req, res);   // 로그인 · 사람 관리
   if (!(await guard(req, res))) return;
   try {
     if (req.method !== 'GET') {
@@ -11,18 +23,32 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: '지원하지 않는 요청이에요.' });
     }
     if (req.query?.only === 'rev') {
-      return res.status(200).json({ rev: Number(await redis('GET', K.rev)) || 0 });
+      const master = req.user.id === MASTER;
+      const [rev, raw] = master ? [await redis('GET', K.rev), null] : await redis('MGET', K.rev, AK.user(req.user.id));
+      if (kicked(req, res, raw)) return;
+      return res.status(200).json({ rev: Number(rev) || 0 });
     }
     const months = String(req.query?.months || '')
       .split(',')
       .filter(m => /^\d{4}-\d{2}$/.test(m))
       .slice(0, 3);
-    const [rev, todos, templates, ...monthChecks] = await pipeline([
+    const [userRaw, ids, rev, todos, templates, ...monthChecks] = await pipeline([
+      ['GET', AK.user(req.user.id)],
+      ['SMEMBERS', AK.ids],
       ['GET', K.rev],
       ['HGETALL', K.todos],
       ['HGETALL', K.templates],
       ...months.map(m => ['HGETALL', K.checks(m)]),
     ]);
+    if (kicked(req, res, req.user.id === MASTER ? null : userRaw)) return;
+    let people = [];
+    if (ids && ids.length) {
+      people = (await redis('MGET', ...ids.map(AK.user)))
+        .map(r => { try { return JSON.parse(r); } catch { return null; } })
+        .filter(u => u && !u.off && (u.role === 'admin' || u.role === 'member'))
+        .map(u => ({ id: u.id, name: u.name || u.id }))
+        .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+    }
     const checks = {};
     for (const flat of monthChecks) {
       for (let i = 0; i < (flat || []).length; i += 2) {
@@ -37,6 +63,8 @@ export default async function handler(req, res) {
       checks,
       months,
       today: kstToday(),
+      me: publicUser(req.user),
+      people,
     });
   } catch (e) {
     return fail(res, e);
