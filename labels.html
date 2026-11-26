@@ -502,12 +502,15 @@ function setKind(k, fromLoad){
   const cur = document.querySelector('input[name=paper]:checked');
   if (!fromLoad || cur.closest('[hidden]')){
     document.querySelector(`input[name=paper][value="${k === 'shelf' ? 'zebra' : 'full'}"]`).checked = true;
-    $('zSize').value = k === 'shelf' ? '105x35x20xR' : '100x150';
+    const keep = k === 'shelf' && fromLoad && /^105x35x20x[LR]$/.test($('zSize').value);   // 선반: 고른 비움 칸(왼쪽/오른쪽)은 기억
+    if (!keep) $('zSize').value = k === 'shelf' ? '105x35x20xR' : '100x150';
     // 선반 라벨 기본값: 105 × 35mm, 203dpi, 아래로 10mm (2026-11-14 ZT411 시험 인쇄로 맞춘 값)
     $('zDpi').value = '203'; $('zOffY').value = k === 'shelf' ? '10' : '0'; $('zOffX').value = '0';
   }
   // 선반 라벨은 주봉이 정한 설정만 써요 (105 × 35mm, 화살표 칸 20mm 비움: 기본 오른쪽, 왼쪽도 고를 수 있음, 203dpi, Zebra)
-  if (k === 'shelf'){ document.querySelector('input[name=paper][value="zebra"]').checked = true; if (!/^105x35x20x[LR]$/.test($('zSize').value)) $('zSize').value = '105x35x20xR'; $('zDpi').value = '203'; }
+  if (k === 'shelf'){ document.querySelector('input[name=paper][value="zebra"]').checked = true; if (!/^105x35x20x[LR]$/.test($('zSize').value)) $('zSize').value = '105x35x20xR'; $('zDpi').value = '203';
+    // 위치 조정은 페이지를 열 때마다 주봉 기본값(아래로 10mm)으로 되돌려요. 예전에 바꿔 둔 값이 남아 위/아래가 잘리는 걸 막아요
+    if (fromLoad){ $('zOffY').value = '10'; $('zOffX').value = '0'; } }
   setMode(mode); syncCustom();
 }
 function syncCustom(){
